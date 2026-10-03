@@ -75,7 +75,11 @@ export function buildBrTerrain(zone, cfg, o) {
     trunk: new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: 0.9, metalness: 0.05 }),
     canopy: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, metalness: 0.05, flatShading: true, emissive: 0x06281a, emissiveIntensity: 0.6 }),
     neon: new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
-    lamp: new THREE.MeshBasicMaterial({ color: 0xbff8ff, toneMapped: false })
+    lamp: new THREE.MeshBasicMaterial({ color: 0xbff8ff, toneMapped: false }),
+    // M10 fase 8: identidade das regiões + sinais do dragão
+    prop: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, metalness: 0.2 }),
+    bone: new THREE.MeshStandardMaterial({ color: 0xd8d0bc, roughness: 0.9, metalness: 0.0, emissive: 0x1a1810, emissiveIntensity: 0.5 }),
+    decal: new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 })
   };
   const geos = {
     wall: new THREE.BoxGeometry(T, 1, T).translate(0, 0.5, 0),
@@ -89,7 +93,19 @@ export function buildBrTerrain(zone, cfg, o) {
     bush: new THREE.IcosahedronGeometry(0.55, 0),
     rubble: new THREE.BoxGeometry(0.5, 0.22, 0.4),
     pole: new THREE.CylinderGeometry(0.05, 0.07, 3.2, 6).translate(0, 1.6, 0),
-    lampHead: new THREE.BoxGeometry(0.5, 0.1, 0.22)
+    lampHead: new THREE.BoxGeometry(0.5, 0.1, 0.22),
+    barrel: new THREE.CylinderGeometry(0.32, 0.32, 0.9, 8).translate(0, 0.45, 0),
+    stub: new THREE.CylinderGeometry(0.34, 0.4, 1, 7).translate(0, 0.5, 0),
+    fern: new THREE.ConeGeometry(0.32, 0.7, 5).translate(0, 0.35, 0),
+    shroom: new THREE.SphereGeometry(0.12, 6, 4),
+    strip: new THREE.BoxGeometry(T * 0.95, 0.03, 0.09),
+    vent: new THREE.BoxGeometry(0.9, 0.35, 0.9).translate(0, 0.175, 0),
+    banner: new THREE.BoxGeometry(0.06, 2.2, 0.7).translate(0, 1.1, 0),
+    bone: new THREE.CylinderGeometry(0.05, 0.07, 1, 5).rotateZ(Math.PI / 2),
+    skull: new THREE.DodecahedronGeometry(0.22, 0),
+    claw: new THREE.PlaneGeometry(0.16, 1.7).rotateX(-Math.PI / 2),
+    scorch: new THREE.CircleGeometry(1, 12).rotateX(-Math.PI / 2),
+    ember: new THREE.OctahedronGeometry(0.09, 0)
   };
 
   // —— chunks (16×16 tiles) ——
@@ -104,8 +120,15 @@ export function buildBrTerrain(zone, cfg, o) {
   const KIND = {
     wall: [geos.wall, mats.wall, true], pillar: [geos.pillar, mats.metal, true], cap: [geos.cap, mats.neon, false], neon: [geos.neon, mats.neon, false],
     trunk: [geos.trunk, mats.trunk, true], canopy: [geos.canopy, mats.canopy, true], rock: [geos.rock, mats.rock, true], crate: [geos.crate, mats.crate, true],
-    bush: [geos.bush, mats.canopy, false], rubble: [geos.rubble, mats.rust, false], pole: [geos.pole, mats.metal, false], lampHead: [geos.lampHead, mats.lamp, false]
+    bush: [geos.bush, mats.canopy, false], rubble: [geos.rubble, mats.rust, false], pole: [geos.pole, mats.metal, false], lampHead: [geos.lampHead, mats.lamp, false],
+    barrel: [geos.barrel, mats.prop, true], stub: [geos.stub, mats.rock, true], fern: [geos.fern, mats.canopy, false], shroom: [geos.shroom, mats.neon, false],
+    strip: [geos.strip, mats.neon, false], vent: [geos.vent, mats.metal, false], banner: [geos.banner, mats.neon, false],
+    bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false]
   };
+  const COLORED = new Set(['wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
+  const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
+  const wallNear = (x, y) => { for (const [dx, dy, ry] of [[1, 0, Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, 0], [0, -1, 0]]) if (tileAt(x + dx, y + dy) === 'wall') return { dx, dy, ry }; return null; };
+  const isLootTile = new Set([...(m.chests || []), ...(m.crates || [])].map((c) => c.x + c.y * W));
   const structAt = (x, y) => m.structures.find((s) => x >= s.x0 && x <= s.x1 && y >= s.y0 && y <= s.y1) || null;
   const lampPos = [];
   const caveBox = (m.areas || []).find((a) => a.kind === 'caverna') || null;
@@ -158,6 +181,38 @@ export function buildBrTerrain(zone, cfg, o) {
       push('lampHead', x, y, [wx + 0.6, gy + 3.2, wz + 0.8], 0, [1, 1, 1], 0xffffff);
       lampPos.push(new THREE.Vector3(wx + 0.6, gy + 3.0, wz + 0.8));
     }
+    // —— M10 fase 8: IDENTIDADE DA REGIÃO (decoração instanciada, rente ao chão ou encostada na parede; não bloqueia) ——
+    if (o.props !== false && reg && (t === 'floor' || t === 'street' || t === 'grass' || t === 'tech' || t === 'rubble') && !isLootTile.has(x + y * W)) {
+      const q = h32(x, y, 31); const wn = wallNear(x, y);
+      if (reg.id === 'periferia') {
+        if (wn && q < 0.06) { tmpC.setHSL(h32(x, y, 32) < 0.5 ? 0.02 : 0.55, 0.45, 0.32); pushP('barrel', x, y, [wx + wn.dx * 0.55, gy, wz + wn.dy * 0.55], q * 40, [1, 0.85 + q * 2, 1], tmpC.getHex()); }
+      } else if (reg.id === 'ruinas') {
+        if (wn && q < 0.05) { tmpC.setHex(0xa8906c).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.5 + h32(x, y, 34) * 1.1, 1], tmpC.getHex()); }
+        else if (q > 0.975) pushP('rubble', x, y, [wx, gy + 0.08, wz], q * 9, [1.4, 1, 1.2], 0xffffff);
+      } else if (reg.id === 'floresta') {
+        if (q < 0.07) { tmpC.setHSL(0.33 + h32(x, y, 35) * 0.08, 0.55, 0.2); pushP('fern', x, y, [wx + (h32(x, y, 36) - 0.5) * 1.2, gy, wz + (h32(x, y, 37) - 0.5) * 1.2], q * 60, [1, 0.8 + q * 6, 1], tmpC.getHex()); }
+        else if (q > 0.988) { pushP('shroom', x, y, [wx + (h32(x, y, 38) - 0.5), gy + 0.1, wz + (h32(x, y, 39) - 0.5)], 0, [1, 0.7, 1], h32(x, y, 40) < 0.5 ? 0x5dfff0 : 0xb36bff); }
+      } else if (reg.id === 'complexo') {
+        if (wn && q < 0.08) pushP('strip', x, y, [wx + wn.dx * 0.42, gy + 0.03, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], h32(x, y, 41) < 0.7 ? 0x39e8ff : 0xff4a8a);
+        else if (q > 0.985) pushP('vent', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff);
+      } else if (reg.id === 'elite') {
+        if (wn && q < 0.05) pushP('banner', x, y, [wx + wn.dx * 0.46, gy + 0.6, wz + wn.dy * 0.46], wn.ry + Math.PI / 2, [1, 1, 1], 0xffc830);
+      } else if (reg.id === 'dragao') {
+        if (q < 0.025) pushP('bone', x, y, [wx + (h32(x, y, 42) - 0.5), gy + 0.05, wz + (h32(x, y, 43) - 0.5)], q * 80, [0.6 + q * 20, 1, 1], 0xffffff);
+        else if (q > 0.99) pushP('ember', x, y, [wx, gy + 0.12, wz], q * 7, [1, 1, 1], 0xff7a2a);
+      }
+    }
+  }
+  // —— M10 fase 8: SINAIS DO DRAGÃO (garras, ossos, chão queimado; mais fortes perto do covil) ——
+  const dragonSignsDrawn = { n: 0 };
+  for (const sg of m.dragonSigns || []) {
+    const wx = (sg.x + 0.5) * T, wz = (sg.y + 0.5) * T; const gy = G(sg.x + 0.5, sg.y + 0.5); const near = 1 - Math.min(1, sg.d ?? 0.6); const a = h32(sg.x, sg.y, 50) * Math.PI;
+    pushP('scorch', sg.x, sg.y, [wx, gy + 0.03, wz], 0, [1.1 + near * 1.6, 1, 0.9 + near * 1.4], 0x000000);
+    for (let k = -1; k <= 1; k++) pushP('claw', sg.x, sg.y, [wx + Math.cos(a) * k * 0.32, gy + 0.045, wz + Math.sin(a) * k * 0.32], -a, [1, 1, 1 + near * 0.6], 0x000000);
+    pushP('bone', sg.x, sg.y, [wx + 0.7, gy + 0.05, wz - 0.4], a * 2, [0.9, 1, 1], 0xffffff);
+    if (near > 0.3) pushP('skull', sg.x, sg.y, [wx - 0.6, gy + 0.16, wz + 0.5], a, [1, 0.85, 1.15], 0xffffff);
+    if (near > 0.45) for (let k = 0; k < 2; k++) pushP('ember', sg.x, sg.y, [wx + (h32(sg.x, sg.y, 60 + k) - 0.5) * 1.4, gy + 0.12, wz + (h32(sg.x, sg.y, 70 + k) - 0.5) * 1.4], k, [1, 1, 1], 0xff7a2a);
+    dragonSignsDrawn.n++;
   }
   const e = new THREE.Euler(); const qn = new THREE.Quaternion();
   const treeInst = new Map(); // tile → instâncias (tronco/copa) para esconder entre câmera e herói
@@ -166,11 +221,12 @@ export function buildBrTerrain(zone, cfg, o) {
     const im = new THREE.InstancedMesh(geo, mat, list.length);
     list.forEach((it, i) => {
       dummy.position.set(it.p[0], it.p[1], it.p[2]); dummy.rotation.set(0, it.r, 0); dummy.scale.set(it.s[0], it.s[1], it.s[2]); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix);
-      if (it.c !== 0xffffff || kind === 'wall' || kind === 'canopy' || kind === 'rock' || kind === 'neon' || kind === 'cap' || kind === 'bush') im.setColorAt(i, tmpC.setHex(it.c));
+      if (it.c !== 0xffffff || COLORED.has(kind)) im.setColorAt(i, tmpC.setHex(it.c));
     });
     if (kind === 'trunk' || kind === 'canopy' || kind === 'bush') list.forEach((it, i) => { let e = treeInst.get(it.t); if (!e) { e = []; treeInst.set(it.t, e); } const mm = new THREE.Matrix4(); im.getMatrixAt(i, mm); e.push({ im, i, m: mm }); });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
-    im.castShadow = shadow; im.receiveShadow = kind !== 'neon' && kind !== 'cap';
+    im.castShadow = shadow; im.receiveShadow = !['neon', 'cap', 'claw', 'scorch', 'ember', 'shroom', 'strip', 'banner'].includes(kind);
+    if (kind === 'claw' || kind === 'scorch') im.renderOrder = 1;
     im.computeBoundingSphere(); im.name = `br-${kind}`;
     chunks[+ci].add(im); stats.meshes++; stats.instances += list.length;
   }
@@ -317,6 +373,9 @@ export function buildBrTerrain(zone, cfg, o) {
   let visibleChunks = 0; let visibleFloor = 0; const treeHidden = new Set(); const ZERO_M = new THREE.Matrix4().makeScale(0.0001, 0.0001, 0.0001); let treesFaded = 0;
   return {
     group, stats, markers, extraction, lampPos, lootSpots, lootState,
+    regionProps, dragonSigns: dragonSignsDrawn,
+    /** M10: região sob um ponto (tiles) — usado para a tonalidade da névoa por região */
+    regionAt(fx, fy) { const x = Math.floor(fx), y = Math.floor(fy); return x >= 0 && y >= 0 && x < W && y < H ? (regAt(x, y)?.id || null) : null; },
     updateDrops,
     get pickFlashes() { return pickFlashes; },
     beamFade, get beamStats() { return { ...beamStats }; },

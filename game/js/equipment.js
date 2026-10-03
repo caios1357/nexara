@@ -7,7 +7,7 @@
  *    lidos do total em cache do estado ativo (recalculado só quando o equipamento muda).
  * Sem nada equipado do Arsenal: todos os modificadores são neutros (combate idêntico ao da build anterior).
  */
-import { addModifier, STATS } from './modifiers.js?v=20261003m10f';
+import { addModifier, STATS } from './modifiers.js?v=20261003m10g';
 
 export const ARSENAL_SLOTS = Object.freeze(['helmet', 'armor', 'pants', 'weapon']);
 export const ALL_SLOTS = Object.freeze(['weapon', 'armor', 'helmet', 'pants', 'body', 'accessory']);

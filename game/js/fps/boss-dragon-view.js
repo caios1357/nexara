@@ -13,10 +13,10 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261003m10f';
-import { TILE } from './fps-camera.js?v=20261003m10f';
-import { mergeStaticParts } from './merge-util.js?v=20261003m10f';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261003m10f';
+import { attachDragonGlb } from './dragon-glb.js?v=20261003m10g';
+import { TILE } from './fps-camera.js?v=20261003m10g';
+import { mergeStaticParts } from './merge-util.js?v=20261003m10g';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261003m10g';
 
 const GREEN_DARK = 0x214f29;
 const GREEN_MID = 0x2f6636;

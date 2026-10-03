@@ -4,9 +4,9 @@
  * destacada, as demais travam (sem escolha dupla), confirmação curta, fecha.
  * Entrada por pointerup (um caminho só — sem click duplicado no mobile).
  */
-import { getRarity, buildOfPassive } from './passives.js?v=20261003m10f';
-import { getConfig } from './gameplay-config.js?v=20261003m10f';
-import { icon } from './icons.js?v=20261003m10f';
+import { getRarity, buildOfPassive } from './passives.js?v=20261003m10g';
+import { getConfig } from './gameplay-config.js?v=20261003m10g';
+import { icon } from './icons.js?v=20261003m10g';
 
 /** EVO: cor-assinatura de cada passiva (mesma da VFX in-game) — arte da carta. */
 const SIG_HEX = {
@@ -15,7 +15,7 @@ const SIG_HEX = {
   fagulha_em_cadeia: '#fff07a', reflexo_fantasma: '#c89aff', telemetria_neural: '#6ae8ff', sobrecarga_de_nexa: '#b46aff',
   sifao_de_reator: '#5affc8', quebra_postura: '#ffb02a', coracao_de_dragao: '#ff5a3a', blindagem_adaptativa: '#ffa040', nucleo_de_vigor: '#6aff7a'
 };
-import { describeProc } from './passive-procs.js?v=20261003m10f';
+import { describeProc } from './passive-procs.js?v=20261003m10g';
 /** Bloco 6: texto EFEITO = comportamento automático (gerado do config) + bônus base do JSON. */
 const effectText = (d) => describeProc(d.id) || d.descricao;
 

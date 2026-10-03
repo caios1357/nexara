@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261003m10f';
-import { pushLog } from './state.js?v=20261003m10f';
-import { isArenaState } from './arena.js?v=20261003m10f';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261003m10f';
-import { ICONS } from './icons.js?v=20261003m10f';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261003m10g';
+import { pushLog } from './state.js?v=20261003m10g';
+import { isArenaState } from './arena.js?v=20261003m10g';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261003m10g';
+import { ICONS } from './icons.js?v=20261003m10g';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -347,13 +347,16 @@ export function createMobileControls(hooks) {
   }
 
   // ——— ÁREA OLHAR / ANALÓGICO DIREITO HÍBRIDO ———
+  /** M10: hora REAL do toque (timestamp do evento, do SO/navegador) — um quadro travado (GC, shader no 1º segundo)
+   *  não pode transformar um toque rápido em "gesto longo" e engolir o ataque. Fallback: performance.now(). */
+  const evT = (e) => { const n = performance.now(); const t = e && e.timeStamp; return t > 0 && t <= n + 50 && n - t < 5000 ? t : n; };
   function beginGesture(e, el, { fromAttack, onStick }) {
     look.id = e.pointerId;
     look.lastX = e.clientX;
     look.lastY = e.clientY;
     look.downX = e.clientX;
     look.downY = e.clientY;
-    look.downT = performance.now();
+    look.downT = evT(e);
     look.travel = 0;
     look.committed = false;
     look.pendX = 0;
@@ -397,7 +400,7 @@ export function createMobileControls(hooks) {
       look.pendY += dy;
       const rs = getConfig().rightStick;
       const dist = Math.hypot(e.clientX - look.downX, e.clientY - look.downY);
-      const elapsed = performance.now() - look.downT;
+      const elapsed = evT(e) - look.downT;
       if (dist >= rs.minDragDistance || (elapsed >= rs.tapRecognitionTime && dist >= rs.deadZone)) commitDrag();
     } else {
       onLookDelta?.(dx, dy);
@@ -431,7 +434,7 @@ export function createMobileControls(hooks) {
       lookGesture.y = e ? e.clientY : look.lastY;
       lookGesture.distPx = Math.hypot(lookGesture.x - look.downX, lookGesture.y - look.downY);
       lookGesture.travelPx = look.travel;
-      lookGesture.durationMs = performance.now() - look.downT;
+      lookGesture.durationMs = evT(e) - look.downT;
       lookGesture.cancelled = !!cancelled;
       lookGesture.onStick = look.onStick;
       lookGesture.fromAttack = look.fromAttack;
