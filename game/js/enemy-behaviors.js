@@ -10,9 +10,9 @@
  * Dano sempre por actions.monsterAttackPlayer (esquiva/i-frames, defesa, escudo, morte).
  * Números em gameplay-config.js → archetypes / enemyHazards.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10e';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10e';
-import { isWalkable } from './map.js?v=20261003m10e';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10f';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10f';
+import { isWalkable } from './map.js?v=20261003m10f';
 
 export const ARCH_IDS = Object.freeze(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
 const RANGED = new Set(['C', 'E']);
@@ -219,6 +219,17 @@ function impact(K, state, zone, mon, r, a, P, result, dist, toPlayer) {
  * Decisão de um inimigo com arquétipo. Retorna true se tratou o estado (senão a IA genérica segue).
  * Só assume os estados de combate; IDLE/PATROL/DETECT/ALERT/RETURN ficam com a IA genérica.
  */
+/** M10: vagas do cerco do enxame (recalculadas 1x por quadro): membros vivos a ≤ 12 tiles, ordenados por uid. */
+let swarmCache = { at: -1, ids: [], base: 0 };
+export const swarmTicks = { n: 0 };
+function swarmSlots(state, clock, P) {
+  if (swarmCache.at === clock) return swarmCache;
+  const ids = [];
+  for (const m of state.monstersAlive) if (m.alive && m.tac === 'swarm' && Math.hypot(m.x + 0.5 - P.px, m.y + 0.5 - P.py) <= 12) ids.push(m.uid);
+  ids.sort((a, b) => a - b);
+  swarmCache = { at: clock, ids, base: ((P.yaw ?? 0) - Math.PI / 2) };
+  return swarmCache;
+}
 export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
   const A = archCfg(r.arch);
   if (!A) return false;
@@ -229,7 +240,7 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
   const dist = Math.hypot(dpx, dpy) || 1e-6;
   const toPlayer = Math.atan2(dpx, -dpy);
   const t = clock - r.stateAt;
-  const speed = cfg.chaseSpeed * (A.speedMult || 1) * (r.phaseSpeed || 1);
+  const speed = cfg.chaseSpeed * (A.speedMult || 1) * (r.phaseSpeed || 1) * (mon.tacSpeed || 1);
   const bodyR = K.bodyR(mon);
   const reach = cfg.combatRange + Math.max(0, bodyR - cfg.bodyRadius);
 
@@ -305,7 +316,14 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
       // ——— corpo a corpo (A, B, D, F, G) ———
       const a = A.attack;
       const atkReach = a.kind === 'lunge' ? a.lungeDist + 0.3 : a.kind === 'slam' ? a.radius * 0.85 : reach + (a.range - cfg.attackHitRange) * 0.5;
-      if (cdOk && dist <= atkReach && los && K.tokenAvailable(cfg)) {
+      // M10: enxame só ataca depois de chegar perto da sua vaga no cerco (ou após 2,5 s)
+      let swarmOk = true;
+      if (mon.tac === 'swarm' && r.slotAng != null) {
+        const my = Math.atan2(r.fy - P.py, r.fx - P.px); let da = Math.abs(my - r.slotAng) % (Math.PI * 2); if (da > Math.PI) da = Math.PI * 2 - da;
+        if (r.swarmSince == null) r.swarmSince = clock;
+        swarmOk = da < 0.9 || clock - r.swarmSince > 2500;
+      }
+      if (cdOk && swarmOk && dist <= atkReach && los && K.tokenAvailable(cfg)) {
         K.acquire(r);
         startAttack(K, mon, r, 'attack', P, result);
         return true;
@@ -317,6 +335,28 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
           r.behavior = 'retreat';
           r.wantVx = (-dpx / dist) * speed * 0.8; r.wantVy = (-dpy / dist) * speed * 0.8;
           return true;
+        }
+        // M10: BOTE do predador que estava à espreita — dispara reto até o herói (o golpe sai ao entrar no alcance)
+        if (clock < (r.pounceUntil || 0)) {
+          r.behavior = 'pounce';
+          const dir = K.steerToward(zone, K.flow(), r.fx, r.fy, P.px, P.py);
+          r.wantVx = dir.x * speed * 1.45; r.wantVy = dir.y * speed * 1.45;
+          return true;
+        }
+        // M10: ENXAME cerca — cada membro ocupa um ângulo ao redor do herói (não vêm em fila)
+        if (mon.tac === 'swarm') {
+          const sw = swarmSlots(state, clock, P);
+          const idx = sw.ids.indexOf(mon.uid);
+          if (idx >= 0 && sw.ids.length >= 2) {
+            const ang = sw.base + (idx / sw.ids.length) * Math.PI * 2;
+            const R0 = (state._data?.arena_br?.taticas?.enxame?.raio || 1.6);
+            const tx = P.px + Math.cos(ang) * R0, ty = P.py + Math.sin(ang) * R0;
+            const okT = isWalkable(zone, Math.floor(tx), Math.floor(ty));
+            r.behavior = 'surround'; r.slotAng = ang; swarmTicks.n++;
+            const dir = K.steerToward(zone, K.flow(), r.fx, r.fy, okT ? tx : P.px, okT ? ty : P.py);
+            r.wantVx = dir.x * speed; r.wantVy = dir.y * speed;
+            return true;
+          }
         }
         r.behavior = 'flank';
         if (clock >= (r.flankFlipAt || 0)) { r.flankSide = Math.random() < 0.5 ? -1 : 1; r.flankFlipAt = clock + A.flankMs; }
@@ -427,8 +467,9 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
         K.releaseToken(r, cfg.tokenGapMs);
         releaseRanged(r);
         const cd = (r.move === 'attack' ? A.attack.cooldownMs : [700, 1100]) || [cfg.attackCooldownMinMs, cfg.attackCooldownMaxMs];
-        r.nextAttackAt = clock + K.rand(cd[0], cd[1]) * (r.cdScale || 1);
+        r.nextAttackAt = clock + K.rand(cd[0], cd[1]) * (r.cdScale || 1) * (mon.cdMult || 1);
         if (r.arch === 'B') r.retreatUntil = clock + A.retreatMs;
+        r.swarmSince = null;
         r.atkPhase = '';
         r.move = null;
         K.setState(mon, r, S.CHASE);

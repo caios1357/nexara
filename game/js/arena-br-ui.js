@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261003m10e';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261003m10f';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -193,6 +193,7 @@ export function createArenaBrUi(deps) {
     for (const mon of s.monstersAlive) {
       if (!mon.alive || mon.zone !== s.zoneId) continue;
       if (!mon.boss && Math.hypot(mon.x - p.x, mon.y - p.y) > 14) continue;
+      if (mon.lurking) continue; // M10: predador à espreita não aparece no radar
       const [x, y] = T(mon.x + 0.5, mon.y + 0.5);
       g.fillStyle = mon.boss ? '#5dff6a' : mon.hunted || mon.elite ? '#ffc93a' : '#e85d4c';
       g.beginPath(); g.arc(x, y, mon.boss ? 4 : mon.elite ? 3 : 2, 0, Math.PI * 2); g.fill();

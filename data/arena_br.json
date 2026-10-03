@@ -542,5 +542,30 @@
   "abandonados": {
     "_doc": "caixas de equipamento abandonado (sempre 1 equipamento, tier da região +1)",
     "porRegiao": 1
+  },
+  "taticas": {
+    "_doc": "M10 fase 7: IA por papel na Arena. predador espreita (parado, só nota de perto, bote imediato); enxame cerca (cada um num ângulo); guardião vigia o posto (aviso, coleira curta, regenera ao voltar); elite agressivo (detecta/persegue mais, ataca mais rápido, chama aliados).",
+    "predador": {
+      "regioes": [
+        "floresta"
+      ],
+      "emboscada": true,
+      "espreitaR": 6.5
+    },
+    "enxame": {
+      "raio": 1.6
+    },
+    "guardiao": {
+      "alertaR": 10
+    },
+    "elite": {
+      "aggroMult": 1.4,
+      "leashMult": 1.5,
+      "loseMult": 1.5,
+      "cdMult": 0.7,
+      "speedMult": 1.12,
+      "chamaR": 8,
+      "chamaMax": 3
+    }
   }
 }

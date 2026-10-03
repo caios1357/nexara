@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10e';
-import { isWalkable, getTileType } from './map.js?v=20261003m10e';
-import { monsterAttackPlayer } from './actions.js?v=20261003m10e';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10e';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10e';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10f';
+import { isWalkable, getTileType } from './map.js?v=20261003m10f';
+import { monsterAttackPlayer } from './actions.js?v=20261003m10f';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10f';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10f';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -211,6 +211,11 @@ function decayPosture(r, dtSec) {
 }
 
 /** EVO: alerta imediato (ondas do Campo de Ascensão entram já caçando o herói). */
+/** M10 fase 7: contadores das táticas da Arena (e2e). */
+export const tacStats = { pounces: 0, guardWarns: 0, eliteCalls: 0, eliteAllies: 0, surroundTicks: 0 };
+export function resetTacStats() { for (const k in tacStats) tacStats[k] = 0; }
+export function getTacStats() { return { ...tacStats }; }
+function brTac(state) { return state?._data?.arena_br?.taticas || {}; }
 export function alertMonster(mon) {
   const r = rtFor(mon);
   r.state = S.ALERT;
@@ -446,6 +451,27 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
 
   switch (r.state) {
     case S.IDLE: {
+      // M10: PREDADOR à espreita — parado, quase invisível; só nota o herói de perto e dá o bote na hora
+      if (mon.tac === 'lurk') {
+        r.behavior = 'lurk'; mon.lurking = true;
+        const LR = brTac(state).predador?.espreitaR || 6.5;
+        if (dist <= LR && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py)) {
+          mon.lurking = false; mon.tac = 'lurk_done'; r.nextAttackAt = clock; r.pounceUntil = clock + 1600; tacStats.pounces++;
+          logEvent('POUNCE', mon, { dist: +dist.toFixed(2) }); setState(mon, r, S.CHASE, { pounce: true });
+        }
+        break;
+      }
+      // M10: GUARDIÃO vigia o posto — não patrulha; avisa (encara) quem chega perto; só ataca dentro da coleira
+      if (mon.tac === 'guard') {
+        const AR = brTac(state).guardiao?.alertaR || 10;
+        if (dist <= AR && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py)) {
+          turnToward(r, toPlayer, cfg.turnSpeedDeg, dtSec); r.behavior = 'guard_watch';
+          if (!r.guardWarned) { r.guardWarned = true; tacStats.guardWarns++; logEvent('GUARD_WARN', mon, { dist: +dist.toFixed(2) }); }
+        } else { r.behavior = 'guard_post'; if (dist > AR + 3) r.guardWarned = false; }
+        if (canDetect && dist <= aggroR && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py)) { setState(mon, r, S.DETECT); break; }
+        if (homeD > 0.8) { setState(mon, r, S.RETURN); }
+        break;
+      }
       if (canDetect && dist <= aggroR && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py)) { setState(mon, r, S.DETECT); break; }
       // MASTER 10: PATRULHA / ESCOLTA — a "casa" anda (diretor da Arena); longe dela → caminha até lá
       if (mon.route && homeD > 2.2) { r.routeWalk = true; setState(mon, r, S.RETURN, { route: true }); break; }
@@ -472,6 +498,13 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
     }
     case S.DETECT: {
       turnToward(r, toPlayer, cfg.turnSpeedDeg, dtSec);
+      // M10: ELITE agressivo — chama aliados próximos ao detectar e pula o alerta
+      if (mon.tac === 'elite' && !r.eliteCalled) {
+        r.eliteCalled = true; const E2 = brTac(state).elite || {}; let n = 0;
+        for (const o of state.monstersAlive) { if (n >= (E2.chamaMax || 3)) break; if (o === mon || !o.alive || !o.br || o.boss || o.guard) continue; if (Math.hypot(o.x - mon.x, o.y - mon.y) > (E2.chamaR || 8)) continue; const ro = runtimes.get(o); if (ro && ro.state !== S.IDLE && ro.state !== S.PATROL) continue; if (o.tac === 'lurk') { o.tac = 'lurk_done'; o.lurking = false; } alertMonster(o); n++; }
+        tacStats.eliteCalls++; tacStats.eliteAllies += n; logEvent('ELITE_CALL', mon, { allies: n });
+        setState(mon, r, S.CHASE); break;
+      }
       if (t >= cfg.detectMs) setState(mon, r, S.ALERT);
       break;
     }
@@ -547,7 +580,7 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
     case S.RECOVERY: {
       if (t >= cfg.attackRecoveryMs) {
         releaseToken(r, cfg.tokenGapMs);
-        r.nextAttackAt = clock + rand(cfg.attackCooldownMinMs, cfg.attackCooldownMaxMs);
+        r.nextAttackAt = clock + rand(cfg.attackCooldownMinMs, cfg.attackCooldownMaxMs) * (mon.cdMult || 1);
         setState(mon, r, S.CHASE);
       }
       break;

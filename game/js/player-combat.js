@@ -18,9 +18,9 @@
  * Relógio próprio (ms) avançado por update(dt): congela no hit-stop/pausa.
  * Sem alocação por frame (objetos reutilizados).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10e';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10e';
-import { getStat, STATS } from './modifiers.js?v=20261003m10e';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10f';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10f';
+import { getStat, STATS } from './modifiers.js?v=20261003m10f';
 
 export const ATK = Object.freeze({ IDLE: 'IDLE', STARTUP: 'STARTUP', ACTIVE: 'ACTIVE', RECOVERY: 'RECOVERY' });
 const EVENT_CAP = 120;

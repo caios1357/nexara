@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003m10e';
-import { pushLog } from './state.js?v=20261003m10e';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10e';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10e';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261003m10e';
+import { createArenaState } from './arena.js?v=20261003m10f';
+import { pushLog } from './state.js?v=20261003m10f';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10f';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10f';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261003m10f';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -103,6 +103,12 @@ export function createArenaBr(deps) {
     m.elite = !!b.elite;
     m.guard = !!extra.guard;
     m.hunted = !!extra.hunted;
+    // M10 fase 7: papel tático (lido pela IA genérica / arquétipos)
+    const TA = cfg().taticas || {}; m.tac = null; m.cdMult = 1; m.tacSpeed = 1;
+    if (mdef.id === 'mon_br_predador' && TA.predador && ((TA.predador.regioes || []).includes(brRegionAt(map(), cfg(), m.x, m.y)?.id) || (TA.predador.emboscada && extra.enc === 'emboscada'))) m.tac = 'lurk';
+    else if (mdef.id === 'mon_br_enxame' && TA.enxame) m.tac = 'swarm';
+    else if (b.guarda && TA.guardiao) m.tac = 'guard';
+    else if ((b.elite || extra.hunted) && TA.elite) { const E2 = TA.elite; m.tac = 'elite'; m.aggroR = Math.round((m.aggroR || 10) * (E2.aggroMult || 1)); m.leash = Math.round((m.leash || 14) * (E2.leashMult || 1)); m.loseR = Math.round((m.loseR || 18) * (E2.loseMult || 1)); m.cdMult = E2.cdMult || 1; m.tacSpeed = E2.speedMult || 1; }
     m.arenaLabel = extra.hunted ? `ALVO DA CAÇADA · ${mdef.name}` : b.elite ? `ELITE · ${mdef.name}` : mdef.name;
   }
   function spawnAt(monId, x, y, extra = {}) {
