@@ -166,7 +166,7 @@
     }
   ],
   "diretor": {
-    "_doc": "Spawns ESPARSOS ao redor do herói (anel), por região/risco; teto de vivos; some quem fica longe e não está em combate. Espaço vazio proposital.",
+    "_doc": "Spawns ao redor do herói (anel) por região/risco + ENCONTROS (normal, grupo, patrulha, emboscada, guardião/ninho, enxame, elite+escolta, raro). maxVivos = teto base; maxVivosAlvo = teto que só é liberado quando o FPS sustenta (sobe devagar, cai rápido).",
     "maxVivos": {
       "low": 12,
       "medium": 14,
@@ -182,7 +182,141 @@
     ],
     "pontosPorRegiao": 14,
     "espacoMinEntrePontos": 6,
-    "zonaLivreSpawn": 9
+    "zonaLivreSpawn": 9,
+    "maxVivosAlvo": {
+      "low": 16,
+      "medium": 24,
+      "high": 36
+    },
+    "fpsDensidade": {
+      "_doc": "FPS médio (EMA) ≥ sobe → libera +10% do intervalo base→alvo a cada 2 s; < desce → corta 25%; < corte → volta ao teto base",
+      "sobe": 50,
+      "desce": 34,
+      "corte": 24
+    },
+    "encontros": {
+      "_doc": "Pesos por risco da região (1–5). normal = 1 monstro · grupo = 2–3 do mesmo tipo · patrulha = 1–2 andando uma rota longa (tipos com patrulhaLonga preferidos) · escolta = elite + 2 guardas que o seguem. enxame continua vindo do tipo com grupo=true.",
+      "pesos": {
+        "1": {
+          "normal": 6,
+          "grupo": 2,
+          "patrulha": 2,
+          "escolta": 0
+        },
+        "2": {
+          "normal": 5,
+          "grupo": 3,
+          "patrulha": 2,
+          "escolta": 0
+        },
+        "3": {
+          "normal": 4,
+          "grupo": 3,
+          "patrulha": 2,
+          "escolta": 1
+        },
+        "4": {
+          "normal": 3,
+          "grupo": 2,
+          "patrulha": 1,
+          "escolta": 3
+        },
+        "5": {
+          "normal": 5,
+          "grupo": 2,
+          "patrulha": 0,
+          "escolta": 0
+        }
+      },
+      "grupo": [
+        2,
+        3
+      ],
+      "patrulha": {
+        "n": [
+          1,
+          2
+        ],
+        "passos": [
+          3,
+          5
+        ],
+        "dist": [
+          8,
+          18
+        ]
+      },
+      "raro": {
+        "chance": 0.025,
+        "maxVivos": 1,
+        "hpMult": 2.2,
+        "sizeMult": 1.15
+      },
+      "emboscada": {
+        "_doc": "Sub-áreas sorteadas no início da corrida; ao entrar, 2–3 monstros saem a 5–8 tiles (já alertas). Uma vez por área.",
+        "areas": [
+          "casa_saque",
+          "ruina_saque",
+          "sala_fechada",
+          "clareira",
+          "deposito",
+          "plato"
+        ],
+        "chance": 0.35,
+        "n": [
+          2,
+          3
+        ],
+        "raio": [
+          5,
+          8
+        ],
+        "preferido": {
+          "floresta": "mon_br_predador"
+        }
+      },
+      "ninhos": {
+        "_doc": "Encontros pré-colocados por sub-área; acordam quando o herói chega perto (ativaDist) e ficam presos ao ninho (coleira curta). Até porRegiao×escala ninhos por região.",
+        "areas": {
+          "periferia": [
+            "deposito",
+            "praca"
+          ],
+          "ruinas": [
+            "maquina",
+            "torre"
+          ],
+          "floresta": [
+            "clareira",
+            "gruta"
+          ],
+          "complexo": [
+            "laboratorio",
+            "sala_fechada"
+          ],
+          "elite": [
+            "plato",
+            "risco"
+          ],
+          "dragao": [
+            "aproximacao"
+          ]
+        },
+        "porRegiao": 2,
+        "ativaDist": 20,
+        "n": [
+          2,
+          4
+        ],
+        "coleira": 8,
+        "folgaTeto": 4
+      },
+      "nivel": {
+        "_doc": "a cada N níveis do herói, grupos/ninhos ganham +1",
+        "cadaNiveis": 8,
+        "max": 2
+      }
+    }
   },
   "lodIa": {
     "_doc": "≤ perto: IA completa · ≤ medio: pensa a cada 4 quadros · além: congelado (patrulha simplificada).",

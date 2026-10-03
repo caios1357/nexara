@@ -16,8 +16,8 @@
  * Relógio próprio em ms de JOGO (congela com passivas/modal/hit-stop, igual ao combate).
  * Números em gameplay-config.js → passiveProcs. Efeitos via modifiers (getStat), sem atalhos.
  */
-import { getConfig } from './gameplay-config.js?v=20261003m10b';
-import { addModifier, STATS } from './modifiers.js?v=20261003m10b';
+import { getConfig } from './gameplay-config.js?v=20261003m10c';
+import { addModifier, STATS } from './modifiers.js?v=20261003m10c';
 
 export const PROC_IDS = Object.freeze([
   'furia_cibernetica', 'impulso_neural', 'nucleo_reforcado', 'mira_neural',

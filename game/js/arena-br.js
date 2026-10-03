@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003m10b';
-import { pushLog } from './state.js?v=20261003m10b';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10b';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10b';
-import { rollLootFor } from './br-items.js?v=20261003m10b';
+import { createArenaState } from './arena.js?v=20261003m10c';
+import { pushLog } from './state.js?v=20261003m10c';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10c';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10c';
+import { rollLootFor } from './br-items.js?v=20261003m10c';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -65,7 +65,7 @@ export function createArenaBr(deps) {
   const cfg = () => deps.getData().arena_br;
   const map = () => st?._data.zones.zones.find((z) => z.id === BR_ZONE_ID)?.brMap || null;
   const R = () => br.rng();
-  const stats = { spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [] };
+  const stats = { spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [], enc: { normal: 0, grupo: 0, enxame: 0, patrulha: 0, escolta: 0, raro: 0, emboscada: 0, ninho: 0 }, minSpawnDist: 999 };
 
   function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
@@ -78,6 +78,7 @@ export function createArenaBr(deps) {
       clock: 0, startedAt: Date.now(), kills: 0, killsBy: {}, mcbRun: 0, mcbStart: st.player.mcb || 0, itemsFound: [], best: null,
       lootOpened: [], lootOpenedDirty: [], drops: [], dropSeq: 1, region: null, visited: [],
       explored: null, exploredN: 0, found: [], fogCell: -1,
+      densK: 0, fpsEma: 0, densAt: 0, nests: [], ambushAreas: [], ambushDone: [],
       zone: { phase: 'wait', stage: -1, r: R0, fromR: R0, toR: R0, cx: c.zonaSegura.centro.x + 0.5, cy: c.zonaSegura.centro.y + 0.5, phaseAt: 0, warned: false, outside: false },
       event: null, nextEventAt: c.eventos?.primeiroMs ?? 60000, eventSeq: 0,
       extractionOpen: false, extract: { id: null, ms: 0 }, ended: null, dragonWarned: false, inDragon: false, bossEngaged: false, bossKilled: false,
@@ -85,6 +86,7 @@ export function createArenaBr(deps) {
     };
     br.rng = rng32((Date.now() & 0x7fffffff) ^ 0x5bd1e995);
     spawnGuardians();
+    setupEncounters();
     note('run_start', {});
   }
   function stop() { st = null; br = null; }
@@ -111,13 +113,29 @@ export function createArenaBr(deps) {
     m.x = x; m.y = y; m.homeX = x; m.homeY = y;
     m.hp = m.hpMax = Math.round(mdef.hp * (extra.hpMult || 1));
     m.alive = true; m.alerted = false; m._wasAlive = true;
+    m.route = null; m.follow = null; m.nest = null; m.rare = false; m.ambush = false; m.enc = extra.enc || 'normal';
     m.region = brRegionAt(map(), cfg(), x, y)?.id || null;
     applyType(m, mdef, extra);
+    if (extra.rare) { m.rare = true; m.sizeMult *= cfg().diretor.encontros?.raro?.sizeMult || 1.15; m.arenaLabel = `RARO · ${mdef.name}`; }
     stats.spawned++;
+    if (deps.getPos && !extra.guard && !extra.nest && extra.enc !== 'emboscada' && !extra.dbg) { const p = deps.getPos(); stats.minSpawnDist = Math.min(stats.minSpawnDist, Math.hypot(x - p.x, y - p.y)); }
     return m;
   }
   function aliveCount() { let n = 0; for (const m of st.monstersAlive) if (m.br && m.alive && !m.guard) n++; return n; }
-  function maxAlive() { const t = cfg().diretor.maxVivos; const p = deps.presetName?.() || 'medium'; return t[p] ?? t.medium ?? 16; }
+  function baseCap() { const t = cfg().diretor.maxVivos; const p = deps.presetName?.() || 'medium'; return t[p] ?? t.medium ?? 16; }
+  function targetCap() { const t = cfg().diretor.maxVivosAlvo || cfg().diretor.maxVivos; const p = deps.presetName?.() || 'medium'; return Math.max(baseCap(), t[p] ?? t.medium ?? 16); }
+  /** teto efetivo: base + parte do caminho até o alvo, liberada pelo FPS medido (densK 0..1); fase 9 pode cortar abaixo da base (densCut) */
+  function maxAlive() { const b = baseCap(); const k = br ? br.densK : 0; const cut = br?.densCut || 0; return Math.max(4, Math.round(b + (targetCap() - b) * k) - cut); }
+  function updateDensity(dtMs) {
+    if (!(dtMs > 0) || dtMs > 1000 || br.noFps) return;
+    const f = 1000 / dtMs; br.fpsEma = br.fpsEma ? br.fpsEma * 0.95 + f * 0.05 : f;
+    if (br.clock - br.densAt < 2000) return; br.densAt = br.clock;
+    const F = cfg().diretor.fpsDensidade || { sobe: 50, desce: 34, corte: 24 };
+    if (br.densLock != null) { br.densK = br.densLock; return; }
+    if (br.fpsEma >= F.sobe) br.densK = Math.min(1, br.densK + 0.1);
+    else if (br.fpsEma < F.corte) br.densK = 0;
+    else if (br.fpsEma < F.desce) br.densK = Math.max(0, br.densK - 0.25);
+  }
 
   /** Guardiões fixos nos POIs (coleira curta) — contam fora do teto do diretor; LOD os congela longe. */
   function spawnGuardians() {
@@ -136,6 +154,111 @@ export function createArenaBr(deps) {
     const ent = Object.entries(w); const tot = ent.reduce((a, [, v]) => a + v, 0); let x = R() * tot;
     for (const [k, v] of ent) { x -= v; if (x <= 0) return k; } return ent[0][0];
   }
+  /* ── MASTER 10 · FASE 4: ENCONTROS ── */
+  const E = () => cfg().diretor.encontros || {};
+  const lvlBonus = () => { const N = E().nivel || { cadaNiveis: 8, max: 2 }; return Math.min(N.max ?? 2, Math.floor(((st.player.level || 1) - 1) / (N.cadaNiveis || 8))); };
+  const rint = (a) => a[0] + Math.floor(R() * (a[1] - a[0] + 1));
+  function pickEnc(risco) {
+    const w = E().pesos?.[String(risco)] || { normal: 1 }; const ent = Object.entries(w).filter(([, v]) => v > 0); const tot = ent.reduce((a, [, v]) => a + v, 0); let x = R() * tot;
+    for (const [k, v] of ent) { x -= v; if (x <= 0) return k; } return 'normal';
+  }
+  const rareAlive = () => st.monstersAlive.some((q) => q.alive && q.rare);
+  function nonEliteType(region) { for (let i = 0; i < 6; i++) { const t = pickType(region); const b = st._monsters[t]?.br || {}; if (!b.elite && !b.grupo && !b.guarda) return t; } return 'mon_br_rastreador'; }
+  /** vizinho livre para membros do grupo SEM chegar mais perto do herói que o anel mínimo */
+  function nearFreeAway(x, y) {
+    const p = deps.getPos?.(); const minD = cfg().diretor.anelMin || 11;
+    for (let r = 1; r < 5; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const tx = x + dx, ty = y + dy; if (walk(tx, ty) && (!p || Math.hypot(tx - p.x, ty - p.y) >= minD)) return { x: tx, y: ty }; }
+    return null;
+  }
+  function spawnEncounter(q, region, cap, force) {
+    const enc = force || pickEnc(region?.risco || 1);
+    let type = pickType(region);
+    const isGroup = force ? force === 'enxame' : !!st._monsters[type]?.br?.grupo;
+    if (force === 'enxame' && !st._monsters[type]?.br?.grupo) type = 'mon_br_enxame';
+    const RA = E().raro || { chance: 0 };
+    const rare = force ? force === 'raro' : !isGroup && R() < (RA.chance || 0) && st.monstersAlive.filter((x) => x.alive && x.rare).length < (RA.maxVivos || 1);
+    if (rare) { const mm = spawnAt(nonEliteType(region), q.x, q.y, { hpMult: RA.hpMult || 2.2, rare: true, enc: 'raro' }); if (mm) { stats.enc.raro++; note('rare_spawn', { id: mm.id, x: mm.x, y: mm.y }); } return; }
+    if (isGroup) { // ENXAME (tipo com grupo=true)
+      const D = cfg().diretor; const n = D.gruposEnxame[0] + Math.floor(R() * (D.gruposEnxame[1] - D.gruposEnxame[0] + 1)) + lvlBonus();
+      for (let i = 0; i < n && aliveCount() < cap + 3; i++) { const pt = i === 0 ? q : nearFreeAway(q.x + (i % 2 ? 1 : -1), q.y + (i > 1 ? 1 : 0)); if (pt) spawnAt(type, pt.x, pt.y, { enc: 'enxame' }); }
+      stats.enc.enxame++; return;
+    }
+    if (enc === 'grupo') {
+      type = nonEliteType(region); const n = rint(E().grupo || [2, 3]) + lvlBonus();
+      for (let i = 0; i < n && aliveCount() < cap + 2; i++) { const pt = i === 0 ? q : nearFreeAway(q.x + (i % 2 ? 1 : -1), q.y + (i > 1 ? 1 : 0)); if (pt) spawnAt(type, pt.x, pt.y, { enc: 'grupo' }); }
+      stats.enc.grupo++; return;
+    }
+    if (enc === 'patrulha') {
+      const P = E().patrulha || { n: [1, 2], passos: [3, 5], dist: [8, 18] };
+      const pref = Object.keys(region?.monstros || {}).find((k) => st._monsters[k]?.br?.patrulhaLonga); type = pref && R() < 0.7 ? pref : nonEliteType(region);
+      const pts = [{ x: q.x, y: q.y }]; const sp = map().spawnPoints.filter((o) => o.region === q.region);
+      for (let k = 1; k < rint(P.passos); k++) { const last = pts[pts.length - 1]; const nx = sp.filter((o) => { const d = Math.hypot(o.x - last.x, o.y - last.y); return d >= P.dist[0] && d <= P.dist[1]; }); if (!nx.length) break; pts.push(nx[Math.floor(R() * nx.length)]); }
+      if (pts.length < 2) { spawnAt(type, q.x, q.y, { enc: 'normal' }); stats.enc.normal++; return; }
+      const n = rint(P.n);
+      for (let i = 0; i < n; i++) { const pt = i === 0 ? q : nearFreeAway(q.x + 1, q.y); if (!pt) continue; const mm = spawnAt(type, pt.x, pt.y, { enc: 'patrulha' }); if (mm) { mm.route = { pts, i: 0 }; } }
+      stats.enc.patrulha++; return;
+    }
+    if (enc === 'escolta') {
+      const lead = spawnAt('mon_br_elite', q.x, q.y, { enc: 'escolta' }); if (!lead) return;
+      for (let i = 0; i < 2; i++) { const pt = nearFreeAway(q.x + (i ? 1 : -1), q.y + 1); if (!pt) continue; const mm = spawnAt(nonEliteType(region), pt.x, pt.y, { enc: 'escolta' }); if (mm) { mm.follow = lead.uid; mm.route = { pts: [], i: 0 }; mm.arenaLabel = `ESCOLTA · ${st._monsters[mm.id]?.name || ''}`; } }
+      stats.enc.escolta++; return;
+    }
+    spawnAt(type, q.x, q.y, { enc: 'normal' }); stats.enc.normal++;
+  }
+  const engaged = (mon) => { const s = getAiView(mon)?.state; return s === AI_STATES.CHASE || s === AI_STATES.ATTACK || s === AI_STATES.ATTACK_PREPARE || s === AI_STATES.DETECT || s === AI_STATES.ALERT; };
+  /** patrulhas andam a rota (a IA vai até a "casa", que avança de ponto em ponto); escoltas seguem o elite */
+  function updateFollowers() {
+    for (const mon of st.monstersAlive) {
+      if (!mon.alive || !mon.route) continue;
+      if (mon.follow != null) {
+        const lead = st.monstersAlive.find((q) => q.uid === mon.follow && q.alive);
+        if (!lead) { mon.follow = null; mon.route = null; continue; }
+        if (!engaged(mon) && Math.hypot(lead.x - mon.homeX, lead.y - mon.homeY) > 2.5) { const pt = nearestFree(lead.x + (mon.uid % 2 ? 1 : -1), lead.y + 1); if (pt) { mon.homeX = pt.x; mon.homeY = pt.y; } }
+        continue;
+      }
+      const R2 = mon.route; if (!R2.pts.length || engaged(mon)) continue;
+      const h = R2.pts[R2.i]; if (Math.hypot(mon.x - h.x, mon.y - h.y) < 2.5) { R2.i = (R2.i + 1) % R2.pts.length; const n = R2.pts[R2.i]; mon.homeX = n.x; mon.homeY = n.y; R2.legs = (R2.legs || 0) + 1; }
+    }
+  }
+  /** ninhos: sorteados no início; acordam por proximidade, presos ao ninho; mortos não voltam na corrida */
+  function setupEncounters() {
+    const m = map(); const NI = E().ninhos; const EM = E().emboscada; const S = cfg()._escala || 1;
+    br.nests = []; br.ambushAreas = []; br.ambushDone = [];
+    if (!m?.areas) return;
+    if (NI) for (const r of cfg().regioes) {
+      const kinds = NI.areas?.[r.id] || []; const sp0 = cfg().spawnHeroi; const calm = (a) => Math.hypot(a.cx - sp0.x, a.cy - sp0.y) >= (NI.calmaSpawn || 30); // começo tranquilo (introdução)
+      const cand = m.areas.filter((a) => a.region === r.id && kinds.includes(a.kind) && !a.hidden && calm(a));
+      const want = Math.round((NI.porRegiao || 2) * S);
+      for (let i = 0; i < want && cand.length; i++) { const a = cand.splice(Math.floor(R() * cand.length), 1)[0]; const pt = nearestFree(a.cx, a.cy); if (!pt) continue; br.nests.push({ id: `ninho_${a.id}`, area: a.id, region: r.id, x: pt.x, y: pt.y, n: rint(NI.n || [2, 4]) + lvlBonus(), killed: 0, alive: [], active: false, wakes: 0 }); }
+    }
+    if (EM) { const sp0 = cfg().spawnHeroi; for (const a of m.areas) if (!a.hidden && EM.areas.includes(a.kind) && Math.hypot(a.cx - sp0.x, a.cy - sp0.y) >= 24 && R() < (EM.chance ?? 0.35)) br.ambushAreas.push(a.id); }
+  }
+  function updateNests(p) {
+    const NI = E().ninhos; if (!NI) return;
+    for (const n of br.nests) {
+      n.alive = n.alive.filter((uid) => st.monstersAlive.some((q) => q.uid === uid && q.alive && q.nest === n.id));
+      const d = Math.hypot(n.x - p.x, n.y - p.y);
+      if (n.active && !n.alive.length) n.active = false;
+      if (n.active || n.killed >= n.n || d > (NI.ativaDist || 20)) continue;
+      if (aliveCount() >= maxAlive() + (NI.folgaTeto ?? 4)) continue;
+      const region = cfg().regioes.find((r) => r.id === n.region); const type = nonEliteType(region);
+      const left = n.n - n.killed;
+      for (let i = 0; i < left; i++) { const pt = nearestFree(n.x + ((i % 3) - 1) * 2, n.y + (i > 2 ? 2 : 0)); if (!pt) continue; const mm = spawnAt(type, pt.x, pt.y, { enc: 'ninho', nest: true }); if (mm) { mm.nest = n.id; mm.leash = Math.min(mm.leash || 12, NI.coleira || 8); n.alive.push(mm.uid); } }
+      n.active = true; n.wakes++; stats.enc.ninho++;
+    }
+  }
+  function updateAmbush(p) {
+    const EM = E().emboscada; if (!EM || !br.ambushAreas.length) return; const m = map();
+    for (const id of br.ambushAreas) {
+      if (br.ambushDone.includes(id)) continue; const a = m.areas.find((q) => q.id === id); if (!a) continue;
+      if (!(p.x >= a.x0 && p.x <= a.x1 + 1 && p.y >= a.y0 && p.y <= a.y1 + 1)) continue;
+      br.ambushDone.push(id);
+      const region = cfg().regioes.find((r) => r.id === a.region); const type = EM.preferido?.[a.region] || nonEliteType(region);
+      const n = rint(EM.n || [2, 3]); let made = 0;
+      for (let i = 0; i < n * 6 && made < n; i++) { const ang = R() * Math.PI * 2; const rr = EM.raio[0] + R() * (EM.raio[1] - EM.raio[0]); const tx = Math.round(p.x + Math.cos(ang) * rr), ty = Math.round(p.y + Math.sin(ang) * rr); if (!walk(tx, ty)) continue; const mm = spawnAt(type, tx, ty, { enc: 'emboscada' }); if (mm) { mm.ambush = true; mm.aggroR = Math.max(mm.aggroR || 9, 14); made++; } }
+      if (made) { stats.enc.emboscada++; note('ambush', { area: id, n: made, region: a.region }); }
+    }
+  }
   function director(p) {
     const c = cfg(); const D = c.diretor; const m = map();
     // some quem ficou longe e fora de combate (libera o teto para perto do herói)
@@ -147,6 +270,7 @@ export function createArenaBr(deps) {
       if (s === AI_STATES.CHASE || s === AI_STATES.ATTACK || s === AI_STATES.ATTACK_PREPARE) continue;
       mon.alive = false; mon.hp = 0; resetMonsterRuntime(mon); stats.despawned++;
     }
+    updateFollowers(); updateNests(p); updateAmbush(p);
     if (br.clock < br.nextSpawnAt) return;
     br.nextSpawnAt = br.clock + D.intervaloMs;
     const cap = maxAlive();
@@ -158,13 +282,7 @@ export function createArenaBr(deps) {
     const q = cands[Math.floor(R() * cands.length)];
     const region = c.regioes.find((r) => r.id === q.region);
     if (R() > (region?.densidade ?? 0.6)) return; // espaço vazio proposital
-    const type = pickType(region);
-    const isGroup = !!st._monsters[type]?.br?.grupo;
-    const n = isGroup ? D.gruposEnxame[0] + Math.floor(R() * (D.gruposEnxame[1] - D.gruposEnxame[0] + 1)) : 1;
-    for (let i = 0; i < n && aliveCount() < cap + (isGroup ? 3 : 0); i++) {
-      const pt = i === 0 ? q : nearestFree(q.x + (i % 2 ? 1 : -1), q.y + (i > 1 ? 1 : 0));
-      if (pt) spawnAt(type, pt.x, pt.y);
-    }
+    spawnEncounter(q, region, cap);
     stats.maxAlive = Math.max(stats.maxAlive, aliveCount());
   }
   /** Mutante: alterna o arquétipo (controle ↔ corpo a corpo) fora do golpe. */
@@ -341,6 +459,7 @@ export function createArenaBr(deps) {
   function update(dtMs, p) {
     if (!isActive()) return;
     br.clock += dtMs; stats.ticks++;
+    updateDensity(dtMs);
     director(p);
     mutate();
     updateLoot(p, dtMs);
@@ -355,6 +474,7 @@ export function createArenaBr(deps) {
     if (!isActive() || !mon) return;
     br.kills++; br.killsBy[mon.id] = (br.killsBy[mon.id] || 0) + 1;
     if (mon.boss) return;
+    if (mon.nest) { const n = br.nests.find((q) => q.id === mon.nest); if (n) n.killed++; }
     const reg = brRegionAt(map(), cfg(), mon.x, mon.y);
     const tier = mon.elite || mon.hunted ? 'elite' : (def?.tier || 'comum');
     const ch = cfg().dropMonstro?.[tier] ?? 0.1;
@@ -395,7 +515,7 @@ export function createArenaBr(deps) {
     const zoneMsLeft = z.phase === 'wait' ? Math.max(0, c.zonaSegura.inicioMs - c.zonaSegura.avisoMs - br.clock) : z.phase === 'warn' ? Math.max(0, c.zonaSegura.avisoMs - (br.clock - z.phaseAt)) : z.phase === 'shrink' ? Math.max(0, c.zonaSegura.estagios[z.stage].duracaoMs - (br.clock - z.phaseAt)) : 0;
     return {
       active: isActive(), clock: Math.round(br.clock), region: br.region, regionNome: c.regioes.find((r) => r.id === br.region)?.nome || '', risco: c.regioes.find((r) => r.id === br.region)?.risco || 0,
-      kills: br.kills, mcbRun: br.mcbRun, alive: aliveCount(), cap: maxAlive(),
+      kills: br.kills, mcbRun: br.mcbRun, alive: aliveCount(), cap: maxAlive(), capBase: baseCap(), capAlvo: targetCap(), densK: +br.densK.toFixed(2), fpsEma: +br.fpsEma.toFixed(1), nests: br.nests.length, nestsAwake: br.nests.filter((n) => n.active).length, ambushAreas: br.ambushAreas.length,
       zone: { phase: z.phase, stage: z.stage + 1, stages: c.zonaSegura.estagios.length, r: +z.r.toFixed(2), toR: z.toR, cx: z.cx, cy: z.cy, msLeft: Math.round(zoneMsLeft), outside: z.outside },
       event: br.event ? { kind: br.event.kind, nome: br.event.nome, x: br.event.x, y: br.event.y, msLeft: Math.max(0, Math.round(br.event.until - br.clock)), uid: br.event.uid || null, done: !!br.event.done } : null,
       extractionOpen: br.extractionOpen, extractInMs: Math.max(0, c.extracao.liberaAposMs - br.clock), extract: { ...br.extract, need: c.extracao.segundos * 1000 },
@@ -407,11 +527,14 @@ export function createArenaBr(deps) {
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */
     debug: {
-      advance(ms, p) { if (br) { br.clock += ms; br.nextSpawnAt = Math.min(br.nextSpawnAt, br.clock); } if (p) update(16, p); },
+      advance(ms, p) { if (br) { br.clock += ms; br.nextSpawnAt = Math.min(br.nextSpawnAt, br.clock); } if (p) { br.noFps = true; try { update(16, p); } finally { if (br) br.noFps = false; } } },
       openNearest(p) { const m = map(); let best = null; let bd = 1e9; for (const s of [...m.chests, ...m.crates]) { if (br.lootOpened.includes(s.id)) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } } if (best) openLoot(best); return best; },
       forceEvent(kind) { if (!br) return; br.event = null; br.eventSeq = Object.keys(cfg().eventos.tipos).filter((k) => cfg().eventos.tipos[k].ativo).indexOf(kind); br.nextEventAt = br.clock; },
       spawn(id, x, y, extra) { return spawnAt(id, x, y, extra || {}); },
       drops: () => br?.drops || [],
+      setDensity(k) { if (br) { br.densLock = k == null ? null : Math.max(0, Math.min(1, k)); if (k != null) br.densK = br.densLock; } return br?.densK; },
+      encounter(kind, x, y) { const q = { x, y, region: brRegionAt(map(), cfg(), x, y)?.id }; const region = cfg().regioes.find((r) => r.id === q.region); spawnEncounter(q, region, 999, kind); return st.monstersAlive.filter((m) => m.alive && m.br).length; },
+      nests: () => br?.nests || [], ambushAreas: () => br?.ambushAreas || [],
       /** M10: gera N lotes de loot real num ponto (prova que nada é apagado automaticamente) */
       dropMany(n, x, y) { for (let i = 0; i < n; i++) spawnDrops(x, y, rollLootFor(st, 'basico', { equip: 0, mats: [1, 1], rnd: R }), `dbg_${i}`); return br.drops.length; }
     }

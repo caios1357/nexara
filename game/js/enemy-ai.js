@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10b';
-import { isWalkable, getTileType } from './map.js?v=20261003m10b';
-import { monsterAttackPlayer } from './actions.js?v=20261003m10b';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10b';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10b';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10c';
+import { isWalkable, getTileType } from './map.js?v=20261003m10c';
+import { monsterAttackPlayer } from './actions.js?v=20261003m10c';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10c';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10c';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -447,6 +447,8 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
   switch (r.state) {
     case S.IDLE: {
       if (canDetect && dist <= aggroR && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py)) { setState(mon, r, S.DETECT); break; }
+      // MASTER 10: PATRULHA / ESCOLTA — a "casa" anda (diretor da Arena); longe dela → caminha até lá
+      if (mon.route && homeD > 2.2) { r.routeWalk = true; setState(mon, r, S.RETURN, { route: true }); break; }
       if (clock >= r.patrolWaitUntil) {
         if (pickPatrolTarget(zone, r, mon, cfg)) setState(mon, r, S.PATROL);
         else r.patrolWaitUntil = clock + rand(cfg.patrolPauseMinMs, cfg.patrolPauseMaxMs);
@@ -558,16 +560,20 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
       const dx = hx - r.fx;
       const dy = hy - r.fy;
       const d = Math.hypot(dx, dy);
-      if (d < ARRIVE_EPS * 2) {
-        if (cfg.regenOnReturn) mon.hp = mon.hpMax || mon.hp;
+      // patrulha/escolta andando a rota continua vigiando (não é retirada)
+      if (mon.route && canDetect && dist <= aggroR && t > 400 && hasLineOfSight(zone, r.fx, r.fy, P.px, P.py) && r.routeWalk) { r.routeWalk = false; setState(mon, r, S.DETECT); break; }
+      if (d < ARRIVE_EPS * 2 || (mon.route && r.routeWalk && d < 1.6)) {
+        r.routeWalk = false;
+        if (cfg.regenOnReturn && !mon.route) mon.hp = mon.hpMax || mon.hp;
         r.patrolWaitUntil = clock + rand(cfg.patrolPauseMinMs, cfg.patrolPauseMaxMs);
         setState(mon, r, S.IDLE);
         logEvent('HOME', mon);
         break;
       }
       const dir = steerToward(zone, homeFlowFor(zone, r, mon), r.fx, r.fy, hx, hy);
-      r.wantVx = dir.x * cfg.returnSpeed;
-      r.wantVy = dir.y * cfg.returnSpeed;
+      const rs = r.routeWalk ? cfg.patrolSpeed * 1.5 : cfg.returnSpeed; // patrulha anda; retirada corre
+      r.wantVx = dir.x * rs;
+      r.wantVy = dir.y * rs;
       turnToward(r, Math.atan2(dir.x, -dir.y), cfg.turnSpeedDeg, dtSec);
       break;
     }
