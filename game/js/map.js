@@ -26,6 +26,14 @@ export function isWalkable(zone, x, y) {
   return true;
 }
 
+/** MASTER 10: o HERÓI passa pelo tile de árvore (colisão só no tronco, círculo pequeno — player-motion). Monstros/IA seguem por tile. */
+export function isWalkableHero(zone, x, y) {
+  const t = getTileType(zone, x, y);
+  if (t === 'tree' && zone.br) return true;
+  return isWalkable(zone, x, y);
+}
+export const TREE_TRUNK_R = 0.24;
+
 export function monstersInZone(state, zoneId) {
   return state.monstersAlive.filter((m) => m.alive && m.zone === zoneId);
 }

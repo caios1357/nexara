@@ -34,7 +34,7 @@ export function buildBrTerrain(zone, cfg, o) {
   //    Normais analíticas (diferença central da MESMA função de altura) → sem costura entre blocos. ——
   const FC = 32; const floorChunks = [];
   {
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.62, metalness: 0.35, envMapIntensity: 0.7 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.72, metalness: 0.12, envMapIntensity: 0.7, emissive: 0x18202a, emissiveIntensity: 1 }); // M10: menos metal = chão legível sem envMap
     const nv = new THREE.Vector3();
     for (let fy0 = 0; fy0 < H; fy0 += FC) for (let fx0 = 0; fx0 < W; fx0 += FC) {
       const fx1 = Math.min(W, fx0 + FC), fy1 = Math.min(H, fy0 + FC); const cw = fx1 - fx0, chh = fy1 - fy0; const NV = (cw + 1) * (chh + 1);
@@ -50,7 +50,7 @@ export function buildBrTerrain(zone, cfg, o) {
           const x = i + dx, y = j + dy; if (x < 0 || y < 0 || x >= W || y >= H) continue;
           const t = tileAt(x, y); const reg = regAt(x, y);
           tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[reg.id] : 0x2a3038));
-          const v = 0.86 + h32(x, y, 3) * 0.28; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
+          const v = (0.86 + h32(x, y, 3) * 0.28) * 1.4; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
         }
         n = n || 1; col[k * 3] = r / n; col[k * 3 + 1] = g / n; col[k * 3 + 2] = b / n;
       }
@@ -67,7 +67,7 @@ export function buildBrTerrain(zone, cfg, o) {
 
   // —— materiais (texturas existentes) ——
   const mats = {
-    wall: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('wall-rust.png', 1, 1.3), roughness: 0.72, metalness: 0.28 }),
+    wall: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('wall-rust.png', 1, 1.3), roughness: 0.75, metalness: 0.14 }),
     metal: new THREE.MeshStandardMaterial({ color: 0x8a96a4, map: o.loadTex('metal-plate.png', 1, 1), roughness: 0.45, metalness: 0.65 }),
     crate: new THREE.MeshStandardMaterial({ color: 0x6a5038, map: o.loadTex('metal-plate.png', 1, 1), roughness: 0.7, metalness: 0.15 }),
     rust: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('rust-detail.png', 1, 1), roughness: 0.85, metalness: 0.2 }),
@@ -99,7 +99,7 @@ export function buildBrTerrain(zone, cfg, o) {
   const dummy = new THREE.Object3D();
   const push = (kind, tx, ty, p, r, s, c) => {
     const ci = Math.min(CW - 1, Math.floor(tx / CH)) + Math.min(CHH - 1, Math.floor(ty / CH)) * CW;
-    const k = `${kind}|${ci}`; let b = buckets.get(k); if (!b) { b = []; buckets.set(k, b); } b.push({ p, r, s, c });
+    const k = `${kind}|${ci}`; let b = buckets.get(k); if (!b) { b = []; buckets.set(k, b); } b.push({ p, r, s, c, t: tx + ty * W });
   };
   const KIND = {
     wall: [geos.wall, mats.wall, true], pillar: [geos.pillar, mats.metal, true], cap: [geos.cap, mats.neon, false], neon: [geos.neon, mats.neon, false],
@@ -160,6 +160,7 @@ export function buildBrTerrain(zone, cfg, o) {
     }
   }
   const e = new THREE.Euler(); const qn = new THREE.Quaternion();
+  const treeInst = new Map(); // tile → instâncias (tronco/copa) para esconder entre câmera e herói
   for (const [k, list] of buckets) {
     const [kind, ci] = k.split('|'); const [geo, mat, shadow] = KIND[kind];
     const im = new THREE.InstancedMesh(geo, mat, list.length);
@@ -167,6 +168,7 @@ export function buildBrTerrain(zone, cfg, o) {
       dummy.position.set(it.p[0], it.p[1], it.p[2]); dummy.rotation.set(0, it.r, 0); dummy.scale.set(it.s[0], it.s[1], it.s[2]); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix);
       if (it.c !== 0xffffff || kind === 'wall' || kind === 'canopy' || kind === 'rock' || kind === 'neon' || kind === 'cap' || kind === 'bush') im.setColorAt(i, tmpC.setHex(it.c));
     });
+    if (kind === 'trunk' || kind === 'canopy' || kind === 'bush') list.forEach((it, i) => { let e = treeInst.get(it.t); if (!e) { e = []; treeInst.set(it.t, e); } const mm = new THREE.Matrix4(); im.getMatrixAt(i, mm); e.push({ im, i, m: mm }); });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
     im.castShadow = shadow; im.receiveShadow = kind !== 'neon' && kind !== 'cap';
     im.computeBoundingSphere(); im.name = `br-${kind}`;
@@ -312,7 +314,7 @@ export function buildBrTerrain(zone, cfg, o) {
   }
 
   const viewDist = o.tierName === 'low' ? 34 : o.tierName === 'medium' ? 44 : 62; // névoa esconde o corte
-  let visibleChunks = 0; let visibleFloor = 0;
+  let visibleChunks = 0; let visibleFloor = 0; const treeHidden = new Set(); const ZERO_M = new THREE.Matrix4().makeScale(0.0001, 0.0001, 0.0001); let treesFaded = 0;
   return {
     group, stats, markers, extraction, lampPos, lootSpots, lootState,
     updateDrops,
@@ -329,13 +331,22 @@ export function buildBrTerrain(zone, cfg, o) {
       view.hx = heroWX / T; view.hy = heroWZ / T; view.ok = Number.isFinite(camWX); if (view.ok) { view.cx = camWX / T; view.cy = camWZ / T; }
       const vd = viewDist + CH * T * 0.71; visibleChunks = 0;
       for (const c of chunks) { const on = Math.hypot(c.userData.cx - heroWX, c.userData.cz - heroWZ) < vd; c.visible = on; if (on) visibleChunks++; }
+      // árvores entre a câmera e o herói somem (não tampam o herói); voltam quando saem da linha
+      if (view.ok && treeInst.size) {
+        const want = new Set(); const ax = view.cx, ay = view.cy, bx = view.hx, by = view.hy; const L = Math.hypot(bx - ax, by - ay); const n = Math.ceil(L * 2) + 1;
+        for (let k = 0; k <= n; k++) { const f = k / n; if (f > 0.93) break; const px = ax + (bx - ax) * f, py = ay + (by - ay) * f;
+          for (let b2 = -1; b2 <= 1; b2++) for (let a2 = -1; a2 <= 1; a2++) { const tx = Math.floor(px + a2 * 0.6), ty = Math.floor(py + b2 * 0.6); const t = tx + ty * W; if (treeInst.has(t)) want.add(t); } }
+        for (const t of treeHidden) if (!want.has(t)) { for (const q of treeInst.get(t)) { q.im.setMatrixAt(q.i, q.m); q.im.instanceMatrix.needsUpdate = true; } treeHidden.delete(t); }
+        for (const t of want) if (!treeHidden.has(t)) { for (const q of treeInst.get(t)) { q.im.setMatrixAt(q.i, ZERO_M); q.im.instanceMatrix.needsUpdate = true; } treeHidden.add(t); }
+        treesFaded = treeHidden.size;
+      }
       visibleFloor = 0; for (const f of floorChunks) { const on = Math.hypot(f.userData.cx - heroWX, f.userData.cz - heroWZ) < viewDist * 1.6 + f.userData.rad; f.visible = on; if (on) visibleFloor++; }
       beamStats.faded = 0; beamStats.hidden = 0;
       for (const mk of markers) { const f = beamFade(mk.x, mk.y); if (f < 1) beamStats.faded++; mk.beam.visible = f > 0.01; if (!mk.beam.visible) beamStats.hidden++; mk.beam.material.opacity = (mk.beam.userData.base ??= mk.beam.material.opacity) * (0.85 + 0.15 * Math.sin(now * 0.002 + mk.x)) * f; }
       const glowPulse = 0.75 + 0.25 * Math.sin(now * 0.005);
       chestGlow.material.color.setScalar(glowPulse);
     },
-    get visibleChunks() { return visibleChunks; }, get floorChunks() { return floorChunks.length; }, mapW: W, mapH: H, get visibleFloor() { return visibleFloor; },
+    get visibleChunks() { return visibleChunks; }, get floorChunks() { return floorChunks.length; }, get treesFaded() { return treesFaded; }, get treeTiles() { return treeInst.size; }, mapW: W, mapH: H, get visibleFloor() { return visibleFloor; },
     chunkCount: chunks.length,
     dispose() {
       group.traverse((n) => { if (n.geometry && !Object.values(geos).includes(n.geometry)) n.geometry.dispose?.(); });

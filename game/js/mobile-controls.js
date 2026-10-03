@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261003m10a';
-import { pushLog } from './state.js?v=20261003m10a';
-import { isArenaState } from './arena.js?v=20261003m10a';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261003m10a';
-import { ICONS } from './icons.js?v=20261003m10a';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261003m10b';
+import { pushLog } from './state.js?v=20261003m10b';
+import { isArenaState } from './arena.js?v=20261003m10b';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261003m10b';
+import { ICONS } from './icons.js?v=20261003m10b';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.

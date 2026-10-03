@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261003m10a';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261003m10a';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261003m10a';
-import { addReputation } from '../../rules/reputation.js?v=20261003m10a';
-import { isWalkable, getTileType, monstersInZone } from './map.js?v=20261003m10a';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261003m10a';
-import { currentWeaponClass, magicMult } from './equipment.js?v=20261003m10a';
-import { reveal } from './arquivo.js?v=20261003m10a';
-import { checkEventReady } from './events.js?v=20261003m10a';
-import { getConfig } from './gameplay-config.js?v=20261003m10a';
-import { getStat, STATS } from './modifiers.js?v=20261003m10a';
+import { trainSkill } from '../../rules/skills.js?v=20261003m10b';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261003m10b';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261003m10b';
+import { addReputation } from '../../rules/reputation.js?v=20261003m10b';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261003m10b';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261003m10b';
+import { currentWeaponClass, magicMult } from './equipment.js?v=20261003m10b';
+import { reveal } from './arquivo.js?v=20261003m10b';
+import { checkEventReady } from './events.js?v=20261003m10b';
+import { getConfig } from './gameplay-config.js?v=20261003m10b';
+import { getStat, STATS } from './modifiers.js?v=20261003m10b';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -22,7 +22,7 @@ export function tryMove(state, dx, dy, opts = {}) {
   const zone = state._data.zones.zones.find((z) => z.id === state.zoneId);
   const nx = state.player.x + dx;
   const ny = state.player.y + dy;
-  if (!isWalkable(zone, nx, ny)) return false;
+  if (!(opts.ignoreMonsters ? isWalkableHero(zone, nx, ny) : isWalkable(zone, nx, ny))) return false;
   if (!opts.ignoreMonsters && monstersInZone(state, zone.id).some((m) => m.x === nx && m.y === ny)) return false;
   if (state._data.npcs.npcs.some((n) => n.zone === zone.id && n.x === nx && n.y === ny)) return false;
   state.player.x = nx;

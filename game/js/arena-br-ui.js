@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, isBrItemId } from './br-items.js?v=20261003m10a';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, isBrItemId } from './br-items.js?v=20261003m10b';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -148,12 +148,21 @@ export function createArenaBrUi(deps) {
       const t = z.map.legend[m.tiles[y][x]] || 'floor';
       const col = regCol[m.regionGrid[x + y * m.W]] || '#334';
       if (t === 'wall') g.fillStyle = '#0b0f14';
-      else if (t === 'tree') g.fillStyle = '#123a24';
+      else if (t === 'tree') g.fillStyle = '#1d5a36';
       else if (t === 'rock' || t === 'pillar' || t === 'crate') g.fillStyle = '#2a3036';
-      else { g.fillStyle = col; g.globalAlpha = t === 'street' ? 0.32 : 0.2; }
+      else { g.fillStyle = col; g.globalAlpha = t === 'street' ? 0.46 : 0.32; }
       g.fillRect(x * S, y * S, S, S); g.globalAlpha = 1;
     }
     baseCanvas = c; baseKey = key; return c;
+  }
+  /** MASTER 10 · FASE 3: névoa — só o que o herói já viu aparece em detalhe (esconderijos/atalhos não se revelam sozinhos) */
+  function fog(g, s, m, ox, oy, sc, tx0, ty0, tx1, ty1) {
+    const ex = s.br?.explored; if (!ex) return; const F = 4; const cw = Math.ceil(m.W / F);
+    if (ex.length !== cw * Math.ceil(m.H / F)) return;
+    g.fillStyle = 'rgba(4,7,11,0.76)';
+    const c0 = Math.max(0, Math.floor(tx0 / F)), c1 = Math.min(cw - 1, Math.floor(tx1 / F)), r0 = Math.max(0, Math.floor(ty0 / F)), r1 = Math.min(Math.ceil(m.H / F) - 1, Math.floor(ty1 / F));
+    for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) if (!ex[cx + cy * cw]) g.fillRect((cx * F - ox) * sc - 0.5, (cy * F - oy) * sc - 0.5, F * sc + 1, F * sc + 1);
+    stats.fogDraws = (stats.fogDraws || 0) + 1;
   }
   function drawLayer(g, s, v, ox, oy, sc, Wpx, Hpx, full) {
     const cfg = s._data.arena_br; const z = s._data.zones.zones.find((q) => q.id === s.zoneId); const m = z.brMap;
@@ -198,6 +207,7 @@ export function createArenaBrUi(deps) {
     const ox = p.x - span / 2, oy = p.y - span / 2;
     g.clearRect(0, 0, W, H); g.fillStyle = '#05080c'; g.fillRect(0, 0, W, H);
     g.drawImage(b, ox * 4, oy * 4, span * 4, span * 4, 0, 0, W, H);
+    { const m = s._data.zones.zones.find((q) => q.id === s.zoneId)?.brMap; if (m) fog(g, s, m, ox, oy, sc, Math.floor(ox), Math.floor(oy), Math.ceil(ox + span), Math.ceil(oy + span)); }
     drawLayer(g, s, v, ox, oy, sc, W, H, false);
     stats.minimapDraws++;
   }
@@ -206,6 +216,7 @@ export function createArenaBrUi(deps) {
     const g = cv.getContext('2d'); const m = s._data.zones.zones.find((q) => q.id === s.zoneId).brMap;
     const sc = Math.min(cv.width / m.W, cv.height / m.H);
     g.clearRect(0, 0, cv.width, cv.height); g.drawImage(b, 0, 0, m.W * sc, m.H * sc);
+    fog(g, s, m, 0, 0, sc, 0, 0, m.W, m.H);
     // nomes das regiões
     g.font = 'bold 13px system-ui, sans-serif'; g.textAlign = 'center';
     for (const r of s._data.arena_br.regioes) { g.fillStyle = r.cor; g.globalAlpha = 0.85; g.fillText(r.nome.toUpperCase(), ((r.x0 + r.x1) / 2) * sc, ((r.y0 + r.y1) / 2) * sc + 22); g.globalAlpha = 1; }

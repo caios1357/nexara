@@ -2,10 +2,10 @@
  * NEXARA — HUD da moeda MCB (🪙 MCB: N + popups) e tela ARSENAL (categorias, compra, equipar).
  * Toda a regra fica em mcb.js (compra atômica) e actions.js (equipItem/unequipItem — o mesmo do Inventário).
  */
-import { arsenalConfig, buyItem, isOwned, priceOf, basePriceOf, isTestPricing, testPriceLabel, ensureWallet } from './mcb.js?v=20261003m10a';
-import { attrLines } from './equipment.js?v=20261003m10a';
-import { equipItem, unequipItem } from './actions.js?v=20261003m10a';
-import { addToInventory } from '../../rules/loot.js?v=20261003m10a';
+import { arsenalConfig, buyItem, isOwned, priceOf, basePriceOf, isTestPricing, testPriceLabel, ensureWallet } from './mcb.js?v=20261003m10b';
+import { attrLines } from './equipment.js?v=20261003m10b';
+import { equipItem, unequipItem } from './actions.js?v=20261003m10b';
+import { addToInventory } from '../../rules/loot.js?v=20261003m10b';
 
 const RAR = { comum: ['COMUM', '#c8d4d0'], incomum: ['INCOMUM', '#4aa0ff'], raro: ['RARO', '#ffc24a'], epico: ['ÉPICO', '#b36bff'], lendario: ['LENDÁRIO', '#ffd34a'] };
 const ICON = { capacete: '⛑', armadura: '🛡', calca: '👖', espada: '🗡', arco: '🏹', cajado: '🪄' };

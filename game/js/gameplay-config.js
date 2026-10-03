@@ -202,6 +202,8 @@ export const DEFAULTS = Object.freeze({
     bloomThreshold: 0.8,
     /** Exposição do tone mapping ACES Filmic. */
     exposure: 1.1,
+    /** MASTER 10: luz da ARENA PRINCIPAL (mais clara para celular; noite neon mantida). exposureK multiplica `exposure`. */
+    brLight: { exposureK: 1.36, amb: 1.55, hemi: 1.85, dir: 1.25, fogK: 0.88, fogColorK: 0.95, horizon: '#1a3866', skyTop: '#03081a', skyMid: '#0c1f48' },
     /** Correção de cor teal/laranja (0..1) e vinheta (0..1). */
     gradeAmount: 0.55,
     vignette: 0.45,

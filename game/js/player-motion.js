@@ -15,11 +15,11 @@
  * Um único dono do movimento: este módulo. Sem loop próprio — é chamado pelo
  * rAF único do renderer ativo (update(state, dt, yaw, opts)).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10a';
-import { tryMove, maybeRespawn } from './actions.js?v=20261003m10a';
-import { isWalkable } from './map.js?v=20261003m10a';
-import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261003m10a';
-import { getStat, STATS } from './modifiers.js?v=20261003m10a';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10b';
+import { tryMove, maybeRespawn } from './actions.js?v=20261003m10b';
+import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261003m10b';
+import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261003m10b';
+import { getStat, STATS } from './modifiers.js?v=20261003m10b';
 
 const KEY_MAP = {
   w: 'f', arrowup: 'f',
@@ -126,7 +126,7 @@ export function createPlayerMotion() {
   function blockedTile(tx, ty) {
     const state = colState;
     const zone = colZone;
-    if (!isWalkable(zone, tx, ty)) return true;
+    if (!isWalkableHero(zone, tx, ty)) return true;
     // Tile onde o herói está (autoridade) nunca bloqueia a si mesmo
     if (tx === state.player.x && ty === state.player.y) return false;
     const npcs = state._data.npcs.npcs;
@@ -160,6 +160,24 @@ export function createPlayerMotion() {
       moveAxisY(pos, ny * push, r, blockedTile);
       // tira a componente da velocidade que entra no corpo
       const vn = vel.x * nx + vel.y * ny;
+      if (vn < 0) { vel.x -= vn * nx; vel.y -= vn * ny; }
+    }
+  }
+
+  /** MASTER 10: troncos de árvore = círculos pequenos (o herói desliza entre eles, não trava no tile inteiro) */
+  function resolveTrees(zone, r) {
+    if (!zone?.br) return;
+    const cx = Math.floor(pos.x), cy = Math.floor(pos.y);
+    for (let ty = cy - 1; ty <= cy + 1; ty++) for (let tx = cx - 1; tx <= cx + 1; tx++) {
+      if (getTileType(zone, tx, ty) !== 'tree') continue;
+      const bx = tx + 0.5, by = ty + 0.5; const dx = pos.x - bx, dy = pos.y - by; const min = r + TREE_TRUNK_R; const d2 = dx * dx + dy * dy;
+      if (d2 >= min * min) continue;
+      const d = Math.sqrt(d2); let nx = 1, ny = 0; if (d > 1e-5) { nx = dx / d; ny = dy / d; }
+      const push = min - d; moveAxisX(pos, nx * push, r, blockedTile); moveAxisY(pos, ny * push, r, blockedTile);
+      const vn = vel.x * nx + vel.y * ny;
+      // de frente para o tronco: escorrega para o lado (não trava atrás da árvore)
+      const tx2 = -ny, ty2 = nx; const vt = vel.x * tx2 + vel.y * ty2; const sp = Math.hypot(vel.x, vel.y);
+      if (vn < 0 && sp > 0.2 && Math.abs(vt) < sp * 0.5) { const sg = vt !== 0 ? Math.sign(vt) : ((tx + ty) & 1 ? 1 : -1); moveAxisX(pos, tx2 * sg * 0.06, r, blockedTile); moveAxisY(pos, ty2 * sg * 0.06, r, blockedTile); }
       if (vn < 0) { vel.x -= vn * nx; vel.y -= vn * ny; }
     }
   }
@@ -308,6 +326,7 @@ export function createPlayerMotion() {
       if (hitY) vel.y = 0;
     }
     resolveBodies(opts.bodies, cfg.playerRadius);
+    resolveTrees(zone, cfg.playerRadius);
     return finishStep(state, dt, yaw, opts, prevX, prevY, speed, cfg, snapped);
   }
 
@@ -335,6 +354,7 @@ export function createPlayerMotion() {
       }
     }
     if (!opts.dashThrough) resolveBodies(opts.bodies, r);
+    resolveTrees(zone, r);
     const ddt = Math.max(1e-3, dt);
     vel.x = (pos.x - prevX) / ddt;
     vel.y = (pos.y - prevY) / ddt;

@@ -10,33 +10,33 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261003m10a';
-import { buildArenaDressing } from './arena-dressing.js?v=20261003m10a';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261003m10a';
-import { createHeroModel } from './hero-model.js?v=20261003m10a';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261003m10a';
-import { getModelStats, setPresetModels } from './model-lib.js?v=20261003m10a';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261003m10a';
-import { createActionVfx } from './action-vfx.js?v=20261003m10a';
-import { createPassiveVfx } from './passive-vfx.js?v=20261003m10a';
-import { createFpsControls } from './fps-controls.js?v=20261003m10a';
-import { createViewmodel } from './viewmodel.js?v=20261003m10a';
-import { createDragonView } from './dragon-view.js?v=20261003m10a';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261003m10a';
-import { getSprite } from '../assets.js?v=20261003m10a';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261003m10a';
-import { createBossDragon } from './boss-dragon-view.js?v=20261003m10a';
-import { mergeStaticParts } from './merge-util.js?v=20261003m10a';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261003m10a';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261003m10a';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261003m10a';
-import { createPostFx } from './post-fx.js?v=20261003m10a';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261003m10a';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261003m10a';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261003m10a';
-import { groundAt, setGroundFn } from './ground.js?v=20261003m10a';
-import { buildBrTerrain } from './br-terrain.js?v=20261003m10a';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261003m10a';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261003m10b';
+import { buildArenaDressing } from './arena-dressing.js?v=20261003m10b';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261003m10b';
+import { createHeroModel } from './hero-model.js?v=20261003m10b';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261003m10b';
+import { getModelStats, setPresetModels } from './model-lib.js?v=20261003m10b';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261003m10b';
+import { createActionVfx } from './action-vfx.js?v=20261003m10b';
+import { createPassiveVfx } from './passive-vfx.js?v=20261003m10b';
+import { createFpsControls } from './fps-controls.js?v=20261003m10b';
+import { createViewmodel } from './viewmodel.js?v=20261003m10b';
+import { createDragonView } from './dragon-view.js?v=20261003m10b';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261003m10b';
+import { getSprite } from '../assets.js?v=20261003m10b';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261003m10b';
+import { createBossDragon } from './boss-dragon-view.js?v=20261003m10b';
+import { mergeStaticParts } from './merge-util.js?v=20261003m10b';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261003m10b';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261003m10b';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261003m10b';
+import { createPostFx } from './post-fx.js?v=20261003m10b';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261003m10b';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261003m10b';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261003m10b';
+import { groundAt, setGroundFn } from './ground.js?v=20261003m10b';
+import { buildBrTerrain } from './br-terrain.js?v=20261003m10b';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261003m10b';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -518,8 +518,9 @@ export function createFpsRenderer() {
       scene.fog = new THREE.FogExp2(new THREE.Color(horizon).multiplyScalar(0.8), (getConfig().graphics.fogDensity[key] ?? 0.022) * 0.9);
     }
 
-    if (sceneLights.amb) sceneLights.amb.intensity = key === 'e4' ? 0.38 : 0.48;
-    if (sceneLights.hemi) sceneLights.hemi.intensity = key === 'e4' ? 0.58 : 0.72;
+    if (sceneLights.amb) { sceneLights.amb.intensity = key === 'e4' ? 0.38 : 0.48; sceneLights.amb.color.setHex(0x6a8090); }
+    if (sceneLights.hemi) { sceneLights.hemi.intensity = key === 'e4' ? 0.58 : 0.72; sceneLights.hemi.color.setHex(0x5a7898); sceneLights.hemi.groundColor.setHex(0x3a3020); }
+    if (renderer) renderer.toneMappingExposure = getConfig().graphics.exposure; // ARENA PRINCIPAL usa exposição própria (mais clara)
 
     const fw = zone.map.width * TILE;
     const fh = zone.map.height * TILE;
@@ -821,12 +822,15 @@ export function createFpsRenderer() {
     fpsCam.setBlocker((tx, ty) => { const t = getTileType(zone, Math.floor(tx), Math.floor(ty)); return t === 'wall' || t === 'pillar'; });
     heroSt.init = false;
     // mesmo céu/névoa do Campo (paleta aprovada), névoa um pouco mais densa para esconder o fim dos blocos
-    const horizon = '#0a1e42';
-    scene.background = skyTex('#010309', '#05112c', horizon);
-    const fogD = tierName === 'low' ? 0.026 : tierName === 'medium' ? 0.021 : 0.017;
-    scene.fog = new THREE.FogExp2(new THREE.Color(horizon).multiplyScalar(0.8), fogD);
-    if (sceneLights.amb) sceneLights.amb.intensity = 0.8;
-    if (sceneLights.hemi) sceneLights.hemi.intensity = 1.05;
+    // MASTER 10 (Caio: "está escuro demais"): ARENA mais clara — exposição, ambiente/hemisfério e névoa mais clara (noite neon mantida)
+    const BL = getConfig().graphics?.brLight || {};
+    const horizon = BL.horizon || '#1a3866';
+    scene.background = skyTex(BL.skyTop || '#03081a', BL.skyMid || '#0c1f48', horizon);
+    const fogD = (tierName === 'low' ? 0.026 : tierName === 'medium' ? 0.021 : 0.017) * (BL.fogK ?? 0.88);
+    scene.fog = new THREE.FogExp2(new THREE.Color(horizon).multiplyScalar(BL.fogColorK ?? 0.95), fogD);
+    renderer.toneMappingExposure = getConfig().graphics.exposure * (BL.exposureK ?? 1.28);
+    if (sceneLights.amb) { sceneLights.amb.intensity = BL.amb ?? 1.3; sceneLights.amb.color.setHex(0x8aa2bc); }
+    if (sceneLights.hemi) { sceneLights.hemi.intensity = BL.hemi ?? 1.6; sceneLights.hemi.color.setHex(0x86a8d4); sceneLights.hemi.groundColor.setHex(0x4a4232); }
     const cfg = getState()?._data?.arena_br || {};
     brWorld = buildBrTerrain(zone, cfg, { TILE, ground: groundAt, loadTex: loadHdTex, tierName });
     worldRoot.add(brWorld.group);
@@ -841,7 +845,7 @@ export function createFpsRenderer() {
     brLights = [];
     for (let i = 0; i < n; i++) { const pl = new THREE.PointLight(i % 2 ? AMBER : ACCENT, 2.2, 16, 1.6); pl.position.set(-99, -99, -99); worldRoot.add(pl); brLights.push(pl); }
     brLightAt = 0;
-    brDir = new THREE.DirectionalLight(0xc0d0e0, 0.7);
+    brDir = new THREE.DirectionalLight(0xc8d8ea, getConfig().graphics?.brLight?.dir ?? 1.15);
     brDir.castShadow = renderer.shadowMap.enabled;
     brDir.shadow.mapSize.set(tierName === 'high' ? 1024 : 512, tierName === 'high' ? 1024 : 512);
     brDir.shadow.camera.near = 1; brDir.shadow.camera.far = 60;
@@ -2642,7 +2646,7 @@ export function createFpsRenderer() {
       precompile: { ...precompileInfo },
       botPool: Object.fromEntries(Object.entries(botPool).map(([k, v]) => [k, v.length])),
       scenery: dressing ? { ...dressing.stats } : null,
-      br: brWorld ? { ...brWorld.stats, chunks: brWorld.chunkCount, visibleChunks: brWorld.visibleChunks, floorChunks: brWorld.floorChunks, visibleFloor: brWorld.visibleFloor, mapW: brWorld.mapW, mapH: brWorld.mapH, lodHidden: brLod.hidden, lodShown: brLod.shown, pointLights: brLights.length, pickFlashes: brWorld.pickFlashes, teleOnTop } : null,
+      br: brWorld ? { ...brWorld.stats, chunks: brWorld.chunkCount, visibleChunks: brWorld.visibleChunks, floorChunks: brWorld.floorChunks, visibleFloor: brWorld.visibleFloor, treesFaded: brWorld.treesFaded, treeTiles: brWorld.treeTiles, mapW: brWorld.mapW, mapH: brWorld.mapH, lodHidden: brLod.hidden, lodShown: brLod.shown, pointLights: brLights.length, pickFlashes: brWorld.pickFlashes, teleOnTop } : null,
       archTeleSeen: { ...teleSeen },
       merge: { hero: hero?.mergeInfo || null, dragon: dragonView?.mergeInfo || null }
     }),

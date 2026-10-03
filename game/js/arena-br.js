@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003m10a';
-import { pushLog } from './state.js?v=20261003m10a';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10a';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10a';
-import { rollLootFor } from './br-items.js?v=20261003m10a';
+import { createArenaState } from './arena.js?v=20261003m10b';
+import { pushLog } from './state.js?v=20261003m10b';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10b';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10b';
+import { rollLootFor } from './br-items.js?v=20261003m10b';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -77,6 +77,7 @@ export function createArenaBr(deps) {
     br = st.br = {
       clock: 0, startedAt: Date.now(), kills: 0, killsBy: {}, mcbRun: 0, mcbStart: st.player.mcb || 0, itemsFound: [], best: null,
       lootOpened: [], lootOpenedDirty: [], drops: [], dropSeq: 1, region: null, visited: [],
+      explored: null, exploredN: 0, found: [], fogCell: -1,
       zone: { phase: 'wait', stage: -1, r: R0, fromR: R0, toR: R0, cx: c.zonaSegura.centro.x + 0.5, cy: c.zonaSegura.centro.y + 0.5, phaseAt: 0, warned: false, outside: false },
       event: null, nextEventAt: c.eventos?.primeiroMs ?? 60000, eventSeq: 0,
       extractionOpen: false, extract: { id: null, ms: 0 }, ended: null, dragonWarned: false, inDragon: false, bossEngaged: false, bossKilled: false,
@@ -305,6 +306,25 @@ export function createArenaBr(deps) {
     br.extract.ms += dtMs;
     if (br.extract.ms >= X.segundos * 1000) finish('extraido', { point: pt.id });
   }
+  // MASTER 10 · FASE 3: mapa revelado só onde o herói passou (névoa) + descoberta de esconderijos/atalhos (sem marcador antes)
+  const FOG = 4, FOG_R = 3; // célula de 4×4 tiles · revela ~12 tiles em volta
+  function updateExplore(p) {
+    const m = map(); if (!m) return;
+    const cw = Math.ceil(m.W / FOG), chh = Math.ceil(m.H / FOG);
+    if (!br.explored || br.explored.length !== cw * chh) { br.explored = new Uint8Array(cw * chh); br.exploredN = 0; br.fogCell = -1; }
+    const cx = Math.floor(p.x / FOG), cy = Math.floor(p.y / FOG); const cell = cx + cy * cw;
+    if (cell !== br.fogCell) {
+      br.fogCell = cell;
+      for (let b = -FOG_R; b <= FOG_R; b++) for (let a = -FOG_R; a <= FOG_R; a++) {
+        if (a * a + b * b > FOG_R * FOG_R + 1) continue; const x = cx + a, y = cy + b; if (x < 0 || y < 0 || x >= cw || y >= chh) continue;
+        const i = x + y * cw; if (!br.explored[i]) { br.explored[i] = 1; br.exploredN++; }
+      }
+    }
+    for (const a of m.areas || []) {
+      if (!a.hidden || br.found.includes(a.id)) continue;
+      if (p.x >= a.x0 - 0.5 && p.x <= a.x1 + 1.5 && p.y >= a.y0 - 0.5 && p.y <= a.y1 + 1.5) { br.found.push(a.id); note('secret_area', { id: a.id, kind: a.kind, region: a.region }); }
+    }
+  }
   function updateRegion(p) {
     const reg = brRegionAt(map(), cfg(), p.x, p.y);
     if (reg && reg.id !== br.region) {
@@ -327,7 +347,7 @@ export function createArenaBr(deps) {
     updateZone(p, dtMs);
     updateEvents(p);
     updateExtraction(p, dtMs);
-    updateRegion(p);
+    updateRegion(p); updateExplore(p);
   }
 
   /** actions.setMonsterKillHook (BR): contagem, drop por tier, alvo da caçada. */
@@ -379,7 +399,7 @@ export function createArenaBr(deps) {
       zone: { phase: z.phase, stage: z.stage + 1, stages: c.zonaSegura.estagios.length, r: +z.r.toFixed(2), toR: z.toR, cx: z.cx, cy: z.cy, msLeft: Math.round(zoneMsLeft), outside: z.outside },
       event: br.event ? { kind: br.event.kind, nome: br.event.nome, x: br.event.x, y: br.event.y, msLeft: Math.max(0, Math.round(br.event.until - br.clock)), uid: br.event.uid || null, done: !!br.event.done } : null,
       extractionOpen: br.extractionOpen, extractInMs: Math.max(0, c.extracao.liberaAposMs - br.clock), extract: { ...br.extract, need: c.extracao.segundos * 1000 },
-      opening: br.opening ? { ...br.opening, need: 450 } : null, drops: br.drops.length, inDragon: br.inDragon, ended: br.ended ? { ...br.ended } : null, bossKilled: br.bossKilled
+      opening: br.opening ? { ...br.opening, need: 450 } : null, drops: br.drops.length, explored: br.exploredN, exploredTotal: br.explored?.length || 0, found: br.found.slice(), inDragon: br.inDragon, ended: br.ended ? { ...br.ended } : null, bossKilled: br.bossKilled
     };
   }
   return {

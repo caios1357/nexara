@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10a';
-import { isWalkable, getTileType } from './map.js?v=20261003m10a';
-import { monsterAttackPlayer } from './actions.js?v=20261003m10a';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10a';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10a';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10b';
+import { isWalkable, getTileType } from './map.js?v=20261003m10b';
+import { monsterAttackPlayer } from './actions.js?v=20261003m10b';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10b';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10b';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',

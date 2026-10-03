@@ -117,7 +117,13 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) {
       if (get(x, y) !== 'g') continue;
       const n = vnoise(x, y, seed, 6);
-      const n2 = vnoise(x, y, seed + 11, 2.5); if ((n > 0.52 && R() < 0.7) || (n > 0.4 && n2 > 0.7 && R() < 0.5)) set(x, y, 'T'); else if (n < 0.2 && R() < 0.12) set(x, y, 'R'); else if (R() < 0.08) set(x, y, 'b');
+      const n2 = vnoise(x, y, seed + 11, 2.5); if ((n > 0.5 && R() < 0.5) || (n > 0.4 && n2 > 0.7 && R() < 0.35)) set(x, y, "T"); else if (n < 0.2 && R() < 0.1) set(x, y, 'R'); else if (R() < 0.07) set(x, y, 'b');
+    }
+    // Caio: "árvores demais / herói tem de passar entre elas" → nenhuma árvore encosta em outra (8 vizinhos): sempre há vão andável entre troncos
+    for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) {
+      if (get(x, y) !== 'T') continue;
+      const nb = [[-1, 0], [-1, -1], [0, -1], [1, -1]].some(([a2, b2]) => get(x + a2, y + b2) === 'T'); // varredura: só olha vizinhos já mantidos
+      if (nb) set(x, y, R() < 0.3 ? 'b' : 'g');
     }
     // caverna principal (posição de projeto) + túnel
     const cv = { x0: D(18), y0: Math.max(r.y0 + 1, D(2)), x1: D(31), y1: D(9) };
@@ -149,7 +155,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     }
     // trilhas: entradas → clareiras → boca da caverna (rede ligada)
     const hubs = [...gaps.filter((q) => q.ra === r.id), ...clear, caveMouth];
-    for (let i = 1; i < hubs.length; i++) { let best = hubs[0], bd = 1e9; for (let j = 0; j < i; j++) { const d = Math.hypot(hubs[j].x - hubs[i].x, hubs[j].y - hubs[i].y); if (d < bd) { bd = d; best = hubs[j]; } } carve([[hubs[i].x, hubs[i].y], [best.x, best.y]], 1); }
+    for (let i = 1; i < hubs.length; i++) { let best = hubs[0], bd = 1e9; for (let j = 0; j < i; j++) { const d = Math.hypot(hubs[j].x - hubs[i].x, hubs[j].y - hubs[i].y); if (d < bd) { bd = d; best = hubs[j]; } } carve([[hubs[i].x, hubs[i].y], [best.x, best.y]], 2); } // trilhas largas, sem árvore no caminho
     // local secreto principal (posição de projeto): bolsão de árvores com 1 abertura estreita
     const sx = D(29), sy = D(38);
     rect(sx - 3, sy - 3, sx + 3, sy + 3, 'T'); rect(sx - 1, sy - 1, sx + 2, sy + 2, 'g'); set(sx - 2, sy, 'g'); set(sx - 3, sy, 'g'); set(sx - 4, sy, 'g');
@@ -203,6 +209,97 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     }
     area('covil', r, dc.x - 6, dc.y - 6, dc.x + 6, dc.y + 6, { main: true });
   } }
+
+  // —— MASTER 10 · FASE 3: identidade extra por região, ESCONDERIJOS, ATALHOS secretos ——
+  const freeBox = (x0, y0, x1, y1, r) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (regionOf(x, y) !== r) return false; const c = get(x, y); if (c !== floorOf(r) && c !== '.' && c !== 'g' && c !== 'T' && c !== 'b' && c !== 'R' && c !== '~') return false; } return true; };
+  const inArea = (x, y, pad = 0) => areas.some((a) => x >= a.x0 - pad && x <= a.x1 + pad && y >= a.y0 - pad && y <= a.y1 + pad);
+  const nearGap = (x, y, d) => gaps.some((q) => Math.hypot(q.x - x, q.y - y) < d);
+  // ELITE: platôs de risco (mini-arenas de pilares com 2 aberturas) + barricadas de caixas = gargalos
+  { const r = byId.elite; if (r) {
+    const n = Math.max(2, Math.round(S * 1.5)); let made = 0;
+    for (let t = 0; t < n * 40 && made < n; t++) {
+      const x0 = ri(r.x0 + 3, r.x1 - 12), y0 = ri(r.y0 + 3, r.y1 - 10); const x1 = x0 + 8, y1 = y0 + 6;
+      if (inArea((x0 + x1) / 2, (y0 + y1) / 2, 6) || nearGap(x0 + 4, y0 + 3, 9) || !freeBox(x0, y0, x1, y1, r)) continue;
+      rect(x0, y0, x1, y1, '.'); box(x0, y0, x1, y1, 'P');
+      for (let x = x0 + 1; x < x1; x += 2) set(x, y0, '.'); for (let x = x0 + 2; x < x1; x += 2) set(x, y1, '.'); // colunata (passa entre os pilares)
+      set(x0, y0 + 3, '.'); set(x1, y0 + 3, '.'); set(x0 + 4, y0 + 3, 'C');
+      area('plato', r, x0, y0, x1, y1); made++;
+    }
+    const nb = Math.round(S * 3);
+    for (let i = 0; i < nb; i++) { const x = ri(r.x0 + 3, r.x1 - 8), y = ri(r.y0 + 3, r.y1 - 3); if (inArea(x, y, 2) || nearGap(x, y, 6)) continue; const hz = R() < 0.5; for (let k = 0; k < 5; k++) { if (k === 2) continue; const xx = hz ? x + k : x, yy = hz ? y : y + k; if (get(xx, yy) === '.') set(xx, yy, 'C'); } }
+  } }
+  // DRAGÃO: aproximação em CAMADAS — arcos de rocha em volta do covil com aberturas; sinais (marcas) para a fase visual
+  const dragonSigns = [];
+  { const r = byId.dragao; if (r) {
+    const half = Math.min(r.x1 - r.x0, r.y1 - r.y0) / 2; const R0 = half;
+    for (const [k, rad] of [[0, half * 0.5], [1, half * 0.78]]) {
+      const open = [ri(0, 7), (ri(0, 7) + 3) % 8, (ri(0, 7) + 5) % 8].map((o) => (o * Math.PI) / 4 + (k ? Math.PI / 8 : 0));
+      for (let a = 0; a < Math.PI * 2; a += 0.6 / rad) {
+        if (open.some((o) => Math.abs(Math.atan2(Math.sin(a - o), Math.cos(a - o))) < 0.32)) continue;
+        if (R() < 0.35) continue; // arco quebrado (cobertura, não muralha)
+        const x = Math.round(dc.x + Math.cos(a) * rad), y = Math.round(dc.y + Math.sin(a) * rad / 1.2);
+        if (regionOf(x, y) === r && get(x, y) === '.' && !nearGap(x, y, 5)) set(x, y, 'R');
+      }
+      area('aproximacao', r, Math.round(dc.x - rad), Math.round(dc.y - rad / 1.2), Math.round(dc.x + rad), Math.round(dc.y + rad / 1.2), { ring: k + 1 });
+    }
+    for (let i = 0; i < Math.round(10 * S); i++) { const a = R() * Math.PI * 2; const d = R0 * (0.35 + R() * 0.6); const x = Math.round(dc.x + Math.cos(a) * d), y = Math.round(dc.y + Math.sin(a) * d / 1.2); if (regionOf(x, y) === r && get(x, y) === '.') { dragonSigns.push({ x, y, d: +(d / R0).toFixed(2) }); if (R() < 0.5) set(x, y, '~'); } }
+  } }
+  // ESCONDERIJOS: câmara pequena fechada, entrada de 1 tile, baú dentro (não aparece no mapa até ser achado)
+  const hideouts = [];
+  for (const r of regions) {
+    if (r.id === 'dragao') continue;
+    const want = Math.max(1, Math.round(S - 0.5)); let made = 0;
+    for (let t = 0; t < want * 60 && made < want; t++) {
+      const x0 = ri(r.x0 + 3, r.x1 - 9), y0 = ri(r.y0 + 3, r.y1 - 8); const x1 = x0 + 5, y1 = y0 + 4;
+      if (inArea((x0 + x1) / 2, (y0 + y1) / 2, 4) || nearGap(x0, y0, 10) || Math.hypot(x0 - cfg.spawnHeroi.x, y0 - cfg.spawnHeroi.y) < 14 || hideouts.some((h) => Math.hypot(h.x - x0, h.y - y0) < 18)) continue;
+      if (!freeBox(x0 - 1, y0 - 1, x1 + 1, y1 + 1, r)) continue;
+      const wallC = r.id === 'floresta' ? 'T' : 'W';
+      rect(x0, y0, x1, y1, wallC); rect(x0 + 1, y0 + 1, x1 - 1, y1 - 1, floorOf(r));
+      const side = ri(0, 3); const ex = side < 2 ? ri(x0 + 1, x1 - 1) : side === 2 ? x0 : x1; const ey = side >= 2 ? ri(y0 + 1, y1 - 1) : side === 0 ? y0 : y1;
+      set(ex, ey, floorOf(r)); const ox = ex + (side === 2 ? -1 : side === 3 ? 1 : 0), oy = ey + (side === 0 ? -1 : side === 1 ? 1 : 0); set(ox, oy, floorOf(r));
+      if (wallC === 'W') structures.push({ kind: 'casa', x0, y0, x1, y1, h: 2.4 });
+      const id = `bau_esc_${r.id}_${made}`;
+      area('esconderijo', r, x0 + 1, y0 + 1, x1 - 1, y1 - 1, { hidden: true, chest: id });
+      chestsFixed.push({ x: x0 + 2 + ri(0, 1), y: y0 + 2, region: r.id, id, loot: r.loot, kind: 'bau', secret: true });
+      hideouts.push({ x: x0, y: y0 }); made++;
+    }
+    // regiões urbanas: casa/ruína/sala existente vira esconderijo (porta lacrada + parede quebrada nos fundos)
+    if (made < want) {
+      const cand = structures.filter((st) => ['casa', 'ruina', 'sala'].includes(st.kind) && regionOf(st.x0, st.y0) === r && st.x1 - st.x0 >= 4 && st.y1 - st.y0 >= 3 && !inArea((st.x0 + st.x1) / 2, (st.y0 + st.y1) / 2, 1) && Math.hypot(st.x0 - cfg.spawnHeroi.x, st.y0 - cfg.spawnHeroi.y) > 14 && !hideouts.some((h) => Math.hypot(h.x - st.x0, h.y - st.y0) < 16));
+      for (let t = 0; t < 40 && made < want && cand.length; t++) {
+        const st = cand.splice(ri(0, cand.length - 1), 1)[0];
+        const { x0, y0, x1, y1 } = st;
+        // lados com chão andável do lado de fora
+        const sides = [];
+        for (let x = x0 + 1; x < x1; x++) { if (!['W', 'P', 'C', 'T', 'R'].includes(get(x, y0 - 1))) sides.push([x, y0, x, y0 - 1]); if (!['W', 'P', 'C', 'T', 'R'].includes(get(x, y1 + 1))) sides.push([x, y1, x, y1 + 1]); }
+        for (let y = y0 + 1; y < y1; y++) { if (!['W', 'P', 'C', 'T', 'R'].includes(get(x0 - 1, y))) sides.push([x0, y, x0 - 1, y]); if (!['W', 'P', 'C', 'T', 'R'].includes(get(x1 + 1, y))) sides.push([x1, y, x1 + 1, y]); }
+        if (!sides.length) continue;
+        box(x0, y0, x1, y1, 'W'); rect(x0 + 1, y0 + 1, x1 - 1, y1 - 1, floorOf(r));
+        const e = sides[ri(0, sides.length - 1)]; set(e[0], e[1], '~');
+        st.kind = st.kind === 'ruina' ? 'ruina' : 'casa'; st.hideout = true;
+        const id = `bau_esc_${r.id}_${made}`;
+        area('esconderijo', r, x0 + 1, y0 + 1, x1 - 1, y1 - 1, { hidden: true, chest: id });
+        chestsFixed.push({ x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), region: r.id, id, loot: r.loot, kind: 'bau', secret: true });
+        hideouts.push({ x: x0, y: y0 }); made++;
+      }
+    }
+  }
+  // ATALHOS secretos: passagem de 1 tile com entulho atravessando o muro entre regiões vizinhas (não Elite/Dragão)
+  const shortcuts = [];
+  for (let i = 0; i < regions.length; i++) for (let j = 0; j < regions.length; j++) {
+    const a = regions[i], b = regions[j]; if (i === j || ['elite', 'dragao'].includes(a.id) || ['elite', 'dragao'].includes(b.id)) continue;
+    const right = b.x0 > a.x1 && b.x0 - a.x1 <= 6 && b.y0 <= a.y1 && b.y1 >= a.y0; const down = b.y0 > a.y1 && b.y0 - a.y1 <= 6 && b.x0 <= a.x1 && b.x1 >= a.x0;
+    if (!right && !down) continue;
+    for (let t = 0; t < 30; t++) {
+      const lo = right ? Math.max(a.y0, b.y0) + 4 : Math.max(a.x0, b.x0) + 4; const hi = right ? Math.min(a.y1, b.y1) - 4 : Math.min(a.x1, b.x1) - 4; if (hi <= lo) break;
+      const c = ri(lo, hi); const px = right ? a.x1 : c, py = right ? c : a.y1;
+      if (nearGap(px, py, 5)) continue;
+      if (right) for (let xx = a.x1 - 3; xx <= b.x0 + 3; xx++) set(xx, c, '~'); else for (let yy = a.y1 - 3; yy <= b.y0 + 3; yy++) set(c, yy, '~');
+      const sc = { x: px, y: py, ra: a.id, rb: b.id }; shortcuts.push(sc);
+      area('atalho', a, px - 1, py - 1, px + 1, py + 1, { hidden: true, to: b.id });
+      break;
+    }
+  }
 
   // passagens sempre livres
   for (const q of gaps) keepClear(q.x, q.y, 2);
@@ -309,6 +406,6 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   for (const r of regions) { delete r._towers; delete r._secret; delete r._cave; delete r._clear; delete r._lab; delete r._ec; }
   const tiles = g.map((row) => row.join(''));
   let walkN = 0; for (let i = 0; i < reach.length; i++) walkN += reach[i];
-  return { W, H, tiles, heights: hgt, regionGrid, structures, chests, crates, spawnPoints, pois, areas, gaps, reachable: reach, gerador: 2, escala: S,
+  return { W, H, tiles, heights: hgt, regionGrid, structures, chests, crates, spawnPoints, pois, areas, gaps, reachable: reach, gerador: 2, escala: S, shortcuts, dragonSigns,
     stats: { walkable: walkN, total: W * H, chests: chests.length, crates: crates.length, spawnPoints: spawnPoints.length, structures: structures.length, areas: areas.length, gaps: gaps.length / 2 } };
 }
