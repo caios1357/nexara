@@ -360,32 +360,39 @@
     }
   },
   "lootPorRisco": {
-    "_doc": "peso de raridade por nível de loot da região (risco ↑ recompensa ↑).",
+    "_doc": "M10 fase 5: raridade por nível de loot (comum na Periferia; raro/épico exige risco; lendário quase só no Dragão/elite).",
     "basico": {
-      "comum": 70,
-      "incomum": 26,
-      "raro": 4
+      "comum": 88,
+      "incomum": 11,
+      "raro": 1
     },
     "medio": {
-      "comum": 35,
-      "incomum": 45,
-      "raro": 18,
-      "epico": 2
+      "comum": 55,
+      "incomum": 40,
+      "raro": 5
     },
     "avancado": {
-      "incomum": 30,
-      "raro": 50,
-      "epico": 18,
-      "lendario": 2
+      "comum": 15,
+      "incomum": 55,
+      "raro": 27,
+      "epico": 3
     },
     "alto": {
-      "raro": 45,
-      "epico": 45,
-      "lendario": 10
+      "incomum": 35,
+      "raro": 50,
+      "epico": 13,
+      "lendario": 2
     },
     "lendario": {
-      "epico": 55,
-      "lendario": 45
+      "raro": 50,
+      "epico": 38,
+      "lendario": 12
+    },
+    "elite": {
+      "incomum": 20,
+      "raro": 52,
+      "epico": 25,
+      "lendario": 3
     }
   },
   "bausPorRegiao": {
@@ -405,9 +412,10 @@
     "dragao": 2
   },
   "dropMonstro": {
-    "comum": 0.12,
-    "forte": 0.25,
-    "elite": 1,
+    "_doc": "chance de drop por tier do monstro (elite/caçada usam a tabela 'elite'; RARO sempre dropa, tier da região +1)",
+    "comum": 0.1,
+    "forte": 0.2,
+    "elite": 0.6,
     "mini_chefe": 1,
     "chefe": 1
   },
@@ -523,5 +531,16 @@
       "y1": 34
     },
     "avisoDist": 16
+  },
+  "lootOrdem": [
+    "basico",
+    "medio",
+    "avancado",
+    "alto",
+    "lendario"
+  ],
+  "abandonados": {
+    "_doc": "caixas de equipamento abandonado (sempre 1 equipamento, tier da região +1)",
+    "porRegiao": 1
   }
 }

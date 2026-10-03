@@ -14,9 +14,9 @@
  * applyDamageToMonster (XP/loot/quests) — o Núcleo Divino (+15% dano de habilidade) vale aqui.
  * Todos os números em gameplay-config (actions / dodge / defense / specials).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10c';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10c';
-import { getStat, STATS } from './modifiers.js?v=20261003m10c';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003m10d';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10d';
+import { getStat, STATS } from './modifiers.js?v=20261003m10d';
 
 export const ACTION_STATES = Object.freeze({
   DEAD: 'DEAD', CRITICAL_ANIM: 'CRITICAL_ANIM', DODGE: 'DODGE', SPECIAL: 'SPECIAL',

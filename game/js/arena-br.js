@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003m10c';
-import { pushLog } from './state.js?v=20261003m10c';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10c';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10c';
-import { rollLootFor } from './br-items.js?v=20261003m10c';
+import { createArenaState } from './arena.js?v=20261003m10d';
+import { pushLog } from './state.js?v=20261003m10d';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10d';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10d';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261003m10d';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -65,7 +65,7 @@ export function createArenaBr(deps) {
   const cfg = () => deps.getData().arena_br;
   const map = () => st?._data.zones.zones.find((z) => z.id === BR_ZONE_ID)?.brMap || null;
   const R = () => br.rng();
-  const stats = { spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [], enc: { normal: 0, grupo: 0, enxame: 0, patrulha: 0, escolta: 0, raro: 0, emboscada: 0, ninho: 0 }, minSpawnDist: 999 };
+  const stats = { spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [], enc: { normal: 0, grupo: 0, enxame: 0, patrulha: 0, escolta: 0, raro: 0, emboscada: 0, ninho: 0 }, minSpawnDist: 999, lootRar: {} };
 
   function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
@@ -312,10 +312,12 @@ export function createArenaBr(deps) {
     br.lootOpened.push(spot.id); br.lootOpenedDirty.push(spot.id); stats.opened++;
     const chest = spot.kind === 'bau';
     const big = spot.loot === 'alto' || spot.loot === 'lendario';
-    const loots = rollLootFor(st, spot.loot, { equip: chest ? (big ? 2 : 1) : (R() < 0.4 ? 1 : 0), mats: chest ? [1, 2] : [1, 2], rnd: R });
+    const tierL = spot.hideout ? lootTierUp(st, spot.loot) : spot.loot; // esconderijo: tier da região +1
+    const loots = rollLootFor(st, tierL, { equip: spot.aband ? 1 : chest ? (big ? 2 : 1) : (R() < 0.4 ? 1 : 0), mats: chest ? [1, 2] : spot.aband ? [0, 1] : [1, 2], rnd: R });
+    for (const l of loots) if (l.kind === 'equip') { stats.lootRar[l.r] = (stats.lootRar[l.r] || 0) + 1; }
     spawnDrops(spot.x, spot.y, loots, spot.id);
     if (spot.secret && !br.secretFound && spot.id === 'bau_secreto') { br.secretFound = true; note('secret', { id: spot.id }); }
-    note('loot_open', { id: spot.id, kind: spot.kind, loot: spot.loot, n: loots.length, secret: !!spot.secret });
+    note('loot_open', { id: spot.id, kind: spot.kind, loot: tierL, n: loots.length, secret: !!spot.secret, aband: !!spot.aband, hideout: !!spot.hideout });
   }
   function updateLoot(p, dtMs) {
     const m = map();
@@ -477,8 +479,9 @@ export function createArenaBr(deps) {
     if (mon.nest) { const n = br.nests.find((q) => q.id === mon.nest); if (n) n.killed++; }
     const reg = brRegionAt(map(), cfg(), mon.x, mon.y);
     const tier = mon.elite || mon.hunted ? 'elite' : (def?.tier || 'comum');
-    const ch = cfg().dropMonstro?.[tier] ?? 0.1;
-    if (R() < ch) spawnDrops(mon.x, mon.y, rollLootFor(st, mon.elite || mon.hunted ? 'alto' : reg?.loot || 'basico', { equip: mon.elite || mon.hunted ? 1 : (R() < 0.5 ? 1 : 0), mats: [0, 1], rnd: R }), `mon_${mon.uid}`);
+    const ch = mon.rare || mon.hunted ? 1 : (cfg().dropMonstro?.[tier] ?? 0.1); // RARO e alvo da caçada sempre dropam
+    const lt = mon.elite || mon.hunted ? 'elite' : mon.rare ? lootTierUp(st, reg?.loot || 'basico') : (reg?.loot || 'basico');
+    if (R() < ch) { const loots = rollLootFor(st, lt, { equip: mon.elite || mon.hunted || mon.rare ? 1 : (R() < 0.5 ? 1 : 0), mats: [0, 1], rnd: R }); for (const l of loots) if (l.kind === 'equip') stats.lootRar[l.r] = (stats.lootRar[l.r] || 0) + 1; spawnDrops(mon.x, mon.y, loots, `mon_${mon.uid}`); }
     if (br.event?.kind === 'cacada' && br.event.uid === mon.uid && !br.event.done) {
       br.event.done = true; br.event.until = br.clock + 1500;
       deps.credit?.(br.event.bonus || 0, 'cacada');
@@ -530,6 +533,7 @@ export function createArenaBr(deps) {
       advance(ms, p) { if (br) { br.clock += ms; br.nextSpawnAt = Math.min(br.nextSpawnAt, br.clock); } if (p) { br.noFps = true; try { update(16, p); } finally { if (br) br.noFps = false; } } },
       openNearest(p) { const m = map(); let best = null; let bd = 1e9; for (const s of [...m.chests, ...m.crates]) { if (br.lootOpened.includes(s.id)) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } } if (best) openLoot(best); return best; },
       forceEvent(kind) { if (!br) return; br.event = null; br.eventSeq = Object.keys(cfg().eventos.tipos).filter((k) => cfg().eventos.tipos[k].ativo).indexOf(kind); br.nextEventAt = br.clock; },
+      open(id) { const sp = [...map().chests, ...map().crates].find((q) => q.id === id); if (sp) openLoot(sp); return sp || null; },
       spawn(id, x, y, extra) { return spawnAt(id, x, y, extra || {}); },
       drops: () => br?.drops || [],
       setDensity(k) { if (br) { br.densLock = k == null ? null : Math.max(0, Math.min(1, k)); if (k != null) br.densK = br.densLock; } return br?.densK; },

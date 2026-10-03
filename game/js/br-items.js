@@ -11,8 +11,8 @@
  * com preço de teste 0 isso viraria MCB infinito); venda remove o item de TODOS os estados espelhados no mesmo
  * passo; uid vendido entra em player.brVendidos (não vende 2×); preço com teto sobre o preço real de compra.
  */
-import { basePriceOf } from './mcb.js?v=20261003m10c';
-import { statSheet, compareSheets } from './vestiario.js?v=20261003m10c';
+import { basePriceOf } from './mcb.js?v=20261003m10d';
+import { statSheet, compareSheets } from './vestiario.js?v=20261003m10d';
 
 const RAR = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
 let uidSeq = 0;
@@ -57,6 +57,13 @@ export function bagCount(s) { return bagEntries(s).length; }
 
 /** Sorteio ponderado {a: peso}. */
 function pickW(w, rnd) { const ent = Object.entries(w || {}).filter(([, v]) => v > 0); const tot = ent.reduce((a, [, v]) => a + v, 0); let x = rnd() * tot; for (const [k, v] of ent) { x -= v; if (x <= 0) return k; } return ent[ent.length - 1]?.[0]; }
+
+/** M10: sobe N níveis na escada de loot (basico→medio→avancado→alto→lendario). */
+export function lootTierUp(s, tier, n = 1) {
+  const cfg = cfgOf(s); const ord = cfg?.lootOrdem || ['basico', 'medio', 'avancado', 'alto', 'lendario'];
+  const i = ord.indexOf(tier); if (i < 0) return tier;
+  return ord[Math.min(ord.length - 1, i + n)];
+}
 
 /** Loot de um baú/caixa/monstro: equipamento (raridade pelo risco) + materiais. Não altera estado. */
 export function rollLootFor(s, lootTier, { equip = 1, mats = [1, 2], rnd = Math.random } = {}) {

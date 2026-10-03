@@ -7,8 +7,8 @@
  * AudioContext dos efeitos (sfx.js) → volume funciona também no iOS. Sem contexto, cai em element.volume.
  * Faixa com peso ~0 por >3 s é pausada (bateria/CPU). Aba escondida → pausa tudo.
  */
-import { getConfig } from './gameplay-config.js?v=20261003m10c';
-import { getAudioContext } from './sfx.js?v=20261003m10c';
+import { getConfig } from './gameplay-config.js?v=20261003m10d';
+import { getAudioContext } from './sfx.js?v=20261003m10d';
 
 const BASE = new URL('../../assets/audio/music/', import.meta.url);
 const TRACKS = {

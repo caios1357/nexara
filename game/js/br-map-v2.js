@@ -260,7 +260,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
       if (wallC === 'W') structures.push({ kind: 'casa', x0, y0, x1, y1, h: 2.4 });
       const id = `bau_esc_${r.id}_${made}`;
       area('esconderijo', r, x0 + 1, y0 + 1, x1 - 1, y1 - 1, { hidden: true, chest: id });
-      chestsFixed.push({ x: x0 + 2 + ri(0, 1), y: y0 + 2, region: r.id, id, loot: r.loot, kind: 'bau', secret: true });
+      chestsFixed.push({ x: x0 + 2 + ri(0, 1), y: y0 + 2, region: r.id, id, loot: r.loot, kind: 'bau', secret: true, hideout: true });
       hideouts.push({ x: x0, y: y0 }); made++;
     }
     // regiões urbanas: casa/ruína/sala existente vira esconderijo (porta lacrada + parede quebrada nos fundos)
@@ -279,7 +279,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
         st.kind = st.kind === 'ruina' ? 'ruina' : 'casa'; st.hideout = true;
         const id = `bau_esc_${r.id}_${made}`;
         area('esconderijo', r, x0 + 1, y0 + 1, x1 - 1, y1 - 1, { hidden: true, chest: id });
-        chestsFixed.push({ x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), region: r.id, id, loot: r.loot, kind: 'bau', secret: true });
+        chestsFixed.push({ x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), region: r.id, id, loot: r.loot, kind: 'bau', secret: true, hideout: true });
         hideouts.push({ x: x0, y: y0 }); made++;
       }
     }
@@ -350,6 +350,21 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const got = pick(r, want, cfg.diretor?.espacoMinEntrePontos || 6, 1);
     if (got.length < want * 0.6) got.push(...pick(r, Math.ceil(want * 0.6) - got.length, 4, 0));
     for (const p of got) spawnPoints.push(p);
+  }
+  // EQUIPAMENTO ABANDONADO: caixa encostada numa parede/árvore, longe das demais (sempre 1 equipamento, tier +1)
+  const ORD = cfg.lootOrdem || ['basico', 'medio', 'avancado', 'alto', 'lendario'];
+  const up = (t) => ORD[Math.min(ORD.length - 1, Math.max(0, ORD.indexOf(t)) + 1)];
+  const solidA = (x, y) => inb(x, y) && solid(get(x, y));
+  for (const r of regions) {
+    if (r.id === 'dragao' || r.id === 'elite') continue;
+    const nA = Math.max(1, Math.round((cfg.abandonados?.porRegiao ?? 1) * S)); let made = 0;
+    for (let t = 0; t < 400 && made < nA; t++) {
+      const x = ri(r.x0 + 2, r.x1 - 2), y = ri(r.y0 + 2, r.y1 - 2);
+      if (!walkable(x, y) || !(solidA(x + 1, y) || solidA(x - 1, y) || solidA(x, y + 1) || solidA(x, y - 1))) continue;
+      if (Math.hypot(x - sp.x, y - sp.y) < 16 || !farFrom(x, y, 4)) continue;
+      const p = { x, y, region: r.id }; taken.push(p);
+      crates.push({ ...p, id: `cx_aband_${r.id}_${made}`, loot: up(r.loot), kind: 'caixa', aband: true }); made++;
+    }
   }
   const ec = byId.elite?._ec || { x: D(82), y: D(61) };
   chests.push(...chestsFixed);
