@@ -80,3 +80,10 @@
 .nx-outros-title { color: var(--muted, #8aa); font-size: 0.72rem; letter-spacing: 0.1em; text-align: left; }
 .nx-vol-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; } .nx-vol-row input { flex: 1; }
 @media (max-height: 520px) { .br-minimap { width: 104px; height: 104px; } .br-loot-pop { top: 118px; } }
+
+/* M10 fase 6: resumo da troca, nota de inferior, bolsa cheia */
+.br-pop-sum { margin-top: 2px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; }
+.br-pop-sum.up { color: #5dff8a; } .br-pop-sum.down { color: #ff8a7a; } .br-pop-sum.eq { color: #ffd34a; }
+.br-pop-note { margin-top: 4px; color: #ffb0a4; font-size: 0.7rem; }
+.br-pop-card.full { border-color: #ff8a7a; }
+.br-pop-actions button.danger { background: rgba(160, 40, 30, 0.55); border-color: #ff6a5a; color: #fff; }

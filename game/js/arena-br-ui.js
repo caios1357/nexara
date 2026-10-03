@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, isBrItemId } from './br-items.js?v=20261003m10d';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261003m10e';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -61,8 +61,9 @@ export function createArenaBrUi(deps) {
     if (e.code === 'KeyM' && !e.repeat && !panel) { toggleBigMap(); e.preventDefault(); }
     if (popCur && !e.repeat) {
       if (e.code === 'Digit1') { popAct('equip'); e.preventDefault(); }
-      else if (e.code === 'Digit2') { popAct('keep'); e.preventDefault(); }
+      else if (e.code === 'Digit2') { popAct(popCur.full ? 'back' : 'keep'); e.preventDefault(); }
       else if (e.code === 'Digit3') { popAct('sell'); e.preventDefault(); }
+      else if (e.code === 'Digit4') { popAct('discard'); e.preventDefault(); }
     }
   }
 
@@ -238,29 +239,44 @@ export function createArenaBrUi(deps) {
     popCur = popQueue.shift() || null;
     if (!popCur) { popup.classList.add('hidden'); return; }
     const s = deps.getState(); const { def, uid, full } = popCur;
-    const cmp = uid ? compareWithEquipped(s, uid) : null;
-    popCur.cmp = cmp;
-    const V = { melhor: ['↑ MELHOR', 'up'], inferior: ['↓ INFERIOR', 'down'], equivalente: ['= EQUIVALENTE', 'eq'] }[cmp?.verdict || 'equivalente'];
-    const rows = (cmp?.rows || []).filter((r) => r.delta || r.text).slice(0, 5).map((r) => r.text ? `<li><span>${esc(r.nome)}</span><b>${esc(r.antes)} → ${esc(r.depois)}</b></li>` : `<li class="${r.delta > 0 ? 'up' : 'down'}"><span>${esc(r.nome)}</span><b>${r.delta > 0 ? '+' : ''}${r.delta}${esc(r.un || '')}</b></li>`).join('');
-    const price = uid ? sellPriceOfEntry(s, { item_id: uid, qty: 1 }) : 0;
-    popup.innerHTML = `<div class="br-pop-card" style="--rar:${rarColor(def.rarity)}">
+    const cmp = popCur.cmp || (uid ? compareWithEquipped(s, uid) : null);
+    popCur.cmp = cmp; popCur.confirm = false;
+    const verdict = cmp?.verdict || 'equivalente';
+    const V = { melhor: ['↑ MELHOR', 'up'], inferior: ['↓ INFERIOR', 'down'], equivalente: ['= EQUIVALENTE', 'eq'] }[verdict];
+    const sum = compareSummary(cmp);
+    const rows = (cmp?.rows || []).filter((r) => r.text || (r.delta && !sum)).slice(0, 5).map((r) => r.text ? `<li><span>${esc(r.nome)}</span><b>${esc(r.antes)} → ${esc(r.depois)}</b></li>` : `<li class="${r.delta > 0 ? 'up' : 'down'}"><span>${esc(r.nome)}</span><b>${r.delta > 0 ? '+' : ''}${r.delta}${esc(r.un || '')}</b></li>`).join('');
+    const price = full ? (popCur.price || 0) : uid ? sellPriceOfEntry(s, { item_id: uid, qty: 1 }) : 0;
+    const n = bagEntries(s).length, cap = bagCap(s);
+    // M10: item INFERIOR não oferece EQUIPAR; bolsa cheia: VENDER / DESCARTAR (confirma) / VOLTAR (fica no chão)
+    const btn = (a, label, k, primary) => `<button type="button" data-a="${a}"${primary ? ' class="primary"' : ''}>${label} <kbd>${k}</kbd></button>`;
+    const acts = full
+      ? btn('sell', `VENDER +${price}`, 3, true) + btn('discard', 'DESCARTAR', 4, false) + btn('back', 'VOLTAR', 2, false)
+      : (verdict !== 'inferior' ? btn('equip', 'EQUIPAR', 1, verdict === 'melhor') : '') + btn('keep', 'GUARDAR', 2, verdict === 'equivalente') + btn('sell', `VENDER +${price}`, 3, verdict === 'inferior');
+    popup.innerHTML = `<div class="br-pop-card${full ? ' full' : ''}" style="--rar:${rarColor(def.rarity)}" data-mode="${full ? 'full' : verdict}">
       <div class="br-pop-head"><span class="br-pop-rar">${esc(RAR_N[def.rarity] || def.rarity)}</span><b>${esc(def.name)}</b></div>
       <div class="br-pop-verdict ${V[1]}" data-verdict="${cmp?.verdict || ''}">${V[0]}<small>${cmp?.equipped ? ` vs ${esc(cmp.equipped)}` : ' (espaço vazio)'}</small></div>
+      ${sum ? `<div class="br-pop-sum ${V[1]}">${esc(sum)}</div>` : ''}
       ${rows ? `<ul class="br-pop-rows">${rows}</ul>` : ''}
-      ${full ? '<div class="br-pop-full">Bolsa cheia. Equipe ou venda — ou deixe no chão.</div>' : ''}
-      <div class="br-pop-actions">
-        <button type="button" data-a="equip" class="primary">EQUIPAR <kbd>1</kbd></button>
-        <button type="button" data-a="keep">${full ? 'DEIXAR' : 'GUARDAR'} <kbd>2</kbd></button>
-        <button type="button" data-a="sell">VENDER +${price} <kbd>3</kbd></button>
-      </div></div>`;
+      ${verdict === 'inferior' && !full ? '<div class="br-pop-note">Pior que o equipado — guarde ou venda.</div>' : ''}
+      ${full ? `<div class="br-pop-full">Bolsa cheia (${n}/${cap}). Venda ou descarte este item — ou VOLTAR e ele fica no chão.</div>` : ''}
+      <div class="br-pop-actions">${acts}</div></div>`;
     popup.querySelectorAll('button[data-a]').forEach((b) => { b.onclick = () => popAct(b.dataset.a); });
     popup.classList.remove('hidden'); popup.classList.remove('pop-in'); void popup.offsetWidth; popup.classList.add('pop-in');
-    stats.popups++;
-    popTimer = setTimeout(() => popAct('keep', true), 9000); // ignorado → fica guardado (ou no chão, se cheia)
+    stats.popups++; if (full) stats.fullPopups = (stats.fullPopups || 0) + 1;
+    armTimer();
   }
+  // ignorado → fica guardado (ou, com bolsa cheia, continua no chão — nada é apagado sem confirmação)
+  function armTimer(ms = 9000) { clearTimeout(popTimer); popTimer = setTimeout(() => popAct(popCur?.full ? 'back' : 'keep', true), ms); }
   function popAct(a, auto = false) {
     if (!popCur) return;
-    const cur = popCur; stats.popupActions[a] = (stats.popupActions[a] || 0) + 1;
+    if (!auto && !popup.querySelector(`button[data-a="${a}"]`)) return; // ação não oferecida (ex.: EQUIPAR num item inferior)
+    const cur = popCur;
+    if (a === 'discard' && !cur.confirm) { // 1º toque: pede confirmação
+      cur.confirm = true; const b = popup.querySelector('button[data-a="discard"]');
+      if (b) { b.innerHTML = 'CONFIRMAR? <kbd>4</kbd>'; b.classList.add('danger'); }
+      stats.discardAsk = (stats.discardAsk || 0) + 1; armTimer(); return;
+    }
+    stats.popupActions[a] = (stats.popupActions[a] || 0) + 1;
     const r = deps.onPopupAction?.(a, cur, auto);
     if (r?.msg) deps.toast?.(r.msg);
     nextPop();

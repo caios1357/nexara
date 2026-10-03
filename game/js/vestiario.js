@@ -7,12 +7,12 @@
  *  - comparação antes→depois (Dano/Defesa/Vida/Crítico…) ao passar o mouse/selecionar um item
  *  - até 3 LOADOUTS salvos em player.loadouts (vai no save com o player)
  */
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261003m10d';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261003m10d';
-import { sumEquipAttrs, weaponClassOf, ALL_SLOTS } from './equipment.js?v=20261003m10d';
-import { getEquippedStats } from './state.js?v=20261003m10d';
-import { isOwned, arsenalConfig } from './mcb.js?v=20261003m10d';
-import { paintItemIcons } from './ui.js?v=20261003m10d';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261003m10e';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261003m10e';
+import { sumEquipAttrs, weaponClassOf, ALL_SLOTS } from './equipment.js?v=20261003m10e';
+import { getEquippedStats } from './state.js?v=20261003m10e';
+import { isOwned, arsenalConfig } from './mcb.js?v=20261003m10e';
+import { paintItemIcons } from './ui.js?v=20261003m10e';
 
 export const VEST_SLOTS = [['helmet', 'CAPACETE', '⛑'], ['armor', 'ARMADURA', '🛡'], ['pants', 'CALÇA', '👖'], ['weapon', 'ARMA', '⚔'], ['body', 'ROUPA', '👕'], ['accessory', 'ACESSÓRIO', '💍']];
 export const MAX_LOADOUTS = 3;
@@ -228,7 +228,7 @@ export function createVestiario(deps) {
     open = true;
     document.querySelectorAll('#vst [data-vst-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.vstTab; msg = ''; render(); }; });
     styleEd = mountHeroStyleEditor(document.getElementById('vst-style-box'), { styleId: s.player.heroStyle, custom: s.player.heroCustom || {}, preview: false, onChange: (v) => { if (styleEd) applyStyle(v); } });
-    import('./fps/hero-preview.js?v=20261003m10d').then((m) => {
+    import('./fps/hero-preview.js?v=20261003m10e').then((m) => {
       const cv = document.getElementById('vst-canvas'); if (!cv || !open) return;
       try { preview = m.createHeroPreview(cv, { interactive: true }); refreshModel(); } catch (e) { console.warn('[vestiário] prévia 3D indisponível', e); }
       document.getElementById('vst-front').onclick = () => preview?.front();

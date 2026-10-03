@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003m10d';
-import { pushLog } from './state.js?v=20261003m10d';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10d';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10d';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261003m10d';
+import { createArenaState } from './arena.js?v=20261003m10e';
+import { pushLog } from './state.js?v=20261003m10e';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10e';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10e';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261003m10e';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -527,12 +527,15 @@ export function createArenaBr(deps) {
   }
   return {
     start, stop, update, isActive, onKill, onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
+    /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
+    removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */
     debug: {
       advance(ms, p) { if (br) { br.clock += ms; br.nextSpawnAt = Math.min(br.nextSpawnAt, br.clock); } if (p) { br.noFps = true; try { update(16, p); } finally { if (br) br.noFps = false; } } },
       openNearest(p) { const m = map(); let best = null; let bd = 1e9; for (const s of [...m.chests, ...m.crates]) { if (br.lootOpened.includes(s.id)) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } } if (best) openLoot(best); return best; },
       forceEvent(kind) { if (!br) return; br.event = null; br.eventSeq = Object.keys(cfg().eventos.tipos).filter((k) => cfg().eventos.tipos[k].ativo).indexOf(kind); br.nextEventAt = br.clock; },
+      dropLoot(loot, x, y) { if (!br) return null; spawnDrops(x - 0.5, y - 0.5, [loot], 'dbg_loot'); const d = br.drops[br.drops.length - 1]; d.x = x; d.y = y; d.at = br.clock - 1000; return d.id; },
       open(id) { const sp = [...map().chests, ...map().crates].find((q) => q.id === id); if (sp) openLoot(sp); return sp || null; },
       spawn(id, x, y, extra) { return spawnAt(id, x, y, extra || {}); },
       drops: () => br?.drops || [],

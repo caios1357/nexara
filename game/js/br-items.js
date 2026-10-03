@@ -11,8 +11,8 @@
  * com preço de teste 0 isso viraria MCB infinito); venda remove o item de TODOS os estados espelhados no mesmo
  * passo; uid vendido entra em player.brVendidos (não vende 2×); preço com teto sobre o preço real de compra.
  */
-import { basePriceOf } from './mcb.js?v=20261003m10d';
-import { statSheet, compareSheets } from './vestiario.js?v=20261003m10d';
+import { basePriceOf } from './mcb.js?v=20261003m10e';
+import { statSheet, compareSheets } from './vestiario.js?v=20261003m10e';
 
 const RAR = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
 let uidSeq = 0;
@@ -164,5 +164,30 @@ export function compareWithEquipped(s, uid) {
   const eqId = s.equipment?.[d.equip_slot];
   const verdict = !eqId ? 'melhor' : score > 0.4 ? 'melhor' : score < -0.4 ? 'inferior' : 'equivalente';
   return { verdict, score: +score.toFixed(2), rows, slot: d.equip_slot, equipped: eqId ? s._items[eqId]?.name || eqId : null };
+}
+/** M10: prévia de um loot que AINDA não está na bolsa (bolsa cheia): def + comparação + preço. Não altera o estado. */
+export function previewLoot(s, loot) {
+  if (!s || loot?.kind !== 'equip') return null;
+  const PK = '__brpeek'; const def = brDefFor(s, PK, { b: loot.b, r: loot.r }); if (!def) return null;
+  const had = s._items[PK]; s._items[PK] = def;
+  let cmp = null; try { cmp = compareWithEquipped(s, PK); } finally { if (had) s._items[PK] = had; else delete s._items[PK]; }
+  const base = s._items[loot.b];
+  return { def: { ...def, id: null }, cmp, price: base ? sellPriceOfDef(s, { ...base, arsenal: false, rarity: loot.r, brItem: true, brBase: base.id }) : 0 };
+}
+/** M10: vende um loot do CHÃO direto no Mercado Negro (bolsa cheia) — mesmo preço da venda pela bolsa. */
+export function sellLootDirect(states, loot) {
+  const list = uniq(states); const ref = list[0]; if (!ref) return { ok: false, reason: 'sem jogo' };
+  const pv = previewLoot(ref, loot); const price = pv?.price || 0;
+  if (!(price > 0)) { stats.refusedSell++; return { ok: false, reason: 'Não vendável.' }; }
+  const after = (ref.player.mcb || 0) + price;
+  for (const q of list) { q.player.mcb = after; q.player.mcbTotal = (q.player.mcbTotal || 0) + price; q.player.brVendas = (q.player.brVendas || 0) + 1; }
+  stats.sold++; stats.soldMcb += price; stats.soldDirect = (stats.soldDirect || 0) + 1;
+  return { ok: true, price, mcb: after };
+}
+/** M10: resumo curto da troca ("+7 Ataque · +2 Defesa"). */
+export function compareSummary(cmp) {
+  const rows = (cmp?.rows || []).filter((r) => !r.text && r.delta);
+  if (!rows.length) return '';
+  return rows.slice(0, 4).map((r) => `${r.delta > 0 ? '+' : ''}${r.delta}${r.un || ''} ${r.nome}`).join(' · ');
 }
 export const RARITY_ORDER = RAR;
