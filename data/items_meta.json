@@ -1,0 +1,44 @@
+{
+  "_doc": "MODELOS3D/itens: categoria/raridade/visual dos itens ANTIGOS (items.json dos itens antigos fica intacto; o loader mescla isto)",
+  "meta": {
+    "item_lamina_sucata": {
+      "category": "espada",
+      "rarity": "comum",
+      "visual": {
+        "model": "style"
+      }
+    },
+    "item_pistola_parafuso": {
+      "category": "arco",
+      "rarity": "comum",
+      "visual": {
+        "model": "1H_Crossbow",
+        "glow": 16756810
+      }
+    },
+    "item_colete_chapa": {
+      "category": "armadura",
+      "rarity": "comum",
+      "visual": {
+        "plates": true,
+        "color": 6974058
+      }
+    },
+    "item_lamina_sombra": {
+      "category": "espada",
+      "rarity": "raro",
+      "visual": {
+        "model": "1H_Sword",
+        "glow": 10119935
+      }
+    },
+    "item_colete_tunel": {
+      "category": "armadura",
+      "rarity": "incomum",
+      "visual": {
+        "plates": true,
+        "color": 4872810
+      }
+    }
+  }
+}

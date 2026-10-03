@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NEXARA — Fase 02 · FPS</title>
+  <!-- Bloco 6b: tela inteira — Android usa a Fullscreen API; iPhone abre em tela inteira pela Tela de Início -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#05080d" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NEXARA" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/app-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/app-192.png" />
+  <link rel="stylesheet" href="css/theme.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/ui.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/mobile-controls.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/hud-modern.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/inventory.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/hero-style.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/vestiario.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/arsenal.css?v=20261003arena" />
+  <link rel="stylesheet" href="css/arena-br.css?v=20261003arena" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div id="title-screen" class="screen">
+    <div class="logo">NEXARA</div>
+    <div class="subtitle">ANO 2847 — FASE 02 · CONTROLE</div>
+    <div id="build-stamp" style="margin:0.4rem 0 0.8rem;padding:0.35rem 0.7rem;display:inline-block;border:1px solid #3ecfbf;color:#3ecfbf;font-size:0.75rem;letter-spacing:0.06em;border-radius:4px">BUILD 20261003arena · ARENA</div>
+    <div class="menu-col panel nx-main-menu">
+      <!-- ARENA PRINCIPAL: menu com 4 entradas; os modos antigos continuam em ARENA → Outros modos (nada removido) -->
+      <button class="primary nx-main" id="btn-main-arena" type="button">⚔ ARENA</button>
+      <div id="arena-panel" class="nx-arena-panel hidden">
+        <button class="primary" id="btn-br-entrar" type="button">ENTRAR NA ARENA PRINCIPAL</button>
+        <button id="btn-outros-modos" type="button" aria-expanded="false">Outros modos ▸</button>
+        <div id="menu-outros" class="nx-outros hidden">
+          <div class="nx-outros-title">OUTROS MODOS (antigos — mantidos)</div>
+          <button class="primary" id="btn-novo">Novo Jogo</button>
+          <button id="btn-continuar">Continuar</button>
+          <button id="btn-arena" class="primary">Arena de Teste</button>
+          <button id="btn-campo" class="primary">Campo de Ascensão</button>
+          <button id="btn-fullscreen-menu" class="nx-fs-menu" type="button" aria-pressed="false">TELA INTEIRA</button>
+          <button id="btn-menu-personagem">Personagem</button>
+          <button id="btn-menu-inv">Inventário</button>
+          <button id="btn-menu-quests">Quests</button>
+          <button id="btn-menu-skills">Skills</button>
+          <button id="btn-menu-arquivo">Arquivo Nexara</button>
+          <button id="btn-menu-arsenal">Arsenal</button>
+          <button id="btn-google-login" class="nx-login-google" type="button" disabled aria-disabled="true" title="Login com Google ainda não implementado">Entrar com Google — Em desenvolvimento</button>
+        </div>
+      </div>
+      <button class="nx-main" id="btn-main-mercado" type="button">🏴 MERCADO NEGRO</button>
+      <button class="nx-main" id="btn-menu-vestiario">🛡 VESTIÁRIO</button>
+      <button class="nx-main" id="btn-menu-cfg">⚙ CONFIGURAÇÕES</button>
+      <div id="profile-line" class="nx-profile-line">Perfil local</div>
+    </div>
+    <p style="margin-top:1.5rem;color:var(--muted);font-size:0.8rem">Dragões = reatores vivos · Magia + tech · Megacidade</p>
+    <p style="margin-top:0.4rem;color:var(--muted);font-size:0.72rem">Desktop: clique no canvas → pointer-lock · WASD move (Shift corre) · Esc libera. Celular: joystick esq. move · arraste na metade direita para olhar · ATAQUE.</p>
+  </div>
+
+  <div id="create-screen" class="screen hidden">
+    <div class="panel char-create">
+      <h2 style="color:var(--accent);margin-bottom:0.8rem">Criar Personagem</h2>
+      <label>Nome<br /><input id="char-name" maxlength="20" placeholder="Viajante" /></label>
+      <p style="margin:0.8rem 0 0.4rem;color:var(--accent2)">Estilo do herói</p>
+      <div id="create-style-box"></div>
+      <p style="margin:0.8rem 0 0.4rem;color:var(--accent2)">Raça</p>
+      <div id="race-list"></div>
+      <div class="close-row" style="margin-top:1rem">
+        <button id="btn-create-back">Voltar</button>
+        <button class="primary" id="btn-start">Entrar em G6</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-screen" class="hidden hud-mmorpg mobile-compact">
+    <div id="top-bar">
+      <div class="hud-identity">
+        <canvas id="hud-portrait" width="48" height="48" aria-hidden="true"></canvas>
+        <div class="hud-id-text">
+          <span id="hud-name" style="color:var(--accent2)">—</span>
+          <span id="hud-level">Nv.1</span>
+        </div>
+      </div>
+      <div class="hud-stats">
+        <div class="bar-group">HP <div class="bar hp" id="hp-bar"><span style="width:100%"></span></div> <span id="hud-hp-text">—</span></div>
+        <div class="bar-group">Nexa <div class="bar nexa" id="nexa-bar"><span style="width:100%"></span></div> <span id="hud-nexa-text">—</span></div>
+        <div class="bar-group">XP
+          <div class="bar xp" id="xp-bar"><span style="width:0%"></span></div>
+          <span id="hud-xp-text">0/100</span>
+        </div>
+        <div class="bar-group" id="hud-skills"></div>
+      </div>
+      <div id="hud-mcb" class="hud-mcb" title="Moeda MCB">🪙 MCB: <b id="hud-mcb-n">0</b></div>
+      <button type="button" id="btn-fullscreen" class="hud-menu-fab hud-fs-fab" aria-label="Tela inteira" title="Tela inteira" aria-pressed="false">⛶</button>
+      <button type="button" id="btn-hud-menu" class="hud-menu-fab" aria-label="Abrir menu" title="Menu">☰</button>
+    </div>
+    <div id="main-area">
+      <div id="canvas-wrap">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        <div id="blackout-overlay">
+          <div class="msg" id="bo-msg1"></div>
+          <div class="msg" id="bo-msg2"></div>
+        </div>
+        <div id="vision-overlay"></div>
+        <div id="log-overlay" class="log-box hud-log">
+          <h3>Log</h3>
+          <div id="log"></div>
+        </div>
+        <aside id="side-panel" class="hud-float-info">
+          <div class="minimap-box">
+            <h3>Minimapa · <span id="zone-label">G6</span></h3>
+            <canvas id="minimap" width="240" height="120"></canvas>
+          </div>
+          <div class="quest-box">
+            <h3>Quest Atual</h3>
+            <div id="current-quest">—</div>
+          </div>
+          <div class="hotkeys-box">
+            <h3>Atalhos</h3>
+            <div id="hotkeys" style="font-size:0.72rem;color:var(--muted)"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <div id="bottom-bar">
+      <div id="skill-bar" aria-label="Skills 1-6">
+        <div class="skill-slot" data-slot="1"><span class="sk-key">1</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+        <div class="skill-slot" data-slot="2"><span class="sk-key">2</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+        <div class="skill-slot" data-slot="3"><span class="sk-key">3</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+        <div class="skill-slot" data-slot="4"><span class="sk-key">4</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+        <div class="skill-slot" data-slot="5"><span class="sk-key">5</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+        <div class="skill-slot" data-slot="6"><span class="sk-key">6</span><canvas width="36" height="36"></canvas><span class="sk-name">—</span></div>
+      </div>
+    </div>
+
+    <div id="hud-drawer" class="hud-drawer" aria-hidden="true">
+      <div class="hud-drawer-backdrop" id="hud-drawer-backdrop"></div>
+      <aside class="hud-drawer-panel" id="hud-drawer-panel" role="dialog" aria-label="Menu do jogo">
+        <div class="hud-drawer-head">
+          <span>NEXARA</span>
+          <button type="button" id="btn-hud-drawer-close" class="hud-drawer-close" aria-label="Fechar">✕</button>
+        </div>
+        <div id="util-bar">
+          <button id="btn-char">Personagem</button>
+          <button id="btn-inv">Inventário</button>
+          <button id="btn-arsenal">Arsenal</button>
+          <button id="btn-vestiario">Vestiário</button>
+          <button id="btn-quests">Quests</button>
+          <button id="btn-skills">Skills</button>
+          <button id="btn-passivas">Passivas</button>
+          <button id="btn-arquivo">Arquivo Nexara</button>
+          <button id="btn-cfg">Configurações</button>
+          <button id="btn-save" class="primary">Salvar</button>
+          <button id="btn-menu">Menu</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay hidden"></div>
+  <div id="mcb-pop-layer" class="mcb-pop-layer" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js?v=20261003arena"></script>
+</body>
+</html>

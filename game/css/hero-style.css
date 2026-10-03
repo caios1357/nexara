@@ -1,0 +1,28 @@
+/* ESTILO DO HERÓI — escolha + editor (retrato e paisagem, toque) */
+.hse { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.hse-prev { position: relative; height: 230px; border-radius: 12px; background: radial-gradient(circle at 50% 70%, #10304a, #050a12 70%); border: 1px solid #1e3a50; overflow: hidden; }
+.hse-prev canvas { width: 100%; height: 100%; display: block; }
+.hse-prev-n { position: absolute; left: 10px; bottom: 8px; font-weight: 800; letter-spacing: 0.06em; text-shadow: 0 0 8px currentColor; }
+.hse-styles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.hse-style { min-height: 56px; text-align: left; padding: 6px 8px; border-radius: 9px; border: 2px solid #22384a; background: #0a131c; color: #d8e6f0; touch-action: manipulation; }
+.hse-style b { display: block; font-size: 12px; color: var(--sc); letter-spacing: 0.04em; }
+.hse-style small { font-size: 10.5px; color: #8aa0b4; }
+.hse-style.on { border-color: var(--sc); box-shadow: 0 0 12px color-mix(in srgb, var(--sc) 50%, transparent); }
+.hse-lore { margin: 0; font-size: 12px; color: #8aa0b4; font-style: italic; }
+.hse-row { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 6px; }
+.hse-row > span { font-size: 11px; font-weight: 700; color: #5ad8ff; letter-spacing: 0.05em; }
+.hse-sw { display: flex; flex-wrap: wrap; gap: 6px; }
+.hse-sw button { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; border: 2px solid #0a131c; touch-action: manipulation; }
+.hse-sw button.on { border-color: #fff; transform: scale(1.08); }
+.hse-tg { display: flex; flex-wrap: wrap; gap: 6px; }
+.hse-tg button { min-height: 40px; padding: 0 10px; border-radius: 8px; font-size: 11.5px; touch-action: manipulation; }
+.hse-tg button.on { background: #12465a; border-color: #39f0ff; color: #fff; }
+.hse-reset { justify-self: start; min-height: 36px; font-size: 11px; }
+.modal.nx-hse-modal { width: min(96vw, 860px); max-height: 92vh; display: flex; flex-direction: column; }
+.modal.nx-hse-modal .modal-body { overflow: auto; }
+@media (orientation: landscape) and (min-width: 640px) {
+  .hse { grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1.2fr); }
+  .hse-prev { height: auto; min-height: 260px; }
+  .hse-side { display: flex; flex-direction: column; gap: 8px; }
+}
+@media (orientation: portrait) { .hse-side { display: flex; flex-direction: column; gap: 8px; } }

@@ -1,0 +1,221 @@
+{
+  "_doc": "ARSENAL + MCB — ÚNICO lugar de configuração: recompensa MCB por tipo de inimigo, mapa inimigo→tipo, preços, atributos e classes de arma. Valores editáveis sem mexer no código.",
+  "testMode": true,
+  "priceMultiplier": 0,
+  "testLabel": "GRÁTIS (teste)",
+  "_testModeDoc": "MODO TESTE: testMode:true → preço = preço real × priceMultiplier (0 = grátis). Os preços reais continuam em 'precos'. Para voltar aos preços reais: testMode:false.",
+  "testGrantMcb": 100000,
+  "testGrantId": "grant-teste-20261003-100k",
+  "_testGrantDoc": "CRÉDITO DE TESTE: soma testGrantMcb ao saldo UMA vez por perfil local (marca em player.mcbGrants + localStorage nexara_mcb_grants_v1), registrado no log do jogo; o save regrava a assinatura da carteira. 0 = desligado. Trocar testGrantId = novo crédito.",
+  "moeda": {
+    "id": "mcb",
+    "nome": "MCB",
+    "icone": "🪙"
+  },
+  "recompensaMcb": {
+    "comum": 1,
+    "forte": 3,
+    "elite": 10,
+    "mini_chefe": 25,
+    "chefe": 100
+  },
+  "tipoInimigo": {
+    "_doc": "id do monstro → tipo de recompensa. Sem entrada: usa o campo 'tier' do monstro (comum/elite/mini_chefe/chefe); 'boss' = chefe.",
+    "mon_ca_couraca": "forte",
+    "mon_ca_ceifador": "forte",
+    "mon_ca_bombardeiro": "forte",
+    "mon_ca_executor": "elite",
+    "mon_ca_guardiao": "mini_chefe",
+    "boss_gigante_verde": "chefe",
+    "mon_br_brutamonte": "forte",
+    "mon_br_mutante": "forte",
+    "mon_br_predador": "forte",
+    "mon_br_guardiao": "elite",
+    "mon_br_elite": "elite"
+  },
+  "popup": {
+    "comum": "+{n} MCB",
+    "forte": "FORTE DERROTADO +{n} MCB",
+    "elite": "ELITE DERROTADO +{n} MCB",
+    "mini_chefe": "VARGOS DERROTADO +{n} MCB",
+    "chefe": "GIGANTE VERDE DERROTADO +{n} MCB"
+  },
+  "precos": {
+    "basico": 50,
+    "intermediario": 150,
+    "avancado": 400
+  },
+  "categorias": [
+    {
+      "id": "capacete",
+      "nome": "Capacetes",
+      "slot": "helmet"
+    },
+    {
+      "id": "armadura",
+      "nome": "Armaduras",
+      "slot": "armor"
+    },
+    {
+      "id": "calca",
+      "nome": "Calças",
+      "slot": "pants"
+    },
+    {
+      "id": "espada",
+      "nome": "Espadas",
+      "slot": "weapon"
+    },
+    {
+      "id": "arco",
+      "nome": "Arcos",
+      "slot": "weapon"
+    },
+    {
+      "id": "cajado",
+      "nome": "Cajados",
+      "slot": "weapon"
+    }
+  ],
+  "familias": {
+    "infernal": {
+      "nome": "Infernal",
+      "foco": "dano / crítico / ofensivo",
+      "cor": "#ff3a1e",
+      "vfx": 16726558
+    },
+    "draconico": {
+      "nome": "Dracônico",
+      "foco": "dano + resistência / defesa (poder do dragão)",
+      "cor": "#2cffc8",
+      "vfx": 2948040
+    },
+    "cibernetico": {
+      "nome": "Cibernético",
+      "foco": "velocidade / precisão / energia / recarga",
+      "cor": "#3aa8ff",
+      "vfx": 3844351
+    }
+  },
+  "atributos": {
+    "_doc": "chave → rótulo, unidade e EFEITO REAL no combate (modifiers.js / calcDamage). Novos atributos: acrescentar aqui + mapear em equipment.js.",
+    "dano": {
+      "nome": "Dano",
+      "un": "",
+      "efeito": "ataque fixo somado ao golpe (calcDamage)"
+    },
+    "defesa": {
+      "nome": "Defesa",
+      "un": "",
+      "efeito": "defesa fixa contra o dano recebido (calcDamage)"
+    },
+    "vida": {
+      "nome": "Vida",
+      "un": "",
+      "efeito": "HP máximo +N (MAX_HP)"
+    },
+    "critico": {
+      "nome": "Crítico",
+      "un": "%",
+      "efeito": "chance de crítico +N pontos (CRIT_CHANCE)"
+    },
+    "velocidade": {
+      "nome": "Velocidade",
+      "un": "%",
+      "efeito": "velocidade de movimento +N% (MOVE_SPEED)"
+    },
+    "precisao": {
+      "nome": "Precisão",
+      "un": "%",
+      "efeito": "dano crítico +N% (CRIT_MULT)"
+    },
+    "poderMagico": {
+      "nome": "Poder mágico",
+      "un": "%",
+      "efeito": "dano dos ataques/especiais do CAJADO +N%"
+    },
+    "resistencia": {
+      "nome": "Resistência",
+      "un": "%",
+      "efeito": "dano recebido −N% (DAMAGE_TAKEN)"
+    },
+    "energia": {
+      "nome": "Energia",
+      "un": "/s",
+      "efeito": "Nexa regenerada +N por segundo (NEXA_REGEN)"
+    },
+    "recarga": {
+      "nome": "Recarga",
+      "un": "%",
+      "efeito": "recarga dos especiais −N% (SPECIAL_COOLDOWN)"
+    }
+  },
+  "armas": {
+    "_doc": "Classe da arma principal. espada = combo corpo a corpo atual (intocado). arco/cajado = projétil real (dano ao chegar).",
+    "arco": {
+      "projetil": {
+        "velocidade": 22,
+        "raio": 0.35,
+        "alcance": 6,
+        "meioAnguloDeg": 24
+      },
+      "especiais": {
+        "golpe_poderoso": {
+          "nome": "TIRO CARREGADO",
+          "modo": "projetil",
+          "range": 7.0,
+          "halfAngleDeg": 16,
+          "dmgMult": 2.6
+        },
+        "ataque_area": {
+          "nome": "CHUVA DE FLECHAS",
+          "modo": "area_alvo",
+          "alcanceCentro": 5.0,
+          "radius": 1.9,
+          "dmgMult": 1.3
+        },
+        "suprema": {
+          "nome": "TEMPESTADE DE FLECHAS",
+          "modo": "area_alvo",
+          "alcanceCentro": 5.5,
+          "radius": 3.0,
+          "dmgMult": 3.6
+        }
+      }
+    },
+    "cajado": {
+      "projetil": {
+        "velocidade": 15,
+        "raio": 0.45,
+        "alcance": 5.5,
+        "meioAnguloDeg": 26,
+        "splashRaio": 1.1,
+        "splashMult": 0.5
+      },
+      "especiais": {
+        "golpe_poderoso": {
+          "nome": "RAIO ARCANO",
+          "modo": "projetil",
+          "range": 6.5,
+          "halfAngleDeg": 18,
+          "dmgMult": 2.4,
+          "splashRaio": 1.4
+        },
+        "ataque_area": {
+          "nome": "NOVA ARCANA",
+          "modo": "area_alvo",
+          "alcanceCentro": 4.5,
+          "radius": 2.2,
+          "dmgMult": 1.5
+        },
+        "suprema": {
+          "nome": "CATACLISMO NEXA",
+          "modo": "area_alvo",
+          "alcanceCentro": 5.0,
+          "radius": 3.4,
+          "dmgMult": 3.9
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1117 @@
+{
+  "monsters": [
+    {
+      "id": "mon_bot_combate_mk1",
+      "name": "Bot de Combate Mk.1",
+      "zone": "zone_g6",
+      "hp": 40,
+      "ataque": 8,
+      "defesa": 4,
+      "velocidade": 4,
+      "xp": 25,
+      "skill_train": "corte",
+      "description": "Unidade de combate enferrujada. Ainda obedece a protocolos antigos.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.55,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.7,
+          "qty": [
+            1,
+            3
+          ]
+        },
+        {
+          "item_id": "item_plaqueta_bot",
+          "chance": 1.0,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.5,
+          "qty": [
+            2,
+            6
+          ]
+        }
+      ],
+      "spawn_tiles": [
+        {
+          "x": 4,
+          "y": 8
+        },
+        {
+          "x": 6,
+          "y": 8
+        }
+      ],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_bot_patrulha_mk1",
+      "name": "Bot de Patrulha Mk.1",
+      "zone": "zone_g6",
+      "hp": 28,
+      "ataque": 5,
+      "defesa": 3,
+      "velocidade": 6,
+      "xp": 15,
+      "skill_train": "distancia",
+      "description": "Patrulha a beira da periferia. Sensores fracos, mas atentos.",
+      "loot_table": [
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.4,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_plaqueta_bot",
+          "chance": 0.85,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.45,
+          "qty": [
+            1,
+            4
+          ]
+        }
+      ],
+      "spawn_tiles": [
+        {
+          "x": 7,
+          "y": 8
+        },
+        {
+          "x": 3,
+          "y": 7
+        }
+      ],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_rato_metal",
+      "name": "Rato de Metal",
+      "zone": "zone_g6",
+      "hp": 12,
+      "ataque": 3,
+      "defesa": 1,
+      "velocidade": 9,
+      "xp": 5,
+      "skill_train": "corte",
+      "description": "Praga mecânica das sarjetas. Quase inofensivo sozinho.",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.5,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.3,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_drone_sucata",
+      "name": "Drone Sucata",
+      "zone": "zone_g6",
+      "hp": 18,
+      "ataque": 4,
+      "defesa": 2,
+      "velocidade": 8,
+      "xp": 10,
+      "skill_train": "hack_runico",
+      "description": "Drone caído reativado por runas ruins. EM DESENVOLVIMENTO como spawn ativo.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.3,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_rato_nexa",
+      "name": "Rato Nexa",
+      "zone": "zone_e4",
+      "hp": 18,
+      "ataque": 5,
+      "defesa": 2,
+      "velocidade": 10,
+      "xp": 12,
+      "skill_train": "corte",
+      "description": "Praga do subsolo. Olhos fosforescentes de fragmento barato.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.55,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.4,
+          "qty": [
+            1,
+            4
+          ]
+        },
+        {
+          "item_id": "item_chip_sem_nome",
+          "chance": 0.35,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [
+        {
+          "x": 5,
+          "y": 8
+        },
+        {
+          "x": 8,
+          "y": 8
+        }
+      ],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_mut_sombra",
+      "name": "Mutante Sombra",
+      "zone": "zone_e4",
+      "hp": 45,
+      "ataque": 9,
+      "defesa": 4,
+      "velocidade": 5,
+      "xp": 30,
+      "skill_train": "protecao",
+      "description": "Humanoide deformado pela sucata viva. Move-se pelos túneis ilegais.",
+      "loot_table": [
+        {
+          "item_id": "item_pele_mutante",
+          "chance": 0.7,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            3
+          ]
+        },
+        {
+          "item_id": "item_chip_sem_nome",
+          "chance": 0.9,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.45,
+          "qty": [
+            3,
+            8
+          ]
+        }
+      ],
+      "spawn_tiles": [
+        {
+          "x": 6,
+          "y": 8
+        }
+      ],
+      "tier": "comum"
+    },
+    {
+      "id": "mon_sucata_viva",
+      "name": "Sucata Viva",
+      "zone": "zone_e4",
+      "hp": 32,
+      "ataque": 7,
+      "defesa": 6,
+      "velocidade": 3,
+      "xp": 20,
+      "skill_train": "hack_runico",
+      "description": "Aglomerado de metal que se move sozinho. Cheira a ozônio podre.",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.8,
+          "qty": [
+            2,
+            4
+          ]
+        },
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_doc_sangue_verde",
+          "chance": 0.25,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.35,
+          "qty": [
+            2,
+            5
+          ]
+        }
+      ],
+      "spawn_tiles": [
+        {
+          "x": 7,
+          "y": 8
+        }
+      ],
+      "tier": "comum"
+    },
+    {
+      "id": "boss_gigante_verde",
+      "name": "Gigante Verde",
+      "zone": "zone_arena",
+      "hp": 100,
+      "ataque": 14,
+      "defesa": 6,
+      "velocidade": 3,
+      "xp": 400,
+      "skill_train": "corte",
+      "tier": "chefe",
+      "boss": true,
+      "description": "Dragão inimigo colossal da Arena de Teste: carapaça negra, escamas verde-escuras e um núcleo de Nexa verde no peito. HP real = HP máximo do herói × multiplicador (gameplay-config.arenaBoss).",
+      "loot_table": [
+        {
+          "item_id": "item_escama_gigante_verde",
+          "chance": 1.0,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 1.0,
+          "qty": [
+            2,
+            3
+          ]
+        },
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 1.0,
+          "qty": [
+            3,
+            5
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_frasco_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_kit_reparo",
+          "chance": 0.35,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": []
+    },
+    {
+      "id": "mon_ca_lamina",
+      "name": "Ceifa-Runa",
+      "zone": "zone_campo_ascensao",
+      "hp": 58,
+      "ataque": 9,
+      "defesa": 4,
+      "velocidade": 4,
+      "xp": 30,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "A",
+      "description": "ARQUÉTIPO A — corpo a corpo. Persegue, espera a vez em grupo e corta em cone (telegraph vermelho no chão).",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.4,
+          "qty": [
+            1,
+            4
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⚔",
+      "cor": "#ff4a3a",
+      "visual": "A",
+      "lore": "Cultistas do Circuito Rubro que gravaram runas de corte nos próprios braços-lâmina. Caçam em bando e esperam a vez de golpear."
+    },
+    {
+      "id": "mon_ca_vespa",
+      "name": "Faísca Espectral",
+      "zone": "zone_campo_ascensao",
+      "hp": 34,
+      "ataque": 8,
+      "defesa": 2,
+      "velocidade": 7,
+      "xp": 28,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "B",
+      "description": "ARQUÉTIPO B — rápido e frágil. Flanqueia pelas costas, avança em linha (faixa no chão) e recua.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.4,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.3,
+          "qty": [
+            1,
+            3
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⚡",
+      "cor": "#f0ff40",
+      "visual": "B",
+      "lore": "Espíritos presos em carcaças-drone de 2847. Rápidos e frágeis: flanqueiam pelas costas e fogem depois do bote."
+    },
+    {
+      "id": "mon_ca_atirador",
+      "name": "Arcanista de Plasma",
+      "zone": "zone_campo_ascensao",
+      "hp": 42,
+      "ataque": 8,
+      "defesa": 3,
+      "velocidade": 4,
+      "xp": 32,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "C",
+      "description": "ARQUÉTIPO C — à distância. Mantém distância, mira (linha) e dispara projéteis que dá para esquivar.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.35,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.4,
+          "qty": [
+            1,
+            4
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "✶",
+      "cor": "#4ad8ff",
+      "visual": "C",
+      "lore": "Magos-engenheiros que canalizam Nexa crua por um cajado-canhão. Mantêm distância e miram antes de disparar."
+    },
+    {
+      "id": "mon_ca_couraca",
+      "name": "Golem de Ferro-Vivo",
+      "zone": "zone_campo_ascensao",
+      "hp": 150,
+      "ataque": 12,
+      "defesa": 9,
+      "velocidade": 2,
+      "xp": 55,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "D",
+      "postura": 90,
+      "description": "ARQUÉTIPO D — tanque. Lento, muito HP, super-armadura no golpe; pisão em área com preparo longo. Protege atiradores.",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.8,
+          "qty": [
+            2,
+            3
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⬢",
+      "cor": "#ffa030",
+      "visual": "D",
+      "lore": "Sucata fundida por alquimia de reator. Lento, quase inquebrável, protege os atiradores com o próprio corpo."
+    },
+    {
+      "id": "mon_ca_tecelao",
+      "name": "Tecelã da Estática",
+      "zone": "zone_campo_ascensao",
+      "hp": 50,
+      "ataque": 8,
+      "defesa": 3,
+      "velocidade": 3,
+      "xp": 38,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "E",
+      "description": "ARQUÉTIPO E — controle. Mantém distância e cria zonas de estática que causam dano e deixam o herói lento.",
+      "loot_table": [
+        {
+          "item_id": "item_frasco_nexa",
+          "chance": 0.25,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "෴",
+      "cor": "#ff3ae8",
+      "visual": "E",
+      "lore": "Feiticeiras de cabo e seda que tecem campos de estática no chão: queimam e prendem os pés do herói."
+    },
+    {
+      "id": "mon_ca_executor",
+      "name": "Inquisidor Áureo",
+      "zone": "zone_campo_ascensao",
+      "hp": 280,
+      "ataque": 14,
+      "defesa": 8,
+      "velocidade": 5,
+      "xp": 140,
+      "skill_train": "corte",
+      "tier": "elite",
+      "arquetipo": "F",
+      "description": "ARQUÉTIPO F — ELITE. Mais forte e resistente, marcador dourado, habilidade própria ONDA NEXA (círculo grande no chão).",
+      "loot_table": [
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.7,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 1.0,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_kit_reparo",
+          "chance": 0.4,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "♛",
+      "cor": "#ffc830",
+      "visual": "F",
+      "lore": "Elite da Ordem Áurea. Carrega um martelo-relíquia e libera a ONDA NEXA — leia o círculo dourado e saia."
+    },
+    {
+      "id": "mon_ca_guardiao",
+      "name": "VARGOS, Sentinela do Portão",
+      "zone": "zone_campo_ascensao",
+      "hp": 760,
+      "ataque": 15,
+      "defesa": 10,
+      "velocidade": 4,
+      "xp": 320,
+      "skill_train": "corte",
+      "tier": "mini_chefe",
+      "arquetipo": "G",
+      "description": "ARQUÉTIPO G — MINI-CHEFE com 3 fases: golpes pesados → INVESTIDA → ONDA. Guarda o Portão do Dragão.",
+      "loot_table": [
+        {
+          "item_id": "item_dispositivo_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 1.0,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_frasco_nexa",
+          "chance": 1.0,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "☗",
+      "cor": "#ff2a6a",
+      "visual": "G",
+      "lore": "O último juramento antes do covil. Três fases: golpes pesados, INVESTIDA e ONDA. Só cai quem quebra a postura dele."
+    },
+    {
+      "id": "mon_ca_ceifador",
+      "name": "Ceifador Carmesim",
+      "zone": "zone_campo_ascensao",
+      "hp": 82,
+      "ataque": 11,
+      "defesa": 5,
+      "velocidade": 5,
+      "xp": 46,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "A",
+      "description": "VARIANTE do arquétipo A — mais forte e rápido, lâminas duplas e capuz rasgado.",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.4,
+          "qty": [
+            1,
+            4
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "✠",
+      "cor": "#ff2050",
+      "visual": "A2",
+      "lore": "Sacerdotes-carrasco do Circuito Rubro. Lâminas duplas incandescentes; onde passam, deixam faíscas vermelhas."
+    },
+    {
+      "id": "mon_ca_sombra",
+      "name": "Sombra Hexa",
+      "zone": "zone_campo_ascensao",
+      "hp": 44,
+      "ataque": 10,
+      "defesa": 2,
+      "velocidade": 7,
+      "xp": 40,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "B",
+      "description": "VARIANTE do arquétipo B — flanqueador de vidro-sombra com asas hexagonais.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.4,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.3,
+          "qty": [
+            1,
+            3
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⬡",
+      "cor": "#9a6aff",
+      "visual": "B2",
+      "lore": "Assassinos de vidro-sombra que dobram a luz de Nexa. Aparecem pelas costas e somem num brilho violeta."
+    },
+    {
+      "id": "mon_ca_bombardeiro",
+      "name": "Bombardeiro Rúnico",
+      "zone": "zone_campo_ascensao",
+      "hp": 60,
+      "ataque": 10,
+      "defesa": 4,
+      "velocidade": 3,
+      "xp": 48,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "C",
+      "description": "VARIANTE do arquétipo C — morteiro rúnico nas costas, disparo mais pesado.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.35,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_credito_g6",
+          "chance": 0.4,
+          "qty": [
+            1,
+            4
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "✹",
+      "cor": "#7affc8",
+      "visual": "C2",
+      "lore": "Artilheiros com um morteiro-relicário nas costas. Cada disparo é um selo rúnico em chamas verdes."
+    },
+    {
+      "id": "mon_br_rastreador",
+      "name": "Rastreador",
+      "zone": "zone_arena_br",
+      "hp": 54,
+      "ataque": 8,
+      "defesa": 3,
+      "velocidade": 4,
+      "xp": 26,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "A",
+      "description": "ARENA — RASTREADOR: corpo a corpo comum; segue o rastro do herói e chama atenção em grupo.",
+      "loot_table": [
+        {
+          "item_id": "item_ferro_enferrujado",
+          "chance": 0.4,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⚔",
+      "cor": "#ff4a3a",
+      "visual": "A",
+      "lore": "Batedores do Circuito Rubro que farejam Nexa no ar. Andam em duplas pelas ruas da Periferia.",
+      "br": {
+        "aggroR": 9,
+        "leash": 16,
+        "loseR": 18,
+        "sizeMult": 1.0
+      }
+    },
+    {
+      "id": "mon_br_brutamonte",
+      "name": "Brutamonte",
+      "zone": "zone_arena_br",
+      "hp": 190,
+      "ataque": 14,
+      "defesa": 9,
+      "velocidade": 2,
+      "xp": 60,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "D",
+      "description": "ARENA — BRUTAMONTE: tanque lento, muito HP, pisão em área com preparo longo.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⬢",
+      "cor": "#ffa030",
+      "visual": "D",
+      "lore": "Golems de sucata que dormem entre as ruínas industriais. Lentos, mas cada pisão racha o concreto.",
+      "br": {
+        "aggroR": 7,
+        "leash": 12,
+        "loseR": 14,
+        "sizeMult": 1.22
+      }
+    },
+    {
+      "id": "mon_br_predador",
+      "name": "Predador",
+      "zone": "zone_arena_br",
+      "hp": 40,
+      "ataque": 13,
+      "defesa": 2,
+      "velocidade": 8,
+      "xp": 38,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "B",
+      "description": "ARENA — PREDADOR: muito rápido e frágil; flanqueia e dá botes de alto dano.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⬡",
+      "cor": "#9a6aff",
+      "visual": "B2",
+      "lore": "Caçadores de vidro-sombra da floresta. Você só vê o brilho violeta um instante antes do bote.",
+      "br": {
+        "aggroR": 10,
+        "leash": 18,
+        "loseR": 20,
+        "sizeMult": 0.95
+      }
+    },
+    {
+      "id": "mon_br_guardiao",
+      "name": "Guardião",
+      "zone": "zone_arena_br",
+      "hp": 320,
+      "ataque": 15,
+      "defesa": 10,
+      "velocidade": 3,
+      "xp": 120,
+      "skill_train": "corte",
+      "tier": "elite",
+      "arquetipo": "A",
+      "description": "ARENA — GUARDIÃO: protege um POI; coleira curta (não persegue longe), muito resistente.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "✠",
+      "cor": "#ff2050",
+      "visual": "A2",
+      "lore": "Sentinelas juradas a um ponto do mapa. Não saem do posto — mas quem entra no posto paga caro.",
+      "br": {
+        "aggroR": 7,
+        "leash": 6,
+        "loseR": 10,
+        "sizeMult": 1.35,
+        "guarda": true
+      }
+    },
+    {
+      "id": "mon_br_enxame",
+      "name": "Enxame",
+      "zone": "zone_arena_br",
+      "hp": 18,
+      "ataque": 5,
+      "defesa": 1,
+      "velocidade": 7,
+      "xp": 10,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "B",
+      "description": "ARENA — ENXAME: pequenos, fracos sozinhos, aparecem em grupos de 3–4.",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⚡",
+      "cor": "#f0ff40",
+      "visual": "B",
+      "lore": "Drones-espírito que caçam em nuvem. Um só é faísca; quatro juntos derrubam um herói distraído.",
+      "br": {
+        "aggroR": 9,
+        "leash": 16,
+        "loseR": 18,
+        "sizeMult": 0.62,
+        "grupo": true
+      }
+    },
+    {
+      "id": "mon_br_cacador",
+      "name": "Caçador",
+      "zone": "zone_arena_br",
+      "hp": 46,
+      "ataque": 9,
+      "defesa": 3,
+      "velocidade": 4,
+      "xp": 34,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "C",
+      "description": "ARENA — CAÇADOR: patrulha longa e detecção à distância; ataca de longe (dá para esquivar).",
+      "loot_table": [
+        {
+          "item_id": "item_sucata_nexa",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "✹",
+      "cor": "#7affc8",
+      "visual": "C2",
+      "lore": "Artilheiros que patrulham as rotas entre regiões. Enxergam longe — fique na cobertura.",
+      "br": {
+        "aggroR": 14,
+        "leash": 22,
+        "loseR": 24,
+        "sizeMult": 1.0,
+        "patrulhaLonga": true
+      }
+    },
+    {
+      "id": "mon_br_mutante",
+      "name": "Mutante",
+      "zone": "zone_arena_br",
+      "hp": 70,
+      "ataque": 10,
+      "defesa": 4,
+      "velocidade": 4,
+      "xp": 48,
+      "skill_train": "corte",
+      "tier": "comum",
+      "arquetipo": "E",
+      "description": "ARENA — MUTANTE: alterna o comportamento (controle à distância ↔ corpo a corpo) — imprevisível.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "෴",
+      "cor": "#ff3ae8",
+      "visual": "E",
+      "lore": "Tecelãs que a Nexa crua deformou. Ora tecem estática de longe, ora avançam rasgando.",
+      "br": {
+        "aggroR": 10,
+        "leash": 16,
+        "loseR": 18,
+        "sizeMult": 1.08,
+        "muta": [
+          "E",
+          "A"
+        ]
+      }
+    },
+    {
+      "id": "mon_br_elite",
+      "name": "Elite Áureo",
+      "zone": "zone_arena_br",
+      "hp": 360,
+      "ataque": 16,
+      "defesa": 9,
+      "velocidade": 5,
+      "xp": 160,
+      "skill_train": "corte",
+      "tier": "elite",
+      "arquetipo": "F",
+      "description": "ARENA — ELITE: versão rara e forte, marcador dourado, ONDA NEXA; drop garantido de loot alto.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.5,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "♛",
+      "cor": "#ffc830",
+      "visual": "F",
+      "lore": "A Ordem Áurea manda os melhores para a Zona de Elite. Cada um carrega um tesouro — e sabe disso.",
+      "br": {
+        "aggroR": 10,
+        "leash": 14,
+        "loseR": 18,
+        "sizeMult": 1.12,
+        "elite": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "skills": [
+    {
+      "id": "corte",
+      "name": "Corte",
+      "description": "Habilidade com armas brancas e lâminas. Afeta dano corpo a corpo.",
+      "base": 10,
+      "max": 100,
+      "stat_link": "ataque"
+    },
+    {
+      "id": "distancia",
+      "name": "Distância",
+      "description": "Armas à distância e precisão. Afeta dano à distância.",
+      "base": 10,
+      "max": 100,
+      "stat_link": "distancia"
+    },
+    {
+      "id": "protecao",
+      "name": "Proteção",
+      "description": "Bloqueio, armadura e resistência. Reduz dano recebido.",
+      "base": 10,
+      "max": 100,
+      "stat_link": "defesa"
+    },
+    {
+      "id": "canalizacao",
+      "name": "Canalização",
+      "description": "Controle de Nexa (mana). Melhora poder mágico e custo.",
+      "base": 10,
+      "max": 100,
+      "stat_link": "nexa"
+    },
+    {
+      "id": "hack_runico",
+      "name": "Hack Rúnico",
+      "description": "Invasão de circuitos rúnicos e máquinas. Útil contra bots.",
+      "base": 10,
+      "max": 100,
+      "stat_link": null
+    },
+    {
+      "id": "contrato",
+      "name": "Contrato",
+      "description": "Negociação, reputação e barganha com facções e mercadores.",
+      "base": 10,
+      "max": 100,
+      "stat_link": null
+    }
+  ],
+  "xp_per_use": 1,
+  "level_up_threshold": 20,
+  "character_xp_per_level": 100
+}

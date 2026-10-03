@@ -1,0 +1,284 @@
+{
+  "_doc": "EVO — tabelas de RECOMPENSA extra (além da loot_table de cada monstro). Raridade mínima: comum < incomum < raro < épico (só rótulo/cor do brilho do drop; não muda economia). xpBonus somado ao XP do monstro. Itens só de items.json. M3D: drops de equipamento (data/items.json, categoria+raridade) adicionados às tabelas; raridades lendario/reator.",
+  "raridades": {
+    "comum": {
+      "nome": "COMUM",
+      "cor": "#c8d4d0"
+    },
+    "incomum": {
+      "nome": "INCOMUM",
+      "cor": "#4aa0ff"
+    },
+    "raro": {
+      "nome": "RARO",
+      "cor": "#ffc24a"
+    },
+    "epico": {
+      "nome": "ÉPICO",
+      "cor": "#b36bff"
+    },
+    "lendario": {
+      "nome": "LENDÁRIO",
+      "cor": "#ffd34a"
+    },
+    "reator": {
+      "nome": "REATOR",
+      "cor": "#ff3a5a"
+    }
+  },
+  "itemRaridade": {
+    "item_ferro_enferrujado": "comum",
+    "item_credito_g6": "comum",
+    "item_sucata_nexa": "comum",
+    "item_lata_oleo": "comum",
+    "item_nucleo_energia": "incomum",
+    "item_frasco_nexa": "incomum",
+    "item_kit_reparo": "incomum",
+    "item_parafuso_raro": "raro",
+    "item_dispositivo_nexa": "raro",
+    "item_escama_gigante_verde": "epico",
+    "item_capuz_porto": "comum",
+    "item_jaqueta_tunel7": "incomum",
+    "item_manto_chuva_acida": "raro",
+    "item_traje_vela_nexa": "epico",
+    "item_placas_leves_g6": "comum",
+    "item_couraca_escama_verde": "epico",
+    "item_egide_gigante_verde": "lendario",
+    "item_espada_longa_g6": "incomum",
+    "item_fio_nexa_azul": "epico",
+    "item_lamina_coracao_dragao": "lendario",
+    "item_lanca_raio_porto": "incomum",
+    "item_alabarda_inquisidor": "epico",
+    "item_cajado_tecela": "raro",
+    "item_cetro_nucleo_divino": "lendario",
+    "item_arquiflexa_faisca": "raro",
+    "item_besta_olho_dragao": "epico",
+    "item_amuleto_nexa": "incomum",
+    "item_anel_runico": "raro",
+    "item_reator_escama": "reator",
+    "item_lamina_sucata": "comum",
+    "item_lamina_sombra": "raro",
+    "item_pistola_parafuso": "comum",
+    "item_colete_chapa": "comum",
+    "item_colete_tunel": "incomum"
+  },
+  "tabelas": {
+    "elite": {
+      "xpBonus": 40,
+      "drops": [
+        {
+          "item_id": "item_kit_reparo",
+          "chance": 0.6,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_frasco_nexa",
+          "chance": 0.6,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_capuz_porto",
+          "chance": 0.12,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_placas_leves_g6",
+          "chance": 0.1,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_espada_longa_g6",
+          "chance": 0.08,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_lanca_raio_porto",
+          "chance": 0.06,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_amuleto_nexa",
+          "chance": 0.06,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_jaqueta_tunel7",
+          "chance": 0.06,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "healFrac": 0.25
+    },
+    "mini_chefe": {
+      "xpBonus": 120,
+      "drops": [
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 1.0,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_kit_reparo",
+          "chance": 1.0,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_manto_chuva_acida",
+          "chance": 0.25,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_cajado_tecela",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_arquiflexa_faisca",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_anel_runico",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ],
+      "healFrac": 0.5
+    },
+    "chefe": {
+      "xpBonus": 250,
+      "drops": [
+        {
+          "item_id": "item_dispositivo_nexa",
+          "chance": 0.6,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_escama_gigante_verde",
+          "chance": 1.0,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_fio_nexa_azul",
+          "chance": 0.3,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_couraca_escama_verde",
+          "chance": 0.3,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_besta_olho_dragao",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_alabarda_inquisidor",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_traje_vela_nexa",
+          "chance": 0.2,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_lamina_coracao_dragao",
+          "chance": 0.08,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_egide_gigante_verde",
+          "chance": 0.08,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_cetro_nucleo_divino",
+          "chance": 0.08,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item_id": "item_reator_escama",
+          "chance": 0.04,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  }
+}

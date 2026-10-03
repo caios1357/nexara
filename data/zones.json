@@ -1,0 +1,161 @@
+{
+  "zones": [
+    {
+      "id": "zone_a0",
+      "code": "A0",
+      "name": "Núcleo Escarlate",
+      "risk": 5,
+      "playable": false,
+      "description": "O coração da megacidade. Dragões-reatores e o poder absoluto.",
+      "blocked_message": "ZONA DE ALTO RISCO — A0 Núcleo Escarlate está selada. Acesso negado."
+    },
+    {
+      "id": "zone_b1",
+      "code": "B1",
+      "name": "Espinha Corporativa",
+      "risk": 4,
+      "playable": false,
+      "description": "Torres de vidro e contratos sangrentos.",
+      "blocked_message": "ZONA DE ALTO RISCO — B1 Espinha Corporativa bloqueada. Você não tem autorização."
+    },
+    {
+      "id": "zone_c2",
+      "code": "C2",
+      "name": "Forja Verde",
+      "risk": 3,
+      "playable": false,
+      "description": "Fábricas orgânicas e clãs de metal vivo.",
+      "blocked_message": "ZONA RESTRITA — C2 Forja Verde ainda não está acessível. Rumores apontam o Contrato Sangue Verde (EM DESENVOLVIMENTO)."
+    },
+    {
+      "id": "zone_d3",
+      "code": "D3",
+      "name": "Rede Rúnica",
+      "risk": 3,
+      "playable": false,
+      "description": "Circuitos de runas e hackers teúrgicos.",
+      "blocked_message": "ZONA RESTRITA — D3 Rede Rúnica ainda não está acessível na Fase 02."
+    },
+    {
+      "id": "zone_e4",
+      "code": "E4",
+      "name": "Subsolo Negro",
+      "risk": 2,
+      "playable": true,
+      "description": "Túneis ilegais sob a megacidade. Mercado negro, mutantes de sucata e a presença dos Sem Nome.",
+      "blocked_message": "O alçapão para o Subsolo Negro está selado — completo demais perigoso. Termine G6-Q01 e fale com Guarda Brak (ou registre a memória 02:17).",
+      "map": {
+        "width": 12,
+        "height": 10,
+        "tile_size": 48,
+        "spawn": { "x": 2, "y": 1 },
+        "tiles": [
+          "WWWWWWWWWWWW",
+          "WG.........W",
+          "W.TTTT.....W",
+          "W.T..T..K..W",
+          "W.T..T.....W",
+          "W....#.....W",
+          "W..NNNN....W",
+          "W..........W",
+          "W....SSS...W",
+          "WWWWWWWWWWWW"
+        ],
+        "legend": {
+          "W": "wall",
+          ".": "floor",
+          "T": "tunnel",
+          "K": "black_market",
+          "N": "npc_area",
+          "#": "street",
+          "S": "scrap",
+          "G": "exit_g6"
+        },
+        "poi": [
+          { "id": "poi_boca_tunel", "x": 1, "y": 1, "label": "Boca do Túnel (G6)" },
+          { "id": "poi_mercado_negro", "x": 8, "y": 3, "label": "Mercado Negro" },
+          { "id": "poi_pracinha_e4", "x": 4, "y": 6, "label": "Pracinha Sombra" },
+          { "id": "poi_sucata_viva", "x": 6, "y": 8, "label": "Poço de Sucata" },
+          { "id": "poi_cartaz_fantasma", "x": 9, "y": 5, "label": "Cartaz Rasgado" }
+        ],
+        "exits": [
+          {
+            "tile": "exit_g6",
+            "x": 1,
+            "y": 1,
+            "to_zone": "zone_g6",
+            "to_x": 2,
+            "to_y": 4,
+            "locked_message": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_f5",
+      "code": "F5",
+      "name": "Órbita Fantasma",
+      "risk": 6,
+      "playable": false,
+      "description": "Estações mortas acima das nuvens.",
+      "blocked_message": "ZONA EXTREMA — F5 Órbita Fantasma está fora de alcance. Risco máximo. (Torre Fantasma: só rumores)"
+    },
+    {
+      "id": "zone_g6",
+      "code": "G6",
+      "name": "Periferia Ferrugem",
+      "risk": 1,
+      "playable": true,
+      "description": "Bairros enferrujados na beira da megacidade. Máquinas quebradas, gente dura, e o cheiro de ozônio barato.",
+      "blocked_message": null,
+      "map": {
+        "width": 12,
+        "height": 10,
+        "tile_size": 48,
+        "spawn": { "x": 2, "y": 5 },
+        "tiles": [
+          "WWWWWWWWWWWW",
+          "W..........W",
+          "W..MMMM....W",
+          "W..M..M.S..W",
+          "WE.M..M....W",
+          "W.....#....W",
+          "W..NNNN....W",
+          "W..........W",
+          "W....B.....W",
+          "WWWWWWWWWWWW"
+        ],
+        "legend": {
+          "W": "wall",
+          ".": "floor",
+          "M": "workshop",
+          "S": "shop",
+          "N": "npc_area",
+          "#": "street",
+          "B": "bot_spawn",
+          "E": "exit_e4"
+        },
+        "poi": [
+          { "id": "poi_oficina_mara", "x": 3, "y": 3, "label": "Oficina de Mara" },
+          { "id": "poi_mercado", "x": 8, "y": 3, "label": "Barraca do Mercado" },
+          { "id": "poi_praca", "x": 5, "y": 6, "label": "Praça Ferrugem" },
+          { "id": "poi_beira", "x": 5, "y": 8, "label": "Beira dos Bots" },
+          { "id": "poi_alcapao_e4", "x": 1, "y": 4, "label": "Alçapão Subsolo" }
+        ],
+        "exits": [
+          {
+            "tile": "exit_e4",
+            "x": 1,
+            "y": 4,
+            "to_zone": "zone_e4",
+            "to_x": 2,
+            "to_y": 1,
+            "requires": "e4_unlocked",
+            "locked_message": "O alçapão para o Subsolo Negro está selado / demasiado perigoso. Complete G6-Q01 e fale com Guarda Brak — ou registre a memória 02:17."
+          }
+        ]
+      }
+    }
+  ],
+  "risk_order": ["G6", "E4", "C2", "D3", "B1", "A0", "F5"]
+}

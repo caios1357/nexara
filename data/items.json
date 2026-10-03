@@ -1,0 +1,1409 @@
+{
+  "items": [
+    {
+      "id": "item_ferro_enferrujado",
+      "name": "Ferro Enferrujado",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 50,
+      "value": 2,
+      "description": "Pedaço de metal da Periferia. Bom pra forja barata.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_nucleo_energia",
+      "name": "Núcleo de Energia",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 20,
+      "value": 15,
+      "description": "Célula energética extraída de bots. Pulsante.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_lata_oleo",
+      "name": "Lata de Óleo",
+      "type": "consumable",
+      "stackable": true,
+      "max_stack": 10,
+      "value": 8,
+      "description": "Restaura 25 HP. Cheira a oficina.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": {
+        "hp": 25,
+        "nexa": 0
+      },
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_frasco_nexa",
+      "name": "Frasco de Nexa",
+      "type": "consumable",
+      "stackable": true,
+      "max_stack": 10,
+      "value": 12,
+      "description": "Restaura 30 Nexa. Brilho fraco.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": {
+        "hp": 0,
+        "nexa": 30
+      },
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_lamina_sucata",
+      "name": "Lâmina de Sucata",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 20,
+      "description": "Espada improvisada. Aumenta ataque e usa Corte.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 4,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_pistola_parafuso",
+      "name": "Pistola de Parafuso",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 25,
+      "description": "Atira parafusos. Usa Distância.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 3,
+        "skill": "distancia",
+        "ranged": true
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_colete_chapa",
+      "name": "Colete de Chapa",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 30,
+      "description": "Armadura leve de latão. +defesa.",
+      "equip_slot": "armor",
+      "stats": {
+        "defesa": 5,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_chave_runica_g6",
+      "name": "Chave Rúnica G6",
+      "type": "quest",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 0,
+      "description": "Chave que o doador da quest pediu para entregar a Mara.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_dispositivo_nexa",
+      "name": "Dispositivo de Fragmento Nexa",
+      "type": "special",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 0,
+      "description": "Aparelho que continuou ligado durante o blackout. Emite um zumbido baixo.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_parafuso_raro",
+      "name": "Parafuso Raro",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 30,
+      "value": 5,
+      "description": "Parafuso marcado com runa apagada.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_kit_reparo",
+      "name": "Kit de Reparo",
+      "type": "consumable",
+      "stackable": true,
+      "max_stack": 5,
+      "value": 18,
+      "description": "Restaura 40 HP. Usado por técnicos.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": {
+        "hp": 40,
+        "nexa": 0
+      },
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_plaqueta_bot",
+      "name": "Plaqueta de Bot",
+      "type": "quest",
+      "stackable": true,
+      "max_stack": 10,
+      "value": 0,
+      "description": "Identificação de bot abatido. Prova para a quest.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_anillo_ferrugem",
+      "name": "Anel Ferrugem",
+      "type": "special",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 40,
+      "description": "Lembrança da periferia. Sem efeito de combate (ainda).",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_credito_g6",
+      "name": "Crédito G6",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 999,
+      "value": 1,
+      "description": "Moeda local da Periferia Ferrugem.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_sucata_nexa",
+      "name": "Sucata Nexa",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 40,
+      "value": 6,
+      "description": "Fragmento metálico com brilho fraco de Nexa. Comum no Subsolo.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_pele_mutante",
+      "name": "Pele Mutante",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 20,
+      "value": 12,
+      "description": "Tecido orgânico-metal endurecido. Mercado negro paga bem.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_lamina_sombra",
+      "name": "Lâmina Sombra",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 55,
+      "description": "Upgrade de lâmina do Subsolo. Mais corte que sucata de G6.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 7,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_colete_tunel",
+      "name": "Colete de Túnel",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Armadura reforçada com chapas de poço. +defesa.",
+      "equip_slot": "armor",
+      "stats": {
+        "defesa": 8,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_chip_sem_nome",
+      "name": "Chip Sem Nome",
+      "type": "quest",
+      "stackable": true,
+      "max_stack": 10,
+      "value": 0,
+      "description": "Identificador sem serial. Hesh pediu prova do poço.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_doc_sangue_verde",
+      "name": "Documento Sangue Verde",
+      "type": "quest",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 0,
+      "description": "Página rasgada: contrato parcial apontando C2 Forja Verde. Sem acesso.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_passe_subsolo",
+      "name": "Passe do Subsolo",
+      "type": "quest",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 0,
+      "description": "Marca de favor de Hesh. Abre portas menores no Subsolo.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": true,
+      "discardable": false
+    },
+    {
+      "id": "item_escama_gigante_verde",
+      "name": "Escama do Gigante Verde",
+      "type": "material",
+      "stackable": true,
+      "max_stack": 20,
+      "value": 60,
+      "description": "Placa negra com veios de Nexa verde, arrancada do dragão da Arena. Ainda pulsa.",
+      "equip_slot": null,
+      "stats": null,
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true
+    },
+    {
+      "id": "item_capuz_porto",
+      "name": "Capuz do Porto",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 15,
+      "description": "Capuz de lona impermeável. +1 defesa.",
+      "equip_slot": "body",
+      "stats": {
+        "defesa": 1,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "roupa",
+      "rarity": "comum",
+      "lore": "Todo caçador do Porto começa com um.",
+      "build": "ESQUIVA",
+      "passiva": "",
+      "visual": {
+        "tint": 4870720
+      }
+    },
+    {
+      "id": "item_jaqueta_tunel7",
+      "name": "Jaqueta do Túnel 7",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 35,
+      "description": "Jaqueta técnica com capuz. +2 defesa.",
+      "equip_slot": "body",
+      "stats": {
+        "defesa": 2,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "roupa",
+      "rarity": "incomum",
+      "lore": "Costurada com fibra de cabo dos túneis de G6.",
+      "build": "ESQUIVA",
+      "passiva": "(ideia) esquiva perfeita deixa rastro que dá Nexa",
+      "visual": {
+        "tint": 2771562
+      }
+    },
+    {
+      "id": "item_manto_chuva_acida",
+      "name": "Manto da Chuva Ácida",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 70,
+      "description": "Manto rúnico que repele a chuva ácida. +3 defesa, +1 ataque.",
+      "equip_slot": "body",
+      "stats": {
+        "ataque": 1,
+        "defesa": 3,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "roupa",
+      "rarity": "raro",
+      "lore": "As runas da barra brilham quando chove em 2847.",
+      "build": "NEXA",
+      "passiva": "(ideia) correr na chuva acelera a recarga",
+      "visual": {
+        "tint": 3811930
+      }
+    },
+    {
+      "id": "item_traje_vela_nexa",
+      "name": "Traje Vela-Nexa",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 140,
+      "description": "Traje de fibra-Nexa. +5 defesa, +2 ataque.",
+      "equip_slot": "body",
+      "stats": {
+        "ataque": 2,
+        "defesa": 5,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "roupa",
+      "rarity": "epico",
+      "lore": "Fibra tecida com fios de reator: aquece e brilha.",
+      "build": "NEXA",
+      "passiva": "",
+      "visual": {
+        "tint": 1718874
+      }
+    },
+    {
+      "id": "item_placas_leves_g6",
+      "name": "Placas Leves de G6",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 25,
+      "description": "Placas finas de sucata. +4 defesa.",
+      "equip_slot": "armor",
+      "stats": {
+        "defesa": 4,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "armadura",
+      "rarity": "comum",
+      "lore": "Padrão das patrulhas de G6.",
+      "build": "DEFESA",
+      "passiva": "",
+      "visual": {
+        "plates": true,
+        "color": 5922928
+      }
+    },
+    {
+      "id": "item_couraca_escama_verde",
+      "name": "Couraça Escama-Verde",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 160,
+      "description": "Couraça de escamas do Gigante Verde. +12 defesa.",
+      "equip_slot": "armor",
+      "stats": {
+        "defesa": 12,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "armadura",
+      "rarity": "epico",
+      "lore": "Ainda pulsa com a Nexa do dragão-reator.",
+      "build": "DEFESA",
+      "passiva": "(ideia) escudo de energia maior com HP baixo",
+      "visual": {
+        "plates": true,
+        "color": 1985062,
+        "glow": 3866474
+      }
+    },
+    {
+      "id": "item_egide_gigante_verde",
+      "name": "Égide do Gigante Verde",
+      "type": "armor",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 260,
+      "description": "Armadura de reator. +16 defesa, +2 ataque.",
+      "equip_slot": "armor",
+      "stats": {
+        "ataque": 2,
+        "defesa": 16,
+        "skill": "protecao"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "armadura",
+      "rarity": "lendario",
+      "lore": "Forjada com o coração apagado de um dragão.",
+      "build": "DEFESA",
+      "passiva": "(ideia) bloqueio perfeito devolve dano",
+      "visual": {
+        "plates": true,
+        "color": 1060890,
+        "glow": 5963658
+      }
+    },
+    {
+      "id": "item_espada_longa_g6",
+      "name": "Espada Longa de G6",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 45,
+      "description": "Espada longa equilibrada. +6 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 6,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "espada",
+      "rarity": "incomum",
+      "lore": "Aço reciclado das torres de G6.",
+      "build": "COMBO",
+      "passiva": "",
+      "visual": {
+        "model": "1H_Sword",
+        "glow": 6998271
+      }
+    },
+    {
+      "id": "item_fio_nexa_azul",
+      "name": "Fio-Nexa Azul",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Lâmina de plasma azul. +11 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 11,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "espada",
+      "rarity": "epico",
+      "lore": "O fio é um filete de Nexa preso num campo magnético.",
+      "build": "COMBO",
+      "passiva": "(ideia) 3º golpe solta onda de Nexa",
+      "visual": {
+        "model": "1H_Sword",
+        "glow": 3841279
+      }
+    },
+    {
+      "id": "item_lamina_coracao_dragao",
+      "name": "Lâmina Coração-de-Dragão",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 280,
+      "description": "Montante com núcleo de dragão. +15 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 15,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "espada",
+      "rarity": "lendario",
+      "lore": "Dizem que a lâmina ainda ruge.",
+      "build": "PODER",
+      "passiva": "(ideia) crítico encadeia faísca",
+      "visual": {
+        "model": "2H_Sword",
+        "glow": 4652938
+      }
+    },
+    {
+      "id": "item_lanca_raio_porto",
+      "name": "Lança-Raio do Porto",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Lança de choque. +6 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 6,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "lanca",
+      "rarity": "incomum",
+      "lore": "Usada para afastar mutantes das docas.",
+      "build": "PODER",
+      "passiva": "",
+      "visual": {
+        "model": "2H_Staff",
+        "spear": true,
+        "glow": 16769098
+      }
+    },
+    {
+      "id": "item_alabarda_inquisidor",
+      "name": "Alabarda do Inquisidor",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 155,
+      "description": "Alabarda rúnica. +12 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 12,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "lanca",
+      "rarity": "epico",
+      "lore": "Arma cerimonial do Circuito Rubro.",
+      "build": "DEFESA",
+      "passiva": "(ideia) investida perfura vários inimigos",
+      "visual": {
+        "model": "2H_Staff",
+        "spear": true,
+        "glow": 16730698
+      }
+    },
+    {
+      "id": "item_cajado_tecela",
+      "name": "Cajado da Tecelã",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 90,
+      "description": "Cajado de cristal. +8 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 8,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "cajado",
+      "rarity": "raro",
+      "lore": "A Tecelã de Estática tecia teias com ele.",
+      "build": "NEXA",
+      "passiva": "(ideia) especial cria poça de energia",
+      "visual": {
+        "model": "2H_Staff",
+        "glow": 11823871
+      }
+    },
+    {
+      "id": "item_cetro_nucleo_divino",
+      "name": "Cetro do Núcleo Divino",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 270,
+      "description": "Cetro-reator. +14 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 14,
+        "skill": "corte"
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "cajado",
+      "rarity": "lendario",
+      "lore": "Canaliza a Nexa direto de um reator de dragão.",
+      "build": "NEXA",
+      "passiva": "(ideia) cada especial reduz a recarga dos outros",
+      "visual": {
+        "model": "1H_Wand",
+        "glow": 16765770
+      }
+    },
+    {
+      "id": "item_arquiflexa_faisca",
+      "name": "Arquiflexa Faísca",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 85,
+      "description": "Arquiflexa de plasma (à distância). +7 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 7,
+        "skill": "distancia",
+        "ranged": true
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "arco",
+      "rarity": "raro",
+      "lore": "Arco dobrável com corda de luz.",
+      "build": "ESQUIVA",
+      "passiva": "(ideia) tiro após esquiva é crítico",
+      "visual": {
+        "model": "1H_Crossbow",
+        "glow": 4652938
+      }
+    },
+    {
+      "id": "item_besta_olho_dragao",
+      "name": "Besta Olho-de-Dragão",
+      "type": "weapon",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Besta de repetição (à distância). +11 ataque.",
+      "equip_slot": "weapon",
+      "stats": {
+        "ataque": 11,
+        "skill": "distancia",
+        "ranged": true
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "arco",
+      "rarity": "epico",
+      "lore": "A mira é um olho de dragão cristalizado.",
+      "build": "COMBO",
+      "passiva": "(ideia) flecha marca o alvo para o mini dragão",
+      "visual": {
+        "model": "2H_Crossbow",
+        "glow": 16747050
+      }
+    },
+    {
+      "id": "item_amuleto_nexa",
+      "name": "Amuleto de Nexa",
+      "type": "special",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 40,
+      "description": "Pingente com gota de Nexa. +2 ataque.",
+      "equip_slot": "accessory",
+      "stats": {
+        "ataque": 2
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "acessorio",
+      "rarity": "incomum",
+      "lore": "Presente comum entre os juramentados.",
+      "build": "PODER",
+      "passiva": "",
+      "visual": {
+        "glow": 3841279
+      }
+    },
+    {
+      "id": "item_anel_runico",
+      "name": "Anel Rúnico",
+      "type": "special",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 80,
+      "description": "Anel com runas de 2847. +1 ataque, +2 defesa.",
+      "equip_slot": "accessory",
+      "stats": {
+        "ataque": 1,
+        "defesa": 2
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "acessorio",
+      "rarity": "raro",
+      "lore": "As runas giram sozinhas.",
+      "build": "DEFESA",
+      "passiva": "",
+      "visual": {
+        "glow": 11823871
+      }
+    },
+    {
+      "id": "item_reator_escama",
+      "name": "Reator de Escama",
+      "type": "special",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Mini-reator feito de escama de dragão. +5 ataque, +5 defesa.",
+      "equip_slot": "accessory",
+      "stats": {
+        "ataque": 5,
+        "defesa": 5
+      },
+      "consumable": null,
+      "quest_item": false,
+      "discardable": true,
+      "category": "acessorio",
+      "rarity": "reator",
+      "lore": "Raridade REATOR: só cai de dragões.",
+      "build": "PODER",
+      "passiva": "(ideia) Nexa máxima maior",
+      "visual": {
+        "glow": 16726618
+      }
+    },
+    {
+      "id": "eq_infernal_capacete",
+      "name": "Capacete Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Capacete da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "helmet",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 2
+      },
+      "category": "capacete",
+      "rarity": "incomum",
+      "family": "infernal",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 2,
+        "critico": 2
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "crest": "demon"
+      }
+    },
+    {
+      "id": "eq_infernal_armadura",
+      "name": "Armadura Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Armadura da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "armor",
+      "stats": {
+        "skill": "protecao",
+        "ataque": 2,
+        "defesa": 5
+      },
+      "category": "armadura",
+      "rarity": "raro",
+      "family": "infernal",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "defesa": 5,
+        "dano": 2,
+        "critico": 3
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "plates": true
+      }
+    },
+    {
+      "id": "eq_infernal_calca",
+      "name": "Calça Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Calça da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "pants",
+      "stats": {
+        "skill": "protecao",
+        "ataque": 1,
+        "defesa": 2
+      },
+      "category": "calca",
+      "rarity": "incomum",
+      "family": "infernal",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 2,
+        "dano": 1,
+        "critico": 2
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "greaves": true
+      }
+    },
+    {
+      "id": "eq_infernal_espada",
+      "name": "Espada Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Espada da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "corte",
+        "ataque": 12
+      },
+      "category": "espada",
+      "rarity": "raro",
+      "family": "infernal",
+      "weaponClass": "espada",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 12,
+        "critico": 3
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "model": "2H_Sword"
+      }
+    },
+    {
+      "id": "eq_infernal_arco",
+      "name": "Arco Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Arco da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 9,
+        "ranged": true
+      },
+      "category": "arco",
+      "rarity": "raro",
+      "family": "infernal",
+      "weaponClass": "arco",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 9,
+        "critico": 4,
+        "precisao": 3
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "model": "2H_Crossbow"
+      }
+    },
+    {
+      "id": "eq_infernal_cajado",
+      "name": "Cajado Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Cajado da família Infernal. Metal escuro forjado no calor do Circuito Rubro; marcas de brasa ainda pulsam em vermelho.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 7,
+        "ranged": true
+      },
+      "category": "cajado",
+      "rarity": "raro",
+      "family": "infernal",
+      "weaponClass": "cajado",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 7,
+        "poderMagico": 15,
+        "critico": 2
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "model": "2H_Staff"
+      }
+    },
+    {
+      "id": "eq_draconico_capacete",
+      "name": "Capacete Dracônico",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Capacete da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "helmet",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 4
+      },
+      "category": "capacete",
+      "rarity": "incomum",
+      "family": "draconico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 4,
+        "resistencia": 3
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "crest": "horns"
+      }
+    },
+    {
+      "id": "eq_draconico_armadura",
+      "name": "Armadura Dracônica",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Armadura da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "armor",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 10
+      },
+      "category": "armadura",
+      "rarity": "epico",
+      "family": "draconico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "avancado",
+      "attrs": {
+        "defesa": 10,
+        "resistencia": 6,
+        "vida": 15
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "plates": true
+      }
+    },
+    {
+      "id": "eq_draconico_calca",
+      "name": "Calça Dracônica",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Calça da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "pants",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 4
+      },
+      "category": "calca",
+      "rarity": "incomum",
+      "family": "draconico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 4,
+        "resistencia": 3,
+        "vida": 8
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "greaves": true
+      }
+    },
+    {
+      "id": "eq_draconico_espada",
+      "name": "Espada Dracônica",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Espada da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "corte",
+        "ataque": 8,
+        "defesa": 5
+      },
+      "category": "espada",
+      "rarity": "epico",
+      "family": "draconico",
+      "weaponClass": "espada",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "avancado",
+      "attrs": {
+        "dano": 8,
+        "defesa": 5,
+        "resistencia": 5
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "model": "1H_Sword"
+      }
+    },
+    {
+      "id": "eq_draconico_arco",
+      "name": "Arco Dracônico",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Arco da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 7,
+        "defesa": 3,
+        "ranged": true
+      },
+      "category": "arco",
+      "rarity": "epico",
+      "family": "draconico",
+      "weaponClass": "arco",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "avancado",
+      "attrs": {
+        "dano": 7,
+        "defesa": 3,
+        "resistencia": 4
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "model": "2H_Crossbow"
+      }
+    },
+    {
+      "id": "eq_draconico_cajado",
+      "name": "Cajado Dracônico",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Cajado da família Dracônico. Escamas do Gigante Verde trançadas com fios de NEXA; guardam o fôlego do dragão.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 6,
+        "defesa": 3,
+        "ranged": true
+      },
+      "category": "cajado",
+      "rarity": "epico",
+      "family": "draconico",
+      "weaponClass": "cajado",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "avancado",
+      "attrs": {
+        "dano": 6,
+        "poderMagico": 12,
+        "defesa": 3,
+        "resistencia": 4
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "model": "2H_Staff"
+      }
+    },
+    {
+      "id": "eq_cibernetico_capacete",
+      "name": "Capacete Cibernético",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Capacete da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "helmet",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 2
+      },
+      "category": "capacete",
+      "rarity": "incomum",
+      "family": "cibernetico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 2,
+        "precisao": 4,
+        "energia": 0.5
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "crest": true
+      }
+    },
+    {
+      "id": "eq_cibernetico_armadura",
+      "name": "Armadura Cibernética",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Armadura da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "armor",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 5
+      },
+      "category": "armadura",
+      "rarity": "raro",
+      "family": "cibernetico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "defesa": 5,
+        "velocidade": 4,
+        "recarga": 6
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "plates": true
+      }
+    },
+    {
+      "id": "eq_cibernetico_calca",
+      "name": "Calça Cibernética",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 50,
+      "description": "Calça da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "pants",
+      "stats": {
+        "skill": "protecao",
+        "defesa": 2
+      },
+      "category": "calca",
+      "rarity": "incomum",
+      "family": "cibernetico",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "basico",
+      "attrs": {
+        "defesa": 2,
+        "velocidade": 5
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "greaves": true
+      }
+    },
+    {
+      "id": "eq_cibernetico_espada",
+      "name": "Espada Cibernética",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Espada da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "corte",
+        "ataque": 6
+      },
+      "category": "espada",
+      "rarity": "raro",
+      "family": "cibernetico",
+      "weaponClass": "espada",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 6,
+        "velocidade": 8,
+        "precisao": 4
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "model": "1H_Sword"
+      }
+    },
+    {
+      "id": "eq_cibernetico_arco",
+      "name": "Arco Cibernético",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Arco da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 7,
+        "ranged": true
+      },
+      "category": "arco",
+      "rarity": "raro",
+      "family": "cibernetico",
+      "weaponClass": "arco",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 7,
+        "velocidade": 4,
+        "precisao": 6,
+        "recarga": 5
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "model": "1H_Crossbow"
+      }
+    },
+    {
+      "id": "eq_cibernetico_cajado",
+      "name": "Cajado Cibernético",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Cajado da família Cibernético. Liga leve de G6 com circuitos expostos e luzes de varredura azul.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 5,
+        "ranged": true
+      },
+      "category": "cajado",
+      "rarity": "raro",
+      "family": "cibernetico",
+      "weaponClass": "cajado",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 5,
+        "poderMagico": 10,
+        "energia": 1,
+        "recarga": 8
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "model": "1H_Wand"
+      }
+    }
+  ]
+}

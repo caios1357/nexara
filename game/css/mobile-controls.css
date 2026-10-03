@@ -1,0 +1,382 @@
+/* Controles mobile — gp1 · joystick permanente (esq.) + área OLHAR (metade dir.) + cluster ATAQUE
+   Tamanhos do joystick vêm de gameplay-config.js (CSS vars --mc-joy-*). */
+
+.mobile-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  --mc-safe-l: env(safe-area-inset-left, 0px);
+  --mc-safe-r: env(safe-area-inset-right, 0px);
+  --mc-safe-b: env(safe-area-inset-bottom, 0px);
+  --mc-pad-r: max(0.55rem, env(safe-area-inset-right, 0px));
+  --mc-pad-b: max(0.55rem, env(safe-area-inset-bottom, 0px));
+  --mc-joy-r: 58px;
+  --mc-joy-pad: 44px;
+  --mc-joy-ml: 18px;
+  --mc-joy-mb: 18px;
+  --mc-joy-return: 90ms;
+}
+
+.mobile-controls.hidden {
+  display: none !important;
+}
+
+/* Sem scroll / zoom / seleção / menu de toque enquanto joga no celular */
+body.has-mobile-controls #game-screen {
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ——— ÁREA OLHAR: metade direita inteira (dedo de câmera) ——— */
+.mc-look-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 0;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 1;
+}
+
+/* ——— JOYSTICK: zona de toque (maior que o círculo) ——— */
+.mc-joy-zone {
+  position: absolute;
+  left: calc(var(--mc-safe-l) + var(--mc-joy-ml) - var(--mc-joy-pad));
+  bottom: calc(var(--mc-safe-b) + var(--mc-joy-mb) - var(--mc-joy-pad));
+  width: calc(2 * (var(--mc-joy-r) + var(--mc-joy-pad)));
+  height: calc(2 * (var(--mc-joy-r) + var(--mc-joy-pad)));
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 2;
+}
+
+.mc-joy {
+  position: absolute;
+  left: var(--mc-joy-pad);
+  bottom: var(--mc-joy-pad);
+  width: calc(2 * var(--mc-joy-r));
+  height: calc(2 * var(--mc-joy-r));
+  pointer-events: none;
+}
+
+/* Tipo flutuante: zona grande no quadrante inferior esquerdo; base nasce sob o dedo */
+.mobile-controls.mc-joy-floating .mc-joy-zone {
+  left: 0;
+  bottom: 0;
+  width: 46%;
+  height: 62%;
+}
+.mobile-controls.mc-joy-floating .mc-joy {
+  left: calc(var(--mc-safe-l) + var(--mc-joy-ml));
+  bottom: calc(var(--mc-safe-b) + var(--mc-joy-mb));
+}
+
+.mc-joy-base {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 40% 35%, rgba(62, 207, 191, 0.16), transparent 55%),
+    rgba(10, 14, 20, 0.5);
+  border: 2px solid rgba(62, 207, 191, 0.45);
+  box-shadow: 0 0 14px rgba(62, 207, 191, 0.12), inset 0 0 18px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.mobile-controls.mc-joy-active .mc-joy-base {
+  border-color: rgba(62, 207, 191, 0.85);
+  box-shadow: 0 0 20px rgba(62, 207, 191, 0.3), inset 0 0 18px rgba(0, 0, 0, 0.4);
+}
+
+.mc-joy-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, rgba(62, 207, 191, 0.88), rgba(30, 90, 100, 0.92));
+  border: 2px solid rgba(200, 240, 235, 0.6);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  will-change: transform;
+}
+.mc-joy-knob.mc-returning {
+  transition: transform var(--mc-joy-return) ease-out;
+}
+
+.mc-joy-label {
+  position: absolute;
+  left: 50%;
+  bottom: -0.95rem;
+  transform: translateX(-50%);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  color: rgba(176, 188, 200, 0.7);
+  pointer-events: none;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ——— Cluster: PODER em volta do ATAQUE ——— */
+.mc-powers {
+  position: absolute;
+  right: var(--mc-pad-r);
+  bottom: calc(var(--mc-pad-b) + 0.1rem);
+  display: grid;
+  grid-template-columns: 52px 72px 52px;
+  grid-template-rows: 48px 72px 48px;
+  grid-template-areas:
+    ".     p1    ."
+    "p2    atk   talk"
+    ".     p3    .";
+  gap: 0.2rem;
+  width: auto;
+  align-items: center;
+  justify-items: center;
+  pointer-events: none; /* só os botões capturam — o vão entre eles continua sendo OLHAR */
+  touch-action: manipulation;
+  z-index: 3;
+}
+.mc-powers .mc-btn { pointer-events: auto; }
+
+.mc-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+  padding: 0.2rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(122, 136, 153, 0.2), transparent 60%),
+    rgba(12, 16, 24, 0.7);
+  border: 2px solid rgba(122, 136, 153, 0.45);
+  color: var(--text, #d8e0ea);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.35), inset 0 0 10px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mc-btn.mc-attack {
+  grid-area: atk;
+  width: 72px;
+  height: 72px;
+  min-height: 72px;
+  border-color: rgba(232, 93, 76, 0.9);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(232, 93, 76, 0.45), transparent 55%),
+    rgba(40, 14, 16, 0.88);
+  box-shadow: 0 0 18px rgba(232, 93, 76, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.mc-btn.mc-p1 { grid-area: p1; }
+.mc-btn.mc-p2 { grid-area: p2; }
+.mc-btn.mc-p3 { grid-area: p3; }
+
+.mc-btn.mc-interact {
+  grid-area: talk;
+  width: 52px;
+  height: 52px;
+  min-height: 48px;
+  border-color: rgba(62, 207, 191, 0.5);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(62, 207, 191, 0.25), transparent 55%),
+    rgba(12, 24, 28, 0.78);
+}
+
+.mc-btn.mc-interact.mc-hidden-arena,
+.mobile-controls.mc-arena .mc-btn.mc-interact {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mc-btn.mc-dev {
+  opacity: 0.7;
+  border-color: rgba(122, 136, 153, 0.4);
+  background: rgba(16, 20, 28, 0.6);
+  border-style: dashed;
+  width: 48px;
+  height: 48px;
+  min-height: 44px;
+}
+
+.mc-btn:active,
+.mc-btn.mc-pressed {
+  transform: scale(0.94);
+  filter: brightness(1.12);
+}
+
+.mc-ico {
+  font-size: 1.05rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.mc-btn.mc-attack .mc-ico { font-size: 1.35rem; }
+
+.mc-lbl {
+  font-size: 0.48rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.05;
+  max-width: 100%;
+  padding: 0 0.1rem;
+  color: rgba(216, 224, 234, 0.9);
+  pointer-events: none;
+}
+
+.mc-btn.mc-dev .mc-lbl {
+  color: var(--warn, #f0c14a);
+  font-size: 0.4rem;
+  letter-spacing: 0;
+}
+
+.mc-btn.mc-attack .mc-lbl {
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ——— Anel OLHAR (indicador visual da área de câmera; não captura toque) ——— */
+.mc-look {
+  position: absolute;
+  right: max(0.4rem, var(--mc-safe-r));
+  bottom: calc(var(--mc-pad-b) + 12rem);
+  width: min(38vw, 140px);
+  height: min(38vw, 140px);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.8;
+}
+
+.mc-look-base {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 45% 40%, rgba(62, 207, 191, 0.14), transparent 58%),
+    rgba(8, 12, 18, 0.28);
+  border: 2px dashed rgba(62, 207, 191, 0.38);
+  box-shadow: 0 0 18px rgba(62, 207, 191, 0.1), inset 0 0 22px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.12s;
+}
+.mobile-controls.mc-look-active .mc-look-base {
+  border-color: rgba(62, 207, 191, 0.8);
+  border-style: solid;
+}
+
+.mc-look-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 40% 35%, rgba(180, 240, 230, 0.5), rgba(40, 90, 100, 0.5));
+  border: 2px solid rgba(200, 240, 235, 0.4);
+  box-shadow: 0 0 10px rgba(62, 207, 191, 0.2);
+  pointer-events: none;
+  transition: transform 0.08s ease-out;
+}
+
+.mc-look-label {
+  position: absolute;
+  left: 50%;
+  bottom: 0.15rem;
+  transform: translateX(-50%);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  color: rgba(176, 188, 200, 0.75);
+  pointer-events: none;
+  text-shadow: 0 1px 2px #000;
+}
+
+.mobile-controls.mc-arena .mc-joy-base {
+  background:
+    radial-gradient(circle at 40% 35%, rgba(62, 207, 191, 0.25), transparent 55%),
+    rgba(8, 12, 18, 0.65);
+}
+.mobile-controls.mc-arena .mc-btn.mc-attack {
+  box-shadow: 0 0 20px rgba(232, 93, 76, 0.4);
+}
+
+/* ——— Retrato ——— */
+@media (max-width: 640px) and (orientation: portrait) {
+  .mc-powers {
+    grid-template-columns: 46px 64px 46px;
+    grid-template-rows: 42px 64px 42px;
+    transform: scale(0.95);
+    transform-origin: bottom right;
+  }
+  .mc-btn.mc-attack { width: 64px; height: 64px; min-height: 64px; }
+  .mc-btn.mc-dev { width: 42px; height: 42px; min-height: 40px; }
+  .mc-btn.mc-interact { width: 46px; height: 46px; min-height: 42px; }
+  .mc-look {
+    width: min(36vw, 132px);
+    height: min(36vw, 132px);
+    bottom: calc(var(--mc-pad-b) + 11rem);
+  }
+  body.has-mobile-controls .hud-log {
+    max-height: 12%;
+    width: min(150px, 40%);
+  }
+}
+
+/* ——— Paisagem (celular deitado) ——— */
+@media (max-height: 500px) and (orientation: landscape),
+       (max-width: 900px) and (orientation: landscape) {
+  .mc-powers {
+    right: max(0.35rem, var(--mc-safe-r));
+    bottom: max(0.25rem, var(--mc-safe-b));
+    grid-template-columns: 40px 56px 40px;
+    grid-template-rows: 36px 56px 36px;
+    transform: scale(0.9);
+    transform-origin: bottom right;
+  }
+  .mc-btn.mc-attack { width: 56px; height: 56px; min-height: 56px; }
+  .mc-lbl { font-size: 0.4rem; }
+  .mc-look {
+    width: min(30vh, 118px);
+    height: min(30vh, 118px);
+    right: calc(max(0.3rem, var(--mc-safe-r)) + 9.2rem);
+    bottom: max(0.4rem, var(--mc-safe-b));
+  }
+}
+
+/* ——— gp3: analógico direito híbrido (CÂMERA + ATAQUE) — posições via layoutCluster() ——— */
+.mc-look {
+  pointer-events: auto; /* toque no anel = ataque; arrastar = câmera */
+  opacity: 0.92;
+  touch-action: none;
+}
+.mc-look .mc-look-base { border-style: solid; border-color: rgba(62, 207, 191, 0.5); }
+.mc-look .mc-look-base, .mc-look .mc-look-knob, .mc-look .mc-look-label { pointer-events: none; }
+.mc-look .mc-look-knob { width: 34%; height: 34%; }
+.mc-look-label {
+  bottom: auto;
+  top: 15%;
+  white-space: nowrap;
+  padding: 0.08rem 0.3rem;
+  border-radius: 6px;
+  border: 1px solid rgba(62, 207, 191, 0.55);
+  background: rgba(8, 16, 22, 0.78);
+  color: #bff3ec;
+  font-size: 0.42rem;
+  letter-spacing: 0.04em;
+}

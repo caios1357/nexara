@@ -1,0 +1,39 @@
+{
+  "factions": [
+    {
+      "id": "sindicato_espinha",
+      "name": "Sindicato Espinha",
+      "zone_hint": "B1",
+      "description": "Contratos, dívidas e a espinha financeira da megacidade.",
+      "reputation_start": 0
+    },
+    {
+      "id": "cla_sangue_verde",
+      "name": "Clã Sangue Verde",
+      "zone_hint": "C2",
+      "description": "Forjadores orgânicos e sangue de planta-metal.",
+      "reputation_start": 0
+    },
+    {
+      "id": "circulo_fio",
+      "name": "Círculo do Fio",
+      "zone_hint": "D3",
+      "description": "Tece runas e redes. Hackers teúrgicos.",
+      "reputation_start": 0
+    },
+    {
+      "id": "custodios_nucleo",
+      "name": "Custódios do Núcleo",
+      "zone_hint": "A0",
+      "description": "Guardiões do Núcleo Escarlate e dos dragões-reatores.",
+      "reputation_start": 0
+    },
+    {
+      "id": "sem_nome",
+      "name": "Sem Nome",
+      "zone_hint": "E4",
+      "description": "Sombras do Subsolo Negro. Sem rosto, sem contrato.",
+      "reputation_start": 0
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+/* VESTIÁRIO — herói 3D + espaços + estilo + loadouts (retrato e paisagem, toque) */
+.modal.nx-vest-modal{width:min(98vw,1100px)!important;max-width:98vw!important;max-height:96vh;display:flex;flex-direction:column;padding:.6rem .7rem}
+.modal.nx-vest-modal .modal-body{overflow:auto;flex:1;min-height:0}
+.vst{display:grid;grid-template-columns:1fr;gap:.6rem}
+.vst-stage{position:relative;height:min(46vh,380px);border-radius:12px;background:radial-gradient(ellipse at 50% 62%,#1d4a6a 0%,#0b1a2a 55%,#04080e 100%);border:1px solid #1e3a50;overflow:hidden;touch-action:none}
+.vst-stage canvas{width:100%;height:100%;display:block;cursor:grab}
+.vst-stage canvas:active{cursor:grabbing}
+.vst-name{position:absolute;left:10px;top:8px;font-weight:800;letter-spacing:.06em;color:#7ff3ff;text-shadow:0 0 8px #0af}
+.vst-cam{position:absolute;right:8px;top:8px;display:flex;gap:4px}
+.vst-cam button{min-height:34px;min-width:34px;padding:0 8px;font-size:11px;border-radius:8px;background:rgba(5,15,25,.75)}
+.vst-hint{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:10.5px;color:#8fb4c8;pointer-events:none}
+.vst-side{display:flex;flex-direction:column;gap:.45rem;min-width:0}
+.vst-tabs{display:flex;gap:4px}
+.vst-tabs button{flex:1;min-height:38px;font-size:11.5px;font-weight:700;letter-spacing:.04em}
+.vst-tabs button.on{border-color:#39f0ff;color:#39f0ff;background:rgba(57,240,255,.1)}
+.vst-msg{min-height:1em;font-size:.78rem;color:#9fe8c9}
+.vst-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.vst-slot{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:46px;padding:4px 6px;text-align:left;border-radius:8px;touch-action:manipulation}
+.vst-slot.on{border-color:#39f0ff;box-shadow:0 0 0 1px #39f0ff inset}
+.vst-slot.full .vst-slot-n{color:#fff}
+.vst-slot-k{font-size:10px;font-weight:800;color:#5ad8ff;letter-spacing:.05em}
+.vst-slot-n{font-size:11px;color:#7f93a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.vst-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;max-height:24vh;overflow:auto}
+.vst-item{display:flex;align-items:center;gap:6px;min-height:42px;padding:3px 6px;border-left:3px solid var(--fc);border-radius:7px;text-align:left;touch-action:manipulation}
+.vst-item.sel{box-shadow:0 0 0 2px #ffd34a inset}.vst-item.eq{background:rgba(29,91,58,.35)}
+.vst-item .inv-icon-wrap{width:28px;height:28px;flex:none}
+.vst-item-n{font-size:11.5px;flex:1}
+.vst-tag{font-size:9px;font-weight:800;color:#bfffd9;background:#1d5b3a;padding:1px 4px;border-radius:3px}
+.vst-empty{font-size:.78rem;color:#8aa0b4;margin:.2rem 0}
+.vst-cmp{border:1px solid #1e3a50;border-radius:8px;padding:4px 8px;background:rgba(0,0,0,.3)}
+.vst-cmp-t{font-size:11px;font-weight:800;color:#ffd34a;margin-bottom:2px}
+.vst-cmp-tb{width:100%;border-collapse:collapse;font-size:11.5px}
+.vst-cmp-tb td{padding:1px 4px;color:#cfe}.vst-cmp-tb td:first-child{color:#8fb4c8}
+.vst-cmp-tb td.up b{color:#6dffb0}.vst-cmp-tb td.down b{color:#ff6b6b}
+.vst-cmp-tb small{opacity:.85}
+.vst-acts{display:flex;gap:6px;flex-wrap:wrap}.vst-acts button{flex:1;min-height:40px}
+.vst-lo{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.vst-lo-c{border:1px dashed #2a4a60;border-radius:9px;padding:6px 8px}.vst-lo-c.full{border-style:solid;border-color:#39f0ff}
+.vst-lo-h{display:flex;justify-content:space-between;gap:6px}.vst-lo-h small{color:#8fb4c8}
+.vst-lo-c p{font-size:11px;color:#9fb6c8;margin:.25rem 0}
+.vst-lo-b{display:flex;gap:4px;flex-wrap:wrap}.vst-lo-b button{min-height:36px;font-size:11px;flex:1}
+.hse.hse-embed{grid-template-columns:1fr!important}
+@media (orientation:landscape) and (min-width:640px){
+  .vst{grid-template-columns:minmax(260px,.9fr) minmax(0,1.1fr);align-items:start}
+  .vst-stage{height:min(78vh,560px)}
+  .vst-items{max-height:30vh}
+}
+@media (orientation:landscape) and (max-height:480px){
+  .vst-stage{height:calc(96vh - 90px)}
+  .modal.nx-vest-modal{padding:.35rem .5rem}
+  .modal.nx-vest-modal h2,.modal.nx-vest-modal .modal-title{font-size:.95rem;margin:0 0 .2rem}
+  .vst-slot{min-height:38px}.vst-items{max-height:22vh}
+}
+@media (orientation:portrait){.vst-stage{height:min(40vh,360px)}}
+/* paisagem: modelo fixo à esquerda, só o painel da direita rola */
+@media (orientation:landscape) and (min-width:640px){
+  .modal.nx-vest-modal .modal-body{overflow:hidden;display:flex}
+  .modal.nx-vest-modal .vst{flex:1;min-height:0;height:100%}
+  .vst-side{max-height:calc(96vh - 110px);overflow:auto;padding-right:2px}
+  .vst-stage{height:calc(96vh - 110px);max-height:560px}
+}

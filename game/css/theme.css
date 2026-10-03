@@ -1,0 +1,108 @@
+:root {
+  --bg: #060a10;
+  --bg2: #0c121a;
+  --panel: rgba(14, 20, 30, 0.94);
+  --border: rgba(62, 207, 191, 0.28);
+  --accent: #e85d4c;
+  --accent2: #3ecfbf;
+  --nexa: #7b5cff;
+  --hp: #e85d4c;
+  --text: #d8e0ea;
+  --muted: #7a8899;
+  --warn: #f0c14a;
+  --ok: #5dde8a;
+  --blackout: #020305;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  /* Avoid 100vw scrollbar gutter issues */
+  position: relative;
+}
+button {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.15s, background 0.15s;
+  touch-action: manipulation;
+}
+button:hover { border-color: var(--accent2); background: #1a2433; }
+button.primary { border-color: var(--accent); color: #fff; background: #2a1518; }
+button.primary:hover { background: #3a1c20; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+input, select {
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.hidden { display: none !important; }
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  justify-content: safe center; /* EVO: menu mais alto que a tela (paisagem) não corta o topo */
+  background: radial-gradient(ellipse at 50% 18%, #1a2230 0%, #0a1018 45%, var(--bg) 75%);
+  padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+}
+.logo {
+  font-size: clamp(1.8rem, 8vw, 3rem);
+  letter-spacing: 0.35em;
+  color: var(--accent);
+  text-shadow: 0 0 24px rgba(232, 93, 76, 0.45);
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+.subtitle {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  letter-spacing: 0.15em;
+  font-size: clamp(0.7rem, 2.5vw, 0.95rem);
+  text-align: center;
+  max-width: 100%;
+  padding: 0 0.5rem;
+}
+.menu-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: min(260px, 100%);
+  width: min(280px, 100%);
+}
+.menu-col button { min-height: 44px; width: 100%; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(62,207,191,0.12);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* EVO: menu inicial em paisagem baixa — botões em 2 colunas (Campo de Ascensão cabe sem rolar) */
+@media (orientation: landscape) and (max-height: 520px) {
+  #title-screen .menu-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 0.5rem; width: min(92vw, 560px); }
+  #title-screen .menu-col button { margin: 0; }
+}

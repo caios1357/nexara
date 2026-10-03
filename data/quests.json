@@ -1,0 +1,233 @@
+{
+  "quests": [
+    {
+      "id": "G6-Q01",
+      "name": "Uma Noite em Ferrugem",
+      "zone": "zone_g6",
+      "giver": "npc_quest_giver_g6",
+      "level_req": 1,
+      "description": "Aprenda a sobreviver na Periferia: mover, falar, combater, lootear e reportar a Mara Venn.",
+      "steps": [
+        {
+          "id": "step_talk_rusk",
+          "type": "talk",
+          "target": "npc_quest_giver_g6",
+          "text": "Fale com Velho Rusk na Praça Ferrugem."
+        },
+        {
+          "id": "step_explore",
+          "type": "explore",
+          "target": "poi_beira",
+          "text": "Explore até a Beira dos Bots (sul do mapa)."
+        },
+        {
+          "id": "step_combat",
+          "type": "kill",
+          "target": "mon_bot_combate_mk1",
+          "count": 1,
+          "text": "Derrote 1 Bot de Combate Mk.1."
+        },
+        {
+          "id": "step_loot",
+          "type": "collect",
+          "target": "item_plaqueta_bot",
+          "count": 1,
+          "text": "Colete 1 Plaqueta de Bot (loot)."
+        },
+        {
+          "id": "step_skill",
+          "type": "skill_use",
+          "target": "any",
+          "count": 1,
+          "text": "Use combate ou item para treinar qualquer skill pelo menos uma vez."
+        },
+        {
+          "id": "step_mara",
+          "type": "talk",
+          "target": "npc_mara_venn",
+          "text": "Leve o relatório e a plaqueta até Técnico Mara Venn na oficina."
+        }
+      ],
+      "rewards": {
+        "xp": 80,
+        "items": [
+          {
+            "item_id": "item_chave_runica_g6",
+            "qty": 1
+          },
+          {
+            "item_id": "item_credito_g6",
+            "qty": 25
+          },
+          {
+            "item_id": "item_lata_oleo",
+            "qty": 2
+          }
+        ],
+        "reputation": {
+          "cla_sangue_verde": 5
+        }
+      },
+      "follow_up": "G6-Q02"
+    },
+    {
+      "id": "G6-Q02",
+      "name": "Eco na Oficina",
+      "zone": "zone_g6",
+      "giver": "npc_mara_venn",
+      "level_req": 1,
+      "description": "Opcional: entregue a Chave Rúnica a Mara após o evento 02:17.",
+      "steps": [
+        {
+          "id": "step_entregar_chave",
+          "type": "deliver",
+          "target": "npc_mara_venn",
+          "item_id": "item_chave_runica_g6",
+          "text": "Entregue a Chave Rúnica G6 a Mara Venn."
+        }
+      ],
+      "rewards": {
+        "xp": 30,
+        "items": [
+          {
+            "item_id": "item_dispositivo_nexa",
+            "qty": 1
+          },
+          {
+            "item_id": "item_credito_g6",
+            "qty": 10
+          }
+        ],
+        "reputation": {
+          "circulo_fio": 3
+        }
+      },
+      "follow_up": null,
+      "optional": true
+    },
+    {
+      "id": "E4-Q01",
+      "name": "Primeira Sombra",
+      "zone": "zone_e4",
+      "giver": "npc_e4_quest_hesh",
+      "level_req": 1,
+      "description": "Prove que aguenta o Subsolo: fale com Hesh, explore o poço, derrote uma ameaça e traga um Chip Sem Nome.",
+      "bible": {
+        "ID": "E4-Q01",
+        "Zona": "E4 Subsolo Negro",
+        "Nome": "Primeira Sombra",
+        "Quem dá": "Dona Hesh",
+        "Objetivo": "Explorar poço de sucata, abater mutante/ratazana e entregar Chip Sem Nome a Hesh",
+        "Recompensa": "Passe do Subsolo + créditos + Sucata Nexa",
+        "XP": 100,
+        "Skill": "corte / protecao (via combate)",
+        "Item": "item_passe_subsolo",
+        "Reputação": "sem_nome +8; cla_sangue_verde +2 (pista Arc B)",
+        "Segredo": "Presença Sem Nome sentida; documento Sangue Verde aponta C2",
+        "Leva para": "E4-Q02 (opcional) / rumores Arc A Custódios"
+      },
+      "steps": [
+        {
+          "id": "step_talk_hesh",
+          "type": "talk",
+          "target": "npc_e4_quest_hesh",
+          "text": "Fale com Dona Hesh na Pracinha Sombra."
+        },
+        {
+          "id": "step_explore_poco",
+          "type": "explore",
+          "target": "poi_sucata_viva",
+          "text": "Explore o Poço de Sucata (sul do mapa E4)."
+        },
+        {
+          "id": "step_kill_e4",
+          "type": "kill",
+          "target": "any_e4",
+          "count": 1,
+          "text": "Derrote 1 ameaça do Subsolo (Rato Nexa, Mutante Sombra ou Sucata Viva)."
+        },
+        {
+          "id": "step_chip",
+          "type": "collect",
+          "target": "item_chip_sem_nome",
+          "count": 1,
+          "text": "Colete 1 Chip Sem Nome."
+        },
+        {
+          "id": "step_report_hesh",
+          "type": "talk",
+          "target": "npc_e4_quest_hesh",
+          "text": "Entregue o chip a Dona Hesh."
+        }
+      ],
+      "rewards": {
+        "xp": 100,
+        "items": [
+          {
+            "item_id": "item_passe_subsolo",
+            "qty": 1
+          },
+          {
+            "item_id": "item_credito_g6",
+            "qty": 40
+          },
+          {
+            "item_id": "item_sucata_nexa",
+            "qty": 3
+          }
+        ],
+        "reputation": {
+          "sem_nome": 8,
+          "cla_sangue_verde": 2,
+          "custodios_nucleo": 1
+        }
+      },
+      "follow_up": "E4-Q02"
+    },
+    {
+      "id": "E4-Q02",
+      "name": "Eco Verde no Negro",
+      "zone": "zone_e4",
+      "giver": "npc_e4_informante_cinza",
+      "level_req": 1,
+      "description": "Opcional: mostre a Cinza qualquer documento Sangue Verde ou fale sobre o contrato.",
+      "bible": {
+        "ID": "E4-Q02",
+        "Zona": "E4",
+        "Nome": "Eco Verde no Negro",
+        "Quem dá": "Cinza",
+        "Objetivo": "Conversar com Cinza após E4-Q01 (documento opcional)",
+        "Recompensa": "créditos + reputação",
+        "XP": 35,
+        "Skill": "contrato",
+        "Item": "item_credito_g6",
+        "Reputação": "cla_sangue_verde +5; sem_nome +3",
+        "Segredo": "Contrato aponta C2 — sem acesso",
+        "Leva para": "Arc B (EM DESENVOLVIMENTO)"
+      },
+      "steps": [
+        {
+          "id": "step_talk_cinza",
+          "type": "talk",
+          "target": "npc_e4_informante_cinza",
+          "text": "Fale com Cinza sobre o Contrato Sangue Verde."
+        }
+      ],
+      "rewards": {
+        "xp": 35,
+        "items": [
+          {
+            "item_id": "item_credito_g6",
+            "qty": 15
+          }
+        ],
+        "reputation": {
+          "cla_sangue_verde": 5,
+          "sem_nome": 3
+        }
+      },
+      "follow_up": null,
+      "optional": true
+    }
+  ]
+}

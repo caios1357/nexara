@@ -1,0 +1,19 @@
+{
+  "_doc": "Bloco 7 — PODERES TEMPORÁRIOS DA ARENA (tentativa contra o GIGANTE VERDE). Nunca vão para o save: vivem em arenaRun (game/js/arena-run.js) como modificadores do sistema real (modifiers.js) e são removidos matematicamente ao fim de cada tentativa (morte, vitória ou sair da Arena). Efeito por pilha: tipo 'mult' → valor_base × (1 + valor × pilhas); tipo 'add' → valor_base + valor × pilhas. Pilhas limitadas por maxStacks DENTRO da tentativa; nada passa de uma tentativa para outra.",
+  "regras": {
+    "bossHpThresholds": [0.8, 0.6, 0.4, 0.2],
+    "choices": 3,
+    "healOnPickFrac": 0.25
+  },
+  "poderes": [
+    { "id": "arena_forca", "nome": "FORÇA DA ARENA", "raridade": "raro", "icone": "furia_cibernetica", "resumo": "+20% de dano dos seus golpes e especiais por pilha.", "efeitos": [{ "stat": "damage", "tipo": "mult", "valor": 0.20 }], "maxStacks": 3, "peso": 100 },
+    { "id": "arena_blindagem", "nome": "BLINDAGEM NEXA", "raridade": "raro", "icone": "nucleo_reforcado", "resumo": "−15% de dano recebido por pilha.", "efeitos": [{ "stat": "damageTaken", "tipo": "mult", "valor": -0.15 }], "maxStacks": 3, "peso": 100 },
+    { "id": "arena_velocidade", "nome": "PASSO RELÂMPAGO", "raridade": "comum", "icone": "impulso_neural", "resumo": "+15% de velocidade de movimento por pilha.", "efeitos": [{ "stat": "moveSpeed", "tipo": "mult", "valor": 0.15 }], "maxStacks": 2, "peso": 90 },
+    { "id": "arena_precisao", "nome": "OLHO DE CAÇADOR", "raridade": "raro", "icone": "mira_neural", "resumo": "+10% de chance de crítico por pilha.", "efeitos": [{ "stat": "critChance", "tipo": "add", "valor": 0.10 }], "maxStacks": 3, "peso": 90 },
+    { "id": "arena_recarga", "nome": "CIRCUITO RÁPIDO", "raridade": "epico", "icone": "especial", "resumo": "−20% de recarga dos especiais por pilha.", "efeitos": [{ "stat": "specialCooldown", "tipo": "mult", "valor": -0.20 }], "maxStacks": 2, "peso": 70 },
+    { "id": "arena_nexa", "nome": "FONTE DE NEXA", "raridade": "comum", "icone": "condutor_de_nexa", "resumo": "+1,5 Nexa por segundo por pilha.", "efeitos": [{ "stat": "nexaRegen", "tipo": "add", "valor": 1.5 }], "maxStacks": 3, "peso": 90 },
+    { "id": "arena_dragao", "nome": "FÚRIA DO COMPANHEIRO", "raridade": "epico", "icone": "nucleo_divino", "resumo": "+30% de dano do seu Mini Dragão por pilha.", "efeitos": [{ "stat": "dragonDamage", "tipo": "mult", "valor": 0.30 }], "maxStacks": 3, "peso": 70 },
+    { "id": "arena_vigor", "nome": "VIGOR TEMPORÁRIO", "raridade": "raro", "icone": "defesa", "resumo": "+20% de HP máximo por pilha (e cura 25%).", "efeitos": [{ "stat": "maxHp", "tipo": "mult", "valor": 0.20 }], "maxStacks": 2, "peso": 80 },
+    { "id": "arena_ritmo", "nome": "RITMO DE COMBATE", "raridade": "comum", "icone": "espada", "resumo": "+15% de velocidade de ataque por pilha.", "efeitos": [{ "stat": "attackSpeed", "tipo": "mult", "valor": 0.15 }], "maxStacks": 2, "peso": 80 }
+  ]
+}

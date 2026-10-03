@@ -1,0 +1,391 @@
+{
+  "_doc": "ARENA PRINCIPAL (Battle Royale PvE, 1 herói vs monstros). Config ÚNICA: mapa (gerado por seed em game/js/br-map.js), regiões, POIs, diretor de spawn, LOD de IA, loot por risco, zona segura, eventos, extração. enabled:false esconde o modo (feature flag).",
+  "enabled": true,
+  "zona": {
+    "id": "zone_arena_br",
+    "code": "BR",
+    "name": "Arena Principal",
+    "width": 100,
+    "height": 76,
+    "seed": 20261003
+  },
+  "spawnHeroi": {
+    "x": 6,
+    "y": 69
+  },
+  "regioes": [
+    {
+      "id": "periferia",
+      "n": 1,
+      "nome": "Periferia",
+      "x0": 1,
+      "x1": 33,
+      "y0": 46,
+      "y1": 74,
+      "risco": 1,
+      "cor": "#3ecfbf",
+      "altura": 0,
+      "loot": "basico",
+      "densidade": 0.55,
+      "monstros": {
+        "mon_br_rastreador": 3,
+        "mon_br_enxame": 2,
+        "mon_br_cacador": 1
+      }
+    },
+    {
+      "id": "ruinas",
+      "n": 2,
+      "nome": "Ruínas Industriais",
+      "x0": 34,
+      "x1": 65,
+      "y0": 46,
+      "y1": 74,
+      "risco": 2,
+      "cor": "#ffa030",
+      "altura": 0,
+      "loot": "medio",
+      "densidade": 0.8,
+      "monstros": {
+        "mon_br_rastreador": 2,
+        "mon_br_brutamonte": 2,
+        "mon_br_cacador": 2,
+        "mon_br_guardiao": 1
+      }
+    },
+    {
+      "id": "floresta",
+      "n": 3,
+      "nome": "Floresta Selvagem",
+      "x0": 1,
+      "x1": 33,
+      "y0": 1,
+      "y1": 45,
+      "risco": 2,
+      "cor": "#46ff8a",
+      "altura": 0.35,
+      "loot": "medio",
+      "densidade": 0.7,
+      "monstros": {
+        "mon_br_predador": 3,
+        "mon_br_enxame": 2,
+        "mon_br_mutante": 1
+      }
+    },
+    {
+      "id": "complexo",
+      "n": 4,
+      "nome": "Complexo Abandonado",
+      "x0": 34,
+      "x1": 65,
+      "y0": 1,
+      "y1": 45,
+      "risco": 3,
+      "cor": "#4ad8ff",
+      "altura": 0.15,
+      "loot": "avancado",
+      "densidade": 0.85,
+      "monstros": {
+        "mon_br_cacador": 2,
+        "mon_br_mutante": 2,
+        "mon_br_guardiao": 1,
+        "mon_br_brutamonte": 1
+      }
+    },
+    {
+      "id": "elite",
+      "n": 5,
+      "nome": "Zona de Elite",
+      "x0": 67,
+      "x1": 98,
+      "y0": 47,
+      "y1": 74,
+      "risco": 4,
+      "cor": "#ffc830",
+      "altura": 0.55,
+      "loot": "alto",
+      "densidade": 0.9,
+      "monstros": {
+        "mon_br_elite": 2,
+        "mon_br_guardiao": 2,
+        "mon_br_predador": 1,
+        "mon_br_brutamonte": 1
+      }
+    },
+    {
+      "id": "dragao",
+      "n": 6,
+      "nome": "Território do Dragão",
+      "x0": 67,
+      "x1": 98,
+      "y0": 1,
+      "y1": 45,
+      "risco": 5,
+      "cor": "#5dff6a",
+      "altura": -0.3,
+      "loot": "lendario",
+      "densidade": 0.35,
+      "monstros": {
+        "mon_br_mutante": 1,
+        "mon_br_enxame": 1
+      }
+    }
+  ],
+  "rotas": [
+    {
+      "id": "A",
+      "nome": "Rota A — rápida e perigosa",
+      "via": [
+        "periferia",
+        "ruinas",
+        "elite",
+        "dragao"
+      ]
+    },
+    {
+      "id": "B",
+      "nome": "Rota B — longa, com cobertura",
+      "via": [
+        "periferia",
+        "floresta",
+        "complexo",
+        "dragao"
+      ]
+    },
+    {
+      "id": "C",
+      "nome": "Rota C — loot e monstros",
+      "via": [
+        "periferia",
+        "ruinas",
+        "complexo",
+        "dragao"
+      ]
+    }
+  ],
+  "diretor": {
+    "_doc": "Spawns ESPARSOS ao redor do herói (anel), por região/risco; teto de vivos; some quem fica longe e não está em combate. Espaço vazio proposital.",
+    "maxVivos": {
+      "low": 12,
+      "medium": 14,
+      "high": 22
+    },
+    "anelMin": 11,
+    "anelMax": 24,
+    "despawnDist": 34,
+    "intervaloMs": 2600,
+    "gruposEnxame": [
+      3,
+      4
+    ],
+    "pontosPorRegiao": 14,
+    "espacoMinEntrePontos": 6,
+    "zonaLivreSpawn": 9
+  },
+  "lodIa": {
+    "_doc": "≤ perto: IA completa · ≤ medio: pensa a cada 4 quadros · além: congelado (patrulha simplificada).",
+    "perto": 14,
+    "medio": 24
+  },
+  "elite": {
+    "hpMult": 2.4,
+    "danoMult": 1.5,
+    "mcbTier": "elite",
+    "lootBonus": 1
+  },
+  "raridades": {
+    "ordem": [
+      "comum",
+      "incomum",
+      "raro",
+      "epico",
+      "lendario"
+    ],
+    "nomes": {
+      "comum": "Comum",
+      "incomum": "Incomum",
+      "raro": "Raro",
+      "epico": "Épico",
+      "lendario": "Lendário"
+    },
+    "cores": {
+      "comum": "#c8d4d0",
+      "incomum": "#4aa0ff",
+      "raro": "#ffc24a",
+      "epico": "#b36bff",
+      "lendario": "#ffd34a"
+    },
+    "multAtributo": {
+      "comum": 1,
+      "incomum": 1.15,
+      "raro": 1.3,
+      "epico": 1.5,
+      "lendario": 1.8
+    }
+  },
+  "lootPorRisco": {
+    "_doc": "peso de raridade por nível de loot da região (risco ↑ recompensa ↑).",
+    "basico": {
+      "comum": 70,
+      "incomum": 26,
+      "raro": 4
+    },
+    "medio": {
+      "comum": 35,
+      "incomum": 45,
+      "raro": 18,
+      "epico": 2
+    },
+    "avancado": {
+      "incomum": 30,
+      "raro": 50,
+      "epico": 18,
+      "lendario": 2
+    },
+    "alto": {
+      "raro": 45,
+      "epico": 45,
+      "lendario": 10
+    },
+    "lendario": {
+      "epico": 55,
+      "lendario": 45
+    }
+  },
+  "bausPorRegiao": {
+    "periferia": 5,
+    "ruinas": 7,
+    "floresta": 6,
+    "complexo": 7,
+    "elite": 5,
+    "dragao": 3
+  },
+  "caixasPorRegiao": {
+    "periferia": 6,
+    "ruinas": 9,
+    "floresta": 4,
+    "complexo": 8,
+    "elite": 4,
+    "dragao": 2
+  },
+  "dropMonstro": {
+    "comum": 0.12,
+    "forte": 0.25,
+    "elite": 1,
+    "mini_chefe": 1,
+    "chefe": 1
+  },
+  "materiais": [
+    "item_ferro_enferrujado",
+    "item_sucata_nexa",
+    "item_parafuso_raro",
+    "item_nucleo_energia",
+    "item_chip_sem_nome"
+  ],
+  "bolsa": {
+    "capacidade": 30
+  },
+  "venda": {
+    "_doc": "MERCADO NEGRO → VENDER: preço = base da raridade × fator da categoria (equipamento 1, material 0.3). Nunca vende acima do preço de compra × tetoSobreCompra. Item equipado não vende (remova antes).",
+    "basePorRaridade": {
+      "comum": 6,
+      "incomum": 15,
+      "raro": 40,
+      "epico": 100,
+      "lendario": 240
+    },
+    "fatorCategoria": {
+      "equipamento": 1,
+      "material": 0.3,
+      "consumivel": 0.4
+    },
+    "tetoSobreCompra": 0.5
+  },
+  "zonaSegura": {
+    "_doc": "Config de TESTE (curta). Avisos antes de cada fechamento; dano só fora do círculo e só depois do aviso.",
+    "ativa": true,
+    "inicioMs": 120000,
+    "avisoMs": 30000,
+    "estagios": [
+      {
+        "raio": 46,
+        "duracaoMs": 60000
+      },
+      {
+        "raio": 32,
+        "duracaoMs": 60000
+      },
+      {
+        "raio": 20,
+        "duracaoMs": 60000
+      },
+      {
+        "raio": 12,
+        "duracaoMs": 60000
+      }
+    ],
+    "centro": {
+      "x": 52,
+      "y": 34
+    },
+    "danoPorSeg": 4
+  },
+  "extracao": {
+    "_doc": "Ficar parado no ponto por 'segundos' encerra a corrida com sucesso: bônus de MCB sobre o ganho da corrida.",
+    "pontos": [
+      {
+        "id": "ext_norte",
+        "x": 6,
+        "y": 4,
+        "nome": "EXTRAÇÃO NORTE"
+      },
+      {
+        "id": "ext_sul",
+        "x": 62,
+        "y": 72,
+        "nome": "EXTRAÇÃO SUL"
+      }
+    ],
+    "segundos": 5,
+    "liberaAposMs": 45000,
+    "bonusMcbFrac": 0.25
+  },
+  "eventos": {
+    "_doc": "Eventos seguros implementados: cacada (elite marcado) e drop (baú especial). Invasão / dragão em ameaça: arquitetura pronta (tipo registrado, desligado).",
+    "primeiroMs": 60000,
+    "intervaloMs": 110000,
+    "tipos": {
+      "cacada": {
+        "ativo": true,
+        "nome": "CAÇADA",
+        "duracaoMs": 90000,
+        "bonusMcb": 15
+      },
+      "drop": {
+        "ativo": true,
+        "nome": "DROP ESPECIAL",
+        "duracaoMs": 100000,
+        "loot": "alto"
+      },
+      "invasao": {
+        "ativo": false,
+        "nome": "INVASÃO"
+      },
+      "dragao_ameaca": {
+        "ativo": false,
+        "nome": "DRAGÃO EM AMEAÇA"
+      }
+    }
+  },
+  "dragao": {
+    "x": 85,
+    "y": 20,
+    "territorio": {
+      "x0": 72,
+      "x1": 98,
+      "y0": 6,
+      "y1": 34
+    },
+    "avisoDist": 16
+  }
+}

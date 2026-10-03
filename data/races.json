@@ -1,0 +1,108 @@
+{
+  "races": [
+    {
+      "id": "humano",
+      "name": "Humano",
+      "playable": true,
+      "description": "Adaptáveis e negociadores. Dominam distância e contratos.",
+      "base_attrs": {
+        "hp": 100,
+        "nexa": 40,
+        "ataque": 8,
+        "defesa": 6,
+        "distancia": 10,
+        "velocidade": 8,
+        "nivel": 1,
+        "xp": 0
+      },
+      "skill_bonuses": {
+        "corte": 0,
+        "distancia": 5,
+        "protecao": 0,
+        "canalizacao": 0,
+        "hack_runico": 0,
+        "contrato": 5
+      }
+    },
+    {
+      "id": "orc",
+      "name": "Orc",
+      "playable": true,
+      "description": "Resistentes e brutos. Corte e proteção acima da média.",
+      "base_attrs": {
+        "hp": 130,
+        "nexa": 25,
+        "ataque": 12,
+        "defesa": 10,
+        "distancia": 5,
+        "velocidade": 6,
+        "nivel": 1,
+        "xp": 0
+      },
+      "skill_bonuses": {
+        "corte": 5,
+        "distancia": 0,
+        "protecao": 5,
+        "canalizacao": 0,
+        "hack_runico": 0,
+        "contrato": 0
+      }
+    },
+    {
+      "id": "mago",
+      "name": "Mago",
+      "playable": true,
+      "description": "Canalizadores de Nexa. Hack rúnico e magia viva.",
+      "base_attrs": {
+        "hp": 70,
+        "nexa": 90,
+        "ataque": 5,
+        "defesa": 4,
+        "distancia": 7,
+        "velocidade": 7,
+        "nivel": 1,
+        "xp": 0
+      },
+      "skill_bonuses": {
+        "corte": 0,
+        "distancia": 0,
+        "protecao": 0,
+        "canalizacao": 5,
+        "hack_runico": 5,
+        "contrato": 0
+      }
+    },
+    {
+      "id": "hibrido",
+      "name": "Híbrido",
+      "playable": true,
+      "description": "Cruzamento de linhagens. Bônus equilibrados em três vias.",
+      "base_attrs": {
+        "hp": 100,
+        "nexa": 55,
+        "ataque": 8,
+        "defesa": 7,
+        "distancia": 8,
+        "velocidade": 8,
+        "nivel": 1,
+        "xp": 0
+      },
+      "skill_bonuses": {
+        "corte": 3,
+        "distancia": 3,
+        "protecao": 0,
+        "canalizacao": 3,
+        "hack_runico": 0,
+        "contrato": 0
+      }
+    },
+    {
+      "id": "dragao",
+      "name": "Dragão",
+      "playable": false,
+      "description": "Reatores vivos. NÃO jogável.",
+      "base_attrs": null,
+      "skill_bonuses": null
+    }
+  ]
+}

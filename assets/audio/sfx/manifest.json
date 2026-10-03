@@ -1,0 +1,115 @@
+{
+ "swing": [
+  "swing_0.mp3",
+  "swing_1.mp3"
+ ],
+ "combo_0": [
+  "combo_0.mp3"
+ ],
+ "combo_1": [
+  "combo_1.mp3"
+ ],
+ "combo_2": [
+  "combo_2.mp3"
+ ],
+ "whiff": [
+  "whiff.mp3"
+ ],
+ "hit": [
+  "hit_0.mp3",
+  "hit_1.mp3",
+  "hit_2.mp3"
+ ],
+ "hit_heavy": [
+  "hit_heavy_0.mp3",
+  "hit_heavy_1.mp3"
+ ],
+ "crit": [
+  "crit.mp3"
+ ],
+ "hurt": [
+  "hurt.mp3"
+ ],
+ "block": [
+  "block.mp3"
+ ],
+ "posture_break": [
+  "posture_break.mp3"
+ ],
+ "dodge": [
+  "dodge_0.mp3",
+  "dodge_1.mp3"
+ ],
+ "perfect_dodge": [
+  "perfect_dodge.mp3"
+ ],
+ "warn": [
+  "warn.mp3"
+ ],
+ "denied": [
+  "denied.mp3"
+ ],
+ "charge": [
+  "charge.mp3"
+ ],
+ "special_strike": [
+  "special_strike.mp3"
+ ],
+ "special_spin": [
+  "special_spin.mp3"
+ ],
+ "special_dash": [
+  "special_dash.mp3"
+ ],
+ "special_suprema": [
+  "special_suprema.mp3"
+ ],
+ "dragon_shot": [
+  "dragon_shot.mp3"
+ ],
+ "dragon_flame": [
+  "dragon_flame.mp3"
+ ],
+ "dragon_charge": [
+  "dragon_charge.mp3"
+ ],
+ "dragon_impact": [
+  "dragon_impact.mp3"
+ ],
+ "enemy_death": [
+  "enemy_death_0.mp3",
+  "enemy_death_1.mp3"
+ ],
+ "enemy_death_big": [
+  "enemy_death_big.mp3"
+ ],
+ "enemy_growl": [
+  "enemy_growl_0.mp3",
+  "enemy_growl_1.mp3",
+  "enemy_growl_2.mp3"
+ ],
+ "elite_spawn": [
+  "elite_spawn.mp3"
+ ],
+ "level_up": [
+  "level_up.mp3"
+ ],
+ "loot": [
+  "loot.mp3"
+ ],
+ "loot_rare": [
+  "loot_rare.mp3"
+ ],
+ "boss_roar": [
+  "boss_roar.mp3"
+ ],
+ "boss_warn": [
+  "boss_warn.mp3"
+ ],
+ "boss_attack": [
+  "boss_attack.mp3"
+ ],
+ "ui_click": [
+  "ui_click.mp3"
+ ]
+}

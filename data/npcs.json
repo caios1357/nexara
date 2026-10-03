@@ -1,0 +1,229 @@
+{
+  "npcs": [
+    {
+      "id": "npc_quest_giver_g6",
+      "name": "Velho Rusk",
+      "role": "quest_giver",
+      "zone": "zone_g6",
+      "x": 4,
+      "y": 6,
+      "faction": null,
+      "description": "Ex-operário. Conhece todo mundo na Ferrugem.",
+      "dialog_key": "dialog_rusk",
+      "quests_offered": [
+        "G6-Q01"
+      ],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_mara_venn",
+      "name": "Técnico Mara Venn",
+      "role": "smith_tech",
+      "zone": "zone_g6",
+      "x": 3,
+      "y": 3,
+      "faction": null,
+      "description": "Técnica de campo. Conserta o que ninguém mais toca. Ligada ao evento 02:17.",
+      "dialog_key": "dialog_mara",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null,
+      "special": "event_0217_trigger"
+    },
+    {
+      "id": "npc_mercador_kesh",
+      "name": "Kesh o Mercador",
+      "role": "merchant",
+      "zone": "zone_g6",
+      "x": 8,
+      "y": 3,
+      "faction": "sindicato_espinha",
+      "description": "Vende sucata e consumíveis. Sempre com um sorriso de dívida.",
+      "dialog_key": "dialog_kesh",
+      "quests_offered": [],
+      "shop": {
+        "buy": [
+          "item_lata_oleo",
+          "item_frasco_nexa",
+          "item_kit_reparo",
+          "item_lamina_sucata",
+          "item_pistola_parafuso",
+          "item_colete_chapa"
+        ],
+        "sell_multiplier": 0.4
+      },
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_treinadora_lia",
+      "name": "Lia Treinadora",
+      "role": "trainer",
+      "zone": "zone_g6",
+      "x": 6,
+      "y": 6,
+      "faction": null,
+      "description": "Ensina o básico de combate na periferia.",
+      "dialog_key": "dialog_lia",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": [
+        "corte",
+        "distancia",
+        "protecao"
+      ]
+    },
+    {
+      "id": "npc_cidadao_tomo",
+      "name": "Tomo",
+      "role": "citizen",
+      "zone": "zone_g6",
+      "x": 2,
+      "y": 7,
+      "faction": null,
+      "description": "Morador da Ferrugem. Fala de luzes piscando.",
+      "dialog_key": "dialog_tomo",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_informante_nyx",
+      "name": "Nyx",
+      "role": "informant",
+      "zone": "zone_g6",
+      "x": 9,
+      "y": 5,
+      "faction": "sem_nome",
+      "description": "Sussurra pistas sobre o Núcleo. Nunca diz o nome completo.",
+      "dialog_key": "dialog_nyx",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_guarda_brak",
+      "name": "Guarda Brak",
+      "role": "guard",
+      "zone": "zone_g6",
+      "x": 1,
+      "y": 5,
+      "faction": null,
+      "description": "Guarda o portão improvisado da periferia. Bloqueia zonas de risco.",
+      "dialog_key": "dialog_brak",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_misterioso_sombra",
+      "name": "Figura Encoberta",
+      "role": "mysterious",
+      "zone": "zone_g6",
+      "x": 10,
+      "y": 2,
+      "faction": "custodios_nucleo",
+      "description": "Observa de longe. Menciona um dragão jovem e setenta e duas horas.",
+      "dialog_key": "dialog_sombra",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_quest_hesh",
+      "name": "Dona Hesh",
+      "role": "quest_giver",
+      "zone": "zone_e4",
+      "x": 4,
+      "y": 6,
+      "faction": "sem_nome",
+      "description": "Coordena favores no Subsolo. Nunca admite o nome da rede.",
+      "dialog_key": "dialog_hesh",
+      "quests_offered": [
+        "E4-Q01"
+      ],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_mercador_vex",
+      "name": "Vex Mercado-Negro",
+      "role": "merchant",
+      "zone": "zone_e4",
+      "x": 8,
+      "y": 3,
+      "faction": "sem_nome",
+      "description": "Vende o que a superfície proíbe. Preço em crédito e silêncio.",
+      "dialog_key": "dialog_vex",
+      "quests_offered": [],
+      "shop": {
+        "buy": [
+          "item_lata_oleo",
+          "item_kit_reparo",
+          "item_sucata_nexa",
+          "item_lamina_sombra",
+          "item_colete_tunel",
+          "item_frasco_nexa"
+        ],
+        "sell_multiplier": 0.35
+      },
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_informante_cinza",
+      "name": "Cinza",
+      "role": "informant",
+      "zone": "zone_e4",
+      "x": 3,
+      "y": 6,
+      "faction": "sem_nome",
+      "description": "Sussurra pistas Sem Nome. Menciona Sangue Verde e Custódios sem explicar.",
+      "dialog_key": "dialog_cinza",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_mutante_kal",
+      "name": "Kal (Cascas)",
+      "role": "citizen",
+      "zone": "zone_e4",
+      "x": 6,
+      "y": 7,
+      "faction": null,
+      "description": "Cidadão com marcas de mutação leve. Vive entre sucata viva.",
+      "dialog_key": "dialog_kal",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_guarda_selo",
+      "name": "Guarda Selo",
+      "role": "guard",
+      "zone": "zone_e4",
+      "x": 10,
+      "y": 5,
+      "faction": null,
+      "description": "Barreira improvisada para túneis mais fundos (C2/D3). Não passa ninguém.",
+      "dialog_key": "dialog_selo",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    },
+    {
+      "id": "npc_e4_arquivo_rasgado",
+      "name": "Cartaz Rasgado",
+      "role": "mysterious",
+      "zone": "zone_e4",
+      "x": 9,
+      "y": 5,
+      "faction": null,
+      "description": "Poster mural: silhueta de torre fantasma e a frase ÓRBITA NÃO RESPONDE.",
+      "dialog_key": "dialog_cartaz_fantasma",
+      "quests_offered": [],
+      "shop": null,
+      "trainer_skills": null
+    }
+  ]
+}

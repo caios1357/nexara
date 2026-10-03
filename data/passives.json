@@ -1,0 +1,398 @@
+{
+  "_doc": "Passivas (Bloco 3). efeitos: stat = chave de modifiers.STATS; tipo 'mult' soma porcentagem (valor 0.08 = +8%, somadas entre passivas); tipo 'add' soma valor absoluto (critChance 0.05 = +5 pontos percentuais). peso opcional sobrepõe o peso da raridade. empilhavel=false: uma vez escolhida não é oferecida de novo. Bloco V: ids de raridade são as faixas internas de sorteio (comum<raro<epico<lendario<divino, pesos inalterados); 'nome'/'classe'/'cor' são o rótulo exibido na escala visual COMUM<INCOMUM<RARO<ÉPICO<LENDÁRIO. 'categoria' = etiqueta da carta (ATAQUE/NEXA/DEFESA/UTILIDADE/PODER). 'resumo' = frase curta da carta; 'descricao' = linha EFEITO. EVO: 'build' = direção de build da carta (COMBO/ESQUIVA/NEXA/PODER/DEFESA; as 7 originais usam gameplay-config.progression.buildOf); 2 ou 3 passivas da mesma direção ativam SINERGIA (config).",
+  "raridades": {
+    "comum": {
+      "nome": "COMUM",
+      "peso": 100,
+      "cor": "#8fc9c2",
+      "classe": "comum"
+    },
+    "raro": {
+      "nome": "INCOMUM",
+      "peso": 70,
+      "cor": "#4aa0ff",
+      "classe": "incomum"
+    },
+    "epico": {
+      "nome": "RARO",
+      "peso": 35,
+      "cor": "#ffc24a",
+      "classe": "raro"
+    },
+    "lendario": {
+      "nome": "ÉPICO",
+      "peso": 18,
+      "cor": "#b36bff",
+      "classe": "epico"
+    },
+    "divino": {
+      "nome": "LENDÁRIO",
+      "peso": 10,
+      "cor": "#ff9a2a",
+      "classe": "lendario"
+    }
+  },
+  "passivas": [
+    {
+      "id": "furia_cibernetica",
+      "nome": "FÚRIA CIBERNÉTICA",
+      "descricao": "AUTOMÁTICA: 3 acertos seguidos ativam SUPER FORÇA — +30% de dano por 5 s (aura vermelha). Bônus base: +8% de dano do ataque básico.",
+      "icone": "⚔",
+      "raridade": "comum",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "damage",
+          "tipo": "mult",
+          "valor": 0.08
+        }
+      ],
+      "categoria": "ATAQUE",
+      "resumo": "3 acertos seguidos = SUPER FORÇA automática."
+    },
+    {
+      "id": "condutor_de_nexa",
+      "nome": "CONDUTOR DE NEXA",
+      "descricao": "AUTOMÁTICA: acertos ativam FLUXO DE NEXA — +2 Nexa por acerto e +1,5 Nexa/s por 4 s (brilho azul). Bônus base: +10% de regeneração de Nexa.",
+      "icone": "◈",
+      "raridade": "comum",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "nexaRegen",
+          "tipo": "mult",
+          "valor": 0.1
+        }
+      ],
+      "categoria": "NEXA",
+      "resumo": "Acertar recarrega Nexa e acende o FLUXO."
+    },
+    {
+      "id": "nucleo_reforcado",
+      "nome": "NÚCLEO REFORÇADO",
+      "descricao": "AUTOMÁTICA: HP abaixo de 30% cria ESCUDO DE ENERGIA que absorve 25% do HP máx. por 4 s (recarga 20 s). Bônus base: +10% de HP máximo.",
+      "icone": "⬢",
+      "raridade": "comum",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "maxHp",
+          "tipo": "mult",
+          "valor": 0.1
+        }
+      ],
+      "categoria": "DEFESA",
+      "resumo": "Escudo de energia automático com HP baixo."
+    },
+    {
+      "id": "impulso_neural",
+      "nome": "IMPULSO NEURAL",
+      "descricao": "AUTOMÁTICA: abater ou esquivar ativa IMPULSO — +35% de velocidade por 4 s (rastro azul). Bônus base: +5% de velocidade de movimento.",
+      "icone": "➤",
+      "raridade": "comum",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "moveSpeed",
+          "tipo": "mult",
+          "valor": 0.05
+        }
+      ],
+      "categoria": "UTILIDADE",
+      "resumo": "Abate ou esquiva = IMPULSO de velocidade."
+    },
+    {
+      "id": "mira_neural",
+      "nome": "MIRA NEURAL",
+      "descricao": "AUTOMÁTICA: a cada 5 acertos, CRÍTICO garantido (clarão dourado e número grande); crítico ativa FOCO NEURAL +15% de chance por 3 s. Bônus base: +5% de chance de crítico.",
+      "icone": "✛",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "critChance",
+          "tipo": "add",
+          "valor": 0.05
+        }
+      ],
+      "categoria": "ATAQUE",
+      "resumo": "Críticos garantidos e visíveis."
+    },
+    {
+      "id": "cacador_de_monstros",
+      "nome": "CAÇADOR DE MONSTROS",
+      "descricao": "AUTOMÁTICA: MARCA o inimigo atingido (ou travado) — ele recebe +25% de dano do herói e do dragão. Bônus base: +10% de dano contra inimigos comuns.",
+      "icone": "☠",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "damageVsCommon",
+          "tipo": "mult",
+          "valor": 0.1
+        }
+      ],
+      "categoria": "ATAQUE",
+      "resumo": "Marca um inimigo: ele leva dano extra."
+    },
+    {
+      "id": "nucleo_divino",
+      "nome": "NÚCLEO DIVINO",
+      "descricao": "AUTOMÁTICA: usar um especial ativa o MODO DIVINO do dragão — dano ×1,6 e ataques mais rápidos por 6 s (recarga 18 s). Bônus base: +15% de dano de habilidades e +10% de regeneração de Nexa.",
+      "icone": "✦",
+      "raridade": "divino",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "abilityDamage",
+          "tipo": "mult",
+          "valor": 0.15
+        },
+        {
+          "stat": "nexaRegen",
+          "tipo": "mult",
+          "valor": 0.1
+        }
+      ],
+      "categoria": "PODER",
+      "resumo": "Especiais despertam o MODO DIVINO do dragão."
+    },
+    {
+      "id": "eco_runico",
+      "nome": "ECO RÚNICO",
+      "descricao": "+10% velocidade de ataque e +5% de dano. Build COMBO.",
+      "icone": "≋",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "attackSpeed",
+          "tipo": "mult",
+          "valor": 0.1
+        },
+        {
+          "stat": "damage",
+          "tipo": "mult",
+          "valor": 0.05
+        }
+      ],
+      "categoria": "ATAQUE",
+      "resumo": "Combo mais rápido e conectado.",
+      "build": "COMBO"
+    },
+    {
+      "id": "fagulha_em_cadeia",
+      "nome": "FAGULHA EM CADEIA",
+      "descricao": "+6 pp de chance de crítico e +15% de dano crítico. Build COMBO.",
+      "icone": "ϟ",
+      "raridade": "epico",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "critChance",
+          "tipo": "add",
+          "valor": 0.06
+        },
+        {
+          "stat": "critMult",
+          "tipo": "mult",
+          "valor": 0.15
+        }
+      ],
+      "categoria": "ATAQUE",
+      "resumo": "Críticos mais frequentes e mais fortes.",
+      "build": "COMBO"
+    },
+    {
+      "id": "reflexo_fantasma",
+      "nome": "REFLEXO FANTASMA",
+      "descricao": "+60 ms na janela da esquiva perfeita (Nexa extra) e +6% de velocidade. Build ESQUIVA.",
+      "icone": "◌",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "perfectDodgeMs",
+          "tipo": "add",
+          "valor": 60
+        },
+        {
+          "stat": "moveSpeed",
+          "tipo": "mult",
+          "valor": 0.06
+        }
+      ],
+      "categoria": "UTILIDADE",
+      "resumo": "Janela de ESQUIVA PERFEITA maior.",
+      "build": "ESQUIVA"
+    },
+    {
+      "id": "telemetria_neural",
+      "nome": "TELEMETRIA NEURAL",
+      "descricao": "−8% de dano recebido, +30 ms de esquiva perfeita e +3 pp de crítico. Build ESQUIVA.",
+      "icone": "◎",
+      "raridade": "epico",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "damageTaken",
+          "tipo": "mult",
+          "valor": -0.08
+        },
+        {
+          "stat": "perfectDodgeMs",
+          "tipo": "add",
+          "valor": 30
+        },
+        {
+          "stat": "critChance",
+          "tipo": "add",
+          "valor": 0.03
+        }
+      ],
+      "categoria": "DEFESA",
+      "resumo": "Lê os ataques: menos dano recebido.",
+      "build": "ESQUIVA"
+    },
+    {
+      "id": "sobrecarga_de_nexa",
+      "nome": "SOBRECARGA DE NEXA",
+      "descricao": "+20% de dano de habilidade e +20% de regeneração de Nexa. Build NEXA.",
+      "icone": "✷",
+      "raridade": "epico",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "abilityDamage",
+          "tipo": "mult",
+          "valor": 0.2
+        },
+        {
+          "stat": "nexaRegen",
+          "tipo": "mult",
+          "valor": 0.2
+        }
+      ],
+      "categoria": "NEXA",
+      "resumo": "Especiais e dragão batem mais forte.",
+      "build": "NEXA"
+    },
+    {
+      "id": "sifao_de_reator",
+      "nome": "SIFÃO DE REATOR",
+      "descricao": "−12% de recarga dos especiais e +15% de regeneração de Nexa. Build NEXA.",
+      "icone": "⟲",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "specialCooldown",
+          "tipo": "mult",
+          "valor": -0.12
+        },
+        {
+          "stat": "nexaRegen",
+          "tipo": "mult",
+          "valor": 0.15
+        }
+      ],
+      "categoria": "NEXA",
+      "resumo": "Especiais recarregam mais rápido.",
+      "build": "NEXA"
+    },
+    {
+      "id": "quebra_postura",
+      "nome": "QUEBRA-POSTURA",
+      "descricao": "+35% de dano de postura e +15% de dano em inimigo QUEBRADO. Build PODER.",
+      "icone": "⛬",
+      "raridade": "raro",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "postureDamage",
+          "tipo": "mult",
+          "valor": 0.35
+        },
+        {
+          "stat": "breakDamage",
+          "tipo": "mult",
+          "valor": 0.15
+        }
+      ],
+      "categoria": "PODER",
+      "resumo": "Quebra a guarda dos inimigos mais rápido.",
+      "build": "PODER"
+    },
+    {
+      "id": "coracao_de_dragao",
+      "nome": "CORAÇÃO DE DRAGÃO",
+      "descricao": "+30% de dano do Mini Dragão e +6% de HP máximo. Build PODER.",
+      "icone": "♥",
+      "raridade": "lendario",
+      "empilhavel": false,
+      "efeitos": [
+        {
+          "stat": "dragonDamage",
+          "tipo": "mult",
+          "valor": 0.3
+        },
+        {
+          "stat": "maxHp",
+          "tipo": "mult",
+          "valor": 0.06
+        }
+      ],
+      "categoria": "PODER",
+      "resumo": "O Mini Dragão luta mais forte.",
+      "build": "PODER"
+    },
+    {
+      "id": "blindagem_adaptativa",
+      "nome": "BLINDAGEM ADAPTATIVA",
+      "descricao": "−6% de dano recebido e +5% de HP máximo por pilha. Build DEFESA.",
+      "icone": "⬢",
+      "raridade": "comum",
+      "empilhavel": true,
+      "efeitos": [
+        {
+          "stat": "damageTaken",
+          "tipo": "mult",
+          "valor": -0.06
+        },
+        {
+          "stat": "maxHp",
+          "tipo": "mult",
+          "valor": 0.05
+        }
+      ],
+      "categoria": "DEFESA",
+      "resumo": "Empilhável: menos dano, mais HP.",
+      "build": "DEFESA",
+      "maxStacks": 3
+    },
+    {
+      "id": "nucleo_de_vigor",
+      "nome": "NÚCLEO DE VIGOR",
+      "descricao": "+0,5 HP/s e +4% de HP máximo por pilha. Build DEFESA.",
+      "icone": "✚",
+      "raridade": "comum",
+      "empilhavel": true,
+      "efeitos": [
+        {
+          "stat": "hpRegen",
+          "tipo": "add",
+          "valor": 0.5
+        },
+        {
+          "stat": "maxHp",
+          "tipo": "mult",
+          "valor": 0.04
+        }
+      ],
+      "categoria": "DEFESA",
+      "resumo": "Empilhável: regeneração de HP.",
+      "build": "DEFESA",
+      "maxStacks": 3
+    }
+  ]
+}

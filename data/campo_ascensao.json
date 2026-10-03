@@ -1,0 +1,337 @@
+{
+  "_doc": "EVO — CAMPO DE ASCENSÃO (modo de TESTE, id novo zone_campo_ascensao; não altera a campanha nem o save). Zona injetada em runtime (zones.json intacto). 10 ondas (2→12 inimigos; vilões novos apresentados por onda) → VARGOS (mini-chefe da onda 10) → PORTÃO DO DRAGÃO (preparação) → covil do GIGANTE VERDE. Legenda: W parede, . chão, # rua (cobertura baixa), G portão do campo (fecha até a onda 10), H portão do covil (abre ao confirmar ENTRAR). spawnPoints = pontos de entrada das ondas (fora da vista imediata). maxActive/activationDistance limitam inimigos ativos (o preset do aparelho pode reduzir).",
+  "zona": {
+    "id": "zone_campo_ascensao",
+    "code": "CA",
+    "name": "Campo de Ascensão",
+    "spawn": {
+      "x": 3,
+      "y": 7
+    },
+    "tiles": [
+      "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+      "W.....................WWWWWWWW..................W",
+      "W........#............WWWWWWWW..................W",
+      "W...............W.....W......W....W........W....W",
+      "W.....W...............W......W..................W",
+      "W.............#.......G......H..................W",
+      "W.....................G......H..................W",
+      "W...#......W.......W..G......H..................W",
+      "W.....................G......H..................W",
+      "W.............#.......G......H..................W",
+      "W.....W...............W......W..................W",
+      "W...............W.....W......W....W........W....W",
+      "W........#............WWWWWWWW..................W",
+      "W.....................WWWWWWWW..................W",
+      "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+    ],
+    "legend": {
+      "W": "wall",
+      ".": "floor",
+      "#": "street",
+      "G": "gate1",
+      "H": "gate2"
+    },
+    "prep": {
+      "x0": 23,
+      "x1": 28,
+      "y0": 3,
+      "y1": 11,
+      "spawn": {
+        "x": 25,
+        "y": 7
+      }
+    },
+    "lair": {
+      "x0": 30,
+      "x1": 47,
+      "y0": 1,
+      "y1": 13,
+      "boss": {
+        "x": 41,
+        "y": 7
+      },
+      "territoryMinX": 30.2
+    }
+  },
+  "spawnPoints": [
+    {
+      "x": 20,
+      "y": 2
+    },
+    {
+      "x": 20,
+      "y": 12
+    },
+    {
+      "x": 12,
+      "y": 1
+    },
+    {
+      "x": 12,
+      "y": 13
+    },
+    {
+      "x": 20,
+      "y": 7
+    },
+    {
+      "x": 2,
+      "y": 1
+    },
+    {
+      "x": 2,
+      "y": 13
+    }
+  ],
+  "regras": {
+    "maxActive": 10,
+    "activationDistance": 14,
+    "betweenWavesMs": 2600,
+    "recommendedLevel": 9,
+    "powerAfterWaves": [
+      3,
+      6,
+      8
+    ],
+    "healBetweenWavesFrac": 0.35,
+    "nexaBetweenWavesFrac": 0.5,
+    "countsDoc": "Contagem por onda 2,3,4,5,6,7,8,9,10,12. Acima do teto de ativos (maxActive) a onda entra em subgrupos conforme abrem vagas."
+  },
+  "ondas": [
+    {
+      "n": 1,
+      "nome": "ONDA 1 — O CHAMADO RUBRO",
+      "grupos": [
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "nome": "ONDA 2 — FAÍSCAS NO ESCURO",
+      "grupos": [
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_vespa",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "nome": "ONDA 3 — PLASMA À DISTÂNCIA",
+      "grupos": [
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_atirador",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "nome": "ONDA 4 — PASSOS DE FERRO",
+      "grupos": [
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_atirador",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_vespa",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "nome": "ONDA 5 — A TEIA DE ESTÁTICA",
+      "grupos": [
+        {
+          "monster": "mon_ca_tecelao",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_vespa",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "nome": "ONDA 6 — A ORDEM ÁUREA",
+      "grupos": [
+        {
+          "monster": "mon_ca_executor",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_ceifador",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_atirador",
+          "qty": 2
+        }
+      ],
+      "elite": true
+    },
+    {
+      "n": 7,
+      "nome": "ONDA 7 — VIDRO-SOMBRA",
+      "grupos": [
+        {
+          "monster": "mon_ca_sombra",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_tecelao",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_atirador",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "nome": "ONDA 8 — SELOS EM CHAMAS",
+      "grupos": [
+        {
+          "monster": "mon_ca_executor",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_bombardeiro",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_ceifador",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_vespa",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_tecelao",
+          "qty": 1
+        }
+      ],
+      "elite": true
+    },
+    {
+      "n": 9,
+      "nome": "ONDA 9 — CERCO DO CIRCUITO",
+      "grupos": [
+        {
+          "monster": "mon_ca_executor",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_ceifador",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_sombra",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_bombardeiro",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_tecelao",
+          "qty": 1
+        }
+      ],
+      "elite": true
+    },
+    {
+      "n": 10,
+      "nome": "ONDA 10 — O JURAMENTO DE VARGOS",
+      "grupos": [
+        {
+          "monster": "mon_ca_guardiao",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_executor",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_ceifador",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_sombra",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_bombardeiro",
+          "qty": 2
+        },
+        {
+          "monster": "mon_ca_couraca",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_tecelao",
+          "qty": 1
+        },
+        {
+          "monster": "mon_ca_lamina",
+          "qty": 2
+        }
+      ],
+      "elite": true,
+      "miniBoss": true,
+      "final": true
+    }
+  ]
+}
