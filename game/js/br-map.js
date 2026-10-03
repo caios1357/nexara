@@ -7,6 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
+import { generateBrMapV2 } from './br-map-v2.js?v=20261003m10a';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -20,8 +21,38 @@ function vnoise(x, y, s, f) {
   return a + (b - a) * sm(tx) + (c - a) * sm(ty) + (a - b - c + d) * sm(tx) * sm(ty);
 }
 
+/**
+ * MASTER 10 — ESCALA DA ARENA: data/arena_br.json guarda o PROJETO (100×76) + zona.escala.
+ * Escala > 1 → devolve uma cópia com tudo redimensionado (tamanho, regiões, spawn, dragão, extração,
+ * zona segura que encolhe junto, quantidade de baús/caixas/pontos de spawn por área) e zona.gerador = 2.
+ * ?brScale=1 força o mapa original (comparação / rollback). Chamado UMA vez no carregamento dos dados.
+ */
+export function scaleBrConfig(cfg0) {
+  if (!cfg0?.zona || cfg0._escala) return cfg0;
+  let S = Number(cfg0.zona.escala) || 1;
+  try { const q = new URLSearchParams(globalThis.location?.search || '').get('brScale'); if (q && Number(q) > 0) S = Number(q); } catch { /* sem URL */ }
+  if (!(S > 1.01)) return { ...cfg0, _escala: 1 };
+  const c = JSON.parse(JSON.stringify(cfg0));
+  const D = (v) => Math.round(v * S); const D1 = (v) => Math.round((v + 1) * S) - 1;
+  const A = S * S; const k = Number(c.zona.fatorConteudo) || 0.8; // conteúdo cresce com a ÁREA (fator < 1: espaço de exploração entre pontos)
+  c._escala = S; c._design = { width: c.zona.width, height: c.zona.height };
+  c.zona.width = D(c.zona.width); c.zona.height = D(c.zona.height); c.zona.gerador = 2;
+  c.spawnHeroi = { x: D(c.spawnHeroi.x), y: D(c.spawnHeroi.y) };
+  for (const r of c.regioes) { r.x0 = D(r.x0); r.y0 = D(r.y0); r.x1 = D1(r.x1); r.y1 = D1(r.y1); }
+  const t = c.dragao.territorio; c.dragao.x = D(c.dragao.x); c.dragao.y = D(c.dragao.y);
+  c.dragao.territorio = { x0: D(t.x0), x1: D1(t.x1), y0: D(t.y0), y1: D1(t.y1) };
+  c.dragao.avisoDist = Math.round(c.dragao.avisoDist * Math.min(S, 2));
+  for (const p of c.extracao.pontos) { p.x = D(p.x); p.y = D(p.y); }
+  const z = c.zonaSegura; z.centro = { x: D(z.centro.x), y: D(z.centro.y) };
+  z.inicioMs = Math.round(z.inicioMs * S); for (const e of z.estagios) { e.raio = Math.round(e.raio * S); e.duracaoMs = Math.round(e.duracaoMs * S); }
+  for (const key of ['bausPorRegiao', 'caixasPorRegiao']) for (const id of Object.keys(c[key] || {})) c[key][id] = Math.round(c[key][id] * A * k);
+  c.diretor.pontosPorRegiao = Math.round(c.diretor.pontosPorRegiao * A * k);
+  return c;
+}
+
 /** @param {object} cfg data.arena_br */
 export function generateBrMap(cfg) {
+  if (cfg.zona.gerador === 2) return generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise });
   const W = cfg.zona.width; const H = cfg.zona.height; const seed = cfg.zona.seed | 0;
   const R = rng32(seed);
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));

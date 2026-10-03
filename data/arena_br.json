@@ -7,7 +7,9 @@
     "name": "Arena Principal",
     "width": 100,
     "height": 76,
-    "seed": 20261003
+    "seed": 20261003,
+    "escala": 2,
+    "fatorConteudo": 0.8
   },
   "spawnHeroi": {
     "x": 6,

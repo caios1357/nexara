@@ -30,30 +30,39 @@ export function buildBrTerrain(zone, cfg, o) {
   const tmpC = new THREE.Color();
   const stats = { instances: 0, meshes: 0 };
 
-  // —— CHÃO com relevo (1 draw call) ——
+  // —— CHÃO com relevo: blocos de 32×32 tiles (M10: mapa grande → só os blocos perto do herói desenham).
+  //    Normais analíticas (diferença central da MESMA função de altura) → sem costura entre blocos. ——
+  const FC = 32; const floorChunks = [];
   {
-    const pos = new Float32Array((W + 1) * (H + 1) * 3); const uv = new Float32Array((W + 1) * (H + 1) * 2); const col = new Float32Array((W + 1) * (H + 1) * 3);
-    for (let j = 0; j <= H; j++) for (let i = 0; i <= W; i++) {
-      const k = i + j * (W + 1);
-      pos[k * 3] = i * T; pos[k * 3 + 1] = G(i, j); pos[k * 3 + 2] = j * T;
-      uv[k * 2] = i * 0.5; uv[k * 2 + 1] = j * 0.5;
-      let r = 0, g = 0, b = 0, n = 0;
-      for (const [dx, dy] of [[0, 0], [-1, 0], [0, -1], [-1, -1]]) {
-        const x = i + dx, y = j + dy; if (x < 0 || y < 0 || x >= W || y >= H) continue;
-        const t = tileAt(x, y); const reg = regAt(x, y);
-        tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[reg.id] : 0x2a3038));
-        const v = 0.86 + h32(x, y, 3) * 0.28; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
-      }
-      n = n || 1; col[k * 3] = r / n; col[k * 3 + 1] = g / n; col[k * 3 + 2] = b / n;
-    }
-    const idx = new Uint32Array(W * H * 6); let q = 0;
-    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const a = i + j * (W + 1), b = a + 1, c = a + W + 1, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeVertexNormals();
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.62, metalness: 0.35, envMapIntensity: 0.7 });
-    const floor = new THREE.Mesh(geo, mat); floor.receiveShadow = true; floor.name = 'br-floor';
-    group.add(floor); stats.meshes++;
+    const nv = new THREE.Vector3();
+    for (let fy0 = 0; fy0 < H; fy0 += FC) for (let fx0 = 0; fx0 < W; fx0 += FC) {
+      const fx1 = Math.min(W, fx0 + FC), fy1 = Math.min(H, fy0 + FC); const cw = fx1 - fx0, chh = fy1 - fy0; const NV = (cw + 1) * (chh + 1);
+      const pos = new Float32Array(NV * 3); const uv = new Float32Array(NV * 2); const col = new Float32Array(NV * 3); const nor = new Float32Array(NV * 3);
+      for (let j = fy0; j <= fy1; j++) for (let i = fx0; i <= fx1; i++) {
+        const k = (i - fx0) + (j - fy0) * (cw + 1);
+        pos[k * 3] = i * T; pos[k * 3 + 1] = G(i, j); pos[k * 3 + 2] = j * T;
+        uv[k * 2] = i * 0.5; uv[k * 2 + 1] = j * 0.5;
+        nv.set(-(G(i + 1, j) - G(i - 1, j)) / (2 * T), 1, -(G(i, j + 1) - G(i, j - 1)) / (2 * T)).normalize();
+        nor[k * 3] = nv.x; nor[k * 3 + 1] = nv.y; nor[k * 3 + 2] = nv.z;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (const [dx, dy] of [[0, 0], [-1, 0], [0, -1], [-1, -1]]) {
+          const x = i + dx, y = j + dy; if (x < 0 || y < 0 || x >= W || y >= H) continue;
+          const t = tileAt(x, y); const reg = regAt(x, y);
+          tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[reg.id] : 0x2a3038));
+          const v = 0.86 + h32(x, y, 3) * 0.28; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
+        }
+        n = n || 1; col[k * 3] = r / n; col[k * 3 + 1] = g / n; col[k * 3 + 2] = b / n;
+      }
+      const idx = new Uint32Array(cw * chh * 6); let q = 0;
+      for (let j = 0; j < chh; j++) for (let i = 0; i < cw; i++) { const a = i + j * (cw + 1), b = a + 1, c = a + cw + 1, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+      geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeBoundingSphere();
+      const floor = new THREE.Mesh(geo, mat); floor.receiveShadow = true; floor.name = 'br-floor';
+      floor.userData.cx = (fx0 + cw / 2) * T; floor.userData.cz = (fy0 + chh / 2) * T; floor.userData.rad = Math.hypot(cw, chh) * T * 0.5;
+      floorChunks.push(floor); group.add(floor); stats.meshes++;
+    }
   }
 
   // —— materiais (texturas existentes) ——
@@ -99,6 +108,7 @@ export function buildBrTerrain(zone, cfg, o) {
   };
   const structAt = (x, y) => m.structures.find((s) => x >= s.x0 && x <= s.x1 && y >= s.y0 && y <= s.y1) || null;
   const lampPos = [];
+  const caveBox = (m.areas || []).find((a) => a.kind === 'caverna') || null;
   const tower = m.structures.find((s) => s.kind === 'torre');
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const t = tileAt(x, y); const wx = (x + 0.5) * T, wz = (y + 0.5) * T; const gy = G(x + 0.5, y + 0.5); const reg = regAt(x, y); const hs = h32(x, y);
@@ -131,7 +141,7 @@ export function buildBrTerrain(zone, cfg, o) {
       tmpC.setHSL(0.38 + h32(x, y, 4) * 0.1, 0.5, 0.17 + h32(x, y, 5) * 0.08);
       push('canopy', x, y, [wx + jx, gy + 1.6 * th, wz + jz], hs * 9, [0.95 * s, 1.25 * th, 0.95 * s], tmpC.getHex());
     } else if (t === 'rock') {
-      const cave = x >= 18 && x <= 31 && y >= 2 && y <= 9;
+      const cave = caveBox ? (x >= caveBox.x0 && x <= caveBox.x1 && y >= caveBox.y0 && y <= caveBox.y1) : (x >= 18 && x <= 31 && y >= 2 && y <= 9);
       const s = 0.95 + hs * 0.35;
       tmpC.setHex(reg?.id === 'dragao' ? 0x3a4a40 : 0x5a5650).multiplyScalar(0.8 + hs * 0.3);
       push('rock', x, y, [wx, gy + (cave ? 0.6 : 0.2), wz], hs * 7, [s * 1.15, cave ? 2.4 + hs : 0.8 + hs * 0.6, s * 1.15], tmpC.getHex());
@@ -282,8 +292,12 @@ export function buildBrTerrain(zone, cfg, o) {
     for (const [id, d] of prevDrops) if (!cur.has(id) && clock - d.at > 120) { flashes.push({ x: d.x, y: d.y, gy: G(d.x, d.y), col: DROP_COL[d.rar] ?? 0xffffff, big: d.rar === 'epico' || d.rar === 'lendario', t0: now }); pickFlashes++; }
     prevDrops = cur;
     tickFlashes(now);
+    let list = drops;
+    if ((drops?.length || 0) > DROP_MAX) { // muitos drops no chão: desenha os mais próximos do herói
+      list = drops.slice().sort((a, b2) => ((a.x - view.hx) ** 2 + (a.y - view.hy) ** 2) - ((b2.x - view.hx) ** 2 + (b2.y - view.hy) ** 2));
+    }
     for (let i = 0; i < n; i++) {
-      const d = drops[i]; const age = clock - d.at;
+      const d = list[i]; const age = clock - d.at;
       const k = Math.min(1, age / 350); const hop = Math.sin(k * Math.PI) * 0.9; // pulo saindo do baú
       const gy = G(d.x, d.y);
       const big = d.rar === 'lendario' || d.rar === 'epico' ? 1.25 : d.rar === 'material' ? 0.75 : 1;
@@ -298,7 +312,7 @@ export function buildBrTerrain(zone, cfg, o) {
   }
 
   const viewDist = o.tierName === 'low' ? 34 : o.tierName === 'medium' ? 44 : 62; // névoa esconde o corte
-  let visibleChunks = 0;
+  let visibleChunks = 0; let visibleFloor = 0;
   return {
     group, stats, markers, extraction, lampPos, lootSpots, lootState,
     updateDrops,
@@ -315,12 +329,13 @@ export function buildBrTerrain(zone, cfg, o) {
       view.hx = heroWX / T; view.hy = heroWZ / T; view.ok = Number.isFinite(camWX); if (view.ok) { view.cx = camWX / T; view.cy = camWZ / T; }
       const vd = viewDist + CH * T * 0.71; visibleChunks = 0;
       for (const c of chunks) { const on = Math.hypot(c.userData.cx - heroWX, c.userData.cz - heroWZ) < vd; c.visible = on; if (on) visibleChunks++; }
+      visibleFloor = 0; for (const f of floorChunks) { const on = Math.hypot(f.userData.cx - heroWX, f.userData.cz - heroWZ) < viewDist * 1.6 + f.userData.rad; f.visible = on; if (on) visibleFloor++; }
       beamStats.faded = 0; beamStats.hidden = 0;
       for (const mk of markers) { const f = beamFade(mk.x, mk.y); if (f < 1) beamStats.faded++; mk.beam.visible = f > 0.01; if (!mk.beam.visible) beamStats.hidden++; mk.beam.material.opacity = (mk.beam.userData.base ??= mk.beam.material.opacity) * (0.85 + 0.15 * Math.sin(now * 0.002 + mk.x)) * f; }
       const glowPulse = 0.75 + 0.25 * Math.sin(now * 0.005);
       chestGlow.material.color.setScalar(glowPulse);
     },
-    get visibleChunks() { return visibleChunks; },
+    get visibleChunks() { return visibleChunks; }, get floorChunks() { return floorChunks.length; }, mapW: W, mapH: H, get visibleFloor() { return visibleFloor; },
     chunkCount: chunks.length,
     dispose() {
       group.traverse((n) => { if (n.geometry && !Object.values(geos).includes(n.geometry)) n.geometry.dispose?.(); });

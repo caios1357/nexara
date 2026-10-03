@@ -10,11 +10,11 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261003vil';
-import { pushLog } from './state.js?v=20261003vil';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003vil';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003vil';
-import { rollLootFor } from './br-items.js?v=20261003vil';
+import { createArenaState } from './arena.js?v=20261003m10a';
+import { pushLog } from './state.js?v=20261003m10a';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261003m10a';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261003m10a';
+import { rollLootFor } from './br-items.js?v=20261003m10a';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -73,10 +73,11 @@ export function createArenaBr(deps) {
   function start(state) {
     st = state;
     const c = cfg();
+    const R0 = Math.max(80, Math.round((c.zonaSegura?.estagios?.[0]?.raio || 46) * 1.74)); // raio inicial escala com o mapa (S=1 → 80, igual ao original)
     br = st.br = {
       clock: 0, startedAt: Date.now(), kills: 0, killsBy: {}, mcbRun: 0, mcbStart: st.player.mcb || 0, itemsFound: [], best: null,
       lootOpened: [], lootOpenedDirty: [], drops: [], dropSeq: 1, region: null, visited: [],
-      zone: { phase: 'wait', stage: -1, r: 80, fromR: 80, toR: 80, cx: c.zonaSegura.centro.x + 0.5, cy: c.zonaSegura.centro.y + 0.5, phaseAt: 0, warned: false, outside: false },
+      zone: { phase: 'wait', stage: -1, r: R0, fromR: R0, toR: R0, cx: c.zonaSegura.centro.x + 0.5, cy: c.zonaSegura.centro.y + 0.5, phaseAt: 0, warned: false, outside: false },
       event: null, nextEventAt: c.eventos?.primeiroMs ?? 60000, eventSeq: 0,
       extractionOpen: false, extract: { id: null, ms: 0 }, ended: null, dragonWarned: false, inDragon: false, bossEngaged: false, bossKilled: false,
       nextUid: UID_BASE, nextSpawnAt: 1500, secretFound: false, lastMutateAt: 0
@@ -185,7 +186,7 @@ export function createArenaBr(deps) {
       const rr = 0.55 + R() * 0.35;
       br.drops.push({ id: br.dropSeq++, x: x + 0.5 + Math.cos(a) * rr, y: y + 0.5 + Math.sin(a) * rr, loot: loots[i], src, at: br.clock, rar: loots[i].kind === 'equip' ? loots[i].r : 'material' });
     }
-    if (br.drops.length > 60) br.drops.splice(0, br.drops.length - 60);
+    // M10: nada é apagado automaticamente — o renderer mostra só os drops mais próximos (DROP_MAX)
   }
   function openLoot(spot) {
     if (br.lootOpened.includes(spot.id)) return;
@@ -312,7 +313,7 @@ export function createArenaBr(deps) {
       note('region', { id: reg.id, nome: reg.nome, risco: reg.risco, first });
     }
     const t = cfg().dragao.territorio;
-    const inD = p.x >= t.x0 - 6 && p.y <= t.y1 + 11 && p.x >= 67;
+    const SK = cfg()._escala || 1; const inD = p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
     if (inD && !br.inDragon) { br.inDragon = true; note('dragon_territory', { first: !br.dragonWarned }); br.dragonWarned = true; if (!br.bossArmed) { br.bossArmed = true; deps.armBoss?.(); } }
     else if (!inD && br.inDragon) { br.inDragon = false; note('dragon_leave', {}); }
   }
@@ -390,7 +391,9 @@ export function createArenaBr(deps) {
       openNearest(p) { const m = map(); let best = null; let bd = 1e9; for (const s of [...m.chests, ...m.crates]) { if (br.lootOpened.includes(s.id)) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } } if (best) openLoot(best); return best; },
       forceEvent(kind) { if (!br) return; br.event = null; br.eventSeq = Object.keys(cfg().eventos.tipos).filter((k) => cfg().eventos.tipos[k].ativo).indexOf(kind); br.nextEventAt = br.clock; },
       spawn(id, x, y, extra) { return spawnAt(id, x, y, extra || {}); },
-      drops: () => br?.drops || []
+      drops: () => br?.drops || [],
+      /** M10: gera N lotes de loot real num ponto (prova que nada é apagado automaticamente) */
+      dropMany(n, x, y) { for (let i = 0; i < n; i++) spawnDrops(x, y, rollLootFor(st, 'basico', { equip: 0, mats: [1, 1], rnd: R }), `dbg_${i}`); return br.drops.length; }
     }
   };
 }

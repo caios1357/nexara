@@ -3,7 +3,7 @@
  * cor do brilho (Nexa), capacete/chapéu, capa e modelo da espada. Salvo em player.heroStyle + player.heroCustom.
  * Prévia 3D ao vivo (hero-preview.js, contexto próprio só enquanto aberto).
  */
-import { HERO_STYLES, heroStyleOf } from './hero-styles.js?v=20261003vil';
+import { HERO_STYLES, heroStyleOf } from './hero-styles.js?v=20261003m10a';
 
 export const PRIMARY_SWATCHES = [0x3a4658, 0x26303c, 0x5a2a2a, 0x2a4a3a, 0x463a5c, 0x5a4a3a, 0x2a3a6a, 0x6a6a72];
 export const GLOW_SWATCHES = [0x3a9cff, 0x39f0ff, 0x46ff8a, 0xb46aff, 0xff8a2a, 0xff3a5a, 0xffd34a];
@@ -57,7 +57,7 @@ export function mountHeroStyleEditor(box, o = {}) {
   $('hse-head').onclick = () => { custom.head = !eff().head; paint(); };
   $('hse-cape').onclick = () => { custom.cape = !eff().cape; paint(); };
   $('hse-reset').onclick = () => { custom = {}; paint(); };
-  if (withPreview) import('./fps/hero-preview.js?v=20261003vil').then((m) => {
+  if (withPreview) import('./fps/hero-preview.js?v=20261003m10a').then((m) => {
     if (!box.isConnected) return;
     try { preview = m.createHeroPreview($('hse-canvas')); preview.set(styleId, custom, o.equip || {}); } catch (e) { console.warn('[estilo] prévia 3D indisponível', e); }
   }).catch(() => {});
