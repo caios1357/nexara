@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NEXARA — vilões (visualizador de teste)</title>
+<style>html,body{margin:0;background:#111;overflow:hidden;font:12px sans-serif;color:#ddd}#lb{position:fixed;left:0;right:0;bottom:4px;display:flex;justify-content:space-around;pointer-events:none}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body><div id="lb"></div>
+<script type="module">
+import * as THREE from 'three';
+import { attachEnemyGlb, MON } from '../js/fps/enemy-glb.js?v=20261003vil';
+const q = new URLSearchParams(location.search);
+const LOOK = {
+  A: { body: 0x7a2e2a, armor: 0xc04a40, eye: 0xff3a2a, glow: 0xff4a2a, scale: 1.0 }, B: { body: 0x5a6a18, armor: 0xc8d040, eye: 0xfff04a, glow: 0xf0ff40, scale: 0.82 },
+  C: { body: 0x2a3a7a, armor: 0x5a7ad0, eye: 0x6ad8ff, glow: 0x4ad8ff, scale: 0.98 }, D: { body: 0x4a4038, armor: 0xa87838, eye: 0xffa030, glow: 0xff9a20, scale: 1.32 },
+  E: { body: 0x3a1a5a, armor: 0x8a48c8, eye: 0xff4af0, glow: 0xff3ae8, scale: 1.0 }, F: { body: 0x24242a, armor: 0xd4a020, eye: 0xffe070, glow: 0xffc830, scale: 1.15 },
+  G: { body: 0x3a0e1c, armor: 0x9a1e3e, eye: 0xff2050, glow: 0xff2a6a, scale: 1.65 }, A2: { body: 0x2a0a12, armor: 0x8a1030, eye: 0xff2050, glow: 0xff1a40, scale: 1.08 },
+  B2: { body: 0x1a1030, armor: 0x5a3aa8, eye: 0xc89aff, glow: 0x9a6aff, scale: 0.86 }, C2: { body: 0x10302a, armor: 0x2a8a68, eye: 0x7affc8, glow: 0x5affb0, scale: 1.02 }
+};
+const NAMES = { A: 'Rastreador/Ceifa-Runa', A2: 'Guardião/Ceifador', B: 'Enxame/Faísca', B2: 'Predador/Sombra', C: 'Arcanista', C2: 'Caçador/Bombard.', D: 'Brutamonte/Golem', E: 'Mutante/Tecelã', F: 'Elite Áureo', G: 'VARGOS' };
+const keys = (q.get('keys') || 'A,A2,B,B2,C,C2,D,E,F,G').split(',');
+const anim = q.get('anim') || 'idle';
+const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(innerWidth, innerHeight); r.setPixelRatio(1); r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace; document.body.appendChild(r.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1d2230); scene.fog = new THREE.Fog(0x1d2230, 30, 60);
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x3a3020, 1.1)); const sun = new THREE.DirectionalLight(0xfff1dd, 2.2); sun.position.set(4, 8, 6); scene.add(sun);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(40, 32), new THREE.MeshStandardMaterial({ color: 0x3a4032, roughness: 0.95 })); ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const cols = Math.min(keys.length, +(q.get('cols') || 5)); const rows = Math.ceil(keys.length / cols); const sp = +(q.get('sp') || 3.2);
+const cam = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.1, 100);
+const W = (cols - 1) * sp; const D = (rows - 1) * sp * 1.6;
+cam.position.set(0, 2.2 + rows * 1.6, D / 2 + 4 + cols * 2.4); cam.lookAt(0, 0.9, -D * 0.1);
+const ctls = []; const lb = document.getElementById('lb');
+keys.forEach((k, i) => {
+  const g = new THREE.Group(); const L = LOOK[k]; g.scale.setScalar(1.05 * (L?.scale || 1) * (q.get('noscale') ? 1 / (L?.scale || 1) : 1));
+  g.position.set(-W / 2 + (i % cols) * sp, 0, -D / 2 + Math.floor(i / cols) * sp * 1.6); g.rotation.y = +(q.get('yaw') || 0.35);
+  scene.add(g); const c = attachEnemyGlb(g, { key: k, look: L, height: 1.78, bodyMeshes: [] }); c.k = k; ctls.push(c);
+});
+window.__VV__ = { ctls, ready: () => ctls.every((c) => c.status === 'ready' || c.status === 'fallback'), info: () => ctls.map((c) => ({ k: c.k, status: c.status, model: c.model, clip: c.clip })), calls: () => r.info.render.calls, tris: () => r.info.render.triangles, MON };
+let t0 = performance.now(); let last = t0;
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = (now - t0) / 1000;
+  for (const c of ctls) {
+    const v = anim === 'walk' ? { speed: 0.6, phase: 'idle', p: 0 } : anim === 'run' ? { speed: 1.6, phase: 'idle', p: 0 } : anim === 'idle' ? { speed: 0, phase: 'idle', p: 0 } : { speed: 0, phase: 'attack', p: (t * 0.8) % 1, kind: anim };
+    c.update?.(dt, v);
+  }
+  r.render(scene, cam); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>

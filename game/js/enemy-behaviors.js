@@ -10,9 +10,9 @@
  * Dano sempre por actions.monsterAttackPlayer (esquiva/i-frames, defesa, escudo, morte).
  * Números em gameplay-config.js → archetypes / enemyHazards.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003arena';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003arena';
-import { isWalkable } from './map.js?v=20261003arena';
+import { getConfig, DEG } from './gameplay-config.js?v=20261003vil';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003vil';
+import { isWalkable } from './map.js?v=20261003vil';
 
 export const ARCH_IDS = Object.freeze(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
 const RANGED = new Set(['C', 'E']);

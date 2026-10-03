@@ -1,9 +1,9 @@
-import { createSkillsFromRace } from '../../rules/skills.js?v=20261003arena';
-import { initReputation } from '../../rules/reputation.js?v=20261003arena';
-import { createEmptyArquivo, reveal } from './arquivo.js?v=20261003arena';
-import { indexById } from './data-loader.js?v=20261003arena';
-import { getConfig } from './gameplay-config.js?v=20261003arena';
-import { getStat, STATS } from './modifiers.js?v=20261003arena';
+import { createSkillsFromRace } from '../../rules/skills.js?v=20261003vil';
+import { initReputation } from '../../rules/reputation.js?v=20261003vil';
+import { createEmptyArquivo, reveal } from './arquivo.js?v=20261003vil';
+import { indexById } from './data-loader.js?v=20261003vil';
+import { getConfig } from './gameplay-config.js?v=20261003vil';
+import { getStat, STATS } from './modifiers.js?v=20261003vil';
 
 export function createNewGame(data, { name, raceId }) {
   const race = data.races.races.find((r) => r.id === raceId);

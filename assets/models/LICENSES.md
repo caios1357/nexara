@@ -14,3 +14,22 @@ quantização + EXT_meshopt_compression). Scripts: `/workspace/m3d-src/build*.mj
 
 Fallback: `?models=0` (ou falha de rede) mantém os modelos procedurais originais (`game/js/fps/hero-model.js`,
 `makeBot3D`, `dragon-view.js`, `boss-dragon-view.js`).
+
+## Fase VILÕES (build 20261003vil) — modelos novos por arquétipo
+
+Todos de **Quaternius** (https://quaternius.com), baixados do Poly Pizza, licença **CC0 1.0 / Public Domain**
+(conferida na página de cada modelo). Otimizados por `/workspace/m3d-src/build-vil.mjs` (só clipes usados, meshopt).
+`?vil=0` volta aos vilões KayKit acima (preservados).
+
+| Arquivo | Arquétipo (arena / campo) | Modelo original | Página |
+|---|---|---|---|
+| `mon-esqueleto.glb` | A — Rastreador / Ceifa-Runa | Skeleton (machado) | https://poly.pizza/m/1XZD9GK6Kj |
+| `mon-demonio.glb` | A2 — Guardião / Ceifador Carmesim | Demon (Ultimate Monsters) | https://poly.pizza/m/LnfIziKv4o |
+| `mon-caveira.glb` | B — Enxame / Faísca Espectral | Ghost Skull (Ultimate Monsters) | https://poly.pizza/m/TX8r9WBXpe |
+| `mon-lobo.glb` | B2 — Predador / Sombra Hexa | Wolf (Animated Animals) | https://poly.pizza/m/P1gU3Qkr9r |
+| `mon-robo.glb` | C — Arcanista de Plasma | Robot Enemy | https://poly.pizza/m/1gNo5ezvmr |
+| `mon-drone.glb` | C2 — Caçador / Bombardeiro Rúnico | Robot Enemy Flying | https://poly.pizza/m/lF3jeRJwiH |
+| `mon-yeti.glb` | D — Brutamonte / Golem de Ferro-Vivo | Yeti (Ultimate Monsters) | https://poly.pizza/m/ceRHrn8HHE |
+| `mon-zumbi.glb` | E — Mutante / Tecelã da Estática | Zombie | https://poly.pizza/m/VlXjG0N8Eg |
+| `mon-demonio-azul.glb` | F — Elite Áureo / Inquisidor Áureo | Blue Demon (Ultimate Monsters) | https://poly.pizza/m/S7jYW6Amye |
+| `mon-orc.glb` | G — VARGOS, Sentinela do Portão | Orc (Ultimate Monsters) | https://poly.pizza/m/5vO2YJsPEf |
