@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009perf';
-import { isWalkable, getTileType } from './map.js?v=20261009perf';
-import { monsterAttackPlayer } from './actions.js?v=20261009perf';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009perf';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009perf';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009som';
+import { isWalkable, getTileType } from './map.js?v=20261009som';
+import { monsterAttackPlayer } from './actions.js?v=20261009som';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009som';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009som';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -53,7 +53,7 @@ const events = [];
 
 /** Corpos inimigos da zona atual (reutilizados) — herói usa para não sobrepor. */
 const bodies = [];
-const tickResult = { attacks: [], moved: false, prepares: 0, whiffs: 0, bossTele: null, bossHit: null, bossPhase: 0 };
+const tickResult = { attacks: [], moved: false, prepares: 0, prepKind: '', whiffs: 0, bossTele: null, bossHit: null, bossPhase: 0 };
 
 // —— campo de fluxo (BFS a partir do tile do herói) ——
 let flow = null;
@@ -545,7 +545,7 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
         attackers.add(r);
         r.didImpact = false;
         setState(mon, r, S.ATTACK_PREPARE, { dist: +dist.toFixed(2) });
-        result.prepares++;
+        result.prepares++; result.prepKind = result.prepKind || 'melee';
         break;
       }
       // Aguardando ficha → segura um pouco mais longe e circula
@@ -1240,7 +1240,7 @@ export const getAiLodStats = () => ({ ...lodStats, scale: aiLodScale });
 export function tickEnemyAi(state, dtSec, P) {
   tickResult.attacks.length = 0;
   tickResult.moved = false;
-  tickResult.prepares = 0;
+  tickResult.prepares = 0; tickResult.prepKind = '';
   tickResult.bossTele = null; tickResult.bossHit = null; tickResult.bossPhase = 0;
   tickResult.whiffs = 0;
   for (let i = 0; i < bodies.length; i++) bodies[i].active = false;

@@ -274,6 +274,9 @@ export const DEFAULTS = Object.freeze({
     /** ARENA: música de fundo CC0 (assets/audio/music · créditos em CREDITS.md) */
     musicEnabled: true,
     musicVolume: 0.45,
+    /** M10 passo 2: ambiente por região (loops CC0 em assets/audio/amb) + tensão perto do Território do Dragão */
+    ambEnabled: true,
+    ambVolume: 0.55,
     /** EVO: teto de vozes simultâneas (sons acima disso são descartados — sem empilhar ruído). */
     sfxMaxVoices: 10,
     /** EVO: sons reais CC0 (assets/audio/sfx) — false = só síntese. */
@@ -910,6 +913,8 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'sfxVol', label: 'Volume dos efeitos', type: 'range', path: 'combat.sfxVolume', min: 0, max: 1, step: 0.05, fmt: '%' },
     { id: 'musOn', label: 'Música', type: 'toggle', path: 'combat.musicEnabled' },
     { id: 'musVol', label: 'Volume da música', type: 'range', path: 'combat.musicVolume', min: 0, max: 1, step: 0.05, fmt: '%' },
+    { id: 'ambOn', label: 'Som ambiente (por região)', type: 'toggle', path: 'combat.ambEnabled' },
+    { id: 'ambVol', label: 'Volume do ambiente', type: 'range', path: 'combat.ambVolume', min: 0, max: 1, step: 0.05, fmt: '%' },
     { id: 'musCred', type: 'note', label: 'Música (CC0, OpenGameArt): “Another space background track” — yd · “Battle Theme A” — cynicmusic.com · “Ancient Power Of Serpents” — josepharaoh99' }
   ] }
 ]);
@@ -981,6 +986,7 @@ const LIMITS = {
   'combat.hitStopMs': [0, 150],
   'combat.sfxVolume': [0, 1],
   'combat.musicVolume': [0, 1],
+  'combat.ambVolume': [0, 1],
   'combat.critChance': [0, 1],
   'combat.critMult': [1, 5],
   'combat.hpRegenPerSec': [0, 50],

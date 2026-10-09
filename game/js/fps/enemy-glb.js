@@ -6,7 +6,7 @@
  * reaproveita o programa (sem recompilar) — e os bots continuam no pool do renderer.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, createAnimator, findNode } from './model-lib.js?v=20261009perf';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, createAnimator, findNode } from './model-lib.js?v=20261009som';
 
 export const ARCH_MODEL = { A: 'vilao-warrior', A2: 'vilao-warrior', B: 'vilao-rogue', B2: 'vilao-rogue', C: 'vilao-mage', C2: 'vilao-mage', D: 'vilao-warrior', E: 'vilao-mage', F: 'vilao-warrior', G: 'vilao-warrior', patrol: 'vilao-minion', base: 'vilao-minion' };
 const CLIPS = {

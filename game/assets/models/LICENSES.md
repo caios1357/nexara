@@ -29,3 +29,7 @@ Regenerar: `node scripts/export-icons.mjs`.
 ## M3D (20261003m3d) — modelos GLB CC0
 A partir da fase MODELOS 3D o herói, os vilões e os dois dragões usam modelos GLB CC0 (KayKit / Quaternius) —
 lista completa, URLs e licenças em `assets/models/LICENSES.md`. Os procedurais acima continuam como fallback.
+
+## Áudio
+
+Sons e música: todos **CC0 1.0** — lista completa arquivo → origem em `assets/audio/CREDITS.md` (inclui o pacote de som 2 de 09/10/2026: acerto por arma, avisos por tipo de golpe, loot por raridade, marcos de rival/campeão/vitória, ambientes por região e tensão do dragão).

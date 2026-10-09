@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261009perf';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261009perf';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261009perf';
-import { addReputation } from '../../rules/reputation.js?v=20261009perf';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261009perf';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261009perf';
-import { currentWeaponClass, magicMult } from './equipment.js?v=20261009perf';
-import { reveal } from './arquivo.js?v=20261009perf';
-import { checkEventReady } from './events.js?v=20261009perf';
-import { getConfig } from './gameplay-config.js?v=20261009perf';
-import { getStat, STATS } from './modifiers.js?v=20261009perf';
+import { trainSkill } from '../../rules/skills.js?v=20261009som';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261009som';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261009som';
+import { addReputation } from '../../rules/reputation.js?v=20261009som';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261009som';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261009som';
+import { currentWeaponClass, magicMult } from './equipment.js?v=20261009som';
+import { reveal } from './arquivo.js?v=20261009som';
+import { checkEventReady } from './events.js?v=20261009som';
+import { getConfig } from './gameplay-config.js?v=20261009som';
+import { getStat, STATS } from './modifiers.js?v=20261009som';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;

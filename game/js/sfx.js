@@ -4,7 +4,7 @@
  * (primeiro gesto do usuário); buffer de ruído criado uma vez; nós de cada
  * som são descartáveis (padrão WebAudio) e só nascem quando o som toca.
  */
-import { getConfig } from './gameplay-config.js?v=20261009perf';
+import { getConfig } from './gameplay-config.js?v=20261009som';
 
 let ctx = null;
 let master = null;
@@ -78,7 +78,11 @@ function sampleFor(name) {
   return l && l.length ? l[(Math.random() * l.length) | 0] : null;
 }
 /** Toca a amostra (com leve variação de tom) — true se tocou. */
+/** M10 passo 2 — mixagem por categoria (aviso/loot comum mais baixos; marcos do rival/vitória por cima). */
+const CAT_GAIN = [[/^tele_/, 0.75], [/^loot_comum/, 0.7], [/^loot_incomum/, 0.8], [/^loot_(epico|lendario)/, 1.0], [/^hit_(arco|cajado)/, 0.9], [/^(rival_|champion_|victory)/, 1.0]];
+function catGain(name) { for (const [re, g] of CAT_GAIN) if (re.test(name)) return g; return 1; }
 function playSample(c, name, gainMul = 1) {
+  gainMul *= catGain(name);
   const buf = sampleFor(name);
   if (!buf) return false;
   const src = c.createBufferSource();
@@ -319,7 +323,9 @@ export function sfxSpecial(kind = 'strike') {
 
 // ——— EVO: sons distintos por golpe / evento (todos sintetizados, sem arquivos) ———
 /** Acerto do combo 1/2/3: tom sobe a cada golpe; o 3º é mais pesado (grave + estalo largo). */
-export function sfxComboHit(idx = 0, crit = false) {
+export function sfxComboHit(idx = 0, crit = false, weaponClass = 'espada') {
+  // M10 passo 2: arco/cajado têm acerto próprio (amostra real); espada mantém o combo 1/2/3
+  if (weaponClass && weaponClass !== 'espada' && bank.has(`hit_${weaponClass}`)) { ready(`hit_${weaponClass}`, 0.25); if (crit) sfxCrit(); return; }
   const c = ready(`combo_${Math.min(2, idx) + 1}`, 0.18);
   if (!c) return;
   const t = c.currentTime;
@@ -380,6 +386,29 @@ export function sfxLoot(rare = false) {
   tone(c, t, 0.16, 1175, 1180, 0.14, 'sine');
   tone(c, t + 0.08, 0.2, 1568, 1575, 0.14, 'sine');
   if (rare) tone(c, t + 0.16, 0.26, 2093, 2100, 0.12, 'triangle');
+}
+/** M10 passo 2 — loot por raridade (comum → lendário: moeda → moedas → vidro → acorde → sino + brilho). */
+const RAR = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
+export function sfxLootRarity(r = 'comum') {
+  const k = RAR.includes(r) ? r : 'comum';
+  if (bank.has(`loot_${k}`)) { ready(`loot_${k}`, k === 'lendario' ? 0.7 : 0.4); return; }
+  sfxLoot(RAR.indexOf(k) >= 2);
+}
+/** M10 passo 2 — aviso de golpe inimigo por tipo (corpo a corpo / à distância / área / rival BOT); sem amostra → bipe antigo. */
+let lastTeleAt = 0;
+export function sfxTelegraph(kind = 'melee') {
+  const now = performance.now(); if (now - lastTeleAt < 220) return; lastTeleAt = now;
+  const name = `tele_${kind}`;
+  if (bank.has(name)) { ready(name, 0.4); return; }
+  sfxWarn();
+}
+/** M10 passo 2 — marcos dos rivais/campeão/vitória (amostra real; fallback sintetizado curto). */
+export function sfxCue(name) {
+  if (bank.has(name)) { ready(name, name === 'champion_intro' ? 1.1 : 0.7); return; }
+  const c = ready(name, 0.5); if (!c) return; const t = c.currentTime;
+  if (name === 'victory') [523, 659, 784, 1047, 1319].forEach((f, i) => tone(c, t + i * 0.1, 0.3, f, f, 0.16, 'triangle'));
+  else if (name === 'champion_intro') { tone(c, t, 0.9, 110, 55, 0.6, 'sawtooth'); tone(c, t + 0.1, 0.6, 880, 440, 0.12, 'triangle'); }
+  else tone(c, t, 0.3, 660, name === 'rival_down' ? 330 : 990, 0.16, 'square');
 }
 /** Elite apareceu: sirene curta dupla. */
 export function sfxEliteSpawn() {

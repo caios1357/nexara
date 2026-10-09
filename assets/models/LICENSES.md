@@ -33,3 +33,7 @@ Todos de **Quaternius** (https://quaternius.com), baixados do Poly Pizza, licen�
 | `mon-zumbi.glb` | E — Mutante / Tecelã da Estática | Zombie | https://poly.pizza/m/VlXjG0N8Eg |
 | `mon-demonio-azul.glb` | F — Elite Áureo / Inquisidor Áureo | Blue Demon (Ultimate Monsters) | https://poly.pizza/m/S7jYW6Amye |
 | `mon-orc.glb` | G — VARGOS, Sentinela do Portão | Orc (Ultimate Monsters) | https://poly.pizza/m/5vO2YJsPEf |
+
+## Áudio
+
+Sons e música: todos **CC0 1.0** — lista completa arquivo → origem em `assets/audio/CREDITS.md` (inclui o pacote de som 2 de 09/10/2026: acerto por arma, avisos por tipo de golpe, loot por raridade, marcos de rival/campeão/vitória, ambientes por região e tensão do dragão).

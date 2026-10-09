@@ -1,70 +1,70 @@
-import { loadAllData } from './data-loader.js?v=20261009perf';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261009perf';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261009perf';
-import { addToInventory } from '../../rules/loot.js?v=20261009perf';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261009perf';
-import { rollLoot } from '../../rules/loot.js?v=20261009perf';
-import { isWalkable } from './map.js?v=20261009perf';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261009perf';
-import { createUI, bindRenderer } from './ui.js?v=20261009perf';
+import { loadAllData } from './data-loader.js?v=20261009som';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261009som';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261009som';
+import { addToInventory } from '../../rules/loot.js?v=20261009som';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261009som';
+import { rollLoot } from '../../rules/loot.js?v=20261009som';
+import { isWalkable } from './map.js?v=20261009som';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261009som';
+import { createUI, bindRenderer } from './ui.js?v=20261009som';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook
-} from './actions.js?v=20261009perf';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261009perf';
-import { createMcbUi } from './mcb-ui.js?v=20261009perf';
-import { createVestiario } from './vestiario.js?v=20261009perf';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261009perf';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261009perf';
-import { getLocalProfile, authProviders } from './auth.js?v=20261009perf';
-import { lastWalletCheck } from './save.js?v=20261009perf';
-import { maybeTrigger0217 } from './events.js?v=20261009perf';
-import { createRenderer } from './renderer.js?v=20261009perf';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261009perf';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261009perf';
-import { itemRarity } from './sprites.js?v=20261009perf';
-import { createArenaState, isArenaState } from './arena.js?v=20261009perf';
-import { createMobileControls } from './mobile-controls.js?v=20261009perf';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261009perf';
+} from './actions.js?v=20261009som';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261009som';
+import { createMcbUi } from './mcb-ui.js?v=20261009som';
+import { createVestiario } from './vestiario.js?v=20261009som';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261009som';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261009som';
+import { getLocalProfile, authProviders } from './auth.js?v=20261009som';
+import { lastWalletCheck } from './save.js?v=20261009som';
+import { maybeTrigger0217 } from './events.js?v=20261009som';
+import { createRenderer } from './renderer.js?v=20261009som';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261009som';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261009som';
+import { itemRarity } from './sprites.js?v=20261009som';
+import { createArenaState, isArenaState } from './arena.js?v=20261009som';
+import { createMobileControls } from './mobile-controls.js?v=20261009som';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261009som';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261009perf';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261009perf';
-import { createArenaRun } from './arena-run.js?v=20261009perf';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261009perf';
+} from './enemy-ai.js?v=20261009som';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261009som';
+import { createArenaRun } from './arena-run.js?v=20261009som';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261009som';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261009perf';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261009perf';
-import { createMusic } from './music.js?v=20261009perf';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261009perf';
-import { getAiLodStats, setAiLodScale } from './enemy-ai.js?v=20261009perf';
-import { createBossHud } from './boss-hud.js?v=20261009perf';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261009perf';
-import { createPlayerMotion } from './player-motion.js?v=20261009perf';
-import { createPlayerCombat } from './player-combat.js?v=20261009perf';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261009perf';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261009som';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261009som';
+import { createMusic } from './music.js?v=20261009som';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261009som';
+import { getAiLodStats, setAiLodScale } from './enemy-ai.js?v=20261009som';
+import { createBossHud } from './boss-hud.js?v=20261009som';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261009som';
+import { createPlayerMotion } from './player-motion.js?v=20261009som';
+import { createPlayerCombat } from './player-combat.js?v=20261009som';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261009som';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
-  sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn,
+  sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261009perf';
+} from './sfx.js?v=20261009som';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261009perf';
-import { createPassiveUi } from './passives-ui.js?v=20261009perf';
-import { createSettingsMenu } from './settings-menu.js?v=20261009perf';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261009perf';
-import { createPassiveHud } from './passive-hud.js?v=20261009perf';
-import { createDragon } from './companion-dragon.js?v=20261009perf';
-import { createFullscreenUi } from './fullscreen.js?v=20261009perf';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009perf';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261009perf';
+} from './passives.js?v=20261009som';
+import { createPassiveUi } from './passives-ui.js?v=20261009som';
+import { createSettingsMenu } from './settings-menu.js?v=20261009som';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261009som';
+import { createPassiveHud } from './passive-hud.js?v=20261009som';
+import { createDragon } from './companion-dragon.js?v=20261009som';
+import { createFullscreenUi } from './fullscreen.js?v=20261009som';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009som';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261009som';
 
 let DATA = null;
 let state = null;
@@ -385,7 +385,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261009perf').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261009som').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -935,7 +935,7 @@ function simulate(s, dt, yaw) {
   }
   if (r.bossPhase) sfxBossRoar();
   else if (r.bossTele) { if (r.bossTele === 'rugido') sfxBossRoar(); else sfxBossWarn(r.bossTele); }
-  else if (r.prepares) { sfxWarn(); const nw = performance.now(); if (nw - lastGrowlAt > 1400 && Math.random() < 0.55) { lastGrowlAt = nw; sfxEnemyGrowl(); } }
+  else if (r.prepares) { sfxTelegraph(r.prepKind || 'melee'); const nw = performance.now(); if (nw - lastGrowlAt > 1400 && Math.random() < 0.55) { lastGrowlAt = nw; sfxEnemyGrowl(); } }
   if (r.bossHit && r.bossHit !== 'rugido') sfxBossAttack(r.bossHit);
   if (r.whiffs) sfxWhiff();
   for (let i = 0; i < r.attacks.length; i++) onEnemyAttack(r.attacks[i]);
@@ -1093,11 +1093,11 @@ function onPlayerHit(result, mon, info) {
   { const pc = getConfig().posture; if (pc) postureHit(mon, info.heavy ? pc.finisherHit : pc.basicHit); }
   renderer.shake(cfg.hitShake);
   // EVO: som próprio por golpe do combo (1/2/3 sobem; 3º mais pesado) + crítico + abate
-  sfxComboHit(info.comboIndex | 0, !!result.crit);
+  sfxComboHit(info.comboIndex | 0, !!result.crit, weaponClassOf(state));
   renderer.passiveSig?.('hit', { x: info.x, y: info.y, crit: !!result.crit, near: result.crit ? nearestOther(mon) : null });
   if (result.crit) sfxCrit();
   if (result.killed) sfxEnemyDeath(mon.tier === 'elite' || mon.tier === 'mini_chefe' || !!mon.boss);
-  if (result.killed && result.drops && result.drops.length) sfxLoot(result.drops.some((d) => ['raro', 'epico', 'lendario'].includes(itemRarity(state._items[d.item_id]))));
+  if (result.killed && result.drops && result.drops.length) { const RO = ['comum', 'incomum', 'raro', 'epico', 'lendario']; let best = 0; for (const d of result.drops) best = Math.max(best, RO.indexOf(itemRarity(state._items[d.item_id]))); sfxLootRarity(RO[Math.max(0, best)]); }
   procs.onHeroHit(mon, result);
   // ARSENAL: espada de família → faísca/anel na cor da família no ponto do golpe
   if (!info.ranged && weaponFamilyOf(state)) heroShots.burst(info.x, info.y, info.heavy ? 0.9 : 0.6, familyColor(state), 'spark', 260);
@@ -1532,7 +1532,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261009perf').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261009som').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1914,6 +1914,8 @@ async function boot() {
       sigCounts: () => renderer.getPassiveSig?.() ?? null,
       stats: () => JSON.parse(JSON.stringify(evoStats)),
       sfx: () => getSfxStats(),
+      /** M10 passo 2 (e2e): toca um som novo pelo nome da função pública */
+      sfxPlay: (fn, ...a) => { const f = { sfxLootRarity, sfxTelegraph, sfxCue, sfxComboHit }[fn]; if (f) f(...a); return !!f; },
       bossIntro: () => ({ active: !!renderer.bossIntroActive?.() }),
       playBossIntro: () => !!renderer.playBossIntro?.(),
       freeze: () => ({ busy: !!busy, modal: isModalOpen(), drawer: isDrawerOpen(), cards: passiveUi.isOpen(), editor: !!settingsMenu?.isEditorOpen(), hitStopLeftMs: Math.round(hitStopUntil - performance.now()), timeScale: debugTimeScale, visible: isGameVisible() }),
@@ -2015,7 +2017,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261009perf');
+      const { addXp } = await import('./state.js?v=20261009som');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2465,15 +2467,16 @@ function onBrEvent(kind, info) {
   else if (kind === 'secret_area') { ft(info.kind === 'atalho' ? 'ATALHO SECRETO!' : info.kind === 'esconderijo' ? 'ESCONDERIJO ENCONTRADO!' : 'LOCAL SECRETO!', '#ffd34a', { size: 20 }); brSfx('chest'); }
   else if (kind === 'loot_open') { brSfx('chest', info.loot); renderer.shake?.(info.kind === 'bau' ? 0.12 : 0.06); if (info.aband) ft('EQUIPAMENTO ABANDONADO', '#9fe3a0', { size: 16 }); }
   // RIVAIS (BOTS offline)
-  else if (kind === 'rivals_spawn') { big(`<b>⚔ ${info.n} HERÓIS RIVAIS (BOT)</b>Heróis da IA local também exploram, caçam e saqueiam. Derrote-os por XP, MCB e loot.`, 3200); }
+  else if (kind === 'rivals_spawn') { big(`<b>⚔ ${info.n} HERÓIS RIVAIS (BOT)</b>Heróis da IA local também exploram, caçam e saqueiam. Derrote-os por XP, MCB e loot.`, 3200); brSfx('cue', 'rival_spawn'); }
   else if (kind === 'rival_out') { ft(`${info.name} (BOT) ELIMINADO${info.by && info.by !== 'arena' ? ` por ${info.by}` : ''}`, '#ff8fa3', { size: 16 }); }
-  else if (kind === 'rival_down') { ft(`RIVAL DERROTADO: ${info.name}${info.level ? ` NV ${info.level}` : ''}`, '#ff8fa3', { size: 20 }); brSfx('event'); }
+  else if (kind === 'rival_down') { ft(`RIVAL DERROTADO: ${info.name}${info.level ? ` NV ${info.level}` : ''}`, '#ff8fa3', { size: 20 }); brSfx('cue', 'rival_down'); }
   else if (kind === 'rival_final') {
     const rv = arenaBr.rivals?.(); const c = rv?.list.find((q) => q.name === info.name);
     brUi?.showRivalIntro?.({ name: info.name, level: info.level, hp: info.hp, others: info.others, color: c?.color, ms: info.introMs });
-    brSfx('dragon');
+    brSfx('cue', 'champion_intro');
   }
-  else if (kind === 'champion_down') { big(`<b>CAMPEÃO RIVAL DERROTADO!</b>${info.name} (BOT) caiu${info.left ? ` — restam ${info.left} rival(is)` : ''}.`, 2600); }
+  else if (kind === 'champion_down') { big(`<b>CAMPEÃO RIVAL DERROTADO!</b>${info.name} (BOT) caiu${info.left ? ` — restam ${info.left} rival(is)` : ''}.`, 2600); brSfx('cue', 'rival_down'); }
+  else if (kind === 'victory_end') brSfx('cue', 'victory');
   else if (kind === 'boss_down') { big('<b>GIGANTE VERDE DERROTADO!</b>Recompensa real salva no seu personagem. A corrida continua — extraia para o bônus.', 3200); }
   music?.onEvent?.(kind, info);
 }
@@ -2490,11 +2493,12 @@ setInterval(() => {
   let threat = 0; try { threat = getThreatsToPlayer(s, p.x, p.y).length; } catch {}
   const dc = DATA.arena_br?.dragao?.territorio;
   const SKm = DATA.arena_br?._escala || 1; const near = !!dc && p.x > dc.x0 - 14 * SKm && p.y < dc.y1 + 14 * SKm;
-  music.update(dt, { threat, dragon: !!v?.inDragon, near, ended: !!v?.ended });
+  music.update(dt, { threat, dragon: !!v?.inDragon, near, ended: !!v?.ended, region: v?.region || '' });
 }, 200);
 function brSfx(kind, extra) {
   try {
-    if (kind === 'pickup') { if (extra === 'lendario' || extra === 'epico') sfxEliteSpawn(); else sfxLoot(); }
+    if (kind === 'pickup') sfxLootRarity(extra === 'mat' ? 'comum' : extra);
+    else if (kind === 'cue') sfxCue(extra);
     else if (kind === 'warn') sfxWarn();
     else if (kind === 'event') sfxEliteSpawn();
     else if (kind === 'dragon') sfxBossRoar();

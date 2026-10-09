@@ -111,5 +111,52 @@
  ],
  "ui_click": [
   "ui_click.mp3"
+ ],
+ "hit_arco": [
+  "hit_arco_0.mp3",
+  "hit_arco_1.mp3"
+ ],
+ "hit_cajado": [
+  "hit_cajado_0.mp3",
+  "hit_cajado_1.mp3"
+ ],
+ "tele_melee": [
+  "tele_melee.mp3"
+ ],
+ "tele_ranged": [
+  "tele_ranged.mp3"
+ ],
+ "tele_area": [
+  "tele_area.mp3"
+ ],
+ "tele_rival": [
+  "tele_rival.mp3"
+ ],
+ "loot_comum": [
+  "loot_comum.mp3"
+ ],
+ "loot_incomum": [
+  "loot_incomum.mp3"
+ ],
+ "loot_raro": [
+  "loot_raro.mp3"
+ ],
+ "loot_epico": [
+  "loot_epico.mp3"
+ ],
+ "loot_lendario": [
+  "loot_lendario.mp3"
+ ],
+ "rival_spawn": [
+  "rival_spawn.mp3"
+ ],
+ "rival_down": [
+  "rival_down.mp3"
+ ],
+ "champion_intro": [
+  "champion_intro.mp3"
+ ],
+ "victory": [
+  "victory.mp3"
  ]
 }

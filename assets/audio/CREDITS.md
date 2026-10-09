@@ -76,3 +76,41 @@ Todas as faixas abaixo são **CC0 (domínio público)**, baixadas em 03/10/2026 
 | `music/br-explore.mp3` | “Another space background track” (ObservingTheStar) — **yd** | https://opengameart.org/content/another-space-background-track | exploração (calma) |
 | `music/br-combat.mp3` | “Battle Theme A” — **cynicmusic** (cynicmusic.com) | https://opengameart.org/content/battle-theme-a | combate (crossfade por ameaça) |
 | `music/br-dragon.mp3` | “Ancient Power Of Serpents” — **josepharaoh99** | https://opengameart.org/content/ancient-power-of-serpents | Território do Dragão |
+
+## Pacote de som 2 — M10 passo 2 (09/10/2026)
+
+Gerado por `tools/build-sfx2.py` (reprodutível) a partir das MESMAS fontes CC0 acima + 2 ambientes CC0 novos do OpenGameArt.
+Nivelamento: RMS da parte ativa (one-shots ≈ −16 dBFS, avisos/loot comum um pouco abaixo; ambientes ≈ −32 dBFS = cama),
+teto de pico −1 dBFS. MP3 mono 22,05 kHz (56 kbps one-shots / 40 kbps loops). Loops sem emenda (crossfade de 2 s no ponto de volta).
+O "vento" de `amb_periferia`/`amb_elite` é ruído gerado pelo próprio script (sem fonte externa).
+
+| Fonte nova | URL | Licença |
+|---|---|---|
+| TinyWorlds — Forest Ambience | https://opengameart.org/content/forest-ambience | CC0 1.0 |
+| JaggedStone — Loopable Dungeon Ambience | https://opengameart.org/content/loopable-dungeon-ambience | CC0 1.0 |
+
+| Arquivo | Origem | Uso no jogo |
+|---|---|---|
+| sfx/hit_arco_0.mp3 | Kenney Impact `impactWood_medium_001.ogg` | acerto com arco |
+| sfx/hit_arco_1.mp3 | Kenney Impact `impactSoft_heavy_001.ogg` | acerto com arco |
+| sfx/hit_cajado_0.mp3 | artisticdude RPG `battle/magic1.wav` (cortado) | acerto com cajado |
+| sfx/hit_cajado_1.mp3 | Kenney Sci-fi `laserSmall_002.ogg` + Kenney Impact `impactSoft_medium_001.ogg` | acerto com cajado |
+| sfx/tele_melee.mp3 | artisticdude RPG `battle/sword-unsheathe2.wav` | aviso: golpe corpo a corpo |
+| sfx/tele_ranged.mp3 | Kenney RPG `creak1.ogg` (corda tensionando) | aviso: disparo à distância |
+| sfx/tele_area.mp3 | Kenney Sci-fi `forceField_002.ogg` | aviso: golpe em área (nova/slam) |
+| sfx/tele_rival.mp3 | artisticdude RPG `sword-unsheathe4.wav` + Kenney Interface `glitch_003.ogg` | aviso: herói rival (BOT) |
+| sfx/loot_comum.mp3 | artisticdude RPG `inventory/coin.wav` | loot comum / material |
+| sfx/loot_incomum.mp3 | Kenney RPG `handleCoins.ogg` | loot incomum |
+| sfx/loot_raro.mp3 | Kenney Interface `glass_003.ogg` | loot raro |
+| sfx/loot_epico.mp3 | Kenney Interface `confirmation_003.ogg` + `glass_005.ogg` | loot épico |
+| sfx/loot_lendario.mp3 | Kenney Interface `bong_001.ogg` + `maximize_006.ogg` + `glass_001.ogg` | loot lendário |
+| sfx/rival_spawn.mp3 | artisticdude RPG `metal-ringing.wav` + `sword-unsheathe5.wav` | rivais (BOT) entram na arena |
+| sfx/rival_down.mp3 | Kenney Impact `impactBell_heavy_004.ogg` + artisticdude RPG `armor-light.wav` | rival derrotado |
+| sfx/champion_intro.mp3 | Kenney Sci-fi `lowFrequency_explosion_001.ogg` + Kenney Interface `bong_001.ogg` (tom −25%) | cartão do CAMPEÃO RIVAL |
+| sfx/victory.mp3 | Kenney Interface `maximize_009.ogg` + `confirmation_004.ogg` + `bong_001.ogg` | VITÓRIA |
+| amb/amb_periferia.mp3 | vento gerado + Kenney Sci-fi `spaceEngineLow_000.ogg` (passa-baixa) | ambiente: Periferia |
+| amb/amb_ruinas.mp3 | JaggedStone `dungeon_ambient_1.ogg` + Kenney RPG `creak2.ogg`, `metalPot2.ogg` | ambiente: Ruínas Industriais |
+| amb/amb_floresta.mp3 | TinyWorlds `Forest_Ambience.mp3` (28 s) | ambiente: Floresta Selvagem |
+| amb/amb_complexo.mp3 | JaggedStone `dungeon_ambient_1.ogg` + Kenney Sci-fi `computerNoise_001.ogg` | ambiente: Complexo Abandonado |
+| amb/amb_elite.mp3 | vento gerado + Kenney Sci-fi `spaceEngineLarge_001.ogg` (passa-baixa) | ambiente: Zona de Elite |
+| amb/amb_dragao.mp3 | JaggedStone `dungeon_ambient_1.ogg` (tom −20%) + Kenney Sci-fi `spaceEngineLow_003.ogg` (tom −30%) | tensão: Território do Dragão |

@@ -10,9 +10,9 @@
  * Dano sempre por actions.monsterAttackPlayer (esquiva/i-frames, defesa, escudo, morte).
  * Números em gameplay-config.js → archetypes / enemyHazards.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009perf';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009perf';
-import { isWalkable } from './map.js?v=20261009perf';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009som';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009som';
+import { isWalkable } from './map.js?v=20261009som';
 
 export const ARCH_IDS = Object.freeze(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
 const RANGED = new Set(['C', 'E']);
@@ -152,6 +152,8 @@ function startAttack(K, mon, r, move, P, result) {
   K.setState(mon, r, K.S.ATTACK_PREPARE, { arch: r.arch, move, kind: a.kind });
   K.logEvent('TELEGRAPH', mon, { arch: r.arch, move, kind: a.kind });
   result.prepares++;
+  // M10 passo 2: som de aviso por tipo de golpe (corpo a corpo / à distância / área / rival BOT)
+  result.prepKind = mon.rival ? 'rival' : RANGED.has(r.arch) ? 'ranged' : (a.kind === 'nova' || a.kind === 'roar' || a.kind === 'slam' || a.kind === 'hazard' || (a.radius && !a.halfAngleDeg && a.radius >= 2)) ? 'area' : 'melee';
 }
 
 /**
