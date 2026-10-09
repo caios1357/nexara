@@ -12,9 +12,9 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261009som';
-import { mergeStaticParts } from './merge-util.js?v=20261009som';
-import { attachHeroGlb } from './hero-glb.js?v=20261009som';
+import { getConfig } from '../gameplay-config.js?v=20261009graf';
+import { mergeStaticParts } from './merge-util.js?v=20261009graf';
+import { attachHeroGlb } from './hero-glb.js?v=20261009graf';
 
 const CYAN = 0x39f0ff;
 
@@ -338,7 +338,7 @@ export function createHeroModel(opts = {}) {
       for (const m of flashMats) m.emissive.setHex(on ? 0x801010 : 0x000000);
       if (st.hurtT === 0) flashMats.forEach((m, i) => m.emissive.setHex(baseEmissive[i]));
     } else root.rotation.z = tiltZ;
-    if (glb) glb.update(dt, { action: act, attacking, combo: st.combo, attackPhase: st.attackPhase, attackT: st.attackT, hurtT: st.hurtT, moveK, runK, speed: st.speed, walkSpeed: inp.walkSpeed || 2.4, runSpeed: inp.runSpeed || 3.4, yaw: inp.yaw, charge: chargeK, time: st.animTime });
+    if (glb) glb.update(dt, { action: act, attacking, combo: st.combo, attackPhase: st.attackPhase, attackT: st.attackT, hurtT: st.hurtT, moveK, runK, speed: st.speed, walkSpeed: inp.walkSpeed || 2.4, runSpeed: inp.runSpeed || 3.4, yaw: inp.yaw, charge: chargeK, time: st.animTime , nexa: inp.nexa });
     if (!procBodyVisible) bladeGlow.visible = false;
   }
 

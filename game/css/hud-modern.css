@@ -570,3 +570,20 @@ html:fullscreen, html:fullscreen body { background: #000; }
 .nx-fps-hud { position: fixed; left: calc(6px + env(safe-area-inset-left, 0px)); bottom: 4px; z-index: 90; pointer-events: none;
   font: 600 10px/1.2 ui-monospace, Menlo, Consolas, monospace; color: #b8f7d0; background: rgba(6, 12, 18, 0.62);
   padding: 2px 6px; border-radius: 4px; letter-spacing: 0.02em; white-space: nowrap; }
+
+/* M10 passo 3 — Território do Dragão: vinheta vermelha pulsando (só CSS, sem custo de GPU no 3D) */
+.nx-dragon-vignette { position: absolute; inset: 0; pointer-events: none; z-index: 5; opacity: 0; display: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(120, 18, 6, 0.38) 82%, rgba(60, 4, 0, 0.62) 100%); }
+.nx-dragon-vignette.on { display: block; animation: nxDragonPulse 2.6s ease-in-out infinite; }
+@keyframes nxDragonPulse { 0%, 100% { filter: brightness(0.85); } 50% { filter: brightness(1.25); } }
+/* M10 passo 3 — energia NEXA: brilho correndo na barra; pulso ao gastar; aura quando cheia */
+#nexa-bar { position: relative; overflow: hidden; }
+#nexa-bar > span { transition: width 0.25s ease-out; }
+#nexa-bar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30%; left: -30%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent); animation: nxNexaShine 2.4s linear infinite; }
+@keyframes nxNexaShine { to { transform: translateX(440%); } }
+#nexa-bar.nx-nexa-full { box-shadow: 0 0 8px 1px rgba(57, 230, 255, 0.75); }
+#nexa-bar.nx-nexa-spend { animation: nxNexaSpend 0.45s ease-out; }
+@keyframes nxNexaSpend { 0% { box-shadow: 0 0 14px 4px rgba(150, 245, 255, 0.95); } 100% { box-shadow: 0 0 0 0 rgba(57, 230, 255, 0); } }
+/* M10 passo 3 — números de dano: tipos (o "pop" é feito por transform no JS) */
+.nx-dmg { will-change: transform, opacity; }

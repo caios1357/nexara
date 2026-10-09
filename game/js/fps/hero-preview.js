@@ -3,7 +3,7 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261009som';
+import { attachHeroGlb } from './hero-glb.js?v=20261009graf';
 
 export function createHeroPreview(canvas, opts = {}) {
   // opts.interactive (VESTIÁRIO): arrastar = girar · pinça/roda = zoom · começa de FRENTE · luz de estúdio

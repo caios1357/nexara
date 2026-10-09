@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261009som';
-import { drawMinimap } from './map.js?v=20261009som';
+import { label, CATEGORIES } from './arquivo.js?v=20261009graf';
+import { drawMinimap } from './map.js?v=20261009graf';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261009som';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261009som';
-import { getEquippedStats } from './state.js?v=20261009som';
-import { countItem } from '../../rules/loot.js?v=20261009som';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261009som';
-import { isArenaState } from './arena.js?v=20261009som';
-import { spriteCount } from './assets.js?v=20261009som';
-import { attrLines } from './equipment.js?v=20261009som';
+} from './actions.js?v=20261009graf';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261009graf';
+import { getEquippedStats } from './state.js?v=20261009graf';
+import { countItem } from '../../rules/loot.js?v=20261009graf';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261009graf';
+import { isArenaState } from './arena.js?v=20261009graf';
+import { spriteCount } from './assets.js?v=20261009graf';
+import { attrLines } from './equipment.js?v=20261009graf';
 
 let rendererRef = null;
 
@@ -393,6 +393,7 @@ function updateHud(state) {
   const p = state.player;
   setBar('hp-bar', p.hp, p.hpMax);
   setBar('nexa-bar', p.nexa, p.nexaMax);
+  nexaFx(p.nexa, p.nexaMax);
   setBar('xp-bar', p.xp, p.xpNext);
   setText('hud-hp-text', `${p.hp}/${p.hpMax}`);
   setText('hud-nexa-text', `${p.nexa}/${p.nexaMax}`);
@@ -428,6 +429,15 @@ function updateHud(state) {
   }
 }
 
+/** M10 passo 3 — energia NEXA: pulso ao gastar, aura quando cheia (classes CSS; nada por quadro). */
+let nexaPrev = null; const nexaFxStats = { spends: 0, full: false };
+function nexaFx(v, max) {
+  const el = document.getElementById('nexa-bar'); if (!el) return;
+  if (nexaPrev != null && v < nexaPrev - 0.5) { el.classList.remove('nx-nexa-spend'); void el.offsetWidth; el.classList.add('nx-nexa-spend'); nexaFxStats.spends++; }
+  const full = max > 0 && v >= max - 0.01; if (full !== nexaFxStats.full) { nexaFxStats.full = full; el.classList.toggle('nx-nexa-full', full); }
+  nexaPrev = v;
+}
+export const getNexaFxStats = () => ({ ...nexaFxStats });
 function setBar(id, v, max) {
   const w = `${Math.max(0, Math.min(100, (v / max) * 100))}%`;
   if (hudCache[`bar:${id}`] === w) return;

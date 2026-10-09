@@ -10,34 +10,34 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009som';
-import { buildArenaDressing } from './arena-dressing.js?v=20261009som';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009som';
-import { createHeroModel } from './hero-model.js?v=20261009som';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009som';
-import { attachHeroGlb } from './hero-glb.js?v=20261009som';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009som';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009som';
-import { createActionVfx } from './action-vfx.js?v=20261009som';
-import { createPassiveVfx } from './passive-vfx.js?v=20261009som';
-import { createFpsControls } from './fps-controls.js?v=20261009som';
-import { createViewmodel } from './viewmodel.js?v=20261009som';
-import { createDragonView } from './dragon-view.js?v=20261009som';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009som';
-import { getSprite } from '../assets.js?v=20261009som';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009som';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009som';
-import { mergeStaticParts } from './merge-util.js?v=20261009som';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009som';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009som';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009som';
-import { createPostFx } from './post-fx.js?v=20261009som';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009som';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009som';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009som';
-import { groundAt, setGroundFn } from './ground.js?v=20261009som';
-import { buildBrTerrain } from './br-terrain.js?v=20261009som';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009som';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009graf';
+import { buildArenaDressing } from './arena-dressing.js?v=20261009graf';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009graf';
+import { createHeroModel } from './hero-model.js?v=20261009graf';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009graf';
+import { attachHeroGlb } from './hero-glb.js?v=20261009graf';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009graf';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009graf';
+import { createActionVfx } from './action-vfx.js?v=20261009graf';
+import { createPassiveVfx } from './passive-vfx.js?v=20261009graf';
+import { createFpsControls } from './fps-controls.js?v=20261009graf';
+import { createViewmodel } from './viewmodel.js?v=20261009graf';
+import { createDragonView } from './dragon-view.js?v=20261009graf';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009graf';
+import { getSprite } from '../assets.js?v=20261009graf';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009graf';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009graf';
+import { mergeStaticParts } from './merge-util.js?v=20261009graf';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009graf';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009graf';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009graf';
+import { createPostFx } from './post-fx.js?v=20261009graf';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009graf';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009graf';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009graf';
+import { groundAt, setGroundFn } from './ground.js?v=20261009graf';
+import { buildBrTerrain } from './br-terrain.js?v=20261009graf';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009graf';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -146,6 +146,7 @@ export function createFpsRenderer() {
   let brWorld = null; // ARENA PRINCIPAL: terreno instanciado + marcadores
   let brDir = null; let brLights = []; let brLightAt = 0;
   const brFogTint = { id: null, at: 0, last: 0, target: new THREE.Color() };
+  const dragonFx = { pts: null, vel: null, on: false, k: 0, el: null, n: 0, last: 0 };
   const brLod = { hidden: 0, shown: 0 };
   let puddleTex = null;
   let atmoT = 0;
@@ -451,6 +452,7 @@ export function createFpsRenderer() {
   function clearWorld() {
     if (!worldRoot) return;
     brWorld = null; brDir = null; brLights = []; brFogTint.id = null; brFogTint.at = 0;
+    dragonFx.k = 0; dragonFx.last = 0; if (dragonFx.pts) dragonFx.pts.visible = false; if (dragonFx.el) { dragonFx.el.classList.remove('on'); dragonFx.on = false; }
     dressing?.dispose?.();
     dressing = null;
     city?.dispose();
@@ -875,9 +877,38 @@ export function createFpsRenderer() {
     brDir.shadow.camera.left = -22; brDir.shadow.camera.right = 22; brDir.shadow.camera.top = 22; brDir.shadow.camera.bottom = -22;
     worldRoot.add(brDir); worldRoot.add(brDir.target);
   }
+  /** M10 passo 3 — Território do Dragão: brasas subindo em volta do herói (1 Points, tier × degrau 'particles') + vinheta vermelha pulsando (CSS). */
+  function updateDragonFx(inDragon, hx, hz, now) {
+    const dt = Math.min(0.1, Math.max(0, (now - (dragonFx.last || now)) / 1000)); dragonFx.last = now;
+    dragonFx.k += ((inDragon ? 1 : 0) - dragonFx.k) * Math.min(1, dt / (inDragon ? 1.2 : 0.7));
+    if (!inDragon && dragonFx.k < 0.12) dragonFx.k = 0;
+    if (!dragonFx.el && typeof document !== 'undefined' && canvas?.parentElement) {
+      const el = document.createElement('div'); el.id = 'nx-dragon-vignette'; el.className = 'nx-dragon-vignette'; canvas.parentElement.appendChild(el); dragonFx.el = el;
+    }
+    if (dragonFx.el) { const vis = dragonFx.k > 0; if (vis !== dragonFx.on) { dragonFx.on = vis; dragonFx.el.classList.toggle('on', vis); } if (vis) dragonFx.el.style.opacity = dragonFx.k.toFixed(2); }
+    const want = dragonFx.k > 0 && getConfig().graphics.dragonEmbers !== false;
+    if (!want) { if (dragonFx.pts) dragonFx.pts.visible = false; return; }
+    if (!dragonFx.pts) {
+      const N = Math.max(8, Math.round((tierName === 'low' ? 24 : tierName === 'medium' ? 48 : 80)));
+      const pos = new Float32Array(N * 3); dragonFx.vel = new Float32Array(N);
+      for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - 0.5) * 24; pos[i * 3 + 1] = Math.random() * 7; pos[i * 3 + 2] = (Math.random() - 0.5) * 24; dragonFx.vel[i] = 0.6 + Math.random() * 1.1; }
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xff7a2a, size: 0.14, sizeAttenuation: true, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+      dragonFx.pts = new THREE.Points(geo, mat); dragonFx.pts.frustumCulled = false; dragonFx.pts.renderOrder = 6; scene.add(dragonFx.pts); dragonFx.n = N;
+    }
+    const P = dragonFx.pts; P.visible = true; P.position.set(hx, groundAt(hx / TILE, hz / TILE), hz);
+    const arr = P.geometry.attributes.position.array; const use = Math.max(4, Math.round(dragonFx.n * particleK));
+    for (let i = 0; i < dragonFx.n; i++) {
+      if (i >= use) { arr[i * 3 + 1] = -50; continue; }
+      let y = arr[i * 3 + 1] + dragonFx.vel[i] * dt; if (y > 7 || y < 0) { y = 0; arr[i * 3] = (Math.random() - 0.5) * 24; arr[i * 3 + 2] = (Math.random() - 0.5) * 24; }
+      arr[i * 3 + 1] = y; arr[i * 3] += Math.sin(now * 0.001 + i) * 0.25 * dt;
+    }
+    P.geometry.attributes.position.needsUpdate = true; P.material.opacity = 0.9 * dragonFx.k;
+  }
   function updateBrWorld(state, now) {
     if (!brWorld) return;
     const hx = fpsCam.state.visX, hz = fpsCam.state.visZ;
+    updateDragonFx(brFogTint.id === 'dragao', hx, hz, now);
     // M10 fase 8: tonalidade da névoa por região (lerp contínuo; troca de alvo a cada 400 ms)
     if (scene.fog && brWorld.regionAt) {
       const BL = getConfig().graphics?.brLight || {};
@@ -983,6 +1014,29 @@ export function createFpsRenderer() {
     }
     return g;
   }
+  /** M10 passo 3 — "!" sobre a cabeça no aviso de golpe (âmbar no telegraph, vermelho no preparo final). 1 sprite/inimigo, materiais compartilhados. */
+  const teleMarkStats = { shown: 0 };
+  function teleMarkMat(windup) {
+    if (!shared.teleMarkT) {
+      const c = document.createElement('canvas'); c.width = 64; c.height = 96; const g = c.getContext('2d');
+      g.font = '900 84px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+      g.lineWidth = 12; g.strokeStyle = '#140400'; g.strokeText('!', 32, 52); g.fillStyle = '#ffffff'; g.fillText('!', 32, 52);
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      shared.teleMarkT = new THREE.SpriteMaterial({ map: tex, color: 0xffb52e, depthTest: false, transparent: true });
+      shared.teleMarkW = new THREE.SpriteMaterial({ map: tex, color: 0xff3b24, depthTest: false, transparent: true });
+      shared.teleMarkT.userData.shared = true; shared.teleMarkW.userData.shared = true;
+    }
+    return windup ? shared.teleMarkW : shared.teleMarkT;
+  }
+  function setTeleMark(entry, parent, on, windup, y, s, now) {
+    if (!on || getConfig().graphics.teleMarks === false) { if (entry.teleMark) entry.teleMark.visible = false; return; }
+    let sp = entry.teleMark;
+    if (!sp) { sp = entry.teleMark = new THREE.Sprite(teleMarkMat(false)); sp.renderOrder = 14; sp.geometry.userData.shared = true; parent.add(sp); } // geometria de Sprite é global no three → nunca descartar
+    sp.material = teleMarkMat(windup); sp.visible = true;
+    const k = s * (windup ? 0.6 : 0.48) * (1 + 0.14 * Math.sin(now * 0.03));
+    sp.scale.set(k * 0.66, k, 1); sp.position.set(0, y, 0);
+    teleMarkStats.shown++;
+  }
   /** EVO: telegraph do arquétipo (no espaço local do bot; frente = +z). */
   function updateArchTele(entry, v, now) {
     const tele = entry.mesh.userData.tele;
@@ -990,7 +1044,10 @@ export function createFpsRenderer() {
     const T = v && v.tele;
     const on = !!(T && T.kind && (v.state === AI_STATES.ATTACK_PREPARE || (v.state === AI_STATES.ATTACK && (T.kind === 'lunge' || T.kind === 'charge'))));
     tele.visible = on;
+    { const sc0 = 1 / (entry.mesh.scale.x || 1); setTeleMark(entry, entry.mesh, on, on && (T.phase === 'WINDUP' || T.phase === 'ATTACK'), 2.55 * sc0, sc0, now); }
     if (!on) return;
+    // pulso do preenchimento (material compartilhado: todos os avisos pulsam juntos — barato)
+    shared.teleFillT.opacity = 0.17 + 0.12 * (0.5 + 0.5 * Math.sin(now * 0.02));
     teleSeen[T.kind] = (teleSeen[T.kind] || 0) + 1; // e2e: telegraphs de arquétipo realmente desenhados
     if (!entry.tele || entry.teleKind !== T.kind + T.half) {
       while (tele.children.length) tele.remove(tele.children[0]);
@@ -1730,6 +1787,7 @@ export function createFpsRenderer() {
     const st = synced ? v.state : AI_STATES.IDLE; const stT = synced ? aiClock - v.stateAt : 0;
     const prep = st === AI_STATES.ATTACK_PREPARE;
     entry.ringMat.color.set(m.rival.primary); entry.ringMat.opacity = prep ? 0.6 + 0.35 * Math.sin(now * 0.025) : 0.45; // aviso do golpe: anel pulsa na cor do rival (sem vermelho/sangue)
+    setTeleMark(entry, root, prep, prep && stT > 380, 2.85 * sm, 1, now); // M10 passo 3: "!" também no rival (aviso legível)
     // LOD de animação: longe (> 12 tiles) anima 1 a cada 3 quadros
     const d = Math.hypot(fx - fpsCam.state.visX / TILE, fy - fpsCam.state.visZ / TILE);
     if (entry.glb.info.status === 'ready') { if (!entry.ready) { entry.ready = true; rivalStats.ready++; } }
@@ -2216,12 +2274,13 @@ export function createFpsRenderer() {
     }
   }
 
+  let floatSeq = 0; const floatStats = {};
   function spawnFloatDamage(tx, ty, amount, kind, fx, fy) {
     capFloats();
     if (!floatLayer || !renderer) return;
     let left = '50%';
     let top = '42%';
-    if ((kind === 'out' || kind === 'crit') && Number.isFinite(fx) && canvas) {
+    if (kind !== 'in' && Number.isFinite(fx) && canvas) {
       tmpV3.set(fx * TILE, 1.9 + groundAt(fx, fy), fy * TILE).project(fpsCam.camera);
       if (tmpV3.z < 1) {
         left = `${((tmpV3.x * 0.5 + 0.5) * canvas.clientWidth).toFixed(0)}px`;
@@ -2231,12 +2290,20 @@ export function createFpsRenderer() {
     const el = document.createElement('div');
     // Bloco 6: crítico (Mira Neural) = número grande dourado
     const crit = kind === 'crit';
-    el.textContent = crit ? `CRÍTICO! -${amount}` : `-${amount}`;
-    if (crit) el.className = 'nx-float-crit';
-    el.style.cssText = `position:absolute;left:${left};top:${top};transform:translate(-50%,-50%);font:${crit ? '900 30px' : 'bold 18px'} system-ui;color:${kind === 'in' ? '#e85d4c' : crit ? '#ffd23f' : '#3ecfbf'};text-shadow:${crit ? '0 0 12px #ffb300,0 0 4px #000' : '0 0 6px #000'};opacity:1;pointer-events:none;white-space:nowrap;transition:transform ${crit ? 1.1 : 0.7}s ease-out,opacity ${crit ? '0.55s ease-in 0.5s' : '0.7s'};`;
+    // M10 passo 3: leitura — contorno escuro, "pop" de entrada, golpe pesado maior/laranja, ESQUIVA (sem número) no rival,
+    // leve deslocamento lateral p/ números seguidos não se sobreporem
+    const heavy = kind === 'heavy'; const dodge = kind === 'dodge';
+    el.textContent = crit ? `CRÍTICO! -${amount}` : dodge ? 'ESQUIVA' : `-${amount}`;
+    el.className = crit ? 'nx-float-crit nx-dmg' : `nx-dmg nx-dmg-${kind}`;
+    floatSeq = (floatSeq + 1) % 5; const jx = kind === 'in' ? 0 : (floatSeq - 2) * 14;
+    const size = crit ? '900 30px' : heavy ? '900 24px' : dodge ? '800 15px' : kind === 'in' ? '800 19px' : '800 19px';
+    const color = kind === 'in' ? '#ff6b5a' : crit ? '#ffd23f' : heavy ? '#ffb347' : dodge ? '#c9d6ff' : '#5ff0dc';
+    const shadow = crit ? '0 0 12px #ffb300,0 0 4px #000' : '-1px -1px 0 #061016,1px -1px 0 #061016,-1px 1px 0 #061016,1px 1px 0 #061016,0 0 6px rgba(0,0,0,.8)';
+    el.style.cssText = `position:absolute;left:${left};top:${top};transform:translate(calc(-50% + ${jx}px),-50%) scale(${heavy || crit ? 1.45 : 1.25});font:${size} system-ui;color:${color};text-shadow:${shadow};opacity:1;pointer-events:none;white-space:nowrap;letter-spacing:.02em;transition:transform ${crit ? 1.1 : 0.75}s cubic-bezier(.2,.9,.3,1),opacity ${crit ? '0.55s ease-in 0.5s' : '0.45s ease-in 0.3s'};`;
     floatLayer.appendChild(el);
+    floatStats[kind] = (floatStats[kind] || 0) + 1;
     requestAnimationFrame(() => {
-      el.style.transform = 'translate(-50%,-120%)';
+      el.style.transform = `translate(calc(-50% + ${jx}px),-130%) scale(1)`;
       el.style.opacity = '0';
     });
     setTimeout(() => { if (!el.dataset.frozen) el.remove(); }, crit ? 1150 : 750);
@@ -2514,7 +2581,8 @@ export function createFpsRenderer() {
       attack: cview,
       action: act,
       groundY: groundAt(fpsCam.state.visX / TILE, fpsCam.state.visZ / TILE),
-      leapHeight: getConfig().specials.suprema.leapHeight
+      leapHeight: getConfig().specials.suprema.leapHeight,
+      nexa: (() => { const P = getState()?.player; return P && P.nexaMax ? P.nexa / P.nexaMax : 0.5; })()
     });
     const arm = fpsCam.getArm();
     const vis = arm.armLen > t.heroHideDistance;
@@ -2747,6 +2815,8 @@ export function createFpsRenderer() {
       caps: tier?.caps || null,
       antialias: !!renderer?.getContextAttributes?.()?.antialias,
       adaptiveDropped: (perf.dropLog || []).slice(),
+      // M10 passo 3 (e2e): leitura visual
+      gfx3: { teleMarks: teleMarkStats.shown, floats: { ...floatStats }, dragonK: +dragonFx.k.toFixed(2), embers: !!dragonFx.pts?.visible, embersN: dragonFx.n, vignette: !!dragonFx.on, heroRimK: hero?.glb?.info?.rimK ?? null, heroGlb: hero?.glb?.info?.status || null },
       pointLights: (() => { let n = 0; scene?.traverse((o) => { if (o.isPointLight && o.visible && o.intensity > 0) n++; }); return n; })(),
       programs: renderer?.info?.programs?.length || 0,
       particles: (sparks ? sparks.alive : 0) + (dragonView?.getCounts?.().trail || 0),

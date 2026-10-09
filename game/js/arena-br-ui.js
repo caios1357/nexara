@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009som';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009graf';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };

@@ -5,8 +5,9 @@
  * Visual da ref. do Caio: armadura escura, NÚCLEO azul no peito, espada com brilho azul.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, findNode, fitHeight, createAnimator } from './model-lib.js?v=20261009som';
-import { heroStyleOf } from '../hero-styles.js?v=20261009som';
+import { loadModel, getLoaded, cloneSkinned, findNode, fitHeight, createAnimator } from './model-lib.js?v=20261009graf';
+import { heroStyleOf } from '../hero-styles.js?v=20261009graf';
+import { getConfig } from '../gameplay-config.js?v=20261009graf';
 
 const HERO_H = 1.66;
 /** Proporções (só visual; hitbox/tempos intactos): herói mais ALTO e mais MAGRO que o KayKit chibi.
@@ -56,6 +57,7 @@ export function attachHeroGlb(hero, opts = {}) {
   let flash = 0;
   const glowMats = [];
   const tintMats = [];
+  const rimU = { color: { value: new THREE.Color(0x66e6ff) }, k: { value: 0.35 } }; // M10 passo 3: contorno ligado à NEXA
 
   let buildSeq = 0;
   async function build(styleId, sync = false) {
@@ -86,6 +88,7 @@ export function attachHeroGlb(hero, opts = {}) {
     model.scale.x *= HERO_PROP.width; model.scale.z *= HERO_PROP.width;
     info.proportions = { ...HERO_PROP, headBone: headBone?.name || null };
     let meshes = 0;
+    rimU.color.value.set(style.glow ?? 0x66e6ff);
     model.traverse((o) => {
       if (!o.isMesh) return;
       // props do próprio personagem ficam escondidos (a arma vem de hero-props); capacete/capa conforme o estilo
@@ -103,6 +106,15 @@ export function attachHeroGlb(hero, opts = {}) {
       m.emissive = new THREE.Color(primary).lerp(new THREE.Color(0xffffff), 0.2).multiplyScalar(0.1).add(new THREE.Color(style.glow).multiplyScalar(0.06));
       o.material = m;
       m.userData.baseEmissive = m.emissive.clone();
+      // M10 passo 3: contorno (fresnel) na cor do estilo — silhueta legível de costas; força = NEXA atual
+      if (getConfig().graphics.heroRim !== false) {
+        m.onBeforeCompile = (sh) => {
+          sh.uniforms.heroRimColor = rimU.color; sh.uniforms.heroRimK = rimU.k;
+          sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 heroRimColor; uniform float heroRimK;')
+            .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n{ float rf = 1.0 - clamp(abs(dot(normalize(normal), normalize(vViewPosition))), 0.0, 1.0); totalEmissiveRadiance += heroRimColor * (rf * rf * rf) * heroRimK; }');
+        };
+        m.customProgramCacheKey = () => 'heroRim';
+      }
       tintMats.push(m);
       o.castShadow = true;
     });
@@ -398,6 +410,7 @@ export function attachHeroGlb(hero, opts = {}) {
     info.anim = animator.state; info.clip = animator.clipOf(animator.state); info.changes = animator.changes;
     // carga de especial acende a arma; dano pisca vermelho
     for (const m of glowMats) if (m.emissiveIntensity !== undefined && m.isMeshStandardMaterial) m.emissiveIntensity = 1.6 + v.charge * 4;
+    { const G = getConfig().graphics; const nx = v.nexa == null ? 0.5 : Math.max(0, Math.min(1, v.nexa)); rimU.k.value = (G.heroRimBase ?? 0.18) + (G.heroRimNexa ?? 0.42) * nx + (v.charge || 0) * 0.5; info.rimK = +rimU.k.value.toFixed(2); }
     const hurtOn = v.hurtT > 0.12;
     if (hurtOn !== !!flash) {
       flash = hurtOn ? 1 : 0;
