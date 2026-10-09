@@ -536,7 +536,9 @@
       "y0": 6,
       "y1": 34
     },
-    "avisoDist": 16
+    "avisoDist": 16,
+    "hpMult": 55,
+    "danoMult": 1.5
   },
   "lootOrdem": [
     "basico",
@@ -660,34 +662,34 @@
     "bonusMcbPorNivel": 8
   },
   "fast": {
-    "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo).",
-    "escala": 1.3,
+    "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica).",
+    "escala": 1.02,
     "fatorConteudo": 0.8,
     "rivais": 10,
-    "rivaisDistInicialMin": 16,
+    "rivaisDistInicialMin": 28,
     "rivaisSaque": {
       "inicioMs": 10000,
       "pausaMs": 9000
     },
     "zonaSegura": {
-      "inicioMs": 60000,
+      "inicioMs": 76000,
       "avisoMs": 15000,
       "estagios": [
         {
           "raio": 40,
-          "duracaoMs": 45000
+          "duracaoMs": 57000
         },
         {
           "raio": 28,
-          "duracaoMs": 45000
+          "duracaoMs": 57000
         },
         {
           "raio": 17,
-          "duracaoMs": 40000
+          "duracaoMs": 51000
         },
         {
           "raio": 9,
-          "duracaoMs": 40000
+          "duracaoMs": 51000
         }
       ]
     },
@@ -763,6 +765,36 @@
         "primary": "#ff7a3b",
         "glow": "#ffc8a8"
       }
-    ]
+    ],
+    "semExtracao": true,
+    "rivaisForca": {
+      "hpMult": 1.8,
+      "atkMult": 1.5
+    },
+    "rivaisTatica": {
+      "cdMult": 0.8,
+      "velMult": 1.12,
+      "aggro": 18,
+      "esquivaChance": 0.62,
+      "esquivaCooldownMs": 1800,
+      "bloqueioChance": 0.35,
+      "bloqueioMs": 650,
+      "bloqueioCooldownMs": 2200,
+      "bloqueioReduz": 0.55,
+      "pressaoGrupo": true,
+      "pressaoDist": 13
+    },
+    "espectador": {
+      "velocidade": 10
+    },
+    "rivaisCombate": {
+      "danoEntreRivais": 0.3
+    },
+    "rivaisCacaDist": 11,
+    "rivaisElim": {
+      "primeiraMs": 60000,
+      "intervaloMs": 45000,
+      "espectadorMs": 8000
+    }
   }
 }

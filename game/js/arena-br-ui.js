@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009fast';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009fast2';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -69,7 +69,7 @@ export function createArenaBrUi(deps) {
 
   function show() { ensure(); root.classList.remove('hidden'); shown = true; document.getElementById('game-screen')?.classList.add('br-mode'); }
   function hide() {
-    shown = false; root?.classList.add('hidden'); toggleBigMap(false); closePanel(); closeSummary();
+    shown = false; root?.classList.add('hidden'); toggleBigMap(false); closePanel(); closeSummary(); hideSpectate();
     popQueue.length = 0; popCur = null; popup?.classList.add('hidden'); clearTimeout(popTimer);
     document.getElementById('game-screen')?.classList.remove('br-mode');
   }
@@ -239,7 +239,7 @@ export function createArenaBrUi(deps) {
     if (!big) return; bigOpen = !!on; big.classList.toggle('hidden', !bigOpen);
     if (bigOpen) {
       const s = deps.getState(); const v = deps.getView();
-      big.querySelector('.br-legend').innerHTML = (s?._data?.arena_br?.rotas || []).map((r) => `<span>${esc(r.nome)}</span>`).join('') + '<span>◇ ponto de interesse · ○ extração · círculo azul = zona segura (tracejado = próximo)</span>';
+      big.querySelector('.br-legend').innerHTML = (s?._data?.arena_br?.rotas || []).map((r) => `<span>${esc(r.nome)}</span>`).join('') + `<span>◇ ponto de interesse${s?._data?.arena_br?.extracao?.desativada ? '' : ' · ○ extração'} · círculo azul = zona segura (tracejado = próximo)</span>`;
       if (s && v) drawBig(v, s);
     }
   }
@@ -352,9 +352,10 @@ export function createArenaBrUi(deps) {
     const best = sum.best ? `<b style="color:${rarColor(sum.best.rar)}">${esc(sum.best.name)}</b>` : '—';
     summaryEl.innerHTML = `<div class="br-sum-box">
       <h2 class="${win ? 'br-sum-win' : ''}">${win ? 'VITÓRIA' : ok ? 'EXTRAÇÃO CONCLUÍDA' : 'DERROTADO'}</h2>
+      ${sum.spectated ? `<p class="br-sum-fast">Você caiu aos ${mmss(sum.diedAtMs || 0)} (${sum.placement || '?'}º lugar) e acompanhou a briga até o fim${sum.winner ? ` — último herói: <b>${esc(sum.winner)}</b> (BOT)` : ''}.</p>` : ''}
       ${fast ? `<p class="br-sum-fast">NEXARA FAST ⚡ · ${fast.colocacao ? `<b>${fast.colocacao}º lugar</b>` : ''}${fast.vencedor && fast.vencedor !== 'VOCÊ' ? ` · último sobrevivente: <b>${esc(fast.vencedor)}</b> (BOT)` : ''}${fast.killer ? ` · derrotado por <b>${esc(fast.killer)}</b> (BOT)` : ''}</p>` : ''}
       ${zero ? '<p class="br-sum-zero">Partida do zero (NV1): seu herói salvo, itens, MCB e passivas NÃO foram alterados.</p>' : ''}
-      <p class="br-sum-sub" ${zero ? 'hidden' : ''}>${win ? `Você derrotou o <b>CAMPEÃO RIVAL${sum.champion ? ` ${esc(sum.champion)}` : ''}</b> — último herói rival (BOT) da arena. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
+      <p class="br-sum-sub" ${zero ? 'hidden' : ''}>${win ? `Você derrotou <b>TODOS os rivais (BOT)</b>${sum.champion ? ` — o último foi o CAMPEÃO RIVAL <b>${esc(sum.champion)}</b>` : ''}: você é o ÚLTIMO HERÓI. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
       <dl>
         <dt>Tempo sobrevivido</dt><dd data-k="time">${mmss(sum.timeMs)}</dd>
         <dt>Monstros derrotados</dt><dd data-k="kills">${sum.kills}</dd>
@@ -373,6 +374,23 @@ export function createArenaBrUi(deps) {
     stats.summaries++;
   }
 
+  /** ESPECTADOR (FAST): jogador caído, rivais ainda lutando — painel com os rivais vivos, últimas eliminações e PULAR / MENU */
+  let specEl = null; let specAt = 0;
+  function hideSpectate() { specEl?.remove(); specEl = null; }
+  function showSpectate(info) {
+    const nw = performance.now(); if (specEl && nw - specAt < 250) return; specAt = nw;
+    if (!specEl) {
+      specEl = document.createElement('div'); specEl.id = 'br-spectate'; specEl.className = 'nx-spectate';
+      specEl.innerHTML = '<div class="ns-t"></div><div class="ns-s"></div><div class="ns-l"></div><div class="ns-f"></div><button type="button" data-a="skip">PULAR → RESULTADO</button><button type="button" data-a="menu">MENU</button>';
+      specEl.querySelector('[data-a="skip"]').onclick = () => info.onSkip?.();
+      specEl.querySelector('[data-a="menu"]').onclick = () => info.onMenu?.();
+      document.body.appendChild(specEl);
+    }
+    specEl.querySelector('.ns-t').textContent = `VOCÊ CAIU — ${info.placement}º LUGAR · ${info.left} RIVAIS VIVOS`;
+    specEl.querySelector('.ns-s').textContent = `A partida só acaba quando sobrar 1 herói. Acompanhando a briga dos rivais (BOT) em simulação acelerada ×${info.speed} · ⏱ ${mmss(info.clock)}`;
+    specEl.querySelector('.ns-l').innerHTML = info.list.map((r) => `<i class="${r.alive ? '' : 'dead'}" style="color:${esc(r.color || '#fff')};border-color:${esc(r.color || '#fff')}">${esc(r.name)} NV${r.level}</i>`).join('');
+    specEl.querySelector('.ns-f').innerHTML = info.feed.map((t) => `<div>${esc(t)}</div>`).join('');
+  }
   /** RIVAIS: cartão de entrada do CAMPEÃO RIVAL (cor do herói, rótulo BOT) */
   let introEl = null;
   function showRivalIntro(info) {
@@ -380,11 +398,11 @@ export function createArenaBrUi(deps) {
     introEl = document.createElement('div'); introEl.id = 'br-rival-intro'; introEl.className = 'nx-rival-intro';
     introEl.style.setProperty('--rc', info.color || '#ff3b5c');
     introEl.innerHTML = `<div class="nri-tag">CONFRONTO FINAL</div><div class="nri-title">CAMPEÃO RIVAL</div><div class="nri-name">⚔ ${esc(info.name)} <small>(BOT) · NV ${info.level || 1}</small></div>
-      <div class="nri-sub">Herói rival da IA local${info.others ? ` · +${info.others} rival(is) restante(s)` : ''} — derrote-o para a VITÓRIA</div>`;
+      <div class="nri-sub">Herói rival da IA local${info.others ? ` · +${info.others} rival(is) restante(s)` : ''} — derrote TODOS os rivais para a VITÓRIA</div>`;
     (document.getElementById('canvas-wrap') || document.body).appendChild(introEl);
     requestAnimationFrame(() => introEl?.classList.add('show'));
     const el = introEl; stats.rivalIntros = (stats.rivalIntros || 0) + 1;
     setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, info.ms || 3200);
   }
-  return { showRivalIntro, show, hide, update, lootPopup, openBag, openMarket, closePanel, showSummary, closeSummary, toggleBigMap, isPanelOpen: () => !!panel || !!summaryEl || bigOpen, stats: () => JSON.parse(JSON.stringify(stats)), popupOpen: () => !!popCur };
+  return { showSpectate, hideSpectate, spectating: () => !!specEl, showRivalIntro, show, hide, update, lootPopup, openBag, openMarket, closePanel, showSummary, closeSummary, toggleBigMap, isPanelOpen: () => !!panel || !!summaryEl || bigOpen, stats: () => JSON.parse(JSON.stringify(stats)), popupOpen: () => !!popCur };
 }

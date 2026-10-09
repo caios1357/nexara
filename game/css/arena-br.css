@@ -103,3 +103,21 @@
 .nx-fast-zero { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #ffe08a; }
 .br-summary .br-sum-fast { margin: 0.2rem 0; color: #ffb020; font-size: 0.8rem; }
 .br-summary .br-sum-zero { margin: 0.2rem 0; color: #9ffff4; font-size: 0.74rem; }
+/* NEXARA FAST — RANKING: cartão do jogador + linha "VOCÊ" destacada (20261009fast2) */
+.nx-fast-ranking .nfr-card { margin: 0.35rem 0; padding: 0.45rem 0.6rem; border: 2px solid #ffe08a; border-radius: 8px; background: rgba(255, 224, 138, 0.08); }
+.nx-fast-ranking .nfr-card-t { color: #ffe08a; font-weight: 800; letter-spacing: 0.1em; font-size: 0.85rem; }
+.nx-fast-ranking .nfr-card-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(5.6rem, 1fr)); gap: 0.3rem 0.5rem; margin-top: 0.3rem; }
+.nx-fast-ranking .nfr-card-g span { display: flex; flex-direction: column; align-items: center; color: #9fb4c0; font-size: 0.64rem; text-align: center; }
+.nx-fast-ranking .nfr-card-g b { color: #fff; font-size: 1.05rem; line-height: 1.1; }
+.nx-fast-ranking .nfr-scroll { overflow-x: auto; }
+.nx-fast-ranking tr.me td { background: rgba(255, 224, 138, 0.14); color: #ffe08a; font-weight: 800; }
+.nx-fast-ranking .nfr-empty { color: #8aa0ad; font-size: 0.72rem; margin: 0.3rem 0; }
+/* ESPECTADOR (jogador caído, rivais ainda brigando) */
+.nx-spectate { position: fixed; left: 50%; top: 4.2rem; transform: translateX(-50%); z-index: 9400; width: min(92vw, 520px); padding: 0.5rem 0.7rem; border: 1px solid #ff8fa3; border-radius: 10px; background: rgba(10, 14, 20, 0.9); color: #dfe9f0; font-size: 0.78rem; text-align: center; }
+.nx-spectate .ns-t { color: #ff8fa3; font-weight: 800; letter-spacing: 0.06em; }
+.nx-spectate .ns-s { color: #9fb4c0; font-size: 0.68rem; margin: 0.15rem 0 0.3rem; }
+.nx-spectate .ns-l { display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: center; margin: 0.25rem 0; }
+.nx-spectate .ns-l i { font-style: normal; padding: 0.1rem 0.4rem; border-radius: 99px; border: 1px solid; font-size: 0.66rem; }
+.nx-spectate .ns-l i.dead { opacity: 0.35; text-decoration: line-through; }
+.nx-spectate .ns-f { max-height: 4.2rem; overflow: hidden; color: #cfe0ea; font-size: 0.68rem; text-align: left; }
+.nx-spectate button { margin: 0.3rem 0.2rem 0; padding: 0.35rem 0.9rem; border-radius: 8px; border: 1px solid #ffb020; background: #1b1405; color: #ffd27a; font-weight: 700; }

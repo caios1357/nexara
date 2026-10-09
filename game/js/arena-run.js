@@ -13,11 +13,11 @@
  *    rollLoot, addToInventory) no personagem PERMANENTE + stats.arenaBossWins++ → saveToLocal;
  *    depois reset e nova tentativa.
  */
-import { getConfig } from './gameplay-config.js?v=20261009fast';
-import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261009fast';
-import { addXp, pushLog } from './state.js?v=20261009fast';
-import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261009fast';
-import { reveal } from './arquivo.js?v=20261009fast';
+import { getConfig } from './gameplay-config.js?v=20261009fast2';
+import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261009fast2';
+import { addXp, pushLog } from './state.js?v=20261009fast2';
+import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261009fast2';
+import { reveal } from './arquivo.js?v=20261009fast2';
 
 /** Estatísticas medidas para a checagem "sem bônus sobrando" (valores exatos). */
 const SNAP_STATS = [
@@ -69,6 +69,7 @@ export function createArenaRun(deps) {
   const powerDef = (id) => powersData().poderes.find((p) => p.id === id) || null;
 
   function effectiveMultiplier() {
+    const bm = bossMon(); if (bm && bm.hpMult > 0) return bm.hpMult; // ARENA PRINCIPAL: dragão com HP próprio (arena_br.dragao.hpMult); Arena de teste/Campo seguem a fórmula 101×
     const c = cfg();
     const min = Math.max(101, Number(c.hpMultiplierMin) || 101);
     return Math.max(min, Number(c.hpMultiplierOfHero) || min);

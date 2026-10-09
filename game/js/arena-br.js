@@ -10,12 +10,12 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009fast';
-import { pushLog } from './state.js?v=20261009fast';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009fast';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009fast';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009fast';
-import { createRivals } from './arena-rivals.js?v=20261009fast';
+import { createArenaState } from './arena.js?v=20261009fast2';
+import { pushLog } from './state.js?v=20261009fast2';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009fast2';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009fast2';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009fast2';
+import { createRivals } from './arena-rivals.js?v=20261009fast2';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -47,14 +47,16 @@ export function createBrState(data, { from = null, boss = null } = {}) {
     st.monstersAlive.push({
       uid: boss.uid, id: bossDef.id, zone: BR_ZONE_ID, x: d.x, y: d.y, homeX: d.x, homeY: d.y,
       hp: bossDef.hp, hpMax: bossDef.hp, alive: true, boss: true, arenaLabel: 'GIGANTE VERDE',
-      territoryMinX: d.territorio.x0, territoryMaxY: d.territorio.y1 + 8
+      territoryMinX: d.territorio.x0, territoryMaxY: d.territorio.y1 + 8,
+      // ajuste do Caio (20261009fast2): dragão da Arena Principal com MENOS HP (× do HP do herói) e MAIS dano; telegraphs/tempos intocados
+      ...(d.hpMult > 0 ? { hpMult: d.hpMult } : {}), ...(d.danoMult > 0 ? { atkScale: d.danoMult } : {})
     });
     // NEXARA FAST: o território pode cair em qualquer posição → limita também a leste/norte (bordas da região do dragão)
     if (cfg.fastRun) { const rd = cfg.regioes.find((r) => r.id === 'dragao'); const b = st.monstersAlive[st.monstersAlive.length - 1]; if (rd && b) { b.territoryMinX = rd.x0 + 1; b.territoryMaxX = rd.x1 - 1; b.territoryMinY = rd.y0 + 1; b.territoryMaxY = rd.y1 - 1; } }
   }
   if (from?.passives?.pending > 0) st.passives.pending = from.passives.pending;
   st.log = [];
-  pushLog(st, 'ARENA PRINCIPAL — explore, lute, junte loot. Zona segura fecha com aviso. EXTRAÇÃO garante bônus.', 'sys');
+  pushLog(st, cfg.extracao?.desativada ? 'NEXARA FAST — explore, lute, junte loot. A partida só termina quando o ÚLTIMO herói cair.' : 'ARENA PRINCIPAL — explore, lute, junte loot. Zona segura fecha com aviso. EXTRAÇÃO garante bônus.', 'sys');
   return st;
 }
 
@@ -444,6 +446,7 @@ export function createArenaBr(deps) {
   /* ── extração / dragão / região ── */
   function updateExtraction(p, dtMs) {
     const X = cfg().extracao;
+    if (X.desativada || !X.pontos?.length) return; // NEXARA FAST: sem extração
     if (!br.extractionOpen && br.clock >= X.liberaAposMs) { br.extractionOpen = true; note('extract_open', {}); }
     if (!br.extractionOpen) return;
     const pt = X.pontos.find((q) => Math.hypot(q.x + 0.5 - p.x, q.y + 0.5 - p.y) < 1.7);
@@ -484,8 +487,24 @@ export function createArenaBr(deps) {
     else if (!inD && br.inDragon) { br.inDragon = false; note('dragon_leave', {}); }
   }
 
+  /** ESPECTADOR (NEXARA FAST): o jogador caiu com ≥ 2 rivais vivos → o mundo do herói congela e só a briga dos rivais continua (simulação grossa, como longe da câmera). */
+  const FAR = { x: -500, y: -500 };
+  function updateSpectate(dtMs) {
+    br.clock += dtMs; stats.ticks++;
+    const z = br.zone; updateZone({ x: z.cx, y: z.cy }, dtMs); // só avança as fases (o herói está no centro: sem dano)
+    rivals.update(dtMs, FAR);
+  }
+  /** avança o espectador em `ms` de simulação (passos de 100 ms); skip = até o fim */
+  function spectateAdvance(ms, skip = false) {
+    if (!br || !br.spectate || br.ended) return false;
+    br.noFps = true;
+    try { const lim = skip ? 25 * 60 * 1000 : ms; for (let t = 0; t < lim && !br.ended; t += 100) updateSpectate(100); }
+    finally { if (br) br.noFps = false; }
+    return !!br?.ended;
+  }
   function update(dtMs, p) {
     if (!isActive()) return;
+    if (br.spectate) { updateSpectate(dtMs); return; }
     br.clock += dtMs; stats.ticks++;
     updateDensity(dtMs);
     director(p);
@@ -521,10 +540,21 @@ export function createArenaBr(deps) {
   function addMcb(n) { if (br) br.mcbRun += n; }
 
   /** Morte → DERROTADO (nada permanente perdido; o save já tem tudo). */
-  function onPlayerDeath(state) {
+  function onPlayerDeath(state, mon) {
     if (!br || state !== st) return false;
+    const killer = mon?.rival?.name || null; // quem deu o golpe fatal (rival BOT) — o gancho de morte passa o atacante
     state.player.hp = 1;
-    if (!br.ended) finish('derrotado', {});
+    if (br.ended || br.spectate) return true;
+    // NEXARA FAST: a partida só acaba quando o ÚLTIMO herói cai. Jogador morto com ≥ 2 rivais vivos → espectador (a briga continua até sobrar 1)
+    const alive = cfg().rivais?.fimUltimoHeroi ? rivals.aliveRivals() : [];
+    const place = alive.length + 1;
+    if (alive.length >= 2) {
+      br.spectate = { at: Math.round(br.clock), left: alive.length, placement: place, killer }; br.playerPlace = place; br.rivalFinal = false;
+      br.rivalFinal = false; note('player_down', { left: alive.length, placement: place, killer });
+      return true;
+    }
+    if (cfg().rivais?.fimUltimoHeroi) br.playerPlace = place;
+    finish('derrotado', cfg().rivais?.fimUltimoHeroi ? { placement: place, winner: alive.length === 1 ? alive[0].name : null, killer } : { killer });
     return true;
   }
   function finish(kind, info) {
@@ -539,7 +569,8 @@ export function createArenaBr(deps) {
     return {
       kind: br.ended?.kind || null, timeMs: Math.round(br.clock), kills: br.kills, killsBy: { ...br.killsBy }, mcb: br.mcbRun, bonus: br.ended?.bonus || 0,
       items: br.itemsFound.length, itemsList: br.itemsFound.slice(-12), best: br.best, regions: br.visited.slice(), boss: br.bossKilled, secret: br.secretFound,
-      rivalsDown: br.rivalsByHero || 0, champion: br.ended?.champion || null
+      rivalsDown: br.rivalsByHero || 0, champion: br.ended?.champion || null,
+      placement: br.ended?.placement ?? br.playerPlace ?? null, winner: br.ended?.winner ?? null, spectated: !!br.spectate, diedAtMs: br.spectate?.at ?? null
     };
   }
   function view() {
@@ -552,11 +583,12 @@ export function createArenaBr(deps) {
       zone: { phase: z.phase, stage: z.stage + 1, stages: c.zonaSegura.estagios.length, r: +z.r.toFixed(2), toR: z.toR, cx: z.cx, cy: z.cy, msLeft: Math.round(zoneMsLeft), outside: z.outside },
       event: br.event ? { kind: br.event.kind, nome: br.event.nome, x: br.event.x, y: br.event.y, msLeft: Math.max(0, Math.round(br.event.until - br.clock)), uid: br.event.uid || null, done: !!br.event.done } : null,
       extractionOpen: br.extractionOpen, extractInMs: Math.max(0, c.extracao.liberaAposMs - br.clock), extract: { ...br.extract, need: c.extracao.segundos * 1000 },
-      opening: br.opening ? { ...br.opening, need: 450 } : null, drops: br.drops.length, explored: br.exploredN, exploredTotal: br.explored?.length || 0, found: br.found.slice(), inDragon: br.inDragon, ended: br.ended ? { ...br.ended } : null, bossKilled: br.bossKilled
+      opening: br.opening ? { ...br.opening, need: 450 } : null, drops: br.drops.length, explored: br.exploredN, exploredTotal: br.explored?.length || 0, found: br.found.slice(), inDragon: br.inDragon, ended: br.ended ? { ...br.ended } : null, bossKilled: br.bossKilled,
+      spectate: br.spectate ? { ...br.spectate, left: rivals.aliveRivals().length } : null, extractionOff: !!c.extracao?.desativada
     };
   }
   return {
-    start, stop, update, isActive, onKill,
+    start, stop, update, isActive, onKill, spectateAdvance, isSpectating: () => !!(br && br.spectate && !br.ended),
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
     onRivalHit(mon) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos()); },
     rivals: () => (br ? rivals.view(deps.getPos()) : null), onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
@@ -568,6 +600,9 @@ export function createArenaBr(deps) {
     debug: {
       /** RIVAIS (testes): lista, gera rival num ponto, força o confronto final */
       rivals: () => (br ? rivals.view(deps.getPos()) : null),
+      /** testes: morte do herói pela MESMA rota da morte real (regra do último herói / espectador) */
+      killHero() { return st ? onPlayerDeath(st) : false; },
+      spectate(ms, skip) { return spectateAdvance(ms || 0, !!skip); },
       spawnRivals() { if (br && !br.rivals) rivals.spawn(deps.getPos()); return br?.rivals?.length || 0; },
       spawnRival(i, x, y) { if (!br) return null; if (!br.rivals) rivals.spawn(deps.getPos()); const h = cfg().rivais.herois[i % cfg().rivais.herois.length]; const rv = rivals.spawnOne(h, x, y, 100 + br.rivals.length); return rv?.uid || null; },
       /** RIVAIS (testes): simula a corrida em passos reais (dt) sem o herói se mexer — zona, diretor e rivais longe */

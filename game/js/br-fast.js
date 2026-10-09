@@ -5,7 +5,7 @@
  * 10 RIVAIS (BOT) — IA local, sem rede. Zona segura mais rápida (partida ~6–10 min).
  * A ARENA NEXARA (mapa completo) continua exatamente igual: este módulo só cria uma CÓPIA da config.
  */
-import { scaleBrConfig } from './br-map.js?v=20261009fast';
+import { scaleBrConfig } from './br-map.js?v=20261009fast2';
 
 function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -51,6 +51,8 @@ export function makeFastConfig(design, seed) {
   if (Z.centro) z.centro = { ...Z.centro };
   if (F.eventos) Object.assign(c.eventos, F.eventos);
   if (F.extracao) Object.assign(c.extracao, F.extracao);
+  // sem EXTRAÇÃO no FAST: a partida só termina quando o último herói cai (sem pontos, sem fim por extração, sem HUD de extração)
+  if (F.semExtracao) { c.extracao.pontos = []; c.extracao.desativada = true; }
   // 10 rivais (BOT) — contam no teto de densidade do diretor e usam o LOD de IA
   c.rivais.n = F.rivais ?? 10; c.rivais.nMax = Math.max(c.rivais.n, c.rivais.nMax || 5);
   if (F.rivaisDistInicialMin != null) c.rivais.distInicialMin = F.rivaisDistInicialMin;
@@ -59,6 +61,14 @@ export function makeFastConfig(design, seed) {
   c.rivais.nivelProprio = !!F.rivaisNivelProprio; // nível próprio: começam no NV1 e sobem com XP de monstros/rivais
   c.rivais.xpMult = F.rivaisXpMult ?? 1;
   if (F.rivaisSaque) Object.assign(c.rivais.saque, F.rivaisSaque);
+  // RIVAIS MAIS FORTES no FAST (HP/ataque, reação mais rápida, esquiva/bloqueio, pressão em grupo)
+  if (F.rivaisForca) c.rivais.forca = { ...(c.rivais.forca || {}), ...F.rivaisForca };
+  if (F.rivaisTatica) c.rivais.tatica = { ...F.rivaisTatica };
+  if (F.espectador) c.rivais.espectador = { ...F.espectador };
+  if (F.rivaisCombate) c.rivais.combate = { ...c.rivais.combate, ...F.rivaisCombate }; // ritmo das eliminações entre rivais (não zerar a partida antes do herói chegar)
+  if (F.rivaisCacaDist != null) c.rivais.cacaRivalDist = F.rivaisCacaDist;
+  if (F.rivaisElim) { c.rivais.elimPrimeiraMs = F.rivaisElim.primeiraMs; c.rivais.elimIntervaloMs = F.rivaisElim.intervaloMs; c.rivais.elimEspectadorMs = F.rivaisElim.espectadorMs; }
+  c.rivais.fimUltimoHeroi = true; // vitória = todos os rivais mortos; morte do jogador com ≥ 2 rivais vivos = espectador até sobrar 1
   c.zona.seed = seed >>> 0; c.zona.escala = F.escala || 1.3; c.zona.name = 'NEXARA FAST';
   if (F.fatorConteudo) c.zona.fatorConteudo = F.fatorConteudo;
   const bySlot = []; perm.forEach((sl, i) => { bySlot[sl] = c.regioes[i].id; }); // posição (na ordem do mapa completo) → região sorteada

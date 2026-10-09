@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009fast';
-import { isWalkable, getTileType } from './map.js?v=20261009fast';
-import { monsterAttackPlayer } from './actions.js?v=20261009fast';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009fast';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009fast';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009fast2';
+import { isWalkable, getTileType } from './map.js?v=20261009fast2';
+import { monsterAttackPlayer } from './actions.js?v=20261009fast2';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009fast2';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009fast2';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -310,8 +310,11 @@ function releaseToken(r, gap) {
   tokenFreeAt = Math.max(tokenFreeAt, clock + gap);
 }
 
+/** NEXARA FAST: pressão em grupo dos rivais (BOT) — 1 atacante extra simultâneo enquanto ≥ 2 rivais cercam o herói (0 fora disso). */
+let attackerBonus = 0;
+export function setAttackerBonus(n) { attackerBonus = Math.max(0, Math.min(1, n | 0)); }
 function tokenAvailable(cfg) {
-  return attackers.size < cfg.maxSimultaneousAttackers && clock >= tokenFreeAt;
+  return attackers.size < cfg.maxSimultaneousAttackers + attackerBonus && clock >= tokenFreeAt;
 }
 
 function snapRuntime(mon, r) {
