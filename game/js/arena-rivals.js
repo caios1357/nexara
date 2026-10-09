@@ -11,7 +11,7 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos } from './enemy-ai.js?v=20261009graf';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos } from './enemy-ai.js?v=20261009jogo';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -63,15 +63,19 @@ export function createRivals(ctx) {
    * RIVAIS FORTES: nível do rival = nível do herói (CAMPEÃO = +2). HP/ataque = base × força (×1,5 / ×1,3) × nível
    * (× multiplicador do campeão). Ao subir de nível no meio da corrida, os rivais acompanham (mantém a % de HP).
    */
-  function rivalStats(L, champ) {
+  function rivalStats(L, champ, playerL = L) {
     const c = RC(); const F = c.forca || {}; const CP = c.campeao || {}; const def = ctx.st()._monsters[c.monstro || 'mon_br_rival'];
-    const hp = Math.round(def.hp * (F.hpMult ?? 1.5) * (1 + (c.hpPorNivel ?? 0.12) * (L - 1)) * (champ ? (CP.hpMult ?? 1.6) : 1));
-    const atk = (F.atkMult ?? 1.3) * (1 + (c.atkPorNivel ?? 0.06) * (L - 1)) * (champ ? (CP.atkMult ?? 1.3) : 1);
+    // M10 passo 4 (medido em e2e-m10-balanco): no NV1 o CAMPEÃO (NV3 ×1,6 HP) tirava 123% do HP mesmo esquivando → o bônus do campeão
+    // entra em rampa até o herói chegar ao NV "rampaNivel" (o +2 de nível continua valendo sempre)
+    const ramp = Math.min(1, Math.max(0.2, playerL / (CP.rampaNivel ?? 5)));
+    const cH = champ ? 1 + ((CP.hpMult ?? 1.6) - 1) * ramp : 1; const cA = champ ? 1 + ((CP.atkMult ?? 1.3) - 1) * ramp : 1;
+    const hp = Math.round(def.hp * (F.hpMult ?? 1.5) * (1 + (c.hpPorNivel ?? 0.12) * (L - 1)) * cH);
+    const atk = (F.atkMult ?? 1.3) * (1 + (c.atkPorNivel ?? 0.06) * (L - 1)) * cA;
     return { hp, atk };
   }
   function applyLevel(rv, mon, playerL, full) {
     const champ = !!rv.champion; const L = Math.max(1, playerL + (champ ? (RC().campeao?.nivelExtra ?? 2) : 0));
-    const S = rivalStats(L, champ); const frac = full || !(mon.hpMax > 0) ? 1 : Math.max(0, Math.min(1, mon.hp / mon.hpMax));
+    const S = rivalStats(L, champ, playerL); const frac = full || !(mon.hpMax > 0) ? 1 : Math.max(0, Math.min(1, mon.hp / mon.hpMax));
     mon.hpMax = S.hp; mon.hp = Math.max(1, Math.round(S.hp * frac)); mon.atkScale = S.atk;
     rv.level = L; rv.forPlayerL = playerL; mon.rival.level = L;
     mon.arenaLabel = `${champ ? 'CAMPEÃO RIVAL' : 'RIVAL'} (BOT) NV ${L} · ${rv.name}`;

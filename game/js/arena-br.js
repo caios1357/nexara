@@ -10,12 +10,12 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009graf';
-import { pushLog } from './state.js?v=20261009graf';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009graf';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009graf';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009graf';
-import { createRivals } from './arena-rivals.js?v=20261009graf';
+import { createArenaState } from './arena.js?v=20261009jogo';
+import { pushLog } from './state.js?v=20261009jogo';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009jogo';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009jogo';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009jogo';
+import { createRivals } from './arena-rivals.js?v=20261009jogo';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -570,7 +570,7 @@ export function createArenaBr(deps) {
       spawnRival(i, x, y) { if (!br) return null; if (!br.rivals) rivals.spawn(deps.getPos()); const h = cfg().rivais.herois[i % cfg().rivais.herois.length]; const rv = rivals.spawnOne(h, x, y, 100 + br.rivals.length); return rv?.uid || null; },
       /** RIVAIS (testes): simula a corrida em passos reais (dt) sem o herói se mexer — zona, diretor e rivais longe */
       sim(ms, step = 100, p) { if (!br) return null; br.noFps = true; try { for (let t = 0; t < ms && isActive(); t += step) update(step, p || deps.getPos()); } finally { if (br) br.noFps = false; } return br ? rivals.view(deps.getPos()) : null; },
-      forceFinal() { rivals.startFinal(); return br?.championUid || null; },
+      forceFinal(again) { if (again && br) br.rivalFinal = false; rivals.startFinal(); return br?.championUid || null; },
       advance(ms, p) { if (br) { br.clock += ms; br.nextSpawnAt = Math.min(br.nextSpawnAt, br.clock); } if (p) { br.noFps = true; try { update(16, p); } finally { if (br) br.noFps = false; } } },
       openNearest(p) { const m = map(); let best = null; let bd = 1e9; for (const s of [...m.chests, ...m.crates]) { if (br.lootOpened.includes(s.id)) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } } if (best) openLoot(best); return best; },
       forceEvent(kind) { if (!br) return; br.event = null; br.eventSeq = Object.keys(cfg().eventos.tipos).filter((k) => cfg().eventos.tipos[k].ativo).indexOf(kind); br.nextEventAt = br.clock; },

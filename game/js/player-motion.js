@@ -15,11 +15,11 @@
  * Um único dono do movimento: este módulo. Sem loop próprio — é chamado pelo
  * rAF único do renderer ativo (update(state, dt, yaw, opts)).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009graf';
-import { tryMove, maybeRespawn } from './actions.js?v=20261009graf';
-import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261009graf';
-import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261009graf';
-import { getStat, STATS } from './modifiers.js?v=20261009graf';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009jogo';
+import { tryMove, maybeRespawn } from './actions.js?v=20261009jogo';
+import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261009jogo';
+import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261009jogo';
+import { getStat, STATS } from './modifiers.js?v=20261009jogo';
 
 const KEY_MAP = {
   w: 'f', arrowup: 'f',

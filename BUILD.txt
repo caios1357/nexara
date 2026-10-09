@@ -1,3 +1,3 @@
-build=20261009graf
-publicado=2026-10-09 08:52 -04
-origem=/workspace/nexara
+build=20261009jogo
+publicado=2026-10-09 11:36 -04
+origem=/workspace/snap-s4/nexara

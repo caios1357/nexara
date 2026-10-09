@@ -816,7 +816,8 @@ export const DEFAULTS = Object.freeze({
    * Ganhos por nível (somados ao subir; saves antigos ganham só nos próximos níveis).
    */
   progression: {
-    xpBase: 100, xpGrowth: 1.16, xpLinear: 15, maxLevel: 30,
+    // M10 passo 4: 1,16 virava muro (NV20 = 63 abates/nível, NV29 = 218). 1,10 + 30/nível: NV1 igual (100), NV10 ≈ 16, NV20 ≈ 38 abates.
+    xpBase: 100, xpGrowth: 1.10, xpLinear: 30, maxLevel: 30,
     perLevel: { hpMax: 12, nexaMax: 4, ataque: 1.6, defesa: 0.6 },
     /** Direções de build (etiqueta das cartas) e sinergia: 2 / 3 passivas da mesma direção dão bônus extra. */
     builds: {

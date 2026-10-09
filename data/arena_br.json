@@ -611,8 +611,8 @@
         "glow": "#ffc08a"
       }
     ],
-    "hpPorNivel": 0.12,
-    "atkPorNivel": 0.06,
+    "hpPorNivel": 0.18,
+    "atkPorNivel": 0.13,
     "distInicialMin": 30,
     "velocidade": 1.2,
     "visaoMinimapa": 18,
@@ -643,7 +643,8 @@
     "bonusMcb": 60,
     "campeao": {
       "hpMult": 1.6,
-      "atkMult": 1.3,
+      "atkMult": 1.0,
+      "rampaNivel": 5,
       "sizeMult": 1.15,
       "bonusMcb": 200,
       "introMs": 3200,

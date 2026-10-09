@@ -6,7 +6,7 @@
  * iPhone/Safari: não há Fullscreen API para páginas → o botão mostra a dica real
  * "Adicionar à Tela de Início" (o manifest abre em display: fullscreen). Nada é simulado.
  */
-import { getConfig } from './gameplay-config.js?v=20261009graf';
+import { getConfig } from './gameplay-config.js?v=20261009jogo';
 
 const root = () => document.documentElement;
 const st = { enters: 0, exits: 0, lastError: null, lastLock: null, tips: 0, changes: 0 };

@@ -13,11 +13,11 @@
  *  - PORTÃO DO DRAGÃO: área de preparação, nível recomendado, revisão da build, ENTRAR → covil
  *    fecha atrás, chefe com HP = HP máx. do herói × multiplicador (≥101, arena-run.armBoss).
  */
-import { getConfig } from './gameplay-config.js?v=20261009graf';
-import { createArenaState } from './arena.js?v=20261009graf';
-import { addXp, pushLog } from './state.js?v=20261009graf';
-import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261009graf';
-import { resetMonsterRuntime, alertMonster, clearEnemyHazards, resetBossRuntime } from './enemy-ai.js?v=20261009graf';
+import { getConfig } from './gameplay-config.js?v=20261009jogo';
+import { createArenaState } from './arena.js?v=20261009jogo';
+import { addXp, pushLog } from './state.js?v=20261009jogo';
+import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261009jogo';
+import { resetMonsterRuntime, alertMonster, clearEnemyHazards, resetBossRuntime } from './enemy-ai.js?v=20261009jogo';
 
 export const CAMPO_ZONE_ID = 'zone_campo_ascensao';
 const UID_BASE = 12000;
@@ -86,7 +86,7 @@ export function createCampoState(data, { from = null, boss = null } = {}) {
 /**
  * @param {{
  *   getData: () => object,
- *   run: ReturnType<import('./arena-run.js?v=20261009graf').createArenaRun>,
+ *   run: ReturnType<import('./arena-run.js?v=20261009jogo').createArenaRun>,
  *   getPos: () => {x:number,y:number},
  *   applyDerived: (s: object) => void,
  *   presetCap: () => number,
