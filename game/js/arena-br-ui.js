@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261004riv';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009forte';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -205,7 +205,7 @@ export function createArenaBrUi(deps) {
       const [x, y] = T(rv.x, rv.y); const rr = rv.champion ? (full ? 8 : 5.5) : (full ? 6 : 4);
       g.fillStyle = rv.color; g.strokeStyle = '#fff'; g.lineWidth = rv.champion ? 2 : 1.2;
       g.beginPath(); g.moveTo(x, y - rr); g.lineTo(x + rr, y); g.lineTo(x, y + rr); g.lineTo(x - rr, y); g.closePath(); g.fill(); g.stroke();
-      if (full) { g.fillStyle = rv.color; g.fillText(`${rv.champion ? 'CAMPEÃO · ' : ''}${rv.name} (BOT)`, x, y - rr - 4); }
+      if (full) { g.fillStyle = rv.color; g.fillText(`${rv.champion ? 'CAMPEÃO · ' : ''}${rv.name} (BOT) NV ${rv.level || 1}`, x, y - rr - 4); }
       stats.rivalDots = (stats.rivalDots || 0) + 1;
     }
     // herói (seta na direção da câmera)
@@ -375,7 +375,7 @@ export function createArenaBrUi(deps) {
     introEl?.remove();
     introEl = document.createElement('div'); introEl.id = 'br-rival-intro'; introEl.className = 'nx-rival-intro';
     introEl.style.setProperty('--rc', info.color || '#ff3b5c');
-    introEl.innerHTML = `<div class="nri-tag">CONFRONTO FINAL</div><div class="nri-title">CAMPEÃO RIVAL</div><div class="nri-name">⚔ ${esc(info.name)} <small>(BOT)</small></div>
+    introEl.innerHTML = `<div class="nri-tag">CONFRONTO FINAL</div><div class="nri-title">CAMPEÃO RIVAL</div><div class="nri-name">⚔ ${esc(info.name)} <small>(BOT) · NV ${info.level || 1}</small></div>
       <div class="nri-sub">Herói rival da IA local${info.others ? ` · +${info.others} rival(is) restante(s)` : ''} — derrote-o para a VITÓRIA</div>`;
     (document.getElementById('canvas-wrap') || document.body).appendChild(introEl);
     requestAnimationFrame(() => introEl?.classList.add('show'));

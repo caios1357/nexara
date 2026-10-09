@@ -11,7 +11,7 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos } from './enemy-ai.js?v=20261004riv';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos } from './enemy-ai.js?v=20261009forte';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -48,18 +48,33 @@ export function createRivals(ctx) {
   function spawnOne(h, x, y, idx) {
     const c = RC(); const br = ctx.br(); const st = ctx.st();
     const def = st._monsters[c.monstro || 'mon_br_rival']; if (!def) return null;
-    const L = lvl();
-    const mon = ctx.spawnAt(def.id, x, y, { enc: 'rival', dbg: true, fresh: true, hpMult: 1 + (c.hpPorNivel ?? 0.12) * (L - 1) });
+    const mon = ctx.spawnAt(def.id, x, y, { enc: 'rival', dbg: true, fresh: true });
     if (!mon) return null;
     const rv = { uid: mon.uid, idx, style: h.style, name: h.nome, primary: h.primary, glow: h.glow, bag: [], mcb: 0, kills: 0, chests: 0,
       goal: null, goalAt: -1e9, nextSwing: 0, nextHurt: 0, swingAt: -1e9, seenAt: -1e9, champion: false, out: false, by: null, path: null, pathI: 0, dodgeReady: 0 };
     mon.rival = { name: h.nome, style: h.style, primary: h.primary, glow: h.glow, champion: false };
-    mon.arenaLabel = `RIVAL (BOT) · ${h.nome}`;
-    mon.atkScale = 1 + (c.atkPorNivel ?? 0.06) * (L - 1);
+    applyLevel(rv, mon, lvl(), true);
     mon.walkMult = c.velocidade || 1.2;
     mon.route = { pts: [], i: 0, rival: true };
     br.rivals.push(rv);
     return rv;
+  }
+  /**
+   * RIVAIS FORTES: nível do rival = nível do herói (CAMPEÃO = +2). HP/ataque = base × força (×1,5 / ×1,3) × nível
+   * (× multiplicador do campeão). Ao subir de nível no meio da corrida, os rivais acompanham (mantém a % de HP).
+   */
+  function rivalStats(L, champ) {
+    const c = RC(); const F = c.forca || {}; const CP = c.campeao || {}; const def = ctx.st()._monsters[c.monstro || 'mon_br_rival'];
+    const hp = Math.round(def.hp * (F.hpMult ?? 1.5) * (1 + (c.hpPorNivel ?? 0.12) * (L - 1)) * (champ ? (CP.hpMult ?? 1.6) : 1));
+    const atk = (F.atkMult ?? 1.3) * (1 + (c.atkPorNivel ?? 0.06) * (L - 1)) * (champ ? (CP.atkMult ?? 1.3) : 1);
+    return { hp, atk };
+  }
+  function applyLevel(rv, mon, playerL, full) {
+    const champ = !!rv.champion; const L = Math.max(1, playerL + (champ ? (RC().campeao?.nivelExtra ?? 2) : 0));
+    const S = rivalStats(L, champ); const frac = full || !(mon.hpMax > 0) ? 1 : Math.max(0, Math.min(1, mon.hp / mon.hpMax));
+    mon.hpMax = S.hp; mon.hp = Math.max(1, Math.round(S.hp * frac)); mon.atkScale = S.atk;
+    rv.level = L; rv.forPlayerL = playerL; mon.rival.level = L;
+    mon.arenaLabel = `${champ ? 'CAMPEÃO RIVAL' : 'RIVAL'} (BOT) NV ${L} · ${rv.name}`;
   }
   function aliveRivals() { return list().filter((rv) => { const m = monOf(rv); return m && m.alive && !rv.out; }); }
 
@@ -150,8 +165,10 @@ export function createRivals(ctx) {
     const st = ctx.st(); const clock = br.clock; const C = c.combate || {}; const dtS = dtMs / 1000;
     const lodMed = (ctx.cfg().lodIa?.medio || 24) - 1;
     const alive = aliveRivals();
+    const PL = lvl();
     for (const rv of alive) {
       const mon = monOf(rv); const mp = pos(mon);
+      if (rv.forPlayerL !== PL) applyLevel(rv, mon, PL, false); // herói subiu de nível → rivais acompanham
       const dP = Math.hypot(mp.x - p.x, mp.y - p.y);
       if (dP <= (c.visaoMinimapa || 18)) rv.seenAt = clock;
       const v = getAiView(mon); const engaged = v && ENGAGED.has(v.state) && dP < 14;
@@ -245,12 +262,11 @@ export function createRivals(ctx) {
     for (const rv of alive) { const m = monOf(rv); const s = m.hp + rv.kills * 20 + rv.chests * 30; if (s > best) { best = s; champ = rv; } }
     const m = monOf(champ);
     champ.champion = true; m.rival.champion = true;
-    m.hpMax = Math.round(m.hpMax * (CP.hpMult || 2.4)); m.hp = m.hpMax;
-    m.atkScale = (m.atkScale || 1) * (CP.atkMult || 1.3); m.sizeMult = (m.sizeMult || 1) * (CP.sizeMult || 1.15);
-    m.arenaLabel = `CAMPEÃO RIVAL (BOT) · ${champ.name}`;
+    applyLevel(champ, m, lvl(), true); // CAMPEÃO: nível do herói +2, HP cheio
+    m.sizeMult = (m.sizeMult || 1) * (CP.sizeMult || 1.15);
     for (const rv of alive) { const mm = monOf(rv); mm.aggroR = 60; mm.loseR = 999; rv.goal = null; }
     br.championUid = m.uid; br.championName = champ.name;
-    ctx.note('rival_final', { name: champ.name, style: champ.style, hp: m.hpMax, others: alive.length - 1, introMs: CP.introMs || 3200 });
+    ctx.note('rival_final', { name: champ.name, style: champ.style, level: champ.level, hp: m.hpMax, others: alive.length - 1, introMs: CP.introMs || 3200 });
   }
   /** o herói derrubou um rival: bolsa + drop elite + bônus MCB (XP/MCB base vêm do kill hook normal) */
   function onKill(mon) {
@@ -259,9 +275,9 @@ export function createRivals(ctx) {
     rv.out = true; rv.by = 'heroi'; br.rivalsDown++; br.rivalsByHero = (br.rivalsByHero || 0) + 1;
     const loots = rv.bag.splice(0).concat(ctx.rollLootFor(st, 'elite', { equip: 1, mats: [1, 2], rnd: ctx.R }));
     ctx.spawnDrops(mon.x, mon.y, loots, `rival_${rv.idx}`);
-    const bonus = (rv.champion ? (c.campeao?.bonusMcb || 200) : (c.bonusMcb || 60)) + Math.floor(rv.mcb * 0.5);
+    const bonus = (rv.champion ? (c.campeao?.bonusMcb || 200) : (c.bonusMcb || 60)) + (c.bonusMcbPorNivel ?? 8) * (rv.level || 1) + Math.floor(rv.mcb * 0.5);
     ctx.credit(bonus, rv.champion ? 'campeao' : 'rival');
-    ctx.note(rv.champion ? 'champion_down' : 'rival_down', { name: rv.name, bonus, drops: loots.length, left: aliveRivals().length });
+    ctx.note(rv.champion ? 'champion_down' : 'rival_down', { name: rv.name, level: rv.level, bonus, drops: loots.length, left: aliveRivals().length });
   }
   /** o herói acertou um rival vivo → chance de esquiva (passo + i-frames curtos) */
   function onHit(mon, from) {
@@ -279,7 +295,7 @@ export function createRivals(ctx) {
     return {
       final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
-        return { uid: rv.uid, name: rv.name, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
+        return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,
           champion: rv.champion, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null }; })
     };

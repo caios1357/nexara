@@ -763,9 +763,12 @@ export const DEFAULTS = Object.freeze({
       attack: { kind: 'cone', telegraphMs: 520, windupMs: 200, activeMs: 140, recoveryMs: 600, range: 1.7, halfAngleDeg: 65, atkMult: 1.3, cooldownMs: [1200, 1700] },
       special: { kind: 'nova', telegraphMs: 900, windupMs: 300, activeMs: 200, recoveryMs: 900, radius: 2.8, atkMult: 1.6, everyMs: 6500 } },
     /** RIVAIS: herói rival (BOT offline) — golpe rápido de espada (cone), GOLPE GIRATÓRIO e esquiva (enemy-ai.rivalDodge). */
-    H: { nome: 'HERÓI RIVAL', bodyRadius: 0.38, papel: 'herói rival (BOT): golpes rápidos, giro e esquiva', speedMult: 1.2, aggro: 11, knockbackScale: 0.6, stunScale: 0.6,
-      attack: { kind: 'cone', telegraphMs: 380, windupMs: 170, activeMs: 120, recoveryMs: 480, range: 1.7, halfAngleDeg: 62, atkMult: 1.0, cooldownMs: [900, 1400] },
-      special: { kind: 'nova', telegraphMs: 700, windupMs: 260, activeMs: 180, recoveryMs: 800, radius: 2.4, atkMult: 1.35, everyMs: 5500 } },
+    // RIVAIS FORTES: mais agressivo (aggro 14, +velocidade, cooldown menor, giro mais frequente) — aviso/janela de esquiva iguais (justo)
+    H: { nome: 'HERÓI RIVAL', bodyRadius: 0.38, papel: 'herói rival (BOT): golpes rápidos, giro e esquiva', speedMult: 1.3, aggro: 14, knockbackScale: 0.5, stunScale: 0.5,
+      attack: { kind: 'cone', telegraphMs: 380, windupMs: 170, activeMs: 120, recoveryMs: 480, range: 1.7, halfAngleDeg: 62, atkMult: 1.0, cooldownMs: [750, 1150] },
+      special: { kind: 'nova', telegraphMs: 700, windupMs: 260, activeMs: 180, recoveryMs: 800, radius: 2.4, atkMult: 1.35, everyMs: 4500 },
+      /** postura: 3 golpes em 2,5 s → 1,8 s sem reação a golpe (não fica preso em combo infinito) */
+      poise: { hits: 3, windowMs: 2500, armorMs: 1800 } },
     G: { nome: 'GUARDIÃO', bodyRadius: 0.6, papel: 'mini-chefe com fases', speedMult: 0.95, aggro: 12, knockbackScale: 0.1, stunScale: 0.35, hyperArmor: true,
       attack: { kind: 'cone', telegraphMs: 640, windupMs: 260, activeMs: 160, recoveryMs: 750, range: 2.0, halfAngleDeg: 70, atkMult: 1.4, cooldownMs: [1100, 1500] },
       charge: { kind: 'charge', telegraphMs: 850, windupMs: 250, activeMs: 900, recoveryMs: 1100, speed: 7.5, maxDist: 6.5, hitRadius: 0.8, atkMult: 1.7, wallStunMs: 1400 },

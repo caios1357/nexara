@@ -1150,9 +1150,9 @@
       "visual": "H",
       "lore": "Heróis simulados pela Arena Principal para treinar campeões. Lutam como você — e querem o mesmo tesouro.",
       "br": {
-        "aggroR": 11,
+        "aggroR": 14,
         "leash": 999,
-        "loseR": 24,
+        "loseR": 30,
         "sizeMult": 1,
         "rival": true
       }

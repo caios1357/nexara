@@ -4,7 +4,7 @@
  * (primeiro gesto do usuário); buffer de ruído criado uma vez; nós de cada
  * som são descartáveis (padrão WebAudio) e só nascem quando o som toca.
  */
-import { getConfig } from './gameplay-config.js?v=20261004riv';
+import { getConfig } from './gameplay-config.js?v=20261009forte';
 
 let ctx = null;
 let master = null;

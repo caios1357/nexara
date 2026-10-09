@@ -10,12 +10,12 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261004riv';
-import { pushLog } from './state.js?v=20261004riv';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261004riv';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261004riv';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261004riv';
-import { createRivals } from './arena-rivals.js?v=20261004riv';
+import { createArenaState } from './arena.js?v=20261009forte';
+import { pushLog } from './state.js?v=20261009forte';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009forte';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009forte';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009forte';
+import { createRivals } from './arena-rivals.js?v=20261009forte';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;

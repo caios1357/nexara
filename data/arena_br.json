@@ -642,13 +642,20 @@
     },
     "bonusMcb": 60,
     "campeao": {
-      "hpMult": 2.4,
+      "hpMult": 1.6,
       "atkMult": 1.3,
       "sizeMult": 1.15,
       "bonusMcb": 200,
       "introMs": 3200,
-      "gatilhoEstagio": 3
+      "gatilhoEstagio": 3,
+      "nivelExtra": 2
     },
-    "minVivosFinal": 2
+    "minVivosFinal": 2,
+    "forca": {
+      "_doc": "RIVAIS FORTES: nível = nível do herói (campeão +2); HP ×1,5 e ataque ×1,3 sobre a base anterior",
+      "hpMult": 1.5,
+      "atkMult": 1.3
+    },
+    "bonusMcbPorNivel": 8
   }
 }

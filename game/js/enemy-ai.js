@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261004riv';
-import { isWalkable, getTileType } from './map.js?v=20261004riv';
-import { monsterAttackPlayer } from './actions.js?v=20261004riv';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261004riv';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261004riv';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009forte';
+import { isWalkable, getTileType } from './map.js?v=20261009forte';
+import { monsterAttackPlayer } from './actions.js?v=20261009forte';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009forte';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009forte';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -1103,6 +1103,16 @@ export function onMonsterHit(mon, info) {
   }
   // EVO: arquétipos pesados (couraça/elite/guardião) resistem a empurrão/atordoamento; super-armadura no ataque
   const acfg = !r.isBoss && r.arch ? archCfg(r.arch) : null;
+  // RIVAIS FORTES: postura do herói rival — após N golpes seguidos ganha uma janela curta de super-armadura
+  // (não fica preso em reação a cada golpe; o herói ainda pode esquivar do contra-ataque, que mantém o aviso normal)
+  if (mon.rival && acfg?.poise) {
+    const P = acfg.poise;
+    if (!(clock < (r.rivalArmorUntil || 0))) {
+      r.rivalHitTimes = (r.rivalHitTimes || []).filter((t) => clock - t < P.windowMs); r.rivalHitTimes.push(clock);
+      if (r.rivalHitTimes.length >= P.hits) { r.rivalArmorUntil = clock + P.armorMs; r.rivalHitTimes.length = 0; r.hitReactUntil = 0; logEvent('RIVAL_POISE', mon, {}); }
+    }
+    if (clock < (r.rivalArmorUntil || 0)) info = { ...info, noStun: true, forceStunMs: Number.isFinite(info.forceStunMs) ? info.forceStunMs * 0.4 : info.forceStunMs };
+  }
   if (acfg) {
     if (Number.isFinite(acfg.knockbackScale)) kbScale *= acfg.knockbackScale;
     const busy = r.state === S.ATTACK_PREPARE || r.state === S.ATTACK;
@@ -1140,7 +1150,7 @@ export function onMonsterHit(mon, info) {
     // Foi atacado: entra em combate direto (sem tempo de reação)
     setState(mon, r, S.CHASE);
   }
-  if (r.state === S.CHASE && !r.isBoss) r.hitReactUntil = clock + ecfg.hitReactMs;
+  if (r.state === S.CHASE && !r.isBoss && !(mon.rival && clock < (r.rivalArmorUntil || 0))) r.hitReactUntil = clock + ecfg.hitReactMs;
   return hitOut;
 }
 

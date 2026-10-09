@@ -26,7 +26,7 @@
  * próprio de sprites (os mais antigos são reciclados).
  */
 import * as THREE from 'three';
-import { TILE } from './fps-camera.js?v=20261004riv';
+import { TILE } from './fps-camera.js?v=20261009forte';
 
 export const SIG = {
   furia_cibernetica: { cor: 0xff3b3b, prio: 9, glyph: 0 },
