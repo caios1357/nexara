@@ -565,3 +565,8 @@ html:fullscreen, html:fullscreen body { background: #000; }
 .nx-rival-intro .nri-name { font-size: 18px; font-weight: 800; margin-top: 2px; }
 .nx-rival-intro .nri-sub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
 .br-sum.vitoria h2, .br-sum .br-sum-win { color: #ffd34a; text-shadow: 0 0 14px rgba(255, 211, 74, 0.8); }
+
+/* M10 fase 9 — indicador de FPS/qualidade (opcional, CONFIGURAÇÕES → TELA) */
+.nx-fps-hud { position: fixed; left: calc(6px + env(safe-area-inset-left, 0px)); bottom: 4px; z-index: 90; pointer-events: none;
+  font: 600 10px/1.2 ui-monospace, Menlo, Consolas, monospace; color: #b8f7d0; background: rgba(6, 12, 18, 0.62);
+  padding: 2px 6px; border-radius: 4px; letter-spacing: 0.02em; white-space: nowrap; }

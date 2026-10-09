@@ -191,7 +191,12 @@ export const DEFAULTS = Object.freeze({
      * (Em GPU por software — testes/CI — o piso continua minPixelRatio, documentado como simulado.)
      */
     // M10 fase 9: + chuva e decoração das regiões (Arena). Na Arena tudo isto só começa depois da DENSIDADE (arena-br densCut)
-    adaptiveLadder: ['bloom', 'envMap', 'pointLights', 'rain', 'city', 'brDecor'],
+    // M10 fase 9 (final): inimigos distantes (LOD visual) → partículas (chuva + faíscas ×0,5) → efeitos (bloom/env/luzes)
+    //   → detalhe de cenário (decoração/cidade) → frequência da IA longe. Na Arena, a densidade (arena-br) vem antes de tudo.
+    adaptiveLadder: ['enemyLod', 'particles', 'bloom', 'envMap', 'pointLights', 'brDecor', 'city', 'aiFar'],
+    adaptiveEnemyLodK: 0.75, adaptiveParticleK: 0.5, adaptiveAiLodK: 0.7,
+    /** indicador de FPS/qualidade (CONFIGURAÇÕES → TELA) — números medidos de verdade */
+    showFpsHud: false,
     minPixelRatioHardware: 0.8,
     /** Pré-compila shaders da zona (renderer.compileAsync) com VFX visíveis — evita travadas no 1º golpe. */
     precompileShaders: true,
@@ -895,7 +900,9 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'showDefend', label: 'Mostrar botão DEFESA', type: 'toggle', path: 'buttons.showDefend' }
   ] },
   { group: 'TELA', items: [
-    { id: 'fsAuto', label: 'Tela inteira automática', type: 'toggle', path: 'fullscreen.auto' }
+    { id: 'fsAuto', label: 'Tela inteira automática', type: 'toggle', path: 'fullscreen.auto' },
+    { id: 'fpsHud', label: 'Mostrar FPS / qualidade', type: 'toggle', path: 'graphics.showFpsHud' },
+    { id: 'adaptOn', label: 'Qualidade adaptativa (reduz detalhes se o FPS cair)', type: 'toggle', path: 'graphics.adaptiveResolution' }
   ] },
   // EVO: som (salvo no aparelho como os outros ajustes)
   { group: 'SOM', items: [

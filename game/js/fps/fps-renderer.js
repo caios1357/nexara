@@ -10,34 +10,34 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009forte';
-import { buildArenaDressing } from './arena-dressing.js?v=20261009forte';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009forte';
-import { createHeroModel } from './hero-model.js?v=20261009forte';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009forte';
-import { attachHeroGlb } from './hero-glb.js?v=20261009forte';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009forte';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009forte';
-import { createActionVfx } from './action-vfx.js?v=20261009forte';
-import { createPassiveVfx } from './passive-vfx.js?v=20261009forte';
-import { createFpsControls } from './fps-controls.js?v=20261009forte';
-import { createViewmodel } from './viewmodel.js?v=20261009forte';
-import { createDragonView } from './dragon-view.js?v=20261009forte';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009forte';
-import { getSprite } from '../assets.js?v=20261009forte';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009forte';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009forte';
-import { mergeStaticParts } from './merge-util.js?v=20261009forte';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009forte';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009forte';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009forte';
-import { createPostFx } from './post-fx.js?v=20261009forte';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009forte';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009forte';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009forte';
-import { groundAt, setGroundFn } from './ground.js?v=20261009forte';
-import { buildBrTerrain } from './br-terrain.js?v=20261009forte';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009forte';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009perf';
+import { buildArenaDressing } from './arena-dressing.js?v=20261009perf';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009perf';
+import { createHeroModel } from './hero-model.js?v=20261009perf';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009perf';
+import { attachHeroGlb } from './hero-glb.js?v=20261009perf';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009perf';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009perf';
+import { createActionVfx } from './action-vfx.js?v=20261009perf';
+import { createPassiveVfx } from './passive-vfx.js?v=20261009perf';
+import { createFpsControls } from './fps-controls.js?v=20261009perf';
+import { createViewmodel } from './viewmodel.js?v=20261009perf';
+import { createDragonView } from './dragon-view.js?v=20261009perf';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009perf';
+import { getSprite } from '../assets.js?v=20261009perf';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009perf';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009perf';
+import { mergeStaticParts } from './merge-util.js?v=20261009perf';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009perf';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009perf';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009perf';
+import { createPostFx } from './post-fx.js?v=20261009perf';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009perf';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009perf';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009perf';
+import { groundAt, setGroundFn } from './ground.js?v=20261009perf';
+import { buildBrTerrain } from './br-terrain.js?v=20261009perf';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009perf';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -365,12 +365,22 @@ export function createFpsRenderer() {
   }
 
   /** EVO: degraus de qualidade adaptativa (efeitos antes da resolução). */
-  const dropped = { bloom: false, envMap: false, pointLights: false, city: false, rain: false, brDecor: false };
-  let effectGate = null;
+  // M10 fase 9 — escada: inimigos distantes → partículas → efeitos → detalhe de cenário → frequência da IA longe
+  const dropped = { enemyLod: false, particles: false, bloom: false, envMap: false, pointLights: false, city: false, rain: false, brDecor: false, aiFar: false };
+  let effectGate = null; let aiFarHook = null; let brLodK = 1; let particleK = 1;
   function dropNextEffect(g) {
     for (const step of g.adaptiveLadder || []) {
       if (dropped[step]) continue;
-      if (step === 'bloom') {
+      if (step === 'enemyLod') {
+        if (brLodK < 1) { dropped.enemyLod = true; continue; }
+        brLodK = getConfig().graphics.adaptiveEnemyLodK ?? 0.75; // inimigos longe somem mais cedo (IA/HUD seguem)
+      } else if (step === 'particles') {
+        if (particleK < 1 && (!rain?.object || !rain.object.visible)) { dropped.particles = true; continue; }
+        particleK = getConfig().graphics.adaptiveParticleK ?? 0.5; if (rain?.object) rain.object.visible = false; dropped.rain = true;
+      } else if (step === 'aiFar') {
+        if (!aiFarHook) { dropped.aiFar = true; continue; }
+        aiFarHook(getConfig().graphics.adaptiveAiLodK ?? 0.7);
+      } else if (step === 'bloom') {
         if (!postFx?.bloom || !postFx.bloom.enabled) { dropped.bloom = true; continue; }
         postFx.bloom.enabled = false;
       } else if (step === 'envMap') {
@@ -1043,7 +1053,7 @@ export function createFpsRenderer() {
     ensureSparks();
     if (!sparks) return;
     const cfg = getConfig().combat;
-    const count = Math.min(sparks.n, Math.round(cfg.sparkCount * (heavy ? 1.6 : 1)));
+    const count = Math.min(sparks.n, Math.max(1, Math.round(cfg.sparkCount * (heavy ? 1.6 : 1) * particleK))); // fase 9: degrau 'particles'
     const wx = tx * TILE;
     const wz = ty * TILE;
     const wy = 1.15 + groundAt(tx, ty); // ARENA: relevo
@@ -1765,7 +1775,7 @@ export function createFpsRenderer() {
       let entry = entityMeshes.get(key);
       // ARENA PRINCIPAL — LOD visual: longe do herói o bot não é desenhado nem animado (malha fica no lugar, sem recriar)
       if (zone.br && !m.boss) {
-        const far = Math.hypot(m.x + 0.5 - fpsCam.state.visX / TILE, m.y + 0.5 - fpsCam.state.visZ / TILE) > (tierName === 'low' ? 20 : tierName === 'medium' ? 23 : 32);
+        const far = Math.hypot(m.x + 0.5 - fpsCam.state.visX / TILE, m.y + 0.5 - fpsCam.state.visZ / TILE) > (tierName === 'low' ? 20 : tierName === 'medium' ? 23 : 32) * (m.rival ? 1 : brLodK); // fase 9: degrau 'enemyLod' encurta
         if (far) { if (entry) entry.mesh.visible = false; brLod.hidden++; continue; }
         brLod.shown++;
         if (entry && !entry.mesh.visible) entry.mesh.visible = true;
@@ -2160,6 +2170,7 @@ export function createFpsRenderer() {
   function precompileZone(zone) {
     if (dropped.pointLights) { let n = 0; worldRoot?.traverse((o) => { if (o.isPointLight) { n++; if (n > 2) o.visible = false; } }); }
     if (dropped.city && city?.group) city.group.visible = false;
+    if (dropped.rain && rain?.object) rain.object.visible = false;
     if (!getConfig().graphics.precompileShaders || !renderer) return;
     const t0 = performance.now();
     const temp = [];
@@ -2562,7 +2573,8 @@ export function createFpsRenderer() {
   return {
     /** M10 fase 9: main liga a porta (na Arena: efeitos só depois da densidade esgotar) */
     setEffectGate(fn) { effectGate = typeof fn === 'function' ? fn : null; },
-    adaptiveState: () => ({ dropped: { ...dropped }, pr: perf.pr, emaFps: perf.emaMs ? +(1000 / perf.emaMs).toFixed(1) : 0, gated: perf.gated || 0, log: (perf.dropLog || []).slice() }),
+    setAiFarHook(fn) { aiFarHook = typeof fn === 'function' ? fn : null; },
+    adaptiveState: () => ({ dropped: { ...dropped }, ladder: (getConfig().graphics.adaptiveLadder || []).slice(), brLodK, particleK, pr: perf.pr, emaFps: perf.emaMs ? +(1000 / perf.emaMs).toFixed(1) : 0, gated: perf.gated || 0, log: (perf.dropLog || []).slice() }),
     playBossIntro, bossIntroActive,
     mode: 'fps',
     cam: fpsCam,

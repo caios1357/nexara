@@ -7,7 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261009forte';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261009perf';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);

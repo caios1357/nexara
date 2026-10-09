@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009forte';
-import { isWalkable, getTileType } from './map.js?v=20261009forte';
-import { monsterAttackPlayer } from './actions.js?v=20261009forte';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009forte';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009forte';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009perf';
+import { isWalkable, getTileType } from './map.js?v=20261009perf';
+import { monsterAttackPlayer } from './actions.js?v=20261009perf';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009perf';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009perf';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -1233,7 +1233,10 @@ function zoneFor(state) {
 /** ARENA PRINCIPAL: contadores do LOD de IA do último quadro. */
 let lodFrame = 0;
 const lodStats = { full: 0, reduced: 0, frozen: 0 };
-export const getAiLodStats = () => ({ ...lodStats });
+/** M10 fase 9 — último degrau da escada adaptativa: IA longe pensa menos (limiares perto/médio × k). */
+let aiLodScale = 1;
+export function setAiLodScale(k) { aiLodScale = Math.max(0.5, Math.min(1, Number(k) || 1)); return aiLodScale; }
+export const getAiLodStats = () => ({ ...lodStats, scale: aiLodScale });
 export function tickEnemyAi(state, dtSec, P) {
   tickResult.attacks.length = 0;
   tickResult.moved = false;
@@ -1292,8 +1295,10 @@ export function tickEnemyAi(state, dtSec, P) {
       const L = state._data?.arena_br?.lodIa || {};
       const d = Math.hypot(r.fx - P.px, r.fy - P.py);
       const engaged = r.state === S.CHASE || r.state === S.ATTACK_PREPARE || r.state === S.ATTACK || r.state === S.RECOVERY || r.state === S.STUN;
-      if (!engaged && d > (L.medio || 24)) lod = 2;
-      else if (!engaged && d > (L.perto || 14) && ((lodFrame + mon.uid) & 3) !== 0) lod = 1;
+      // rivais (heróis BOT) ficam fora do degrau de IA (o confronto precisa da IA completa)
+      const ks = mon.rival ? 1 : aiLodScale;
+      if (!engaged && d > (L.medio || 24) * ks) lod = 2;
+      else if (!engaged && d > (L.perto || 14) * ks && ((lodFrame + mon.uid) & 3) !== 0) lod = 1;
     }
     if (lod === 2) { lodStats.frozen++; r.wantVx = 0; r.wantVy = 0; continue; }
     if (lod === 1) lodStats.reduced++; else if (zone.br) lodStats.full++;
