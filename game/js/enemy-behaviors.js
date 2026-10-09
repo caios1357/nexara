@@ -10,11 +10,11 @@
  * Dano sempre por actions.monsterAttackPlayer (esquiva/i-frames, defesa, escudo, morte).
  * Números em gameplay-config.js → archetypes / enemyHazards.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10g';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10g';
-import { isWalkable } from './map.js?v=20261003m10g';
+import { getConfig, DEG } from './gameplay-config.js?v=20261004riv';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261004riv';
+import { isWalkable } from './map.js?v=20261004riv';
 
-export const ARCH_IDS = Object.freeze(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+export const ARCH_IDS = Object.freeze(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
 const RANGED = new Set(['C', 'E']);
 let rangedBusy = 0;
 
@@ -268,6 +268,8 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
       const cdOk = clock >= r.nextAttackAt && clock >= K.grace();
       const los = hasLineOfSight(zone, r.fx, r.fy, P.px, P.py);
       K.turnToward(r, toPlayer, cfg.turnSpeedDeg * (r.arch === 'B' ? 1.6 : 1), dtSec);
+      // RIVAIS: esquiva em curso (passo rápido com i-frames)
+      if (r.arch === 'H' && clock < (r.dodgeUntil || 0)) { r.behavior = 'dodge'; r.wantVx = r.dodgeVx || 0; r.wantVy = r.dodgeVy || 0; return true; }
       if (clock < r.hitReactUntil && !A.hyperArmor) { r.behavior = 'recover'; return true; }
       // ——— à distância (C / E) ———
       if (RANGED.has(r.arch)) {
@@ -297,7 +299,7 @@ export function thinkArchetype(K, state, zone, mon, r, P, dtSec, cfg, result) {
         return true;
       }
       // ——— elite: habilidade própria por tempo ———
-      if (r.arch === 'F' && A.special && clock >= (r.specialAt || 0) && dist <= A.special.radius + 0.4 && clock >= K.grace() && K.tokenAvailable(cfg)) {
+      if ((r.arch === 'F' || r.arch === 'H') && A.special && clock >= (r.specialAt || 0) && dist <= A.special.radius + 0.4 && clock >= K.grace() && K.tokenAvailable(cfg)) {
         K.acquire(r);
         r.specialAt = clock + A.special.everyMs;
         startAttack(K, mon, r, 'special', P, result);

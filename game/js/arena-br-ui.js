@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261003m10g';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261004riv';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -192,11 +192,21 @@ export function createArenaBrUi(deps) {
     const p = deps.getPos();
     for (const mon of s.monstersAlive) {
       if (!mon.alive || mon.zone !== s.zoneId) continue;
+      if (mon.rival) continue; // RIVAIS: desenhados abaixo (cor própria, só quando vistos)
       if (!mon.boss && Math.hypot(mon.x - p.x, mon.y - p.y) > 14) continue;
       if (mon.lurking) continue; // M10: predador à espreita não aparece no radar
       const [x, y] = T(mon.x + 0.5, mon.y + 0.5);
       g.fillStyle = mon.boss ? '#5dff6a' : mon.hunted || mon.elite ? '#ffc93a' : '#e85d4c';
       g.beginPath(); g.arc(x, y, mon.boss ? 4 : mon.elite ? 3 : 2, 0, Math.PI * 2); g.fill();
+    }
+    // RIVAIS (BOTS): cor do herói rival, maior; aparecem quando vistos (perto) e ficam ~6 s na memória
+    for (const rv of v.rivals?.list || []) {
+      if (!rv.alive || !rv.seen) continue;
+      const [x, y] = T(rv.x, rv.y); const rr = rv.champion ? (full ? 8 : 5.5) : (full ? 6 : 4);
+      g.fillStyle = rv.color; g.strokeStyle = '#fff'; g.lineWidth = rv.champion ? 2 : 1.2;
+      g.beginPath(); g.moveTo(x, y - rr); g.lineTo(x + rr, y); g.lineTo(x, y + rr); g.lineTo(x - rr, y); g.closePath(); g.fill(); g.stroke();
+      if (full) { g.fillStyle = rv.color; g.fillText(`${rv.champion ? 'CAMPEÃO · ' : ''}${rv.name} (BOT)`, x, y - rr - 4); }
+      stats.rivalDots = (stats.rivalDots || 0) + 1;
     }
     // herói (seta na direção da câmera)
     const [hx, hy] = T(p.x, p.y); const yaw = deps.getYaw?.() || 0;
@@ -335,15 +345,17 @@ export function createArenaBrUi(deps) {
   function closeSummary() { summaryEl?.remove(); summaryEl = null; }
   function showSummary(sum, { onAgain, onMenu }) {
     closeSummary(); toggleBigMap(false);
-    const ok = sum.kind === 'extraido';
-    summaryEl = document.createElement('div'); summaryEl.id = 'br-summary'; summaryEl.className = `br-summary ${ok ? 'ok' : 'dead'}`;
+    const win = sum.kind === 'vitoria'; // RIVAIS: CAMPEÃO RIVAL e todos os rivais derrotados
+    const ok = sum.kind === 'extraido' || win;
+    summaryEl = document.createElement('div'); summaryEl.id = 'br-summary'; summaryEl.className = `br-summary ${ok ? 'ok' : 'dead'}${win ? ' vitoria' : ''}`;
     const best = sum.best ? `<b style="color:${rarColor(sum.best.rar)}">${esc(sum.best.name)}</b>` : '—';
     summaryEl.innerHTML = `<div class="br-sum-box">
-      <h2>${ok ? 'EXTRAÇÃO CONCLUÍDA' : 'DERROTADO'}</h2>
-      <p class="br-sum-sub">${ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
+      <h2 class="${win ? 'br-sum-win' : ''}">${win ? 'VITÓRIA' : ok ? 'EXTRAÇÃO CONCLUÍDA' : 'DERROTADO'}</h2>
+      <p class="br-sum-sub">${win ? `Você derrotou o <b>CAMPEÃO RIVAL${sum.champion ? ` ${esc(sum.champion)}` : ''}</b> — último herói rival (BOT) da arena. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
       <dl>
         <dt>Tempo sobrevivido</dt><dd data-k="time">${mmss(sum.timeMs)}</dd>
         <dt>Monstros derrotados</dt><dd data-k="kills">${sum.kills}</dd>
+        <dt>Rivais (BOT) derrotados</dt><dd data-k="rivals">${sum.rivalsDown || 0}</dd>
         <dt>MCB ganho</dt><dd data-k="mcb">+${sum.mcb + (sum.bonus || 0)}</dd>
         <dt>Itens encontrados</dt><dd data-k="items">${sum.items}</dd>
         <dt>Melhor equipamento</dt><dd data-k="best">${best}</dd>
@@ -357,5 +369,18 @@ export function createArenaBrUi(deps) {
     stats.summaries++;
   }
 
-  return { show, hide, update, lootPopup, openBag, openMarket, closePanel, showSummary, closeSummary, toggleBigMap, isPanelOpen: () => !!panel || !!summaryEl || bigOpen, stats: () => JSON.parse(JSON.stringify(stats)), popupOpen: () => !!popCur };
+  /** RIVAIS: cartão de entrada do CAMPEÃO RIVAL (cor do herói, rótulo BOT) */
+  let introEl = null;
+  function showRivalIntro(info) {
+    introEl?.remove();
+    introEl = document.createElement('div'); introEl.id = 'br-rival-intro'; introEl.className = 'nx-rival-intro';
+    introEl.style.setProperty('--rc', info.color || '#ff3b5c');
+    introEl.innerHTML = `<div class="nri-tag">CONFRONTO FINAL</div><div class="nri-title">CAMPEÃO RIVAL</div><div class="nri-name">⚔ ${esc(info.name)} <small>(BOT)</small></div>
+      <div class="nri-sub">Herói rival da IA local${info.others ? ` · +${info.others} rival(is) restante(s)` : ''} — derrote-o para a VITÓRIA</div>`;
+    (document.getElementById('canvas-wrap') || document.body).appendChild(introEl);
+    requestAnimationFrame(() => introEl?.classList.add('show'));
+    const el = introEl; stats.rivalIntros = (stats.rivalIntros || 0) + 1;
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, info.ms || 3200);
+  }
+  return { showRivalIntro, show, hide, update, lootPopup, openBag, openMarket, closePanel, showSummary, closeSummary, toggleBigMap, isPanelOpen: () => !!panel || !!summaryEl || bigOpen, stats: () => JSON.parse(JSON.stringify(stats)), popupOpen: () => !!popCur };
 }

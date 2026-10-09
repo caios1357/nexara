@@ -68,13 +68,18 @@ export function createBossHud() {
     else { ghostPct = pct; ghostHoldUntil = 0; }
     if (Math.abs(ghostPct - pct) < 0.002) ghostHoldUntil = 0;
     const postPct = v.postureMax > 0 ? Math.max(0, Math.min(1, (v.posture || 0) / v.postureMax)) : 0;
-    const key = `${v.hp}|${v.max}|${v.attempt}|${v.powers}|${v.locked ? 1 : 0}|${v.telegraph || ''}|${ghostPct.toFixed(3)}|${v.phaseName || ''}|${postPct.toFixed(2)}|${v.broken ? 1 : 0}`;
+    const key = `${v.name || ''}|${v.metaText || ''}|${v.hp}|${v.max}|${v.attempt}|${v.powers}|${v.locked ? 1 : 0}|${v.telegraph || ''}|${ghostPct.toFixed(3)}|${v.phaseName || ''}|${postPct.toFixed(2)}|${v.broken ? 1 : 0}`;
     if (key === lastKey) return;
     lastKey = key;
     fill.style.width = `${(pct * 100).toFixed(2)}%`;
     ghost.style.width = `${(ghostPct * 100).toFixed(2)}%`;
     num.textContent = `${Math.max(0, Math.ceil(v.hp)).toLocaleString('pt-BR')} / ${Math.round(v.max).toLocaleString('pt-BR')}`;
-    meta.textContent = `TENTATIVA ${v.attempt} · PODERES ${v.powers}${v.telegraph ? ` · ${v.telegraph}` : ''}`;
+    // RIVAIS: a mesma barra serve ao CAMPEÃO RIVAL (nome/meta próprios; cor do herói)
+    el.querySelector('.nbb-name').textContent = v.name || 'GIGANTE VERDE';
+    el.querySelector('.nbb-skull').textContent = v.name ? '⚔' : '✦';
+    el.classList.toggle('nbb-rival', !!v.name);
+    if (v.color) el.style.setProperty('--nbb-rival', v.color); else el.style.removeProperty('--nbb-rival');
+    meta.textContent = v.metaText != null ? `${v.metaText}${v.telegraph ? ` · ${v.telegraph}` : ''}` : `TENTATIVA ${v.attempt} · PODERES ${v.powers}${v.telegraph ? ` · ${v.telegraph}` : ''}`;
     phaseEl.textContent = v.phaseName || '';
     phaseEl.dataset.phase = String(v.phase ?? '');
     postFill.style.width = `${(v.broken ? 100 : postPct * 100).toFixed(1)}%`;

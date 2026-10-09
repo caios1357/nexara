@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261003m10g';
-import { isWalkable, getTileType } from './map.js?v=20261003m10g';
-import { monsterAttackPlayer } from './actions.js?v=20261003m10g';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10g';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261003m10g';
+import { getConfig, DEG } from './gameplay-config.js?v=20261004riv';
+import { isWalkable, getTileType } from './map.js?v=20261004riv';
+import { monsterAttackPlayer } from './actions.js?v=20261004riv';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261004riv';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261004riv';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -274,6 +274,23 @@ export function getMonsterPos(mon) {
 
 /** Array reutilizado de corpos {x,y,r,active,uid} da zona atual. */
 export function getBodies() { return bodies; }
+/**
+ * RIVAIS: esquiva do herói rival (BOT) — passo lateral/para trás, curto, com i-frames (definidos em actions).
+ * Interrompe a preparação do golpe (não o impacto já ativo). Retorna true se esquivou.
+ */
+export function rivalDodge(mon, fromX, fromY, opt = {}) {
+  const r = runtimes.get(mon); if (!r || !mon.alive) return false;
+  if (r.state === S.ATTACK || r.state === S.STUN) return false;
+  let dx = r.fx - fromX, dy = r.fy - fromY; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
+  const side = Math.random() < 0.5 ? -1 : 1; const vel = opt.vel || 7;
+  // 60% para trás + 80% para o lado → diagonal (sai do cone do golpe seguinte)
+  let vx = dx * 0.6 + (-dy) * side * 0.8, vy = dy * 0.6 + dx * side * 0.8; const n = Math.hypot(vx, vy) || 1;
+  r.dodgeVx = (vx / n) * vel; r.dodgeVy = (vy / n) * vel;
+  r.dodgeUntil = clock + (opt.ms || 280); r.dodgeAt = clock; r.hitReactUntil = 0;
+  if (r.state === S.ATTACK_PREPARE || r.state === S.RECOVERY) { releaseToken(r, 0); setState(mon, r, S.CHASE); }
+  logEvent('RIVAL_DODGE', mon, {});
+  return true;
+}
 
 function setState(mon, r, st, extra) {
   if (r.state === st) return;
@@ -604,7 +621,7 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
         break;
       }
       const dir = steerToward(zone, homeFlowFor(zone, r, mon), r.fx, r.fy, hx, hy);
-      const rs = r.routeWalk ? cfg.patrolSpeed * 1.5 : cfg.returnSpeed; // patrulha anda; retirada corre
+      const rs = (r.routeWalk ? cfg.patrolSpeed * 1.5 : cfg.returnSpeed) * (mon.walkMult || 1); // patrulha anda; retirada corre · RIVAIS: herói anda mais rápido
       r.wantVx = dir.x * rs;
       r.wantVy = dir.y * rs;
       turnToward(r, Math.atan2(dir.x, -dir.y), cfg.turnSpeedDeg, dtSec);

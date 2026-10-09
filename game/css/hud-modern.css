@@ -550,3 +550,18 @@ html:fullscreen, html:fullscreen body { background: #000; }
   .campo-hud span::before { content: none; }
   .campo-hud em { padding-left: 0; border-left: 0; }
 }
+
+/* RIVAIS (BOTS offline) — barra do CAMPEÃO RIVAL e cartão de entrada */
+.nx-boss-bar.nbb-rival { border-color: var(--nbb-rival, #ff3b5c); }
+.nx-boss-bar.nbb-rival .nbb-fill { background: linear-gradient(90deg, #5a0f1e, var(--nbb-rival, #ff3b5c) 60%, #ffd0d8); box-shadow: 0 0 10px var(--nbb-rival, #ff3b5c); }
+.nx-boss-bar.nbb-rival .nbb-name { color: #fff; }
+.nx-rival-intro { position: absolute; left: 50%; top: 18%; transform: translateX(-50%) scale(0.9); z-index: 60; pointer-events: none; min-width: 260px; max-width: 88%;
+  padding: 12px 22px 12px; border-radius: 12px; text-align: center; color: #fff; font-family: inherit;
+  background: linear-gradient(180deg, rgba(20, 8, 14, 0.94), rgba(40, 10, 22, 0.9)); border: 2px solid var(--rc, #ff3b5c);
+  box-shadow: 0 0 28px var(--rc, #ff3b5c), inset 0 0 18px rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.25s, transform 0.25s; }
+.nx-rival-intro.show { opacity: 1; transform: translateX(-50%) scale(1); }
+.nx-rival-intro .nri-tag { font-size: 11px; letter-spacing: 3px; color: var(--rc, #ff3b5c); font-weight: 800; }
+.nx-rival-intro .nri-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--rc, #ff3b5c); }
+.nx-rival-intro .nri-name { font-size: 18px; font-weight: 800; margin-top: 2px; }
+.nx-rival-intro .nri-sub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+.br-sum.vitoria h2, .br-sum .br-sum-win { color: #ffd34a; text-shadow: 0 0 14px rgba(255, 211, 74, 0.8); }

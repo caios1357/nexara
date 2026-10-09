@@ -192,7 +192,13 @@
       "_doc": "FPS médio (EMA) ≥ sobe → libera +10% do intervalo base→alvo a cada 2 s; < desce → corta 25%; < corte → volta ao teto base",
       "sobe": 50,
       "desce": 34,
-      "corte": 24
+      "corte": 24,
+      "_doc9": "M10 fase 9 — escada adaptativa: 1º DENSIDADE (densK→0, depois corta o teto abaixo da base em passos), só então efeitos (renderer) e por último resolução. Recupera a densidade quando sobra FPS. Desligado com ?adaptive=0.",
+      "corteBaixo": 30,
+      "passoCorte": 2,
+      "corteMax": 6,
+      "segurarMs": 4000,
+      "recuperaMs": 8000
     },
     "encontros": {
       "_doc": "Pesos por risco da região (1–5). normal = 1 monstro · grupo = 2–3 do mesmo tipo · patrulha = 1–2 andando uma rota longa (tipos com patrulhaLonga preferidos) · escolta = elite + 2 guardas que o seguem. enxame continua vindo do tipo com grupo=true.",
@@ -567,5 +573,82 @@
       "chamaR": 8,
       "chamaMax": 3
     }
+  },
+  "rivais": {
+    "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
+    "ativo": true,
+    "monstro": "mon_br_rival",
+    "n": 4,
+    "herois": [
+      {
+        "style": "cavaleiro",
+        "nome": "Vex Nexa",
+        "primary": "#ff3b5c",
+        "glow": "#ff8fa3"
+      },
+      {
+        "style": "cacador",
+        "nome": "Kira Sombra",
+        "primary": "#ffb020",
+        "glow": "#ffe08a"
+      },
+      {
+        "style": "runico",
+        "nome": "Orun Runa",
+        "primary": "#9b5cff",
+        "glow": "#d0b0ff"
+      },
+      {
+        "style": "ciborgue",
+        "nome": "Dex-7",
+        "primary": "#21d4c4",
+        "glow": "#9ffff4"
+      },
+      {
+        "style": "cavaleiro",
+        "nome": "Brasa Rubra",
+        "primary": "#ff6a1a",
+        "glow": "#ffc08a"
+      }
+    ],
+    "hpPorNivel": 0.12,
+    "atkPorNivel": 0.06,
+    "distInicialMin": 30,
+    "velocidade": 1.2,
+    "visaoMinimapa": 18,
+    "lembraMs": 6000,
+    "combate": {
+      "alcance": 1.7,
+      "cadenciaMs": 900,
+      "danoMult": 1,
+      "danoRecebidoMs": 1300,
+      "hpMinFrac": 0.3,
+      "regenPorSeg": 2,
+      "danoEntreRivais": 0.6
+    },
+    "esquiva": {
+      "chance": 0.45,
+      "cooldownMs": 2600,
+      "duracaoMs": 280,
+      "iframesMs": 420,
+      "vel": 7
+    },
+    "saque": {
+      "raioBau": 1.4,
+      "mcbPorBau": 25,
+      "maxBaus": 6,
+      "pausaMs": 15000,
+      "inicioMs": 20000
+    },
+    "bonusMcb": 60,
+    "campeao": {
+      "hpMult": 2.4,
+      "atkMult": 1.3,
+      "sizeMult": 1.15,
+      "bonusMcb": 200,
+      "introMs": 3200,
+      "gatilhoEstagio": 3
+    },
+    "minVivosFinal": 2
   }
 }

@@ -30,7 +30,7 @@
         },
         {
           "item_id": "item_plaqueta_bot",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             1,
             1
@@ -341,7 +341,7 @@
       "loot_table": [
         {
           "item_id": "item_escama_gigante_verde",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             1,
             1
@@ -349,7 +349,7 @@
         },
         {
           "item_id": "item_nucleo_energia",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             2,
             3
@@ -357,7 +357,7 @@
         },
         {
           "item_id": "item_sucata_nexa",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             3,
             5
@@ -600,7 +600,7 @@
         },
         {
           "item_id": "item_nucleo_energia",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             1,
             2
@@ -645,7 +645,7 @@
         },
         {
           "item_id": "item_parafuso_raro",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             1,
             2
@@ -653,7 +653,7 @@
         },
         {
           "item_id": "item_frasco_nexa",
-          "chance": 1.0,
+          "chance": 1,
           "qty": [
             1,
             1
@@ -809,7 +809,7 @@
         "aggroR": 9,
         "leash": 16,
         "loseR": 18,
-        "sizeMult": 1.0
+        "sizeMult": 1
       }
     },
     {
@@ -1018,7 +1018,7 @@
         "aggroR": 14,
         "leash": 22,
         "loseR": 24,
-        "sizeMult": 1.0,
+        "sizeMult": 1,
         "patrulhaLonga": true
       }
     },
@@ -1111,6 +1111,50 @@
         "loseR": 18,
         "sizeMult": 1.12,
         "elite": true
+      }
+    },
+    {
+      "id": "mon_br_rival",
+      "name": "Herói Rival (BOT)",
+      "zone": "zone_arena_br",
+      "hp": 260,
+      "ataque": 13,
+      "defesa": 7,
+      "velocidade": 6,
+      "xp": 150,
+      "skill_train": "corte",
+      "tier": "elite",
+      "arquetipo": "H",
+      "description": "ARENA — RIVAL (BOT offline): herói controlado pela IA local; explora, caça monstros, saqueia baús e enfrenta o jogador. Não é um jogador online.",
+      "loot_table": [
+        {
+          "item_id": "item_nucleo_energia",
+          "chance": 0.7,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item_id": "item_parafuso_raro",
+          "chance": 0.6,
+          "qty": [
+            1,
+            2
+          ]
+        }
+      ],
+      "spawn_tiles": [],
+      "icone": "⚔",
+      "cor": "#ff4d6d",
+      "visual": "H",
+      "lore": "Heróis simulados pela Arena Principal para treinar campeões. Lutam como você — e querem o mesmo tesouro.",
+      "br": {
+        "aggroR": 11,
+        "leash": 999,
+        "loseR": 24,
+        "sizeMult": 1,
+        "rival": true
       }
     }
   ]

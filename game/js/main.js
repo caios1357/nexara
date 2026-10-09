@@ -1,70 +1,70 @@
-import { loadAllData } from './data-loader.js?v=20261003m10g';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261003m10g';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261003m10g';
-import { addToInventory } from '../../rules/loot.js?v=20261003m10g';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261003m10g';
-import { rollLoot } from '../../rules/loot.js?v=20261003m10g';
-import { isWalkable } from './map.js?v=20261003m10g';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261003m10g';
-import { createUI, bindRenderer } from './ui.js?v=20261003m10g';
+import { loadAllData } from './data-loader.js?v=20261004riv';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261004riv';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261004riv';
+import { addToInventory } from '../../rules/loot.js?v=20261004riv';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261004riv';
+import { rollLoot } from '../../rules/loot.js?v=20261004riv';
+import { isWalkable } from './map.js?v=20261004riv';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261004riv';
+import { createUI, bindRenderer } from './ui.js?v=20261004riv';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
-  setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook
-} from './actions.js?v=20261003m10g';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261003m10g';
-import { createMcbUi } from './mcb-ui.js?v=20261003m10g';
-import { createVestiario } from './vestiario.js?v=20261003m10g';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261003m10g';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261003m10g';
-import { getLocalProfile, authProviders } from './auth.js?v=20261003m10g';
-import { lastWalletCheck } from './save.js?v=20261003m10g';
-import { maybeTrigger0217 } from './events.js?v=20261003m10g';
-import { createRenderer } from './renderer.js?v=20261003m10g';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261003m10g';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261003m10g';
-import { itemRarity } from './sprites.js?v=20261003m10g';
-import { createArenaState, isArenaState } from './arena.js?v=20261003m10g';
-import { createMobileControls } from './mobile-controls.js?v=20261003m10g';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261003m10g';
+  setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook
+} from './actions.js?v=20261004riv';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261004riv';
+import { createMcbUi } from './mcb-ui.js?v=20261004riv';
+import { createVestiario } from './vestiario.js?v=20261004riv';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261004riv';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261004riv';
+import { getLocalProfile, authProviders } from './auth.js?v=20261004riv';
+import { lastWalletCheck } from './save.js?v=20261004riv';
+import { maybeTrigger0217 } from './events.js?v=20261004riv';
+import { createRenderer } from './renderer.js?v=20261004riv';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261004riv';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261004riv';
+import { itemRarity } from './sprites.js?v=20261004riv';
+import { createArenaState, isArenaState } from './arena.js?v=20261004riv';
+import { createMobileControls } from './mobile-controls.js?v=20261004riv';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261004riv';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261003m10g';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261003m10g';
-import { createArenaRun } from './arena-run.js?v=20261003m10g';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261003m10g';
+} from './enemy-ai.js?v=20261004riv';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261004riv';
+import { createArenaRun } from './arena-run.js?v=20261004riv';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261004riv';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261003m10g';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261003m10g';
-import { createMusic } from './music.js?v=20261003m10g';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261003m10g';
-import { getAiLodStats } from './enemy-ai.js?v=20261003m10g';
-import { createBossHud } from './boss-hud.js?v=20261003m10g';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261003m10g';
-import { createPlayerMotion } from './player-motion.js?v=20261003m10g';
-import { createPlayerCombat } from './player-combat.js?v=20261003m10g';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261003m10g';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261004riv';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261004riv';
+import { createMusic } from './music.js?v=20261004riv';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261004riv';
+import { getAiLodStats } from './enemy-ai.js?v=20261004riv';
+import { createBossHud } from './boss-hud.js?v=20261004riv';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261004riv';
+import { createPlayerMotion } from './player-motion.js?v=20261004riv';
+import { createPlayerCombat } from './player-combat.js?v=20261004riv';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261004riv';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261003m10g';
+} from './sfx.js?v=20261004riv';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261003m10g';
-import { createPassiveUi } from './passives-ui.js?v=20261003m10g';
-import { createSettingsMenu } from './settings-menu.js?v=20261003m10g';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261003m10g';
-import { createPassiveHud } from './passive-hud.js?v=20261003m10g';
-import { createDragon } from './companion-dragon.js?v=20261003m10g';
-import { createFullscreenUi } from './fullscreen.js?v=20261003m10g';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261003m10g';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261003m10g';
+} from './passives.js?v=20261004riv';
+import { createPassiveUi } from './passives-ui.js?v=20261004riv';
+import { createSettingsMenu } from './settings-menu.js?v=20261004riv';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261004riv';
+import { createPassiveHud } from './passive-hud.js?v=20261004riv';
+import { createDragon } from './companion-dragon.js?v=20261004riv';
+import { createFullscreenUi } from './fullscreen.js?v=20261004riv';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261004riv';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261004riv';
 
 let DATA = null;
 let state = null;
@@ -385,7 +385,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261003m10g').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261004riv').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -737,6 +737,7 @@ function updateBossHud(s) {
       v.powers = Object.values(rv.powers).reduce((a, b) => a + b, 0);
     }
   }
+  // RIVAIS: sem barra de chefe para rivais/CAMPEÃO RIVAL (pedido do Caio) — só números de dano, como inimigos comuns
   bossHud.update(v);
 }
 function checkArena(s) {
@@ -753,6 +754,8 @@ function checkArena(s) {
 setPlayerDeathHook((s, mon) => (s?.brMode ? arenaBr.onPlayerDeath(s, mon) : s?.campoMode ? campo.onPlayerDeath(s, mon) : isArenaState(s) ? arenaRun.onPlayerDeath(s, mon) : false));
 /** MCB: recompensa por morte (1× por morte — mcb.js) + popup + grava já (mundo: save · Campo: sync · Arena: permanente). */
 const mcbRunLog = [];
+// RIVAIS: herói rival (BOT) atingido e vivo → esquiva/reação (arena-rivals)
+setRivalHitHook((s, mon) => { if (s?.brMode) arenaBr.onRivalHit(mon); });
 setMonsterKillHook((s, mon, def) => {
   if (s?.brMode) { try { arenaBr.onKill(mon, def); } catch (e) { console.warn('[br] kill', e); } }
   const r = creditKill(s, mon, def);
@@ -1145,7 +1148,7 @@ function damageMonsterFrom(source, mon, amount, opts = {}) {
   if (res && res.killed) sfxEnemyDeath(mon.tier === 'elite' || mon.tier === 'mini_chefe' || !!mon.boss);
   if (renderer.mode === 'fps') {
     if (!opts.noSparks) renderer.spawnSparks?.(mp.x, mp.y, false);
-    renderer.spawnFloatDamage?.(mon.x, mon.y, res.dmgOut, 'out', mp.x, mp.y);
+    if (!res?.dodged) renderer.spawnFloatDamage?.(mon.x, mon.y, res.dmgOut, 'out', mp.x, mp.y); // RIVAIS: esquiva (i-frames) não mostra número
   } else {
     spawnDamage(renderer.vfx, mon.x, mon.y, res.dmgOut, 'out');
   }
@@ -1198,6 +1201,7 @@ function hitSpecial(s, mon, id, info) {
 
 /** Número de dano do herói; com Mira Neural o crítico vira número grande dourado + clarão. */
 function heroDamageFx(mon, res, info) {
+  if (res?.dodged) return; // RIVAIS: golpe esquivado pelo rival (i-frames) — sem número de dano
   const mira = res.crit && (state?.passives?.owned || []).includes('mira_neural') && getConfig().passiveProcs.enabled;
   renderer.spawnFloatDamage?.(mon.x, mon.y, res.dmgOut, mira ? 'crit' : 'out', info.x, info.y);
   if (mira) renderer.passiveFx?.('crit', { x: info.x, y: info.y });
@@ -1528,7 +1532,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261003m10g').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261004riv').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1630,6 +1634,7 @@ async function boot() {
   // SAVE periódico (mundo) — além dos saves por evento
   setInterval(() => { if (state && !isArenaState(state) && isGameVisible()) safeSave(); else if (state?.campoMode && campo.isActive()) syncCampoProgress(state, 'periodic'); else if (state?.brMode && arenaBr.isActive()) syncCampoProgress(state, 'periodic'); }, 30000);
   setupMenus();
+  renderer.setEffectGate?.(() => !state?.brMode || !arenaBr.isActive() || arenaBr.densityExhausted());
   // Bloco 6b: TELA INTEIRA — ⛶ no HUD, opção no menu inicial e automática no 1º toque em JOGAR/Continuar/Arena
   fullscreenUi = createFullscreenUi({ toast: (m, ms) => ui.showToast(m, ms) });
   fullscreenUi.bind(document.getElementById('btn-fullscreen'));
@@ -1692,7 +1697,11 @@ async function boot() {
       enter: () => enterArenaBr(),
       view: () => arenaBr.view(),
       stats: () => arenaBr.stats(),
+      adaptive: () => renderer.adaptiveState?.() || null,
       summary: () => arenaBr.summary(),
+      rivals: () => arenaBr.rivals?.() || null,
+      rivalGfx: () => renderer.getGraphics?.()?.rivals || null,
+      bossHud: () => bossHud.read?.() || null,
       ui: () => brUi.stats(),
       lod: () => getAiLodStats(),
       items: () => brItemStats(),
@@ -1984,7 +1993,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261003m10g');
+      const { addXp } = await import('./state.js?v=20261004riv');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2343,7 +2352,7 @@ function brCredit(n, why) {
   ensureWallet(s);
   s.player.mcb += n; s.player.mcbTotal += n;
   arenaBr.addMcb(why === 'extracao' ? 0 : n);
-  mcbUi?.pop(`+${n} MCB · ${why === 'extracao' ? 'EXTRAÇÃO' : 'CAÇADA'}`, 'elite');
+  mcbUi?.pop(`+${n} MCB · ${why === 'extracao' ? 'EXTRAÇÃO' : why === 'rival' ? 'RIVAL DERROTADO' : why === 'campeao' ? 'CAMPEÃO RIVAL' : 'CAÇADA'}`, 'elite');
   mcbUi?.updateHud(s);
   syncCampoProgress(s, 'br-' + why);
 }
@@ -2433,6 +2442,16 @@ function onBrEvent(kind, info) {
   else if (kind === 'rare_spawn') { ft('UM MONSTRO RARO ESTÁ POR PERTO', '#ffd34a', { size: 18 }); }
   else if (kind === 'secret_area') { ft(info.kind === 'atalho' ? 'ATALHO SECRETO!' : info.kind === 'esconderijo' ? 'ESCONDERIJO ENCONTRADO!' : 'LOCAL SECRETO!', '#ffd34a', { size: 20 }); brSfx('chest'); }
   else if (kind === 'loot_open') { brSfx('chest', info.loot); renderer.shake?.(info.kind === 'bau' ? 0.12 : 0.06); if (info.aband) ft('EQUIPAMENTO ABANDONADO', '#9fe3a0', { size: 16 }); }
+  // RIVAIS (BOTS offline)
+  else if (kind === 'rivals_spawn') { big(`<b>⚔ ${info.n} HERÓIS RIVAIS (BOT)</b>Heróis da IA local também exploram, caçam e saqueiam. Derrote-os por XP, MCB e loot.`, 3200); }
+  else if (kind === 'rival_out') { ft(`${info.name} (BOT) ELIMINADO${info.by && info.by !== 'arena' ? ` por ${info.by}` : ''}`, '#ff8fa3', { size: 16 }); }
+  else if (kind === 'rival_down') { ft(`RIVAL DERROTADO: ${info.name}`, '#ff8fa3', { size: 20 }); brSfx('event'); }
+  else if (kind === 'rival_final') {
+    const rv = arenaBr.rivals?.(); const c = rv?.list.find((q) => q.name === info.name);
+    brUi?.showRivalIntro?.({ name: info.name, hp: info.hp, others: info.others, color: c?.color, ms: info.introMs });
+    brSfx('dragon');
+  }
+  else if (kind === 'champion_down') { big(`<b>CAMPEÃO RIVAL DERROTADO!</b>${info.name} (BOT) caiu${info.left ? ` — restam ${info.left} rival(is)` : ''}.`, 2600); }
   else if (kind === 'boss_down') { big('<b>GIGANTE VERDE DERROTADO!</b>Recompensa real salva no seu personagem. A corrida continua — extraia para o bônus.', 3200); }
   music?.onEvent?.(kind, info);
 }

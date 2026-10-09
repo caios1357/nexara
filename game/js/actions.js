@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261003m10g';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261003m10g';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261003m10g';
-import { addReputation } from '../../rules/reputation.js?v=20261003m10g';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261003m10g';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261003m10g';
-import { currentWeaponClass, magicMult } from './equipment.js?v=20261003m10g';
-import { reveal } from './arquivo.js?v=20261003m10g';
-import { checkEventReady } from './events.js?v=20261003m10g';
-import { getConfig } from './gameplay-config.js?v=20261003m10g';
-import { getStat, STATS } from './modifiers.js?v=20261003m10g';
+import { trainSkill } from '../../rules/skills.js?v=20261004riv';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261004riv';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261004riv';
+import { addReputation } from '../../rules/reputation.js?v=20261004riv';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261004riv';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261004riv';
+import { currentWeaponClass, magicMult } from './equipment.js?v=20261004riv';
+import { reveal } from './arquivo.js?v=20261004riv';
+import { checkEventReady } from './events.js?v=20261004riv';
+import { getConfig } from './gameplay-config.js?v=20261004riv';
+import { getStat, STATS } from './modifiers.js?v=20261004riv';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -174,13 +174,22 @@ export function applyPlayerHit(state, mon, opts = {}) {
  * @param {{ source?: string, label?: string, crit?: boolean }} opts
  * @returns {{ killed:boolean, dmgOut:number, dmgIn:0, mon:object, drops?:Array, source:string }|null}
  */
+let rivalHitHook = null;
+/** RIVAIS: chamado quando um herói rival (BOT) leva dano e sobrevive (esquiva/reação). */
+export function setRivalHitHook(fn) { rivalHitHook = typeof fn === 'function' ? fn : null; }
 export function applyDamageToMonster(state, mon, amount, opts = {}) {
   if (!mon || !mon.alive || mon.zone !== state.zoneId) return null;
   const def = state._monsters[mon.id];
   if (!def) return null;
   const source = opts.source || 'player';
+  // RIVAIS: o herói rival (BOT) tem i-frames curtos na esquiva → o golpe não conta
+  if (mon.rival && mon.rivalIframeUntil && performance.now() < mon.rivalIframeUntil) {
+    pushLog(state, `${mon.rival.name} ESQUIVOU.`, '');
+    return { killed: false, dmgOut: 0, dmgIn: 0, mon, drops: [], source: opts.source || 'player', dodged: true };
+  }
   const dmg = Math.max(1, Math.round(Number(amount) || 0));
   mon.hp -= dmg;
+  if (mon.rival && mon.hp > 0 && rivalHitHook) { try { rivalHitHook(state, mon, opts); } catch (e) { console.warn('[rivais] hit hook', e); } }
   const who = source === 'player' ? 'Você acerta' : `${opts.label || 'Aliado'} acerta`;
   pushLog(state, `${who} ${def.name} por ${dmg}${opts.crit ? ' (CRÍTICO)' : ''}.`, '');
   const dmgOut = dmg;
@@ -244,7 +253,9 @@ export function monsterAttackPlayer(state, monUid, opts = {}) {
   }
 
   // Bloco 7: ataques do chefe escalam o ATAQUE do monstro (opts.atkMult, do config/data)
-  const attacker = Number.isFinite(opts.atkMult) ? { ...def, ataque: Math.round((def.ataque || 0) * opts.atkMult) } : def;
+  // RIVAIS: ataque escala com o nível do herói (mon.atkScale; demais monstros = 1)
+  const am = (Number.isFinite(opts.atkMult) ? opts.atkMult : 1) * (Number.isFinite(mon.atkScale) ? mon.atkScale : 1);
+  const attacker = am !== 1 ? { ...def, ataque: Math.round((def.ataque || 0) * am) } : def;
   let dmgIn = calcDamage(attacker, state.player, 10, { armorDef: eq.armorDef });
   // Bloco 7: dano recebido passa pelos modificadores (poder temporário BLINDAGEM NEXA)
   dmgIn = Math.max(1, Math.round(getStat(STATS.DAMAGE_TAKEN, 1) * dmgIn));
