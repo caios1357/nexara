@@ -87,3 +87,19 @@
 .br-pop-note { margin-top: 4px; color: #ffb0a4; font-size: 0.7rem; }
 .br-pop-card.full { border-color: #ff8a7a; }
 .br-pop-actions button.danger { background: rgba(160, 40, 30, 0.55); border-color: #ff6a5a; color: #fff; }
+/* NEXARA FAST ⚡ — modo compacto (ao lado da ARENA NEXARA mapa completo) */
+#btn-fast-entrar.nx-fast { background: linear-gradient(90deg, #ffb020, #ff6a1a); color: #1a0d00; border-color: #ffd27a; font-weight: 800; letter-spacing: 0.05em; }
+/* NEXARA FAST — RANKING pessoal */
+.nx-fast-ranking { position: fixed; inset: 0; z-index: 9600; display: flex; align-items: center; justify-content: center; background: rgba(2, 6, 10, 0.82); }
+.nx-fast-ranking .nfr-box { width: min(96vw, 860px); max-height: 92vh; overflow: auto; padding: 0.7rem 0.9rem; border: 1px solid #ffb020; border-radius: 10px; background: #0a1118; color: #dfe9f0; font-size: 0.78rem; }
+.nx-fast-ranking .nfr-head { display: flex; justify-content: space-between; align-items: center; color: #ffb020; letter-spacing: 0.05em; }
+.nx-fast-ranking .nfr-sub { color: #8aa0ad; margin: 0.25rem 0 0.4rem; font-size: 0.7rem; }
+.nx-fast-ranking table { width: 100%; border-collapse: collapse; margin: 0.3rem 0; }
+.nx-fast-ranking th, .nx-fast-ranking td { padding: 0.2rem 0.3rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); text-align: center; }
+.nx-fast-ranking th { color: #9fb4c0; font-weight: 600; font-size: 0.66rem; }
+.nx-fast-ranking td.nm { text-align: left; color: #fff; }
+.nx-fast-ranking .nfr-me td { color: #ffe08a; font-weight: 700; }
+.nx-fast-ranking .nfr-last { margin: 0.3rem 0 0; padding-left: 1rem; color: #9fb4c0; font-size: 0.7rem; }
+.nx-fast-zero { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #ffe08a; }
+.br-summary .br-sum-fast { margin: 0.2rem 0; color: #ffb020; font-size: 0.8rem; }
+.br-summary .br-sum-zero { margin: 0.2rem 0; color: #9ffff4; font-size: 0.74rem; }

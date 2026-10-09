@@ -7,7 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261009jogo';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261009fast';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -27,10 +27,10 @@ function vnoise(x, y, s, f) {
  * zona segura que encolhe junto, quantidade de baús/caixas/pontos de spawn por área) e zona.gerador = 2.
  * ?brScale=1 força o mapa original (comparação / rollback). Chamado UMA vez no carregamento dos dados.
  */
-export function scaleBrConfig(cfg0) {
+export function scaleBrConfig(cfg0, forceS = 0) {
   if (!cfg0?.zona || cfg0._escala) return cfg0;
   let S = Number(cfg0.zona.escala) || 1;
-  try { const q = new URLSearchParams(globalThis.location?.search || '').get('brScale'); if (q && Number(q) > 0) S = Number(q); } catch { /* sem URL */ }
+  if (forceS > 0) S = forceS; else try { const q = new URLSearchParams(globalThis.location?.search || '').get('brScale'); if (q && Number(q) > 0) S = Number(q); } catch { /* sem URL */ }
   if (!(S > 1.01)) return { ...cfg0, _escala: 1 };
   const c = JSON.parse(JSON.stringify(cfg0));
   const D = (v) => Math.round(v * S); const D1 = (v) => Math.round((v + 1) * S) - 1;

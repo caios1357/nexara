@@ -1,70 +1,73 @@
-import { loadAllData } from './data-loader.js?v=20261009jogo';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261009jogo';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261009jogo';
-import { addToInventory } from '../../rules/loot.js?v=20261009jogo';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261009jogo';
-import { rollLoot } from '../../rules/loot.js?v=20261009jogo';
-import { isWalkable } from './map.js?v=20261009jogo';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261009jogo';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261009jogo';
+import { loadAllData } from './data-loader.js?v=20261009fast';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261009fast';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261009fast';
+import { addToInventory } from '../../rules/loot.js?v=20261009fast';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261009fast';
+import { rollLoot } from '../../rules/loot.js?v=20261009fast';
+import { isWalkable } from './map.js?v=20261009fast';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261009fast';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261009fast';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook
-} from './actions.js?v=20261009jogo';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261009jogo';
-import { createMcbUi } from './mcb-ui.js?v=20261009jogo';
-import { createVestiario } from './vestiario.js?v=20261009jogo';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261009jogo';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261009jogo';
-import { getLocalProfile, authProviders } from './auth.js?v=20261009jogo';
-import { lastWalletCheck } from './save.js?v=20261009jogo';
-import { maybeTrigger0217 } from './events.js?v=20261009jogo';
-import { createRenderer } from './renderer.js?v=20261009jogo';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261009jogo';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261009jogo';
-import { itemRarity } from './sprites.js?v=20261009jogo';
-import { createArenaState, isArenaState } from './arena.js?v=20261009jogo';
-import { createMobileControls } from './mobile-controls.js?v=20261009jogo';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261009jogo';
+} from './actions.js?v=20261009fast';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261009fast';
+import { createMcbUi } from './mcb-ui.js?v=20261009fast';
+import { createVestiario } from './vestiario.js?v=20261009fast';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261009fast';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261009fast';
+import { getLocalProfile, authProviders } from './auth.js?v=20261009fast';
+import { lastWalletCheck } from './save.js?v=20261009fast';
+import { maybeTrigger0217 } from './events.js?v=20261009fast';
+import { createRenderer } from './renderer.js?v=20261009fast';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261009fast';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261009fast';
+import { itemRarity } from './sprites.js?v=20261009fast';
+import { createArenaState, isArenaState } from './arena.js?v=20261009fast';
+import { createMobileControls } from './mobile-controls.js?v=20261009fast';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261009fast';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261009jogo';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261009jogo';
-import { createArenaRun } from './arena-run.js?v=20261009jogo';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261009jogo';
+} from './enemy-ai.js?v=20261009fast';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261009fast';
+import { createArenaRun } from './arena-run.js?v=20261009fast';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261009fast';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261009jogo';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261009jogo';
-import { createMusic } from './music.js?v=20261009jogo';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261009jogo';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261009jogo';
-import { createBossHud } from './boss-hud.js?v=20261009jogo';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261009jogo';
-import { createPlayerMotion } from './player-motion.js?v=20261009jogo';
-import { createPlayerCombat } from './player-combat.js?v=20261009jogo';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261009jogo';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261009fast';
+import { generateBrMap } from './br-map.js?v=20261009fast';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261009fast';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261009fast';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261009fast';
+import { createMusic } from './music.js?v=20261009fast';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261009fast';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261009fast';
+import { createBossHud } from './boss-hud.js?v=20261009fast';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261009fast';
+import { createPlayerMotion } from './player-motion.js?v=20261009fast';
+import { createPlayerCombat } from './player-combat.js?v=20261009fast';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261009fast';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261009jogo';
+} from './sfx.js?v=20261009fast';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261009jogo';
-import { createPassiveUi } from './passives-ui.js?v=20261009jogo';
-import { createSettingsMenu } from './settings-menu.js?v=20261009jogo';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261009jogo';
-import { createPassiveHud } from './passive-hud.js?v=20261009jogo';
-import { createDragon } from './companion-dragon.js?v=20261009jogo';
-import { createFullscreenUi } from './fullscreen.js?v=20261009jogo';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009jogo';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261009jogo';
+} from './passives.js?v=20261009fast';
+import { createPassiveUi } from './passives-ui.js?v=20261009fast';
+import { createSettingsMenu } from './settings-menu.js?v=20261009fast';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261009fast';
+import { createPassiveHud } from './passive-hud.js?v=20261009fast';
+import { createDragon } from './companion-dragon.js?v=20261009fast';
+import { createFullscreenUi } from './fullscreen.js?v=20261009fast';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009fast';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261009fast';
 
 let DATA = null;
 let state = null;
@@ -268,6 +271,8 @@ const dragon = createDragon({
  */
 let arenaPermCache = null;
 function resolvePermanent() {
+  // NEXARA FAST "Começar do zero": a partida usa um herói TEMPORÁRIO NV1 — o permanente fica invisível p/ a corrida (nada lê/grava o save)
+  if (state?.fastZero) return { state: null, source: 'fast-zero', persist: () => {} };
   if (worldBackup && !isArenaState(worldBackup)) {
     return { state: worldBackup, source: 'memoria', persist: (s) => saveToLocal(s) };
   }
@@ -300,7 +305,7 @@ function progressSig(s) {
     JSON.stringify(s?.equipment || {}), s?.dragon?.stage || 1, s?.dragon?.level || 1].join('|');
 }
 /** ARENA PRINCIPAL: corridas que gravam a evolução no permanente na hora (Campo e Arena Principal). */
-const isRunPersist = (s) => !!(s?.campoMode || s?.brMode);
+const isRunPersist = (s) => !!((s?.campoMode || s?.brMode) && !s?.fastZero); // FAST do zero: nunca sincroniza com o save
 /** Carrega um save e registra as instâncias de itens da Arena (raridade) no índice de itens. */
 function loadSaved(saved) { const s = applySave(DATA, saved); try { hydrateBrItems(s); } catch (e) { console.warn('[br] hydrate', e); } return s; }
 function syncCampoProgress(s, reason = 'tick') {
@@ -346,7 +351,7 @@ let grantChecked = '';
 let lastGrant = null;
 function maybeTestGrant() {
   const g = testGrantConfig();
-  if (!g || !mcbUi || !vestiario) return null;
+  if (!g || !mcbUi || !vestiario || state?.fastZero) return null;
   if (navigator.webdriver && !window.__NEXARA_ALLOW_GRANT__) return null; // suítes de teste: só quando pedem
   const s = state || resolvePermanent().state;
   if (!s?.player) return null;
@@ -385,7 +390,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261009jogo').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261009fast').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -455,8 +460,15 @@ const campo = createCampo({
 });
 /** ARENA PRINCIPAL: estado da corrida (cópia do permanente; evolução/loot sincronizados na hora). */
 function buildBrAttemptState() {
-  const perm = resolvePermanent();
   const bc = getConfig().arenaBoss;
+  // NEXARA FAST "Começar do zero": herói temporário NV1 com equipamento inicial (o save permanente nem é lido)
+  if (brModeCur === 'fast' && fastZeroOn()) {
+    const st = createBrState(DATA, { from: null, boss: bc.enabled ? bc : null }); st.fastZero = true;
+    try { hydrateBrItems(st); } catch {}
+    mcbRunLog.push({ start: Date.now(), mcb: 0, kills: {}, startBalance: st.player.mcb || 0, br: true }); if (mcbRunLog.length > 20) mcbRunLog.shift();
+    return { state: st, source: 'fast-zero' };
+  }
+  const perm = resolvePermanent();
   const st = createBrState(DATA, { from: perm.state, boss: bc.enabled ? bc : null });
   try { hydrateBrItems(st); } catch {}
   mcbRunLog.push({ start: Date.now(), mcb: 0, kills: {}, startBalance: st.player.mcb || 0, br: true });
@@ -1532,7 +1544,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261009jogo').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261009fast').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1712,6 +1724,23 @@ async function boot() {
   }
 
   window.__NEXARA__ = {
+    /** NEXARA FAST ⚡ (testes): entrar, estado, e teste do gerador para várias seeds (6 regiões ligadas, baús alcançáveis) */
+    fast: {
+      enter: () => enterArenaBr('fast'),
+      zero: (on) => (on === undefined ? fastZeroOn() : setFastZero(!!on)),
+      ranking: () => rankingRows(),
+      showRanking: () => !!showRanking(),
+      lastRanked: () => fastRanked,
+      rivalsDetail: () => arenaBr.rivals?.() || null,
+      view: () => { const c = DATA.arena_br; const v = arenaBr.view(); return { zero: !!state?.fastZero, nivel: state?.player?.nivel ?? null, mode: brModeCur, active: !!(state?.brMode && v && !v.ended), seed: c?.fastRun?.seed ?? null, order: c?.fastRun?.order || null, rivals: c?.rivais?.n, cap: v ? { now: v.cap, base: v.capBase, target: v.capAlvo } : null }; },
+      genTest: (seeds) => { const full = DATA.arena_br_full; const out = [];
+        for (const seed of seeds) { const t0 = performance.now(); const c = makeFastConfig(DATA.arena_br_design, seed); const m = generateBrMap(c); const ms = Math.round(performance.now() - t0);
+          const solidT = new Set(['W', 'P', 'C', 'T', 'R']); let minReach = 1;
+          for (const r of c.regioes) { let fl = 0, ok = 0; for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) { if (solidT.has(m.tiles[y][x])) continue; fl++; if (m.reachable[x + y * m.W]) ok++; } minReach = Math.min(minReach, fl ? ok / fl : 0); }
+          const m2 = generateBrMap(makeFastConfig(DATA.arena_br_design, seed));
+          out.push({ seed, W: m.W, H: m.H, cells: m.W * m.H, fullCells: full.zona.width * full.zona.height, regions: new Set(c.regioes.map((r) => r.id)).size, order: c.fastRun.order, minReach: +minReach.toFixed(2), chests: m.chests.length, unreachableChests: m.chests.filter((q) => q.unreachable).length, spawnOk: !!m.reachable[c.spawnHeroi.x + c.spawnHeroi.y * m.W], sameSeedSame: m2.tiles.join('') === m.tiles.join(''), ms }); }
+        return out; }
+    },
     getState: () => state,
     /** ARSENAL MCB (testes/diagnóstico): carteira, compra/equipamento pelo MESMO caminho da tela, recompensas. */
     /** ARENA PRINCIPAL (testes/diagnóstico) */
@@ -2022,7 +2051,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261009jogo');
+      const { addXp } = await import('./state.js?v=20261009fast');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2280,7 +2309,11 @@ function setupMenus() {
     if (bm) bm.onclick = () => { ap.classList.toggle('hidden'); };
     if (bo) bo.onclick = () => { const open = mo.classList.toggle('hidden') === false; bo.setAttribute('aria-expanded', open ? 'true' : 'false'); bo.textContent = open ? 'Outros modos ▾' : 'Outros modos ▸'; };
     const be = document.getElementById('btn-br-entrar');
-    if (be) { if (!brEnabled(DATA)) { be.textContent = 'ARENA PRINCIPAL — EM DESENVOLVIMENTO'; be.disabled = true; } be.onclick = () => enterArenaBr(); }
+    if (be) { if (!brEnabled(DATA)) { be.textContent = 'ARENA PRINCIPAL — EM DESENVOLVIMENTO'; be.disabled = true; } be.onclick = () => enterArenaBr('full'); }
+    const bf = document.getElementById('btn-fast-entrar');
+    if (bf) { if (!brEnabled(DATA)) bf.disabled = true; bf.onclick = () => enterArenaBr('fast'); }
+    const fz = document.getElementById('fast-zero'); if (fz) { fz.checked = fastZeroOn(); fz.onchange = () => setFastZero(fz.checked); }
+    const fr = document.getElementById('btn-fast-ranking'); if (fr) fr.onclick = () => showRanking();
     const bmn = document.getElementById('btn-main-mercado');
     if (bmn) bmn.onclick = () => brUi.openMarket();
   }
@@ -2347,8 +2380,29 @@ function enterCampo() {
 }
 
 /** ARENA PRINCIPAL: entra na corrida (cópia do permanente; tudo que ganhar é salvo na hora). */
-function enterArenaBr() {
+/** NEXARA FAST ⚡: 'full' = ARENA NEXARA (mapa completo, config original intacta) · 'fast' = mapa compacto sorteado (br-fast.js) */
+let brModeCur = 'full';
+const FAST_ZERO_KEY = 'nexara.fastZero';
+function fastZeroOn() { try { const v = localStorage.getItem(FAST_ZERO_KEY); if (v === '0') return false; if (v === '1') return true; } catch {} return DATA?.arena_br_design?.fast?.comecarDoZero !== false; }
+function setFastZero(on) { try { localStorage.setItem(FAST_ZERO_KEY, on ? '1' : '0'); } catch {} const cb = document.getElementById('fast-zero'); if (cb) cb.checked = !!on; return fastZeroOn(); }
+let lastHeroHit = { uid: null, at: 0 }; let fastRanked = null;
+/** NEXARA FAST: registra a partida no RANKING pessoal (números reais da corrida) */
+function recordFastMatch(s, ended) {
+  const rv = arenaBr.rivals?.() || null; const sum = arenaBr.summary?.() || {};
+  const killer = ended.kind === 'derrotado' && lastHeroHit.uid != null && performance.now() - lastHeroHit.at < 4000 ? rv?.list?.find((r) => r.uid === lastHeroHit.uid)?.name || null : null;
+  const res = recordMatch({ kind: ended.kind, seed: DATA.arena_br?.fastRun?.seed || 0, ms: sum.timeMs || 0, heroKills: sum.kills || 0, killerName: killer,
+    rivals: (rv?.list || []).map((r) => ({ name: r.name, alive: r.alive, by: r.by, killedBy: r.killedBy, kills: r.kills, rivalKills: r.rivalKills, level: r.level, champion: r.champion })) });
+  fastRanked = { ...res, killer, at: Date.now() };
+  return fastRanked;
+}
+function setBrMode(mode) {
+  if (mode === 'fast' && DATA.arena_br_design) DATA.arena_br = makeFastConfig(DATA.arena_br_design, fastSeed());
+  else if (DATA.arena_br_full) DATA.arena_br = DATA.arena_br_full;
+  brModeCur = mode === 'fast' && DATA.arena_br?.fastRun ? 'fast' : 'full';
+}
+function enterArenaBr(mode = 'full') {
   if (!brEnabled(DATA)) { ui.showToast('ARENA PRINCIPAL — EM DESENVOLVIMENTO (arena_br.enabled = false).'); return false; }
+  setBrMode(mode);
   if (state && !isArenaState(state)) worldBackup = state;
   exitAllRuns();
   arenaPermCache = null;
@@ -2360,8 +2414,10 @@ function enterArenaBr() {
   brSummaryShown = false;
   brUi.show();
   ui.refresh();
-  if (built.source === 'testador') syncCampoProgress(state, 'enter');
-  ui.showToast('ARENA PRINCIPAL — 6 regiões, loot por risco, zona segura com aviso. Seta = objetivo · M = mapa.', 3800);
+  if (built.source === 'testador' && !state.fastZero) syncCampoProgress(state, 'enter');
+  lastHeroHit = { uid: null, at: 0 }; fastRanked = null;
+  if (brModeCur === 'fast') ui.showToast(`NEXARA FAST ⚡ — 6 regiões sorteadas (seed ${DATA.arena_br.fastRun.seed}), 10 RIVAIS (BOT)${state.fastZero ? ', todos começam do NV1 (seu herói salvo não é alterado)' : ''}. Seta = objetivo · M = mapa.`, 4600);
+  else ui.showToast('ARENA NEXARA (mapa completo) — 6 regiões, loot por risco, zona segura com aviso. Seta = objetivo · M = mapa.', 3800);
   mobile?.setForceVisible(true);
   mobile?.updateVisibility();
   return true;
@@ -2370,10 +2426,11 @@ function checkBrEnd(s) {
   const v = arenaBr.view();
   if (!v?.ended || brSummaryShown) return;
   brSummaryShown = true;
-  syncCampoProgress(s, v.ended.kind);
+  syncCampoProgress(s, v.ended.kind); // (FAST do zero: isRunPersist = false → não grava nada)
+  if (brModeCur === 'fast') try { recordFastMatch(s, v.ended); } catch (e) { console.warn('[fast] ranking', e); }
   const run = mcbRunLog[mcbRunLog.length - 1]; if (run && run.br && !run.end) run.end = Date.now();
   combat.cancel(); motion.stopNow();
-  brUi.showSummary(arenaBr.summary(), { onAgain: () => enterArenaBr(), onMenu: () => exitArenaToMenu() });
+  const again = brModeCur; brUi.showSummary(arenaBr.summary(), { onAgain: () => enterArenaBr(again), onMenu: () => exitArenaToMenu(), zero: !!s.fastZero, fast: again === 'fast' ? fastRanked : null, onRanking: again === 'fast' ? () => showRanking() : null });
 }
 /** Crédito de MCB da corrida (bônus de caçada / extração) — vale na hora, salvo pela sincronização. */
 function brCredit(n, why) {
@@ -2497,7 +2554,7 @@ setInterval(() => {
   const v = arenaBr.view(); const p = motion.getPos();
   let threat = 0; try { threat = getThreatsToPlayer(s, p.x, p.y).length; } catch {}
   const dc = DATA.arena_br?.dragao?.territorio;
-  const SKm = DATA.arena_br?._escala || 1; const near = !!dc && p.x > dc.x0 - 14 * SKm && p.y < dc.y1 + 14 * SKm;
+  const SKm = DATA.arena_br?._escala || 1; const near = !!dc && (DATA.arena_br?.fastRun ? Math.hypot(Math.max(dc.x0 - p.x, 0, p.x - dc.x1), Math.max(dc.y0 - p.y, 0, p.y - dc.y1)) < 14 * SKm : p.x > dc.x0 - 14 * SKm && p.y < dc.y1 + 14 * SKm);
   music.update(dt, { threat, dragon: !!v?.inDragon, near, ended: !!v?.ended, region: v?.region || '' });
 }, 200);
 function brSfx(kind, extra) {
@@ -2515,6 +2572,7 @@ function brSfx(kind, extra) {
 function exitArenaToMenu() {
   // Bloco 7: nada temporário da Arena vaza para o mundo (poderes removidos dos modificadores)
   exitAllRuns();
+  if (brModeCur === 'fast') setBrMode('full'); // NEXARA FAST: volta a config do mapa completo
   arenaPermCache = null;
   if (worldBackup) {
     state = worldBackup;
@@ -2725,7 +2783,7 @@ function applyAiVfx(result) {
   }
   if (result.absorbed && renderer.mode === 'fps') renderer.spawnFloatText?.(`ESCUDO -${result.absorbed}`, '#5ff0ff', { size: 15, dy: 18 });
   if (result.dmgIn > 0) procs.onHeroDamaged(result.dmgIn);
-  if (result.dmgIn > 0 && result.mon?.uid != null) { dmgBySrc.set(result.mon.uid, (dmgBySrc.get(result.mon.uid) || 0) + result.dmgIn); if (dmgBySrc.size > 200) dmgBySrc.clear(); } // diagnóstico: dano recebido por atacante
+  if (result.dmgIn > 0 && result.mon?.uid != null) { lastHeroHit = { uid: result.mon.uid, at: performance.now() }; dmgBySrc.set(result.mon.uid, (dmgBySrc.get(result.mon.uid) || 0) + result.dmgIn); if (dmgBySrc.size > 200) dmgBySrc.clear(); } // diagnóstico: dano recebido por atacante
   if (result.blocked) {
     sfxBlock();
     if (renderer.mode === 'fps') {

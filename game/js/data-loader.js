@@ -1,4 +1,4 @@
-import { scaleBrConfig } from './br-map.js?v=20261009jogo';
+import { scaleBrConfig } from './br-map.js?v=20261009fast';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 
@@ -25,7 +25,7 @@ export async function loadAllData() {
     })
   );
   // MASTER 10: Arena Principal no tamanho da escala configurada (zona.escala; ?brScale=1 = mapa original)
-  if (data.arena_br) data.arena_br = scaleBrConfig(data.arena_br);
+  if (data.arena_br) { data.arena_br_design = JSON.parse(JSON.stringify(data.arena_br)); data.arena_br = scaleBrConfig(data.arena_br); data.arena_br_full = data.arena_br; } // NEXARA FAST parte do PROJETO (br-fast.js)
   const meta = data.items_meta?.meta || {};
   for (const it of data.items?.items || []) if (meta[it.id]) Object.assign(it, meta[it.id]);
   return data;

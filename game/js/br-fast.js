@@ -5,7 +5,7 @@
  * 10 RIVAIS (BOT) — IA local, sem rede. Zona segura mais rápida (partida ~6–10 min).
  * A ARENA NEXARA (mapa completo) continua exatamente igual: este módulo só cria uma CÓPIA da config.
  */
-import { scaleBrConfig } from './br-map.js?v=20261009jogo';
+import { scaleBrConfig } from './br-map.js?v=20261009fast';
 
 function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -54,9 +54,14 @@ export function makeFastConfig(design, seed) {
   // 10 rivais (BOT) — contam no teto de densidade do diretor e usam o LOD de IA
   c.rivais.n = F.rivais ?? 10; c.rivais.nMax = Math.max(c.rivais.n, c.rivais.nMax || 5);
   if (F.rivaisDistInicialMin != null) c.rivais.distInicialMin = F.rivaisDistInicialMin;
+  if (Array.isArray(F.herois) && F.herois.length) c.rivais.herois = F.herois.map((h) => ({ ...h })); // 10 nomes do FAST
+  c.rivais.lutamSempre = !!F.rivaisLutamSempre;   // rivais se enfrentam a partida toda (não só com a zona fechando)
+  c.rivais.nivelProprio = !!F.rivaisNivelProprio; // nível próprio: começam no NV1 e sobem com XP de monstros/rivais
+  c.rivais.xpMult = F.rivaisXpMult ?? 1;
   if (F.rivaisSaque) Object.assign(c.rivais.saque, F.rivaisSaque);
   c.zona.seed = seed >>> 0; c.zona.escala = F.escala || 1.3; c.zona.name = 'NEXARA FAST';
   if (F.fatorConteudo) c.zona.fatorConteudo = F.fatorConteudo;
-  c.fastRun = { seed: seed >>> 0, order: c.regioes.map((r) => r.id), slots: perm.slice() };
+  const bySlot = []; perm.forEach((sl, i) => { bySlot[sl] = c.regioes[i].id; }); // posição (na ordem do mapa completo) → região sorteada
+  c.fastRun = { seed: seed >>> 0, order: bySlot, slots: perm.slice() };
   return scaleBrConfig(c, c.zona.escala);
 }

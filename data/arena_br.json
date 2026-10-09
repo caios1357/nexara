@@ -658,5 +658,111 @@
       "atkMult": 1.3
     },
     "bonusMcbPorNivel": 8
+  },
+  "fast": {
+    "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo).",
+    "escala": 1.3,
+    "fatorConteudo": 0.8,
+    "rivais": 10,
+    "rivaisDistInicialMin": 16,
+    "rivaisSaque": {
+      "inicioMs": 10000,
+      "pausaMs": 9000
+    },
+    "zonaSegura": {
+      "inicioMs": 60000,
+      "avisoMs": 15000,
+      "estagios": [
+        {
+          "raio": 40,
+          "duracaoMs": 45000
+        },
+        {
+          "raio": 28,
+          "duracaoMs": 45000
+        },
+        {
+          "raio": 17,
+          "duracaoMs": 40000
+        },
+        {
+          "raio": 9,
+          "duracaoMs": 40000
+        }
+      ]
+    },
+    "eventos": {
+      "primeiroMs": 40000,
+      "intervaloMs": 80000
+    },
+    "extracao": {
+      "liberaAposMs": 30000
+    },
+    "comecarDoZero": true,
+    "rivaisLutamSempre": true,
+    "rivaisNivelProprio": true,
+    "rivaisXpMult": 1.0,
+    "herois": [
+      {
+        "style": "cavaleiro",
+        "nome": "Vex Nexa",
+        "primary": "#ff3b5c",
+        "glow": "#ff8fa3"
+      },
+      {
+        "style": "cacador",
+        "nome": "Kira Sombra",
+        "primary": "#ffb020",
+        "glow": "#ffe08a"
+      },
+      {
+        "style": "runico",
+        "nome": "Orun Runa",
+        "primary": "#9b5cff",
+        "glow": "#d0b0ff"
+      },
+      {
+        "style": "ciborgue",
+        "nome": "Dex-7",
+        "primary": "#21d4c4",
+        "glow": "#9ffff4"
+      },
+      {
+        "style": "cacador",
+        "nome": "Nyx Lâmina",
+        "primary": "#ff4fd8",
+        "glow": "#ffb0ef"
+      },
+      {
+        "style": "runico",
+        "nome": "Taro Glifo",
+        "primary": "#5c8bff",
+        "glow": "#b0c8ff"
+      },
+      {
+        "style": "ciborgue",
+        "nome": "Zed-9",
+        "primary": "#c8ff3b",
+        "glow": "#eaffa8"
+      },
+      {
+        "style": "cavaleiro",
+        "nome": "Iara Aço",
+        "primary": "#3bffb0",
+        "glow": "#b0ffe0"
+      },
+      {
+        "style": "runico",
+        "nome": "Lume Vórtex",
+        "primary": "#ffe14a",
+        "glow": "#fff3a8"
+      },
+      {
+        "style": "ciborgue",
+        "nome": "Sora Circuito",
+        "primary": "#ff7a3b",
+        "glow": "#ffc8a8"
+      }
+    ]
   }
 }

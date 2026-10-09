@@ -19,11 +19,11 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009jogo';
-import { isWalkable, getTileType } from './map.js?v=20261009jogo';
-import { monsterAttackPlayer } from './actions.js?v=20261009jogo';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009jogo';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009jogo';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009fast';
+import { isWalkable, getTileType } from './map.js?v=20261009fast';
+import { monsterAttackPlayer } from './actions.js?v=20261009fast';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009fast';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009fast';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -83,10 +83,13 @@ function blockedForEnemy(tx, ty) {
 /** Bloco 7: o chefe nunca sai do covil — colunas a oeste de arenaBoss.territoryMinX contam como parede. */
 let curBossMinX = null;
 let curBossMaxY = null; // ARENA PRINCIPAL: território do dragão também limitado ao sul (Zona de Elite fica fora)
+let curBossMaxX = null, curBossMinY = null; // NEXARA FAST: território em posição sorteada (limites a leste/norte)
 function blockedForBoss(tx, ty) {
   const minX = curBossMinX != null ? curBossMinX : getConfig().arenaBoss.territoryMinX;
   if (tx < Math.floor(minX) + 1) return true;
   if (curBossMaxY != null && ty > curBossMaxY) return true;
+  if (curBossMaxX != null && tx > curBossMaxX) return true;
+  if (curBossMinY != null && ty < curBossMinY) return true;
   return blockedForEnemy(tx, ty);
 }
 
@@ -809,7 +812,7 @@ function thinkBoss(state, zone, mon, r, P, dtSec, result) {
   const hx = mon.homeX + 0.5;
   const hy = mon.homeY + 0.5;
   const t = clock - r.stateAt;
-  const playerInLair = P.px >= (Number.isFinite(mon.territoryMinX) ? mon.territoryMinX : bc.territoryMinX) && (!Number.isFinite(mon.territoryMaxY) || P.py <= mon.territoryMaxY + 1);
+  const playerInLair = P.px >= (Number.isFinite(mon.territoryMinX) ? mon.territoryMinX : bc.territoryMinX) && (!Number.isFinite(mon.territoryMaxY) || P.py <= mon.territoryMaxY + 1) && (!Number.isFinite(mon.territoryMaxX) || P.px <= mon.territoryMaxX + 1) && (!Number.isFinite(mon.territoryMinY) || P.py >= mon.territoryMinY - 1);
   r.wantVx = 0;
   r.wantVy = 0;
   const touched = r.touchPlayer;
@@ -1288,7 +1291,7 @@ export function tickEnemyAi(state, dtSec, P) {
     }
     if (r.arch === null && mon.arch) r.arch = mon.arch;
     if (!r.bodyR) r.bodyR = monBodyRadius(mon);
-    if (r.isBoss) { curBossMinX = Number.isFinite(mon.territoryMinX) ? mon.territoryMinX : null; curBossMaxY = Number.isFinite(mon.territoryMaxY) ? mon.territoryMaxY : null; }
+    if (r.isBoss) { curBossMinX = Number.isFinite(mon.territoryMinX) ? mon.territoryMinX : null; curBossMaxY = Number.isFinite(mon.territoryMaxY) ? mon.territoryMaxY : null; curBossMaxX = Number.isFinite(mon.territoryMaxX) ? mon.territoryMaxX : null; curBossMinY = Number.isFinite(mon.territoryMinY) ? mon.territoryMinY : null; }
     // ARENA PRINCIPAL — LOD de IA: perto = completa · médio = pensa 1 a cada 4 quadros · longe (sem combate) = congelado
     let lod = 0;
     if (zone.br && !r.isBoss) {

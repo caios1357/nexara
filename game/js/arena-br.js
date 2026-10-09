@@ -10,21 +10,21 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009jogo';
-import { pushLog } from './state.js?v=20261009jogo';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009jogo';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009jogo';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009jogo';
-import { createRivals } from './arena-rivals.js?v=20261009jogo';
+import { createArenaState } from './arena.js?v=20261009fast';
+import { pushLog } from './state.js?v=20261009fast';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009fast';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009fast';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009fast';
+import { createRivals } from './arena-rivals.js?v=20261009fast';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
-let zoneCache = null;
+const zoneCaches = { full: null, fast: null }; // NEXARA FAST não descarta o mapa completo (e vice-versa)
 function brZone(cfg) {
-  const key = `${cfg.zona.seed}|${cfg.zona.width}|${cfg.zona.height}`;
-  if (!zoneCache || zoneCache.key !== key) zoneCache = { key, zone: buildBrZone(cfg) };
+  const key = `${cfg.zona.seed}|${cfg.zona.width}|${cfg.zona.height}`; const slot = cfg.fastRun ? 'fast' : 'full';
+  if (!zoneCaches[slot] || zoneCaches[slot].key !== key) zoneCaches[slot] = { key, zone: buildBrZone(cfg) };
   // cópia rasa: o mapa (imutável) é compartilhado; flags da zona por corrida
-  return { ...zoneCache.zone, closed: {} };
+  return { ...zoneCaches[slot].zone, closed: {} };
 }
 
 export function brEnabled(data) { return !!data?.arena_br?.enabled; }
@@ -49,6 +49,8 @@ export function createBrState(data, { from = null, boss = null } = {}) {
       hp: bossDef.hp, hpMax: bossDef.hp, alive: true, boss: true, arenaLabel: 'GIGANTE VERDE',
       territoryMinX: d.territorio.x0, territoryMaxY: d.territorio.y1 + 8
     });
+    // NEXARA FAST: o território pode cair em qualquer posição → limita também a leste/norte (bordas da região do dragão)
+    if (cfg.fastRun) { const rd = cfg.regioes.find((r) => r.id === 'dragao'); const b = st.monstersAlive[st.monstersAlive.length - 1]; if (rd && b) { b.territoryMinX = rd.x0 + 1; b.territoryMaxX = rd.x1 - 1; b.territoryMinY = rd.y0 + 1; b.territoryMaxY = rd.y1 - 1; } }
   }
   if (from?.passives?.pending > 0) st.passives.pending = from.passives.pending;
   st.log = [];
@@ -477,7 +479,7 @@ export function createArenaBr(deps) {
       note('region', { id: reg.id, nome: reg.nome, risco: reg.risco, first });
     }
     const t = cfg().dragao.territorio;
-    const SK = cfg()._escala || 1; const inD = p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
+    const SK = cfg()._escala || 1; const inD = cfg().fastRun ? reg?.id === 'dragao' : p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
     if (inD && !br.inDragon) { br.inDragon = true; note('dragon_territory', { first: !br.dragonWarned }); br.dragonWarned = true; if (!br.bossArmed) { br.bossArmed = true; deps.armBoss?.(); } }
     else if (!inD && br.inDragon) { br.inDragon = false; note('dragon_leave', {}); }
   }

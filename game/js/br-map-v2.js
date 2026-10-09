@@ -126,7 +126,9 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
       if (nb) set(x, y, R() < 0.3 ? 'b' : 'g');
     }
     // caverna principal (posição de projeto) + túnel
-    const cv = { x0: D(18), y0: Math.max(r.y0 + 1, D(2)), x1: D(31), y1: D(9) };
+    // posições de PROJETO relativas ao canto da região (no mapa completo r.x0 = D(1): idêntico; no FAST a região pode estar em outro lugar)
+    const RX = (v) => r.x0 + D(v) - D(1), RY = (v) => r.y0 + D(v) - D(1);
+    const cv = { x0: RX(18), y0: Math.max(r.y0 + 1, RY(2)), x1: Math.min(r.x1 - 2, RX(31)), y1: Math.min(r.y1 - 8, RY(9)) };
     rect(cv.x0, cv.y0, cv.x1, cv.y1, 'R');
     const cmx = Math.round((cv.x0 + cv.x1) / 2);
     const tun = [[cmx, cv.y1 + 1], [cmx, cv.y1 - 2], [cv.x1 - 3, cv.y1 - 2], [cv.x1 - 3, cv.y0 + 2], [cv.x0 + 3, cv.y0 + 2], [cv.x0 + 3, cv.y0 + 1]];
@@ -135,10 +137,11 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const caveEnd = { x: cv.x0 + 3, y: cv.y0 + 1 }; const caveMouth = { x: cmx, y: cv.y1 + 1 };
     area('caverna', r, cv.x0, cv.y0, cv.x1, cv.y1, { main: true });
     chestsFixed.push({ x: caveEnd.x, y: caveEnd.y, region: r.id, id: 'bau_caverna', loot: 'alto', kind: 'bau', secret: true });
+    const SXc = Math.min(r.x1 - 6, RX(29)), SYc = Math.min(r.y1 - 6, RY(38)); // local secreto (abaixo)
     // grutas extras (mapa maior): maciço pequeno com câmara
     const nGr = Math.max(0, Math.round(S * S / 3) - 1);
     for (let i = 0; i < nGr; i++) {
-      const gx = ri(r.x0 + 6, r.x1 - 14), gy = ri(Math.max(r.y0 + 14, cv.y1 + 6), r.y1 - 12); if (Math.hypot(gx - D(29), gy - D(38)) < 14) continue;
+      const gx = ri(r.x0 + 6, r.x1 - 14), gy = ri(Math.max(r.y0 + 14, cv.y1 + 6), r.y1 - 12); if (Math.hypot(gx - SXc, gy - SYc) < 14) continue;
       rect(gx, gy, gx + 8, gy + 6, 'R'); rect(gx + 2, gy + 2, gx + 6, gy + 4, '.'); rect(gx + 4, gy + 5, gx + 5, gy + 7, '.');
       structures.push({ kind: 'caverna', x0: gx, y0: gy, x1: gx + 8, y1: gy + 6, h: 3.4 }); area('gruta', r, gx + 2, gy + 2, gx + 6, gy + 4);
       chestsFixed.push({ x: gx + 4, y: gy + 3, region: r.id, id: `bau_gruta_${i}`, loot: 'medio', kind: 'bau', secret: true });
@@ -157,7 +160,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const hubs = [...gaps.filter((q) => q.ra === r.id), ...clear, caveMouth];
     for (let i = 1; i < hubs.length; i++) { let best = hubs[0], bd = 1e9; for (let j = 0; j < i; j++) { const d = Math.hypot(hubs[j].x - hubs[i].x, hubs[j].y - hubs[i].y); if (d < bd) { bd = d; best = hubs[j]; } } carve([[hubs[i].x, hubs[i].y], [best.x, best.y]], 2); } // trilhas largas, sem árvore no caminho
     // local secreto principal (posição de projeto): bolsão de árvores com 1 abertura estreita
-    const sx = D(29), sy = D(38);
+    const sx = SXc, sy = SYc;
     rect(sx - 3, sy - 3, sx + 3, sy + 3, 'T'); rect(sx - 1, sy - 1, sx + 2, sy + 2, 'g'); set(sx - 2, sy, 'g'); set(sx - 3, sy, 'g'); set(sx - 4, sy, 'g');
     area('secreto', r, sx - 1, sy - 1, sx + 2, sy + 2, { hidden: true, main: true });
     chestsFixed.push({ x: sx + 1, y: sy + 1, region: r.id, id: 'bau_secreto', loot: 'lendario', kind: 'bau', secret: true });

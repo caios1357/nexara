@@ -15,11 +15,11 @@
  * Um único dono do movimento: este módulo. Sem loop próprio — é chamado pelo
  * rAF único do renderer ativo (update(state, dt, yaw, opts)).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009jogo';
-import { tryMove, maybeRespawn } from './actions.js?v=20261009jogo';
-import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261009jogo';
-import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261009jogo';
-import { getStat, STATS } from './modifiers.js?v=20261009jogo';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009fast';
+import { tryMove, maybeRespawn } from './actions.js?v=20261009fast';
+import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261009fast';
+import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261009fast';
+import { getStat, STATS } from './modifiers.js?v=20261009fast';
 
 const KEY_MAP = {
   w: 'f', arrowup: 'f',
@@ -40,6 +40,7 @@ export function createPlayerMotion() {
   const vel = { x: 0, y: 0 };
   const synced = { state: null, zoneId: null, tx: 0, ty: 0 };
   let zoneCache = null;
+  let zoneCacheList = null;
   let facing = 0;
   let facingVel = 0;
   let lastSpeed = 0;
@@ -109,7 +110,8 @@ export function createPlayerMotion() {
 
   // —— colisão ——
   function getZone(state) {
-    if (zoneCache && zoneCache.id === state.zoneId) return zoneCache;
+    if (zoneCache && zoneCache.id === state.zoneId && zoneCacheList === state._data.zones.zones) return zoneCache; // NEXARA FAST: nova corrida = nova lista (mapa novo, mesmo id)
+    zoneCacheList = state._data.zones.zones;
     zoneCache = state._data.zones.zones.find((z) => z.id === state.zoneId) || null;
     return zoneCache;
   }

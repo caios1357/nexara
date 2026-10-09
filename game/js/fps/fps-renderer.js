@@ -10,34 +10,34 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009jogo';
-import { buildArenaDressing } from './arena-dressing.js?v=20261009jogo';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009jogo';
-import { createHeroModel } from './hero-model.js?v=20261009jogo';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009jogo';
-import { attachHeroGlb } from './hero-glb.js?v=20261009jogo';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009jogo';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009jogo';
-import { createActionVfx } from './action-vfx.js?v=20261009jogo';
-import { createPassiveVfx } from './passive-vfx.js?v=20261009jogo';
-import { createFpsControls } from './fps-controls.js?v=20261009jogo';
-import { createViewmodel } from './viewmodel.js?v=20261009jogo';
-import { createDragonView } from './dragon-view.js?v=20261009jogo';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009jogo';
-import { getSprite } from '../assets.js?v=20261009jogo';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009jogo';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009jogo';
-import { mergeStaticParts } from './merge-util.js?v=20261009jogo';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009jogo';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009jogo';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009jogo';
-import { createPostFx } from './post-fx.js?v=20261009jogo';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009jogo';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009jogo';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009jogo';
-import { groundAt, setGroundFn } from './ground.js?v=20261009jogo';
-import { buildBrTerrain } from './br-terrain.js?v=20261009jogo';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009jogo';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009fast';
+import { buildArenaDressing } from './arena-dressing.js?v=20261009fast';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009fast';
+import { createHeroModel } from './hero-model.js?v=20261009fast';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009fast';
+import { attachHeroGlb } from './hero-glb.js?v=20261009fast';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009fast';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009fast';
+import { createActionVfx } from './action-vfx.js?v=20261009fast';
+import { createPassiveVfx } from './passive-vfx.js?v=20261009fast';
+import { createFpsControls } from './fps-controls.js?v=20261009fast';
+import { createViewmodel } from './viewmodel.js?v=20261009fast';
+import { createDragonView } from './dragon-view.js?v=20261009fast';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009fast';
+import { getSprite } from '../assets.js?v=20261009fast';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009fast';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009fast';
+import { mergeStaticParts } from './merge-util.js?v=20261009fast';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009fast';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009fast';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009fast';
+import { createPostFx } from './post-fx.js?v=20261009fast';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009fast';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009fast';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009fast';
+import { groundAt, setGroundFn } from './ground.js?v=20261009fast';
+import { buildBrTerrain } from './br-terrain.js?v=20261009fast';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009fast';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -94,6 +94,7 @@ export function createFpsRenderer() {
   let raf = 0;
   let lastT = performance.now();
   let builtZoneId = null;
+  let builtBrMap = null; // NEXARA FAST: mesmo id de zona, mapa novo a cada partida → reconstrói
   let hooks = {};
   let floatLayer = null;
   let flashEl = null;
@@ -519,7 +520,7 @@ export function createFpsRenderer() {
   function buildZone(zone) {
     clearWorld();
     clearEntities();
-    builtZoneId = zone.id;
+    builtZoneId = zone.id; builtBrMap = zone.brMap || null;
     if (zone.br && zone.brMap) { buildBrWorld(zone); return; }
     setGroundFn(null);
     setTeleOnTop(false);
@@ -2385,7 +2386,7 @@ export function createFpsRenderer() {
     const zone = state._data.zones.zones.find((z) => z.id === state.zoneId);
     if (!zone) return;
 
-    if (builtZoneId !== zone.id) {
+    if (builtZoneId !== zone.id || (zone.brMap && builtBrMap !== zone.brMap)) {
       buildZone(zone);
       fpsCam.reset();
       hooks.motion?.snapToTile(state);

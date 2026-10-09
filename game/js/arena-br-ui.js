@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009jogo';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009fast';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -141,8 +141,8 @@ export function createArenaBrUi(deps) {
   let baseCanvas = null; let baseKey = '';
   function baseMap(s) {
     const z = s._data.zones.zones.find((q) => q.id === s.zoneId); const m = z?.brMap; if (!m) return null;
-    const key = `${m.W}x${m.H}`; if (baseCanvas && baseKey === key) return baseCanvas;
-    const cfg = s._data.arena_br; const S = 4;
+    const cfg = s._data.arena_br; const key = `${m.W}x${m.H}|${cfg.zona?.seed}`; if (baseCanvas && baseKey === key) return baseCanvas; // FAST: seed nova = mapa novo
+    const S = 4;
     const c = document.createElement('canvas'); c.width = m.W * S; c.height = m.H * S; const g = c.getContext('2d');
     const regCol = Object.fromEntries(cfg.regioes.map((r) => [r.n, r.cor]));
     for (let y = 0; y < m.H; y++) for (let x = 0; x < m.W; x++) {
@@ -225,6 +225,7 @@ export function createArenaBrUi(deps) {
   }
   function drawBig(v, s) {
     const cv = big.querySelector('canvas'); const b = baseMap(s); if (!b) return;
+    const hd = big.querySelector('.br-bigmap-head b'); if (hd) hd.textContent = s._data.arena_br?.fastRun ? `MAPA · NEXARA FAST ⚡ · seed ${s._data.arena_br.fastRun.seed}` : 'MAPA · ARENA PRINCIPAL';
     const g = cv.getContext('2d'); const m = s._data.zones.zones.find((q) => q.id === s.zoneId).brMap;
     const sc = Math.min(cv.width / m.W, cv.height / m.H);
     g.clearRect(0, 0, cv.width, cv.height); g.drawImage(b, 0, 0, m.W * sc, m.H * sc);
@@ -343,7 +344,7 @@ export function createArenaBrUi(deps) {
 
   /* ── resumo DERROTADO / EXTRAÇÃO ── */
   function closeSummary() { summaryEl?.remove(); summaryEl = null; }
-  function showSummary(sum, { onAgain, onMenu }) {
+  function showSummary(sum, { onAgain, onMenu, zero = false, fast = null, onRanking = null }) {
     closeSummary(); toggleBigMap(false);
     const win = sum.kind === 'vitoria'; // RIVAIS: CAMPEÃO RIVAL e todos os rivais derrotados
     const ok = sum.kind === 'extraido' || win;
@@ -351,7 +352,9 @@ export function createArenaBrUi(deps) {
     const best = sum.best ? `<b style="color:${rarColor(sum.best.rar)}">${esc(sum.best.name)}</b>` : '—';
     summaryEl.innerHTML = `<div class="br-sum-box">
       <h2 class="${win ? 'br-sum-win' : ''}">${win ? 'VITÓRIA' : ok ? 'EXTRAÇÃO CONCLUÍDA' : 'DERROTADO'}</h2>
-      <p class="br-sum-sub">${win ? `Você derrotou o <b>CAMPEÃO RIVAL${sum.champion ? ` ${esc(sum.champion)}` : ''}</b> — último herói rival (BOT) da arena. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
+      ${fast ? `<p class="br-sum-fast">NEXARA FAST ⚡ · ${fast.colocacao ? `<b>${fast.colocacao}º lugar</b>` : ''}${fast.vencedor && fast.vencedor !== 'VOCÊ' ? ` · último sobrevivente: <b>${esc(fast.vencedor)}</b> (BOT)` : ''}${fast.killer ? ` · derrotado por <b>${esc(fast.killer)}</b> (BOT)` : ''}</p>` : ''}
+      ${zero ? '<p class="br-sum-zero">Partida do zero (NV1): seu herói salvo, itens, MCB e passivas NÃO foram alterados.</p>' : ''}
+      <p class="br-sum-sub" ${zero ? 'hidden' : ''}>${win ? `Você derrotou o <b>CAMPEÃO RIVAL${sum.champion ? ` ${esc(sum.champion)}` : ''}</b> — último herói rival (BOT) da arena. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
       <dl>
         <dt>Tempo sobrevivido</dt><dd data-k="time">${mmss(sum.timeMs)}</dd>
         <dt>Monstros derrotados</dt><dd data-k="kills">${sum.kills}</dd>
@@ -362,7 +365,8 @@ export function createArenaBrUi(deps) {
         <dt>Regiões visitadas</dt><dd data-k="regions">${sum.regions.length} / 6</dd>
       </dl>
       ${sum.boss ? '<p class="br-sum-boss">🐉 GIGANTE VERDE derrotado nesta corrida!</p>' : ''}
-      <div class="br-sum-actions"><button type="button" class="primary" data-a="again">JOGAR DE NOVO</button><button type="button" data-a="menu">MENU</button></div></div>`;
+      <div class="br-sum-actions"><button type="button" class="primary" data-a="again">JOGAR DE NOVO</button>${onRanking ? '<button type="button" data-a="ranking">RANKING</button>' : ''}<button type="button" data-a="menu">MENU</button></div></div>`;
+    if (onRanking) summaryEl.querySelector('[data-a="ranking"]').onclick = () => onRanking();
     summaryEl.querySelector('[data-a="again"]').onclick = () => { closeSummary(); onAgain?.(); };
     summaryEl.querySelector('[data-a="menu"]').onclick = () => { closeSummary(); onMenu?.(); };
     document.body.appendChild(summaryEl);
