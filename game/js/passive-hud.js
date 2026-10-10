@@ -4,8 +4,8 @@
  * Só mostra o que está realmente ativo (dados de passive-procs.getBuffs()). Sem efeitos → some.
  * Em 1ª pessoa (?fp=1), um brilho na borda da tela com a cor do efeito substitui a aura no corpo.
  */
-import { icon } from './icons.js?v=20261009leve';
-import { getConfig } from './gameplay-config.js?v=20261009leve';
+import { icon } from './icons.js?v=20261009espada';
+import { getConfig } from './gameplay-config.js?v=20261009espada';
 
 export function createPassiveHud() {
   let row = null;

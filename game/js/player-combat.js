@@ -18,9 +18,9 @@
  * Relógio próprio (ms) avançado por update(dt): congela no hit-stop/pausa.
  * Sem alocação por frame (objetos reutilizados).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009leve';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009leve';
-import { getStat, STATS } from './modifiers.js?v=20261009leve';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009espada';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009espada';
+import { getStat, STATS } from './modifiers.js?v=20261009espada';
 
 export const ATK = Object.freeze({ IDLE: 'IDLE', STARTUP: 'STARTUP', ACTIVE: 'ACTIVE', RECOVERY: 'RECOVERY' });
 const EVENT_CAP = 120;
@@ -142,8 +142,9 @@ export function createPlayerCombat(deps) {
       box.halfAngle = cfg.rangedHalfAngleDeg * DEG;
       box.single = true;
     } else {
-      box.range = cfg.attackRange * (idx >= 2 ? cfg.hit3RangeMult : 1);
-      box.halfAngle = (idx >= 2 ? cfg.hit3HalfAngleDeg : cfg.hitboxHalfAngleDeg) * DEG;
+      const sw = idx >= 2 ? deps.swordCfg?.()?.hit3 : null; // 20261009espada: 3º golpe da ESPADA alcança mais / abre mais
+      box.range = cfg.attackRange * (idx >= 2 ? (sw?.rangeMult ?? cfg.hit3RangeMult) : 1);
+      box.halfAngle = (idx >= 2 ? (sw?.halfAngleDeg ?? cfg.hit3HalfAngleDeg) : cfg.hitboxHalfAngleDeg) * DEG;
       box.single = false;
     }
     return box;
@@ -257,7 +258,7 @@ export function createPlayerCombat(deps) {
     hitSet.add(mon.uid);
     hitInfo.comboIndex = comboIndex;
     hitInfo.heavy = comboIndex >= 2;
-    hitInfo.dmgMult = comboIndex >= 2 ? cfg.hit3DamageMult : 1;
+    { const sw3 = comboIndex >= 2 ? deps.swordCfg?.()?.hit3 : null; hitInfo.dmgMult = comboIndex >= 2 ? (sw3?.damageMult ?? cfg.hit3DamageMult) : 1; hitInfo.forceStunMs = sw3 ? sw3.staggerMs : 0; hitInfo.knockbackScale = sw3 ? sw3.knockbackScale : undefined; }
     hitInfo.fromX = ctx.px;
     hitInfo.fromY = ctx.py;
     hitInfo.yaw = ctx.yaw;

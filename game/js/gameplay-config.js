@@ -566,6 +566,31 @@ export const DEFAULTS = Object.freeze({
       leapHeight: 0.9
     }
   },
+  /**
+   * 20261009espada — REBALANCEAMENTO DA ESPADA (só vale com ESPADA equipada; arco/cajado intocados).
+   * A espada tem o MESMO ritmo de golpes, mas precisa ficar colada no inimigo (risco): compensa com mais dano por golpe, 3º golpe pesado
+   * (mais alcance + atordoamento curto), contra-ataque no BLOQUEIO PERFEITO, INVESTIDA mais forte (dash-strike), GIRO em volta (forte contra enxame)
+   * e um pouco de roubo de vida por golpe. Números medidos por scripts/arsenal-dps.mjs (DPS espada/arco/cajado ≈ 0,9–1,15 no duelo padrão).
+   */
+  sword: {
+    /** × em todo golpe/especial da espada (antes de crítico) e ajuste fino por família do Arsenal (equaliza Infernal 12 / Dracônico 8 / Cibernético 6 de dano de item). */
+    dmgMult: 1.0,
+    familyMult: { infernal: 0.92, draconico: 1.0, cibernetico: 1.04 },
+    /** 3º golpe do combo: mais pesado, alcança mais, abre a guarda (atordoa por pouco tempo; chefes resistem como sempre). */
+    hit3: { damageMult: 1.9, rangeMult: 1.3, halfAngleDeg: 75, staggerMs: 600, knockbackScale: 1.6 },
+    /** Roubo de vida: fração do dano causado devolvida ao herói (golpe comum / 3º golpe / especial), com teto por segundo (fração do HP máx). */
+    lifesteal: { basic: 0.03, heavy: 0.06, special: 0.05, maxPerSecFrac: 0.06 },
+    /** Contra-ataque: bloqueio apertado até windowMs antes do golpe = BLOQUEIO PERFEITO (sem dano) → a espada revida no atacante. */
+    counter: { windowMs: 260, dmgMult: 2.4, stunMs: 900, range: 2.8, knockbackScale: 1.8, healFrac: 0.04 },
+    /** Variantes dos especiais com ESPADA (sobre `specials`): GOLPE mais forte e longo, GIRO (ataque em área) maior e atordoante, INVESTIDA (dash-strike) mais longa, forte e multi-alvo. */
+    especiais: {
+      golpe_poderoso: { dmgMult: 3.0, range: 2.1 },
+      ataque_area: { nome: 'GIRO DE LÂMINA', dmgMult: 1.9, radius: 2.6, stunMs: 400, knockbackScale: 1.5 },
+      dash: { dmgMult: 2.5, distance: 4.2, maxTargets: 5, stunMs: 450, hitRadius: 1.0 }
+    },
+    /** Premissas do DUELO PADRÃO usado pelo script de balanço (scripts/arsenal-dps.mjs): 20 s contra 1 inimigo corpo a corpo; a espada perde tempo colando/reposicionando. */
+    balance: { duelSec: 20, enemyDps: 14, enemyReach: 1.4, enemySpeed: 2.6, uptime: { espada: 0.88, arco: 0.97, cajado: 0.97 }, groupN: 3 }
+  },
   /** Bloco 4 — trava de alvo (LOCK-ON). Nunca forçada. */
   lockOn: {
     /** 'manual' = só por toque no inimigo/Tab; 'automatico' = trava sozinho em quem te atacar. */

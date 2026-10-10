@@ -1,0 +1,22 @@
+/* DRAGON BERÇO — filhotes e gigantes com prévia 3D (retrato e paisagem, toque) */
+.modal.nx-brc-modal{width:min(98vw,1100px)!important;max-width:98vw!important;max-height:96vh;display:flex;flex-direction:column;padding:.6rem .7rem}
+.modal.nx-brc-modal .modal-body{overflow:auto;flex:1;min-height:0}
+.brc{display:grid;grid-template-columns:1fr;gap:.6rem}
+@media (orientation:landscape) and (min-width:600px){.brc{grid-template-columns:minmax(220px,38%) 1fr}}
+.brc-stage{position:relative;height:min(46vh,380px);border-radius:12px;background:radial-gradient(ellipse at 50% 62%,#2a2f4a 0%,#0e1020 55%,#04050a 100%);border:1px solid #2a3350;overflow:hidden}
+.brc-stage canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+.brc-name{position:absolute;left:10px;top:8px;font-weight:800;letter-spacing:.06em;color:#ffe9a8;text-shadow:0 0 8px #f80}
+.brc-hint{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:10.5px;color:#9aa6c0;pointer-events:none}
+.brc-side{display:flex;flex-direction:column;gap:.45rem;min-width:0}
+.brc-tabs{display:flex;gap:4px}.brc-tabs button{flex:1;min-height:38px;font-size:11.5px;font-weight:700;letter-spacing:.04em}
+.brc-tabs button.on{border-color:#ffd34a;color:#ffd34a;background:rgba(255,211,74,.1)}
+.brc-msg{min-height:1em;font-size:.78rem;color:#9fe8c9}
+.brc-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px;max-height:22vh;overflow:auto}
+.brc-item{display:flex;align-items:center;gap:5px;min-height:42px;padding:3px 6px;border-left:3px solid var(--c);border-radius:7px;text-align:left;touch-action:manipulation;position:relative}
+.brc-item.on{box-shadow:0 0 0 2px var(--c) inset}.brc-item .brc-n{font-size:11.5px;flex:1;font-weight:700}.brc-item small{font-size:9px;color:#8fa0b8}.brc-item i{position:absolute;right:4px;top:2px;color:#6dffb0;font-style:normal;font-size:11px}
+.brc-detail h3{margin:.1rem 0 .2rem;font-size:1rem;color:#fff}.brc-chip{font-size:.7rem;padding:1px 7px;border-radius:99px;border:1px solid var(--c);color:var(--c);margin-left:4px;white-space:nowrap}
+.brc-ok{font-size:.65rem;font-weight:800;color:#6dffb0;margin-left:4px}.brc-desc{font-size:.8rem;color:#c8d3e6;margin:.2rem 0}.brc-sig{font-size:.8rem;font-weight:800;color:#ffd34a;margin:.2rem 0}
+.brc-meta{font-size:.74rem;color:#9fb0c8;margin:.25rem 0}.brc-abs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:5px}
+.brc-ab{border:1px solid #2a3350;border-radius:8px;padding:4px 8px;background:rgba(0,0,0,.28);font-size:.74rem}.brc-ab b{color:#ffe9a8}.brc-ab small{color:#8fa0b8}.brc-ab p{margin:.15rem 0;color:#b8c4da}
+.brc-ab ul{margin:.15rem 0 0 .9rem;padding:0;color:#cfe}.brc-dev,.brc-dev em,.brc-ab em{color:#ffb86b;font-size:.72rem}
+.brc-acts{margin-top:.35rem}.brc-acts button{min-height:42px;width:100%}.brc-empty{color:#8aa0b4}

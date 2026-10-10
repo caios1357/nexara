@@ -1,3 +1,3 @@
-build=20261009leve
-publicado=2026-10-09 20:12 -04
+build=20261009espada
+publicado=2026-10-09 21:11 -04
 origem=/workspace/nexara

@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261009leve';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261009leve';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261009leve';
-import { addReputation } from '../../rules/reputation.js?v=20261009leve';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261009leve';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261009leve';
-import { currentWeaponClass, magicMult } from './equipment.js?v=20261009leve';
-import { reveal } from './arquivo.js?v=20261009leve';
-import { checkEventReady } from './events.js?v=20261009leve';
-import { getConfig } from './gameplay-config.js?v=20261009leve';
-import { getStat, STATS } from './modifiers.js?v=20261009leve';
+import { trainSkill } from '../../rules/skills.js?v=20261009espada';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261009espada';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261009espada';
+import { addReputation } from '../../rules/reputation.js?v=20261009espada';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261009espada';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261009espada';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261009espada';
+import { reveal } from './arquivo.js?v=20261009espada';
+import { checkEventReady } from './events.js?v=20261009espada';
+import { getConfig } from './gameplay-config.js?v=20261009espada';
+import { getStat, STATS } from './modifiers.js?v=20261009espada';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -151,6 +151,8 @@ export function applyPlayerHit(state, mon, opts = {}) {
   }
   // MCB/ARSENAL: CAJADO — Poder mágico multiplica o dano de todos os golpes/especiais com ele
   if (currentWeaponClass() === 'cajado') dmg *= magicMult();
+  const SW = currentWeaponClass() === 'espada' ? getConfig().sword : null; // 20261009espada
+  if (SW) dmg *= (SW.dmgMult ?? 1) * (SW.familyMult?.[currentWeaponFamily()] ?? 1);
   dmg = Math.max(1, Math.round(dmg));
   const tr = trainSkill(state.player.skills, skillId, state._data.skills, 1);
   state.flags.skill_trained = true;
@@ -161,8 +163,20 @@ export function applyPlayerHit(state, mon, opts = {}) {
   }
   const res = applyDamageToMonster(state, mon, dmg, { source: 'player', crit: dmgCtx.crit });
   if (res) res.crit = dmgCtx.crit;
+  if (SW && res && res.dmgOut > 0 && SW.lifesteal && !opts.noLifesteal) {
+    // roubo de vida: golpe comum / 3º golpe (pesado) / especial; teto por segundo (rolling) para não virar imortalidade
+    const L = SW.lifesteal; const heavy = !opts.ability && mult >= (SW.hit3?.damageMult ?? 99) * 0.95;
+    const frac = opts.ability ? L.special : heavy ? L.heavy : L.basic;
+    const now = performance.now(); if (now - swordLs.at > 1000) { swordLs.at = now; swordLs.win = 0; }
+    const cap = Math.max(1, Math.round((L.maxPerSecFrac ?? 0.06) * state.player.hpMax));
+    let h = Math.max(frac > 0 ? 1 : 0, Math.round(res.dmgOut * frac)); h = Math.min(h, cap - swordLs.win, state.player.hpMax - state.player.hp);
+    if (h > 0 && state.player.hp > 0) { state.player.hp += h; swordLs.win += h; swordStats.healed += h; swordStats.heals++; res.heal = h; }
+  }
   return res;
 }
+const swordLs = { at: 0, win: 0 };
+export const swordStats = { healed: 0, heals: 0, counters: 0, counterDmg: 0 };
+export const resetSwordStats = () => { swordStats.healed = 0; swordStats.heals = 0; swordStats.counters = 0; swordStats.counterDmg = 0; swordLs.at = 0; swordLs.win = 0; };
 
 /**
  * Caminho GENÉRICO de dano em monstro (herói, companheiro/dragão, projéteis,
@@ -270,6 +284,7 @@ export function monsterAttackPlayer(state, monUid, opts = {}) {
     return { dmgIn: 0, mon, died: false, dodged, blocked, raw: dmgIn, perfect: !!guard.perfect && !opts.hazard };
   }
   const raw = dmgIn;
+  const parried = !!(guard && guard.kind === 'block' && guard.parry && guard.front);
   if (guard && guard.kind === 'block') {
     blocked = true;
     dmgIn = Math.max(1, Math.round(dmgIn * guard.mult));
@@ -294,7 +309,7 @@ export function monsterAttackPlayer(state, monUid, opts = {}) {
     state.player.y = z.map.spawn.y;
     pushLog(state, `Você caiu. Respawn na entrada de ${z.code} (50% HP).`, 'danger');
   }
-  return { dmgIn, mon, died, dodged, blocked, raw, absorbed, front: guard ? !!guard.front : false };
+  return { dmgIn, mon, died, dodged, blocked, raw, absorbed, front: guard ? !!guard.front : false, parry: parried };
 }
 
 /** Bloco 7: gancho de abate de chefe — fn(state, mon, def) → { drops, xp } (recompensa real no save). */

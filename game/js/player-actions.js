@@ -14,9 +14,9 @@
  * applyDamageToMonster (XP/loot/quests) — o Núcleo Divino (+15% dano de habilidade) vale aqui.
  * Todos os números em gameplay-config (actions / dodge / defense / specials).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009leve';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009leve';
-import { getStat, STATS } from './modifiers.js?v=20261009leve';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009espada';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009espada';
+import { getStat, STATS } from './modifiers.js?v=20261009espada';
 
 export const ACTION_STATES = Object.freeze({
   DEAD: 'DEAD', CRITICAL_ANIM: 'CRITICAL_ANIM', DODGE: 'DODGE', SPECIAL: 'SPECIAL',
@@ -236,7 +236,8 @@ export function createPlayerActions(deps) {
       const ang = Math.abs(wrapAngle(toMon - yaw));
       const front = ang <= (c.frontArcDeg * DEG) / 2;
       let red = front ? c.frontReduction : c.backReduction;
-      const parry = !!c.parryEnabled && clock - defend.since <= c.perfectBlockWindowMs;
+      const swc = deps.swordCounter?.(); // 20261009espada: ESPADA → bloqueio perfeito com contra-ataque
+      const parry = (!!c.parryEnabled || !!swc) && clock - defend.since <= (swc?.windowMs ?? c.perfectBlockWindowMs);
       if (parry && front) red = 1; // gancho: parry perfeito (desligado por padrão)
       stats.blocked++;
       log('blocked', { uid: mon.uid, front, parry });
@@ -250,7 +251,14 @@ export function createPlayerActions(deps) {
   }
 
   // —— ESPECIAIS ——
-  function specialCfg(id) { return cfgAll().specials[id]; }
+  const swMerge = new Map();
+  /** 20261009espada: com ESPADA, a variante do especial (gameplay-config.sword.especiais) sobrepõe a base */
+  function specialCfg(id) {
+    const b = cfgAll().specials[id]; const o = deps.swordSpecial?.(id);
+    if (!o || !b) return b;
+    const c = swMerge.get(id); if (c && c.b === b && c.o === o) return c.v;
+    const v = { ...b, ...o }; swMerge.set(id, { b, o, v }); return v;
+  }
   function cooldownLeft(id) { return Math.max(0, cooldowns[id] - clock); }
   function pressSpecial(id) {
     const c = specialCfg(id);
@@ -631,7 +639,7 @@ export function createPlayerActions(deps) {
     blocksAttackStart, getActionState, getView, getButtonsInfo, getDebug, reset, inIFrames,
     getEvents: () => events.slice(),
     clearEvents: () => { events.length = 0; },
-    cooldownLeft,
+    cooldownLeft, specialCfg,
     getClock: () => clock,
     isDefending: () => defend.active,
     isDodging: () => dodge.active,
