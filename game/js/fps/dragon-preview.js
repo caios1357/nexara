@@ -4,8 +4,8 @@
  * Falha de carregamento → o gigante cai no procedural (boss-dragon-view); o filhote avisa "modelo indisponível".
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261009espada';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009espada';
+import { attachDragonGlb } from './dragon-glb.js?v=20261009berco';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009berco';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 
@@ -14,8 +14,8 @@ export function createDragonPreview(canvas) {
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
-  scene.add(new THREE.HemisphereLight(0xbfd8ff, 0x141a28, 1.7));
-  const key = new THREE.DirectionalLight(0xffffff, 2.4); key.position.set(3, 5, 4); scene.add(key);
+  scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x282e44, 2.4));
+  const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(3, 5, 4); scene.add(key);
   const rim = new THREE.DirectionalLight(0xffffff, 1.6); rim.position.set(-4, 2, -3); scene.add(rim);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
   const floor = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: 0x39f0ff, transparent: true, opacity: 0.2, depthWrite: false }));
@@ -24,7 +24,8 @@ export function createDragonPreview(canvas) {
   const root = new THREE.Group(); scene.add(root);
   let item = null; let H = 1.05; let dist = 3.2; let alive = true; let raf = 0; let last = performance.now(); let spin = 0.6; let autoSpin = 0.5; let touched = false;
   const info = { id: null, kind: null, status: 'vazio', height: 0, meshes: 0 };
-  function placeCam() { cam.position.set(0, H * 0.62 + 0.2, dist); cam.lookAt(0, H * 0.45, 0); }
+  let ty = 0.45; // altura do alvo (× H): o filhote é centrado no 0 (xyz); o gigante tem os pés no chão
+  function placeCam() { const t = ty * H; cam.position.set(0, t + H * 0.2 + (ty ? 0.2 : 0.15), dist); cam.lookAt(0, t, 0); }
   function clearItem() {
     if (!item) return; root.remove(item.holder);
     item.holder.traverse((o) => { if (o.isMesh) { o.geometry?.dispose?.(); const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach((m) => { if (!m?.userData?.shared) m?.dispose?.(); }); } });
@@ -35,7 +36,7 @@ export function createDragonPreview(canvas) {
     clearItem();
     const kind = d.kind === 'boss' ? 'boss' : 'mini';
     H = Math.max(0.6, d.height || (kind === 'boss' ? 6.4 : 1.05));
-    dist = kind === 'boss' ? H * 2.35 + 3 : 3.4; floor.scale.setScalar(kind === 'boss' ? H * 0.42 : 0.8); placeCam();
+    dist = kind === 'boss' ? H * 2.35 + 3 : 4.3; ty = kind === 'boss' ? 0.45 : 0; floor.position.y = kind === 'boss' ? 0.01 : -H * 0.52; floor.scale.setScalar(kind === 'boss' ? H * 0.42 : 0.8); placeCam();
     const holder = new THREE.Group(); root.add(holder);
     const proc = new THREE.Group(); holder.add(proc);
     const palette = { base: hexNum(d.cor?.base), dark: hexNum(d.cor?.escuro), glow: hexNum(d.cor?.brilho) };

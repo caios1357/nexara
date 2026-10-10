@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261009espada';
-import { drawMinimap } from './map.js?v=20261009espada';
+import { label, CATEGORIES } from './arquivo.js?v=20261009berco';
+import { drawMinimap } from './map.js?v=20261009berco';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261009espada';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261009espada';
-import { getEquippedStats } from './state.js?v=20261009espada';
-import { countItem } from '../../rules/loot.js?v=20261009espada';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261009espada';
-import { isArenaState } from './arena.js?v=20261009espada';
-import { spriteCount } from './assets.js?v=20261009espada';
-import { attrLines } from './equipment.js?v=20261009espada';
+} from './actions.js?v=20261009berco';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261009berco';
+import { getEquippedStats } from './state.js?v=20261009berco';
+import { countItem } from '../../rules/loot.js?v=20261009berco';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261009berco';
+import { isArenaState } from './arena.js?v=20261009berco';
+import { spriteCount } from './assets.js?v=20261009berco';
+import { attrLines } from './equipment.js?v=20261009berco';
 
 let rendererRef = null;
 

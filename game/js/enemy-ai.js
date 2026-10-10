@@ -19,11 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009espada';
-import { isWalkable, getTileType } from './map.js?v=20261009espada';
-import { monsterAttackPlayer } from './actions.js?v=20261009espada';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009espada';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009espada';
+import { bossCfgFor } from './boss-variants.js?v=20261009berco';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009berco';
+import { isWalkable, getTileType } from './map.js?v=20261009berco';
+import { monsterAttackPlayer } from './actions.js?v=20261009berco';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261009berco';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261009berco';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -96,7 +97,7 @@ function blockedForBoss(tx, ty) {
 /** Bloco 7: raio do corpo por monstro (o chefe é colossal). */
 export function monBodyRadius(mon) {
   const cfg = getConfig();
-  if (mon && mon.boss) return cfg.arenaBoss.bodyRadius;
+  if (mon && mon.boss) return bossCfgFor(mon, cfg.arenaBoss).bodyRadius;
   const ar = mon && mon.arch ? cfg.archetypes?.[mon.arch] : null;
   return ar && ar.bodyRadius ? ar.bodyRadius : cfg.enemyAi.bodyRadius;
 }
@@ -695,7 +696,7 @@ function pickBossAttackPhased(r, dist, ang, bc, playerInLair) {
   return keys[keys.length - 1];
 }
 
-function bossCfg() { return getConfig().arenaBoss; }
+function bossCfg(mon) { return bossCfgFor(mon, getConfig().arenaBoss); } // 20261009berco: variante por dragão (mon.dragonPoder); sem variante = config base
 
 /** Comprimento livre da investida a partir de (fx,fy) na direção (dx,dy) considerando o corpo. */
 function chargeClearLength(fx, fy, dx, dy, maxLen, rad) {
@@ -807,7 +808,7 @@ function bossImpact(state, mon, r, atk, P, bc, zone, result, dist, toPlayer) {
 }
 
 function thinkBoss(state, zone, mon, r, P, dtSec, result) {
-  const bc = bossCfg();
+  const bc = bossCfg(mon);
   const dpx = P.px - r.fx;
   const dpy = P.py - r.fy;
   const dist = Math.hypot(dpx, dpy);
@@ -1021,7 +1022,7 @@ const bossViewOut = {
 export function getBossView(mon) {
   const r = mon ? runtimes.get(mon) : null;
   if (!r || !r.isBoss) return null;
-  const bc = bossCfg();
+  const bc = bossCfg(mon);
   const o = bossViewOut;
   o.state = r.state;
   o.attack = r.bossAtk;
@@ -1052,7 +1053,7 @@ export function debugBossAttack(state, uid, atk, P) {
   if (!r.isBoss) initBossRuntime(mon, r);
   const p = P || { px: state.player.x + 0.5, py: state.player.y + 0.5 };
   r.facing = Math.atan2(p.px - r.fx, -(p.py - r.fy));
-  startBossAttack(mon, r, atk, p, bossCfg(), tickResult);
+  startBossAttack(mon, r, atk, p, bossCfg(mon), tickResult);
   return true;
 }
 
@@ -1184,7 +1185,7 @@ function integrate(mon, r, dtSec, cfg) {
     let hitX = false;
     let hitY = false;
     const pos = r; // fx/fy via adaptador abaixo
-    const rad = r.bodyR || (r.isBoss ? getConfig().arenaBoss.bodyRadius : cfg.bodyRadius);
+    const rad = r.bodyR || (r.isBoss ? bossCfg(mon).bodyRadius : cfg.bodyRadius);
     for (let i = 0; i < n; i++) {
       if (!hitX && moveAxisXr(pos, sx, rad)) hitX = true;
       if (!hitY && moveAxisYr(pos, sy, rad)) hitY = true;

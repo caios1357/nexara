@@ -11,10 +11,10 @@
  *  - Carga: brilho da boca (rajada) / orbe crescendo com partículas sugadas (chama).
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261009espada';
-import { TILE } from './fps-camera.js?v=20261009espada';
-import { getConfig } from '../gameplay-config.js?v=20261009espada';
-import { mergeStaticParts } from './merge-util.js?v=20261009espada';
+import { attachDragonGlb } from './dragon-glb.js?v=20261009berco';
+import { TILE } from './fps-camera.js?v=20261009berco';
+import { getConfig } from '../gameplay-config.js?v=20261009berco';
+import { mergeStaticParts } from './merge-util.js?v=20261009berco';
 
 const BLUE = 0x49c6ff;
 const DEEP = 0x2f6bff;
@@ -402,7 +402,7 @@ export function createDragonView(scene, { pointLight = true } = {}) {
     root,
     update,
     getCounts: () => ({ ...counts, trail: trail.alive + trailBig.alive }),
-    glb,
+    glb, setPalette: (pal) => glb.setPalette?.(pal),
     mergeInfo,
     dispose() {
       scene.remove(root, trail.pts, trailBig.pts); if (light) scene.remove(light);

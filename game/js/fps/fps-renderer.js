@@ -10,34 +10,35 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009espada';
-import { buildArenaDressing } from './arena-dressing.js?v=20261009espada';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009espada';
-import { createHeroModel } from './hero-model.js?v=20261009espada';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009espada';
-import { attachHeroGlb } from './hero-glb.js?v=20261009espada';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009espada';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009espada';
-import { createActionVfx } from './action-vfx.js?v=20261009espada';
-import { createPassiveVfx } from './passive-vfx.js?v=20261009espada';
-import { createFpsControls } from './fps-controls.js?v=20261009espada';
-import { createViewmodel } from './viewmodel.js?v=20261009espada';
-import { createDragonView } from './dragon-view.js?v=20261009espada';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009espada';
-import { getSprite } from '../assets.js?v=20261009espada';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009espada';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009espada';
-import { mergeStaticParts } from './merge-util.js?v=20261009espada';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009espada';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009espada';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009espada';
-import { createPostFx } from './post-fx.js?v=20261009espada';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009espada';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009espada';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009espada';
-import { groundAt, setGroundFn } from './ground.js?v=20261009espada';
-import { buildBrTerrain } from './br-terrain.js?v=20261009espada';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009espada';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009berco';
+import { buildArenaDressing } from './arena-dressing.js?v=20261009berco';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009berco';
+import { createHeroModel } from './hero-model.js?v=20261009berco';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009berco';
+import { attachHeroGlb } from './hero-glb.js?v=20261009berco';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009berco';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009berco';
+import { createActionVfx } from './action-vfx.js?v=20261009berco';
+import { createPassiveVfx } from './passive-vfx.js?v=20261009berco';
+import { createFpsControls } from './fps-controls.js?v=20261009berco';
+import { createViewmodel } from './viewmodel.js?v=20261009berco';
+import { createDragonView } from './dragon-view.js?v=20261009berco';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009berco';
+import { getSprite } from '../assets.js?v=20261009berco';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009berco';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009berco';
+import { bossCfgFor } from '../boss-variants.js?v=20261009berco';
+import { mergeStaticParts } from './merge-util.js?v=20261009berco';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009berco';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009berco';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009berco';
+import { createPostFx } from './post-fx.js?v=20261009berco';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009berco';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009berco';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009berco';
+import { groundAt, setGroundFn } from './ground.js?v=20261009berco';
+import { buildBrTerrain } from './br-terrain.js?v=20261009berco';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009berco';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -116,7 +117,7 @@ export function createFpsRenderer() {
   const shared = { alertMat: null, dangerMat: null, ringMat: null, ringGeo: null };
   const telegraphUids = [];
   /** gp3: visual do Mini Dragão (lógica em companion-dragon.js). */
-  let dragonView = null;
+  let dragonView = null; let dragonPalKey = null;
   /** Bloco V: herói em 3ª pessoa. */
   let hero = null;
   let heroStyleId = 'cavaleiro';
@@ -1710,7 +1711,7 @@ export function createFpsRenderer() {
   let bossFrameK = 0;
   function updateBossEntity(entry, m, now) {
     const v = getBossView(m);
-    const bc = getConfig().arenaBoss;
+    const bc = bossCfgFor(m, getConfig().arenaBoss);
     const dt = Math.min(0.1, Math.max(0, (now - entry.lastNow) / 1000));
     entry.lastNow = now;
     const fx = v ? v.fx : m.x + 0.5;
@@ -1761,6 +1762,25 @@ export function createFpsRenderer() {
     const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
     return new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
   }
+  /** 20261009berco — FILHOTE (BB) do rival: dragãozinho procedural barato (corpo+cabeça+2 asas+cauda+brilho), na paleta do BB; só existe nos rivais "completos" (LOD) */
+  let bbGeo = null;
+  function makeBBMesh(cor) {
+    if (!bbGeo) {
+      const wing = new THREE.BufferGeometry(); wing.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0, 0.55, 0.05, -0.12, 0.38, 0.0, 0.2, 0, 0, 0, 0.38, 0.0, 0.2, 0.12, 0.0, 0.26]), 3)); wing.computeVertexNormals();
+      bbGeo = { body: new THREE.SphereGeometry(0.16, 8, 6), head: new THREE.SphereGeometry(0.095, 8, 6), tail: new THREE.ConeGeometry(0.05, 0.26, 6), wing, glow: new THREE.SphereGeometry(0.06, 6, 5) };
+      bbGeo.body.scale(1, 0.8, 1.35); bbGeo.tail.rotateX(Math.PI / 2);
+    }
+    const hx = (h) => new THREE.Color(parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff);
+    const mBody = new THREE.MeshLambertMaterial({ color: hx(cor?.base), emissive: hx(cor?.escuro) }); const mWing = new THREE.MeshBasicMaterial({ color: hx(cor?.brilho), side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+    const mGlow = new THREE.MeshBasicMaterial({ color: hx(cor?.brilho), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+    const g = new THREE.Group(); g.name = 'rivalBB';
+    const body = new THREE.Mesh(bbGeo.body, mBody); const head = new THREE.Mesh(bbGeo.head, mBody); head.position.set(0, 0.04, 0.2);
+    const tail = new THREE.Mesh(bbGeo.tail, mBody); tail.position.set(0, 0, -0.27);
+    const wl = new THREE.Mesh(bbGeo.wing, mWing); wl.position.set(0.1, 0.06, 0); const wr = new THREE.Mesh(bbGeo.wing, mWing); wr.scale.x = -1; wr.position.set(-0.1, 0.06, 0);
+    const glow = new THREE.Mesh(bbGeo.glow, mGlow); glow.position.set(0, 0.03, 0.29);
+    g.add(body, head, tail, wl, wr, glow); g.scale.setScalar(1.25);
+    return { g, wl, wr, glow, mats: [mBody, mWing, mGlow] };
+  }
   function makeRivalEntity(m) {
     const R0 = m.rival; const root = new THREE.Group(); root.rotation.order = 'YXZ';
     const body = new THREE.Group(); root.add(body);
@@ -1776,7 +1796,8 @@ export function createFpsRenderer() {
     const rgGeo = new THREE.RingGeometry(0.55, 0.68, 28); rgGeo.rotateX(-Math.PI / 2); const rgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(R0.primary), transparent: true, opacity: 0.55, depthWrite: false });
     const ring = new THREE.Mesh(rgGeo, rgMat); ring.position.y = 0.04; root.add(ring); own.push(rgGeo, rgMat);
     rivalStats.made++;
-    return { mesh: root, body, kind: 'mon', uid: m.uid, rival: true, glb, tag, tagLvl: R0.level || 1, ring, ringMat: rgMat, fb, own, lastNow: 0, animAcc: 0, champ: false, fx: null, fy: null };
+    const bbm = R0.bb ? makeBBMesh(R0.bb.cor) : null; if (bbm) { root.add(bbm.g); own.push(...bbm.mats); }
+    return { bb: bbm, mesh: root, body, kind: 'mon', uid: m.uid, rival: true, glb, tag, tagLvl: R0.level || 1, ring, ringMat: rgMat, fb, own, lastNow: 0, animAcc: 0, champ: false, fx: null, fy: null };
   }
   const rivalRank = []; const rivalFull = new Set();
   /** rival fora do grupo próximo: só posição + etiqueta/anel (sem animação/corpo) */
@@ -1793,6 +1814,11 @@ export function createFpsRenderer() {
     root.position.set(fx * TILE, groundAt(fx, fy), fy * TILE);
     if (synced) root.rotation.y = Math.PI - v.facing;
     const sm = m.sizeMult || 1; entry.body.scale.setScalar(sm);
+    if (entry.bb) { // BB orbita o herói; asas batem; boca acende no aviso da habilidade (windup)
+      const B = entry.bb; const a = now * 0.0013 + m.uid; const wind = !!m.rival.bb?.wind;
+      B.g.visible = true; B.g.position.set(Math.cos(a) * 1.15, 1.95 * sm + Math.sin(now * 0.005 + m.uid) * 0.1, Math.sin(a) * 1.15); B.g.rotation.y = -a + Math.PI;
+      const fl = Math.sin(now * 0.03 + m.uid) * 0.7; B.wl.rotation.z = fl; B.wr.rotation.z = -fl; B.glow.scale.setScalar(wind ? 2.2 + Math.sin(now * 0.05) * 0.6 : 1); B.mats[2].opacity = wind ? 1 : 0.7;
+    }
     // etiqueta acompanha o nível (sobe com o herói; CAMPEÃO = +2)
     if ((m.rival.level || 1) !== entry.tagLvl) { const old = entry.tag.material; entry.tag.material = rivalTagMat(`${m.rival.name} · BOT NV ${m.rival.level || 1}`, m.rival.primary); old.map?.dispose(); old.dispose(); entry.tagLvl = m.rival.level || 1; }
     if (m.rival.champion && !entry.champ) { entry.champ = true; entry.ring.scale.setScalar(1.5); entry.tag.position.y = 2.45 * sm + 0.1; }
@@ -1865,14 +1891,15 @@ export function createFpsRenderer() {
       if (m.rival) {
         if (!entry) { entry = makeRivalEntity(m); entityRoot.add(entry.mesh); entityMeshes.set(key, entry); }
         const full = rivalFull.has(m.uid); if (entry.body.visible !== full) entry.body.visible = full; // sem corpo: nem desenha nem anima
+        if (entry.bb && !full && entry.bb.g.visible) entry.bb.g.visible = false; // LOD do BB: só nos rivais próximos
         if (full) updateRivalEntity(entry, m, now, aiClock); else updateRivalLite(entry, m, now);
         continue;
       }
       // Bloco 7: GIGANTE VERDE — modelo procedural próprio (dragão inimigo colossal) + telegraphs no chão
       if (m.boss) {
         if (!entry) {
-          const bc = getConfig().arenaBoss;
-          const view = createBossDragon({ height: bc.visualHeight });
+          const bc = bossCfgFor(m, getConfig().arenaBoss);
+          const view = createBossDragon({ height: bc.visualHeight, palette: m.dragonCor || null });
           entityRoot.add(view.root);
           entry = { mesh: view.root, kind: 'mon', uid: m.uid, boss: true, view, lastNow: now, look: '' };
           entityMeshes.set(key, entry);
@@ -2484,6 +2511,7 @@ export function createFpsRenderer() {
         const touch = !!hooks.isTouchUi?.() || (navigator.maxTouchPoints || 0) > 0;
         dragonView = createDragonView(scene, { pointLight: !touch && getConfig().dragon.pointLightDesktop });
       }
+      { const pal = hooks.getDragonPalette?.() || null; if (pal !== dragonPalKey) { dragonPalKey = pal; if (pal) dragonView.setPalette(pal); } } // 20261009berco: cor do companheiro escolhido no Berço
       // vfx do dragão acompanham o relógio de jogo (congela com passivas/modal/debug)
       dragonView.update(dv, dt * (hooks.getDragonVfxScale?.() ?? 1), fpsCam.camera);
     } else if (dragonView) dragonView.root.visible = false;
@@ -2841,7 +2869,7 @@ export function createFpsRenderer() {
       enemyProjectiles: enemyFx ? enemyFx.proj.count : 0,
       enemyHazards: enemyFx ? enemyFx.haz.count : 0,
       precompile: { ...precompileInfo },
-      rivals: { ...rivalStats, modelsOn: modelsEnabled(), live: [...entityMeshes.values()].filter((e) => e.rival).map((e) => ({ uid: e.uid, visible: e.mesh.visible, glb: e.glb.info.status, style: e.glb.info.style })) },
+      rivals: { ...rivalStats, modelsOn: modelsEnabled(), live: [...entityMeshes.values()].filter((e) => e.rival).map((e) => ({ uid: e.uid, visible: e.mesh.visible, glb: e.glb.info.status, style: e.glb.info.style, bb: e.bb ? e.bb.g.visible : null })) },
       botPool: Object.fromEntries(Object.entries(botPool).map(([k, v]) => [k, v.length])),
       scenery: dressing ? { ...dressing.stats } : null,
       br: brWorld ? { ...brWorld.stats, chunks: brWorld.chunkCount, visibleChunks: brWorld.visibleChunks, floorChunks: brWorld.floorChunks, visibleFloor: brWorld.visibleFloor, regionProps: brWorld.regionProps?.n || 0, propsByKind: brWorld.regionProps?.byKind, dragonSigns: brWorld.dragonSigns?.n || 0, fogRegion: brFogTint.id, fogColor: scene.fog ? '#' + scene.fog.color.getHexString() : null, treesFaded: brWorld.treesFaded, treeTiles: brWorld.treeTiles, mapW: brWorld.mapW, mapH: brWorld.mapH, lodHidden: brLod.hidden, lodShown: brLod.shown, pointLights: brLights.length, pickFlashes: brWorld.pickFlashes, teleOnTop } : null,

@@ -188,6 +188,307 @@
       },
       "descricao": "Dragão colossal do covil da Arena Principal. Todo golpe tem aviso no chão (telegraph): leia o marcador e esquive.",
       "fonte": "gameplay.arenaBoss"
+    },
+    {
+      "id": "boss_drag_periferia",
+      "nome": "TROVÃO DE NEON",
+      "distrito": "periferia",
+      "elemento": "raio",
+      "icone": "⚡",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#2f55e8",
+        "escuro": "#0a1250",
+        "brilho": "#ffe95a"
+      },
+      "descricao": "Dragão veloz da Periferia: corre mais que os outros e arremete longe. Aviso no chão em todo golpe.",
+      "assinatura": "INVESTIDAS LONGAS — o mais ágil dos gigantes",
+      "hpMult": 0.9,
+      "evento": {
+        "estagio": 2,
+        "aviso": "UM TROVÃO DE NEON CORTA O CÉU DA PERIFERIA"
+      },
+      "poder": {
+        "id": "periferia",
+        "altura": 0.85,
+        "corpo": 0.85,
+        "velocidade": 1.35,
+        "intervalo": 0.85,
+        "ataques": {
+          "investida": {
+            "maxDistance": 1.35,
+            "speed": 1.2
+          },
+          "golpe": {
+            "range": 0.95
+          }
+        },
+        "fases": [
+          [
+            "golpe",
+            "investida"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro",
+            "area",
+            "aneis",
+            "pocas"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro",
+            "area",
+            "aneis",
+            "pocas"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "boss_drag_ruinas",
+      "nome": "FORJA RUBRA",
+      "distrito": "ruinas",
+      "elemento": "fogo",
+      "icone": "🔥",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#8a2e12",
+        "escuro": "#2a0a04",
+        "brilho": "#ff7a1a"
+      },
+      "descricao": "Dragão de lava das Ruínas Industriais: sopro de fogo enorme e pisões que soltam 4 anéis de choque.",
+      "assinatura": "SOPRO LONGO + 4 ANÉIS DE IMPACTO",
+      "hpMult": 1.1,
+      "evento": {
+        "estagio": 2,
+        "aviso": "A FORJA RUBRA DESPERTA NAS RUÍNAS"
+      },
+      "poder": {
+        "id": "ruinas",
+        "altura": 1.0,
+        "corpo": 1.0,
+        "velocidade": 0.95,
+        "ataques": {
+          "area": {
+            "radius": 1.3
+          },
+          "sopro": {
+            "range": 1.35,
+            "atkMult": 1.25
+          }
+        },
+        "definir": {
+          "aneis": {
+            "rings": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "boss_drag_floresta",
+      "nome": "ESPINHO DE MUSGO",
+      "distrito": "floresta",
+      "elemento": "veneno",
+      "icone": "☣",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#4a5a1c",
+        "escuro": "#101806",
+        "brilho": "#c6ff3a"
+      },
+      "descricao": "Dragão peçonhento da Floresta Selvagem: cobre o chão de poças ácidas (5 de uma vez) e varre com a cauda.",
+      "assinatura": "5 POÇAS ÁCIDAS + CAUDA AMPLA",
+      "hpMult": 1.05,
+      "evento": {
+        "estagio": 2,
+        "aviso": "O ESPINHO DE MUSGO ACORDA NA FLORESTA"
+      },
+      "poder": {
+        "id": "floresta",
+        "altura": 1.05,
+        "corpo": 1.05,
+        "velocidade": 1.0,
+        "ataques": {
+          "cauda": {
+            "range": 1.2,
+            "halfAngleDeg": 1.1
+          },
+          "pocas": {
+            "radius": 1.25,
+            "durationMs": 1.25
+          }
+        },
+        "definir": {
+          "pocas": {
+            "count": 5,
+            "spread": 2.8
+          }
+        }
+      }
+    },
+    {
+      "id": "boss_drag_complexo",
+      "nome": "GÉLIDO ABANDONADO",
+      "distrito": "complexo",
+      "elemento": "gelo",
+      "icone": "❄",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#2f6ea8",
+        "escuro": "#0a1c30",
+        "brilho": "#b8f4ff"
+      },
+      "descricao": "Dragão glacial do Complexo Abandonado: lento, mas os anéis de gelo cobrem a sala toda e as poças congelam (lentidão forte).",
+      "assinatura": "ANÉIS DE GELO AMPLOS + POÇAS QUE CONGELAM",
+      "hpMult": 1.15,
+      "evento": {
+        "estagio": 2,
+        "aviso": "UM DRAGÃO DE GELO DESPERTA NO COMPLEXO"
+      },
+      "poder": {
+        "id": "complexo",
+        "altura": 1.1,
+        "corpo": 1.1,
+        "velocidade": 0.9,
+        "ataques": {
+          "aneis": {
+            "maxRadius": 1.25,
+            "ringWidth": 1.3,
+            "ringSpeed": 0.9
+          },
+          "area": {
+            "radius": 1.1
+          }
+        },
+        "definir": {
+          "pocas": {
+            "slow": 0.65
+          }
+        }
+      }
+    },
+    {
+      "id": "boss_drag_elite",
+      "nome": "SOBERANO UMBRAL",
+      "distrito": "elite",
+      "elemento": "sombra",
+      "icone": "🌑",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#3c1d62",
+        "escuro": "#0d0618",
+        "brilho": "#d28bff"
+      },
+      "descricao": "Dragão sombrio da Zona de Elite: todos os golpes liberados cedo, golpe pesado mais forte e ritmo que acelera na fase final.",
+      "assinatura": "COMBOS DESDE CEDO + FASE FINAL FRENÉTICA",
+      "hpMult": 1.25,
+      "evento": {
+        "estagio": 2,
+        "aviso": "O SOBERANO UMBRAL ASSUME A ZONA DE ELITE"
+      },
+      "poder": {
+        "id": "elite",
+        "altura": 1.2,
+        "corpo": 1.2,
+        "velocidade": 1.1,
+        "intervalo": 0.9,
+        "gapFinal": 0.45,
+        "ataques": {
+          "golpe": {
+            "atkMult": 1.15,
+            "range": 1.1
+          },
+          "cauda": {
+            "halfAngleDeg": 1.1
+          }
+        },
+        "fases": [
+          [
+            "golpe",
+            "cauda",
+            "investida"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro",
+            "area"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro",
+            "area",
+            "aneis",
+            "pocas"
+          ],
+          [
+            "golpe",
+            "cauda",
+            "investida",
+            "sopro",
+            "area",
+            "aneis",
+            "pocas"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "boss_drag_territorio",
+      "nome": "ANCIÃO DO TERRITÓRIO",
+      "distrito": "dragao",
+      "elemento": "nexa dourado",
+      "icone": "👑",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#c8921a",
+        "escuro": "#3a2606",
+        "brilho": "#ffd34a"
+      },
+      "descricao": "O MAIOR dos gigantes, senhor do Território do Dragão: lento e colossal, todos os ataques com alcance e raio maiores.",
+      "assinatura": "COLOSSO — o maior; ataques de alcance e raio ampliados",
+      "hpMult": 1.6,
+      "evento": {
+        "estagio": 0,
+        "aviso": "O ANCIÃO DO TERRITÓRIO PROTEGE O COVIL"
+      },
+      "poder": {
+        "id": "territorio",
+        "altura": 1.4,
+        "corpo": 1.35,
+        "velocidade": 0.85,
+        "ataques": {
+          "golpe": {
+            "range": 1.2
+          },
+          "cauda": {
+            "range": 1.2
+          },
+          "area": {
+            "radius": 1.25
+          },
+          "sopro": {
+            "range": 1.2
+          },
+          "aneis": {
+            "maxRadius": 1.2
+          }
+        }
+      }
     }
   ],
   "rivais": {

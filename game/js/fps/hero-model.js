@@ -12,9 +12,9 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261009espada';
-import { mergeStaticParts } from './merge-util.js?v=20261009espada';
-import { attachHeroGlb } from './hero-glb.js?v=20261009espada';
+import { getConfig } from '../gameplay-config.js?v=20261009berco';
+import { mergeStaticParts } from './merge-util.js?v=20261009berco';
+import { attachHeroGlb } from './hero-glb.js?v=20261009berco';
 
 const CYAN = 0x39f0ff;
 

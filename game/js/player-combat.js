@@ -18,9 +18,9 @@
  * Relógio próprio (ms) avançado por update(dt): congela no hit-stop/pausa.
  * Sem alocação por frame (objetos reutilizados).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009espada';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009espada';
-import { getStat, STATS } from './modifiers.js?v=20261009espada';
+import { getConfig, DEG } from './gameplay-config.js?v=20261009berco';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009berco';
+import { getStat, STATS } from './modifiers.js?v=20261009berco';
 
 export const ATK = Object.freeze({ IDLE: 'IDLE', STARTUP: 'STARTUP', ACTIVE: 'ACTIVE', RECOVERY: 'RECOVERY' });
 const EVENT_CAP = 120;

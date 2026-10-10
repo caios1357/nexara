@@ -9,7 +9,7 @@
  */
 import {
   getConfig, setOverrides, setLayout, clearOverridePaths, SETTINGS_UI, LAYOUT_ITEMS
-} from './gameplay-config.js?v=20261009espada';
+} from './gameplay-config.js?v=20261009berco';
 
 const ITEM_LABEL = {
   joystick: 'JOYSTICK', camera: 'CÂMERA + ATAQUE', attack: 'ATAQUE', dodge: 'ESQUIVA', defend: 'DEFESA',

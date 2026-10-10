@@ -10,12 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009espada';
-import { pushLog } from './state.js?v=20261009espada';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009espada';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009espada';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009espada';
-import { createRivals } from './arena-rivals.js?v=20261009espada';
+import { createArenaState } from './arena.js?v=20261009berco';
+import { getConfig } from './gameplay-config.js?v=20261009berco';
+import { pushLog } from './state.js?v=20261009berco';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009berco';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009berco';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009berco';
+import { createRivals } from './arena-rivals.js?v=20261009berco';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -30,6 +31,13 @@ function brZone(cfg) {
 export function brEnabled(data) { return !!data?.arena_br?.enabled; }
 
 /** Estado da corrida a partir do permanente. */
+/** 20261009berco: aplica a variante de um dos 6 gigantes (data/dragoes.json chefes[]) ao monstro-chefe — nome, paleta, escala/poderes (boss-variants) e HP */
+export function applyDragonProfile(mon, ch) {
+  if (!mon || !ch) return mon;
+  mon.dragonId = ch.id; mon.dragonPoder = ch.poder || null; mon.dragonCor = ch.cor || null; mon.arenaLabel = ch.nome;
+  if (mon.hpMult > 0 && ch.hpMult > 0) mon.hpMult = +(mon.hpMult * ch.hpMult).toFixed(2);
+  return mon;
+}
 export function createBrState(data, { from = null, boss = null } = {}) {
   const cfg = data.arena_br;
   const st = createArenaState(data, { name: 'Testador', raceId: 'humano', from, boss: null });
@@ -51,6 +59,7 @@ export function createBrState(data, { from = null, boss = null } = {}) {
       // ajuste do Caio (20261009fast2): dragão da Arena Principal com MENOS HP (× do HP do herói) e MAIS dano; telegraphs/tempos intocados
       ...(d.hpMult > 0 ? { hpMult: d.hpMult } : {}), ...(d.danoMult > 0 ? { atkScale: d.danoMult } : {})
     });
+    { const ch = cfg.fastRun && (data.dragoes?.chefes || []).find((c) => c.distrito === cfg.fastRun.distrito); if (ch) applyDragonProfile(st.monstersAlive[st.monstersAlive.length - 1], ch); } // 20261009berco: FAST no Território do Dragão → o ANCIÃO (o maior gigante)
     // NEXARA FAST: o território pode cair em qualquer posição → limita também a leste/norte (bordas da região do dragão)
     if (cfg.fastRun) { const rd = cfg.regioes.find((r) => r.id === 'dragao'); const b = st.monstersAlive[st.monstersAlive.length - 1]; if (rd && b) { b.territoryMinX = rd.x0 + 1; b.territoryMaxX = rd.x1 - 1; b.territoryMinY = rd.y0 + 1; b.territoryMaxY = rd.y1 - 1; } }
   }
@@ -78,7 +87,7 @@ export function createArenaBr(deps) {
   /** covil do dragão: mapa completo = a região do dragão inteira · FAST (distrito único) = só um círculo de 16 tiles em volta do covil (no Território do Dragão o distrito inteiro é a região) */
   const inCovil = (x, y, regionId) => { const c = cfg(); if (c.dragao?.desativado) return false; if (c.fastRun) return c.regioes[0]?.id === 'dragao' && Math.hypot(x - c.dragao.x, y - c.dragao.y) < 16; return regionId === 'dragao'; };
   const rivals = createRivals({
-    inCovil: (x, y, r) => inCovil(x, y, r),
+    inCovil: (x, y, r) => inCovil(x, y, r), damageHero: (n, why) => deps.damageHero?.(n, why),
     st: () => st, br: () => br, cfg, map: () => map(), R: () => R(), walk: (x, y) => walk(x, y), nearestFree: (x, y) => nearestFree(x, y),
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
     rollLootFor, credit: (n, why) => deps.credit?.(n, why), regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
@@ -477,6 +486,21 @@ export function createArenaBr(deps) {
       if (p.x >= a.x0 - 0.5 && p.x <= a.x1 + 1.5 && p.y >= a.y0 - 0.5 && p.y <= a.y1 + 1.5) { br.found.push(a.id); note('secret_area', { id: a.id, kind: a.kind, region: a.region }); }
     }
   }
+  /** 20261009berco — EVENTO FINAL do FAST: em distritos sem covil, o GIGANTE do distrito desperta no centro da zona quando ela chega ao estágio do evento */
+  function updateFinalDragon() {
+    const C = cfg(); if (!C.fastRun || br.finalDragon) return;
+    const ch = (deps.getData().dragoes?.chefes || []).find((c) => c.distrito === C.fastRun.distrito);
+    if (!ch) { br.finalDragon = 'none'; return; }
+    if (!C.dragao?.desativado) { br.finalDragon = ch.id; return; } // covil: já existe desde o início
+    if (br.zone.stage < (ch.evento?.estagio ?? 2)) return;
+    const bc = getConfig().arenaBoss; const def = st._data.monsters.monsters.find((m) => m.id === bc.monsterId); const m = map(); if (!def || !m) { br.finalDragon = 'none'; return; }
+    const z = br.zone; const f = nearestFree(Math.floor(z.cx), Math.floor(z.cy)) || nearestFree(Math.floor(m.W / 2), Math.floor(m.H / 2)); if (!f) { br.finalDragon = 'none'; return; }
+    const D = C.dragao || {};
+    const mon = { uid: bc.uid, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome,
+      territoryMinX: 1, territoryMaxX: m.W - 2, territoryMinY: 1, territoryMaxY: m.H - 2, hpMult: D.hpMult > 0 ? D.hpMult : 55, atkScale: D.danoMult > 0 ? D.danoMult : 2.5, finalEvent: true };
+    applyDragonProfile(mon, ch); st.monstersAlive.push(mon); br.finalDragon = ch.id; br.bossArmed = true; deps.armBoss?.();
+    note('dragon_final', { id: ch.id, nome: ch.nome, aviso: ch.evento?.aviso || `${ch.nome} DESPERTA`, x: f.x, y: f.y, cor: ch.cor?.brilho });
+  }
   function updateRegion(p) {
     const reg = brRegionAt(map(), cfg(), p.x, p.y);
     if (reg && reg.id !== br.region) {
@@ -486,7 +510,7 @@ export function createArenaBr(deps) {
     }
     const t = cfg().dragao.territorio;
     const SK = cfg()._escala || 1; const inD = cfg().fastRun ? reg?.id === 'dragao' : p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
-    if (inD && !br.inDragon) { br.inDragon = true; note('dragon_territory', { first: !br.dragonWarned }); br.dragonWarned = true; if (!br.bossArmed) { br.bossArmed = true; deps.armBoss?.(); } }
+    if (inD && !br.inDragon) { br.inDragon = true; note('dragon_territory', { first: !br.dragonWarned, nome: st.monstersAlive.find((q) => q.boss)?.arenaLabel || 'GIGANTE VERDE' }); br.dragonWarned = true; if (!br.bossArmed) { br.bossArmed = true; deps.armBoss?.(); } }
     else if (!inD && br.inDragon) { br.inDragon = false; note('dragon_leave', {}); }
   }
 
@@ -518,7 +542,7 @@ export function createArenaBr(deps) {
     updateZone(p, dtMs);
     updateEvents(p);
     updateExtraction(p, dtMs);
-    updateRegion(p); updateExplore(p);
+    updateRegion(p); updateExplore(p); updateFinalDragon();
   }
 
   /** actions.setMonsterKillHook (BR): contagem, drop por tier, alvo da caçada. */

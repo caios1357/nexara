@@ -11,8 +11,9 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261009espada';
-import { xpForLevel } from './state.js?v=20261009espada';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261009berco';
+import { xpForLevel } from './state.js?v=20261009berco';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261009berco';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -67,6 +68,10 @@ export function createRivals(ctx) {
       ownL: 1, xp: 0, xpTotal: 0, rivalKills: 0, killedBy: null };
     mon.rival = { name: h.nome, style: h.style, primary: h.primary, glow: h.glow, champion: false };
     if (fastRules()) rv.ownL = ctx.st()?.fastZero ? 1 : lvl(); // FAST do zero: todos no NV1 · sem 'do zero': começam no nível do herói e sobem por conta própria
+    { // 20261009berco: cada herói rival tem seu FILHOTE DE DRAGÃO (BB): cor/elemento próprios + 1 habilidade de apoio (data/dragoes.json)
+      const bd = c.bb === false ? null : bbForRivalIndex(ctx.st()._data, idx);
+      if (bd) { rv.bb = { def: bd, S: newBBState(1800 + idx * 350, br.clock), at: 0 }; mon.rival.bb = { id: bd.id, nome: bd.nome, cor: bd.cor, tipo: bbAbility(bd)?.tipo || null, wind: false, firedAt: -1e9 }; }
+    }
     applyLevel(rv, mon, lvlFor(rv), true);
     mon.walkMult = c.velocidade || 1.2;
     mon.route = { pts: [], i: 0, rival: true };
@@ -102,6 +107,11 @@ export function createRivals(ctx) {
     const br = ctx.br(); const st = ctx.st(); const m = ctx.map();
     if (br.rivalFinal) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) };
     // outro rival por perto (≤ 16 tiles) → caça o rival (a zona aproxima todos; eles se eliminam no caminho)
+    // 20261009berco: XP vem de MONSTROS também — monstro colado (≤ 12 tiles) vence um rival distante (> 8 tiles); rival próximo continua prioridade
+    let nm = null, nd = RC().monstroPertoDist ?? 12;
+    for (const o of st.monstersAlive) { if (!o.alive || o === mon || !o.br || o.boss || o.rival) continue; const d = Math.hypot(o.x + 0.5 - mp.x, o.y + 0.5 - mp.y); if (d < nd && inZone(o.x, o.y)) { nd = d; nm = o; } }
+    const rivalFar = (om) => !om || Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y) > (RC().rivalPertoDist ?? 8);
+    if (nm && rivalFar(rv.tgt?.kind === 'rival' ? monOf(list().find((q) => q.uid === rv.tgt.uid)) : (list().filter((o) => o !== rv && !o.out).map(monOf).filter((q) => q && q.alive).sort((x, y) => Math.hypot(x.x - mp.x, x.y - mp.y) - Math.hypot(y.x - mp.x, y.y - mp.y))[0]))) return { kind: 'monstro', uid: nm.uid, x: nm.x, y: nm.y };
     if (rv.tgt?.kind === 'rival' && rivalsCanKill()) { const om = monOf(list().find((q) => q.uid === rv.tgt.uid)); if (om && om.alive) return { kind: 'rival', uid: om.uid, x: om.x, y: om.y }; } // 20261009leve: alvo escolhido por proximidade/fraqueza/ameaça (herói = 1 alvo a mais)
     let rb = null, rd = rivalsCanKill() ? (br.spectate ? 90 : (RC().cacaRivalDist || 16)) : 0; // só quando podem se eliminar (zona fechando)
     for (const o of list()) { if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue; const d = Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y); if (d < rd) { rd = d; rb = om; } }
@@ -155,6 +165,11 @@ export function createRivals(ctx) {
   }
   function damageRival(rv, mon, n, byName, lethal, killer = null) {
     const c = RC().combate || {};
+    { // 20261009berco: MORTE SÚBITA — zona final + ≤ 3 rivais vivos há > 45 s: o dano entre rivais cresce (até ×5) p/ ninguém ficar em empate eterno (a partida não pode travar)
+      const B = ctx.br(); const z = B?.zone;
+      if (z && z.stage >= 3 && aliveRivals().length <= 3) { B.suddenSince = B.suddenSince || B.clock; const t = B.clock - B.suddenSince; if (t > 45000) n = Math.round(n * Math.min(5, 1 + (t - 45000) / 15000)); } else if (B) B.suddenSince = 0;
+    }
+    { const ck = ctx.br()?.clock || 0; if (rv.shieldUntil > ck) n = Math.max(1, Math.round(n * (1 - (rv.shieldRed || 0)))); if (rv.veilUntil > ck) n = Math.max(1, Math.round(n * 0.25)); } // BB: escudo / véu
     if (lethal && killer && !elimAllowed(ctx.br())) lethal = false; // ainda não pode cair: fica no piso de HP (hpMinFrac)
     const floor = lethal ? 0 : Math.ceil((mon.hpMax || 1) * (c.hpMinFrac ?? 0.3));
     if (mon.hp <= floor) return false;
@@ -219,6 +234,35 @@ export function createRivals(ctx) {
   }
   const countAtk = (k) => { const b = ctx.br(); if (!b) return; const a = (b.atk = b.atk || { jogador: 0, rival: 0, monstro: 0 }); a[k]++; };
 
+  /** FILHOTE (BB) do rival: habilidade com AVISO (windup 450 ms). Alvos: herói e outros rivais. Cadência de passo 250 ms por rival (LOD: custo desprezível). */
+  function stepRivalBB(rv, mon, mp, p, dP, clock) {
+    const B = rv.bb; const st = ctx.st(); const C = RC().combate || {}; const br = ctx.br();
+    const d0 = st._monsters[mon.id] || {}; const base = Math.max(1, Math.round((d0.ataque || 10) * 1.6 * (mon.atkScale || 1) * (C.danoMult || 1) * (RC().bbDanoFrac ?? 0.3))); // BB é APOIO: dano = 30% de um golpe do herói (não decide a luta)
+    const cands = (x, y, r, max) => {
+      const out = [];
+      if (false && st.player.hp > 0 && Math.hypot(p.x - x, p.y - y) <= r) out.push({ x: p.x, y: p.y, d: Math.hypot(p.x - mp.x, p.y - mp.y), hit: (n) => { if (st.player.hp > n + 1) ctx.damageHero?.(n, `filhote de ${rv.name}`); } }); // CAMPEÃO / confronto final: o filhote não entra (duelo justo 1×1) · BB é apoio: nunca dá o golpe final no herói (a morte é sempre por golpe de rival, com atribuição)
+      if (rivalsCanKill()) for (const o of list()) {
+        if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue; const op = pos(om);
+        if (Math.hypot(op.x - x, op.y - y) <= r) out.push({ x: op.x, y: op.y, d: Math.hypot(op.x - mp.x, op.y - mp.y), hit: (n) => { o.lastAttacker = rv.uid; o.lastAttackedAt = clock; countBb(); damageRival(o, om, Math.round(n * (C.danoEntreRivais ?? 0.6)), rv.name, !o.champion || !!br.spectate, rv); } });
+      }
+      return out.sort((a, b) => a.d - b.d).slice(0, max || 1);
+    };
+    const countBb = () => { const a = (br.bbHits = br.bbHits || { jogador: 0, rival: 0 }); a.rival++; };
+    const io = {
+      foe: (range) => { const l = cands(mp.x, mp.y, range, 8); const t = rv.tgt && l.find((q) => (rv.tgt.kind === 'jogador' && q.hit.length >= 0 && q.x === p.x && q.y === p.y)); const f = t || l[0]; if (!f) return null; const h0 = f.hit; f.hit = (n) => { if (f.x === p.x && f.y === p.y) { const a = (br.bbHits = br.bbHits || { jogador: 0, rival: 0 }); a.jogador++; } h0(n); }; return f; },
+      near: (x, y, r, max) => cands(x, y, r, max),
+      threat: () => (dP < 6) || cands(mp.x, mp.y, 6, 1).length > 0,
+      hpFrac: () => (mon.hpMax > 0 ? mon.hp / mon.hpMax : 1),
+      heal: (frac) => { if (rv.champion) return; mon.hp = Math.min(mon.hpMax, mon.hp + Math.round(mon.hpMax * frac)); },
+      shield: (ms, red) => { if (rv.champion) return; rv.shieldUntil = clock + ms; rv.shieldRed = red; },
+      veil: (ms) => { if (rv.champion) return; rv.veilUntil = clock + ms; rv.dodgeReady = 0; },
+      base: () => base,
+      emit: (kind, info) => { if (kind === 'bb_windup') { mon.rival.bb.wind = true; mon.rival.bb.firedAt = clock; } else if (kind === 'bb_hit' || kind === 'bb_buff') mon.rival.bb.wind = false; br.bbEv = (br.bbEv || 0) + 1; }
+    };
+    const r = stepBB(B.def, B.S, clock, io);
+    if (mon.rival.bb.wind && clock - mon.rival.bb.firedAt > 700) mon.rival.bb.wind = false;
+    return r;
+  }
   function update(dtMs, p) {
     const c = RC(); const br = ctx.br(); if (!c.ativo || !br) return;
     if (!br.rivals) { spawn(p); return; }
@@ -291,6 +335,7 @@ export function createRivals(ctx) {
           }
         }
       }
+      if (rv.bb && !engaged && clock - rv.bb.at >= 250) { rv.bb.at = clock; stepRivalBB(rv, mon, mp, p, dP, clock); } // 20261009berco: filhote do rival — só age FORA do duelo com o herói (duelos 1×1 seguem justos/medidos)
       // monstros colados batem no rival (não mata: no máximo até hpMinFrac)
       if (clock >= rv.nextHurt) {
         rv.nextHurt = clock + (C.danoRecebidoMs || 1300);
@@ -380,11 +425,11 @@ export function createRivals(ctx) {
   function view(p) {
     const br = ctx.br(); if (!br?.rivals) return null; const c = RC();
     return {
-      atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
+      atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, bbHits: { ...(br.bbHits || { jogador: 0, rival: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
         return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,
-          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null }; })
+          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
     };
   }
   return { update, onKill, onHit, view, spawn, spawnOne, byUid: (uid) => list().find((q) => q.uid === uid) || null, startFinal: () => { const a = aliveRivals(); if (a.length && !ctx.br().rivalFinal) startFinal(a); }, aliveRivals, list };

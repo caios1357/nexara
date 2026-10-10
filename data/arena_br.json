@@ -578,6 +578,7 @@
     }
   },
   "rivais": {
+    "bbDanoFrac": 0.3,
     "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
     "ativo": true,
     "monstro": "mon_br_rival",

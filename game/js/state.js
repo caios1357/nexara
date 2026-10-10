@@ -1,9 +1,9 @@
-import { createSkillsFromRace } from '../../rules/skills.js?v=20261009espada';
-import { initReputation } from '../../rules/reputation.js?v=20261009espada';
-import { createEmptyArquivo, reveal } from './arquivo.js?v=20261009espada';
-import { indexById } from './data-loader.js?v=20261009espada';
-import { getConfig } from './gameplay-config.js?v=20261009espada';
-import { getStat, STATS } from './modifiers.js?v=20261009espada';
+import { createSkillsFromRace } from '../../rules/skills.js?v=20261009berco';
+import { initReputation } from '../../rules/reputation.js?v=20261009berco';
+import { createEmptyArquivo, reveal } from './arquivo.js?v=20261009berco';
+import { indexById } from './data-loader.js?v=20261009berco';
+import { getConfig } from './gameplay-config.js?v=20261009berco';
+import { getStat, STATS } from './modifiers.js?v=20261009berco';
 
 export function createNewGame(data, { name, raceId }) {
   const race = data.races.races.find((r) => r.id === raceId);

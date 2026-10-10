@@ -13,11 +13,12 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261009espada';
-import { TILE } from './fps-camera.js?v=20261009espada';
-import { mergeStaticParts } from './merge-util.js?v=20261009espada';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261009espada';
+import { attachDragonGlb } from './dragon-glb.js?v=20261009berco';
+import { TILE } from './fps-camera.js?v=20261009berco';
+import { mergeStaticParts } from './merge-util.js?v=20261009berco';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261009berco';
 
+const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
 const GREEN_MID = 0x2f6636;
 const BLACK_PLATE = 0x0b0e0c;
@@ -25,9 +26,15 @@ const NEXA = 0x5dff6a;
 const DANGER = 0xff3b1f;
 const DANGER_EDGE = 0xffc23a;
 
-let shared = null;
-function mats() {
-  if (shared) return shared;
+const sharedByPal = new Map();
+/** 20261009berco: paleta própria por gigante (pal = { base, escuro, brilho } '#rrggbb'); sem paleta = GIGANTE VERDE original */
+function mats(pal) {
+  const key = pal ? `${pal.base}|${pal.escuro}|${pal.brilho}` : 'verde';
+  if (sharedByPal.has(key)) return sharedByPal.get(key);
+  const hx = (h) => hexNum(h); const mix = (a, b, k) => new THREE.Color(a).lerp(new THREE.Color(b), k).getHex(); const css = (n) => `#${new THREE.Color(n).getHexString()}`;
+  const P = pal ? { dark: mix(hx(pal.base), 0x000000, 0.25), mid: hx(pal.base), plate: hx(pal.escuro), nexa: hx(pal.brilho), rimC: mix(hx(pal.brilho), 0xffffff, 0.35), eye: mix(hx(pal.brilho), 0xffffff, 0.6), mem: mix(hx(pal.base), hx(pal.escuro), 0.3), memE: mix(hx(pal.escuro), hx(pal.brilho), 0.12), v1: css(mix(hx(pal.escuro), 0x000000, 0.6)), v2: css(hx(pal.brilho)), v3: css(mix(hx(pal.escuro), 0x000000, 0.4)), v4: css(mix(hx(pal.brilho), 0xffffff, 0.3)), ring: mix(hx(pal.brilho), 0xffffff, 0.5) }
+    : { dark: GREEN_DARK, mid: GREEN_MID, plate: BLACK_PLATE, nexa: NEXA, rimC: 0x8affa0, eye: 0xaaffb0, mem: 0x2a5a2e, memE: 0x0e3313, v1: '#020803', v2: '#7dff7a', v3: '#040c05', v4: '#a0ff8a', ring: 0xd8ff5a };
+  let shared = null;
   const std = (color, o = {}) => {
     const m = new THREE.MeshStandardMaterial({ color, roughness: 0.62, metalness: 0.18, flatShading: true, ...o });
     m.userData.shared = true;
@@ -41,30 +48,31 @@ function mats() {
   shared = {
     // EVO gráficos: pele LISA (sem flat) com ESCAMAS procedurais (map) e VEIAS DE NEXA no emissivo
     // (textura emissiva com base verde-escura → continua legível na arena escura, sem luz extra)
-    skin: std(GREEN_DARK, { flatShading: false, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex('#020803', '#7dff7a', 77), emissiveIntensity: 0.8, roughness: 0.55 }),
-    skin2: std(GREEN_MID, { flatShading: false, roughness: 0.7, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex('#040c05', '#a0ff8a', 91), emissiveIntensity: 0.6 }),
-    plate: std(BLACK_PLATE, { roughness: 0.3, metalness: 0.75, emissive: 0x040a05, emissiveIntensity: 1 }),
+    skin: std(P.dark, { flatShading: false, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v1, P.v2, 77), emissiveIntensity: 0.8, roughness: 0.55 }),
+    skin2: std(P.mid, { flatShading: false, roughness: 0.7, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v3, P.v4, 91), emissiveIntensity: 0.6 }),
+    plate: std(P.plate, { roughness: 0.3, metalness: 0.75, emissive: 0x040a05, emissiveIntensity: 1 }),
     horn: std(0x1a1712, { roughness: 0.4, metalness: 0.5, emissive: 0x0b0a07, emissiveIntensity: 1 }),
     claw: std(0x0a0a0a, { roughness: 0.3, metalness: 0.6 }),
-    membrane: std(0x2a5a2e, { flatShading: false, map: membraneTex(), roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide, transparent: true, opacity: 0.93, emissive: 0x0e3313, emissiveIntensity: 1 }),
-    rim: new THREE.MeshBasicMaterial({ color: 0x3dff5a }),
-    nexa: new THREE.MeshStandardMaterial({ color: NEXA, emissive: NEXA, emissiveIntensity: 2.2, roughness: 0.2, metalness: 0.1, flatShading: true }),
-    eye: new THREE.MeshBasicMaterial({ color: 0xaaffb0 }),
-    glow: basic(NEXA, { opacity: 0.4, blending: THREE.AdditiveBlending }),
+    membrane: std(P.mem, { flatShading: false, map: membraneTex(), roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide, transparent: true, opacity: 0.93, emissive: P.memE, emissiveIntensity: 1 }),
+    rim: new THREE.MeshBasicMaterial({ color: P.nexa }),
+    nexa: new THREE.MeshStandardMaterial({ color: P.nexa, emissive: P.nexa, emissiveIntensity: 2.2, roughness: 0.2, metalness: 0.1, flatShading: true }),
+    eye: new THREE.MeshBasicMaterial({ color: P.eye }),
+    glow: basic(P.nexa, { opacity: 0.4, blending: THREE.AdditiveBlending }),
     shadow: basic(0x000000, { opacity: 0.42 }),
     teleFill: basic(DANGER, { opacity: 0.32, side: THREE.DoubleSide }),
     teleEdge: basic(DANGER_EDGE, { opacity: 0.85, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }),
     teleBase: basic(DANGER, { opacity: 0.14, side: THREE.DoubleSide }),
     shock: basic(0xbfffa8, { opacity: 0.7, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }),
     // EVO: cone do sopro (verde Nexa) e anéis de choque
-    soproFill: basic(0x5dff6a, { opacity: 0.38, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }),
-    ringEdge: basic(0xd8ff5a, { opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+    soproFill: basic(P.nexa, { opacity: 0.38, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }),
+    ringEdge: basic(P.ring, { opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
   };
-  addRim(shared.skin, 0x8affa0, 0.38, 3.0);
-  addRim(shared.skin2, 0x8affa0, 0.26, 3.0);
+  addRim(shared.skin, P.rimC, 0.38, 3.0);
+  addRim(shared.skin2, P.rimC, 0.26, 3.0);
   shared.nexa.userData.shared = false; // pisca por instância (clonado abaixo)
   shared.eye.userData.shared = true;
   shared.rim.userData.shared = true;
+  sharedByPal.set(key, shared);
   return shared;
 }
 
@@ -100,8 +108,8 @@ function hornGeo(len, r) {
 /**
  * @returns {{ root: THREE.Group, update: Function, parts: object }}
  */
-export function createBossDragon({ height = 6.4 } = {}) {
-  const M = mats();
+export function createBossDragon({ height = 6.4, palette = null } = {}) {
+  const M = mats(palette);
   const nexaMat = M.nexa.clone();
   const root = new THREE.Group();
   root.name = 'bossGiganteVerde';
@@ -117,7 +125,7 @@ export function createBossDragon({ height = 6.4 } = {}) {
   shadow.scale.set(1, 1.35, 1);
   root.add(shadow);
   // M3D: dragão GLB (Quaternius, CC0) — corpo procedural vira fallback
-  const glb = attachDragonGlb(root, body, 'boss', { height: height * 0.97 });
+  const glb = attachDragonGlb(root, body, 'boss', { height: height * 0.97, palette: palette ? { base: hexNum(palette.base), dark: hexNum(palette.escuro), glow: hexNum(palette.brilho) } : null, aura: true });
 
   // —— TORSO (pivô no quadril para empinar) ——
   const hips = new THREE.Group();

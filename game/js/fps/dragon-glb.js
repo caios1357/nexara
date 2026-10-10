@@ -4,7 +4,7 @@
  * Mini-dragão companheiro: azul. Falha de carregamento → procedural continua.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261009espada';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261009berco';
 
 export const DRAGON_PRESETS = {
   boss: {
@@ -32,11 +32,12 @@ export function getDragonGlbStats() { return { ...stats, boxes: Object.fromEntri
  * @param {'boss'|'mini'} kind
  */
 export function attachDragonGlb(parent, procBody, kind, opts = {}) {
-  const P = DRAGON_PRESETS[kind];
+  const P = { ...DRAGON_PRESETS[kind], ...(opts.palette || {}) }; // 20261009berco: paleta própria por dragão (base/dark/glow)
   const ctl = { status: 'loading', anim: 'idle', clip: null, changes: 0, kind };
   stats[kind] = 'loading';
   ctls[kind] = ctl;
   let animator = null;
+  let paint = null;
   const glowMats = [];
   let holder = null;
   function setup(g) {
@@ -46,23 +47,28 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
     holder.name = `dragonGlb_${kind}`;
     holder.add(model);
     if (opts.yaw) model.rotation.y += opts.yaw;
-    const base = new THREE.Color(P.base);
-    const dark = new THREE.Color(P.dark);
+    const meshesPaint = [];
     model.traverse((o) => {
       if (!o.isMesh) return;
       const m = o.material.clone();
-      if (/Eye/i.test(o.name)) { m.color.set(P.glow); m.emissive = new THREE.Color(P.glow); m.emissiveIntensity = 3; glowMats.push(m); }
-      else {
-        // cor original → escurecida para verde/preto (ou azul) mantendo o contraste entre as partes
-        const lum = m.color.r * 0.3 + m.color.g * 0.59 + m.color.b * 0.11;
-        m.color.copy(dark).lerp(base, Math.min(1, lum * 1.6));
-        m.metalness = 0.45; m.roughness = 0.5;
-        m.emissive = new THREE.Color(P.glow); m.emissiveIntensity = lum > 0.5 ? P.glowK : P.glowK * 0.25;
-        glowMats.push(m);
-      }
+      const eye = /Eye/i.test(o.name); const lum = m.color.r * 0.3 + m.color.g * 0.59 + m.color.b * 0.11; // luminância ORIGINAL (antes de pintar)
+      meshesPaint.push({ m, eye, lum }); glowMats.push(m);
       o.material = m;
       o.castShadow = true;
     });
+    // pinta com a paleta (base/escuro/brilho); pode ser repintado depois (companheiro escolhido no DRAGON BERÇO)
+    paint = () => {
+      const base = new THREE.Color(P.base); const dark = new THREE.Color(P.dark);
+      for (const { m, eye, lum } of meshesPaint) {
+        if (eye) { m.color.set(P.glow); m.emissive = new THREE.Color(P.glow); m.emissiveIntensity = 3; }
+        else {
+          m.color.copy(dark).lerp(base, Math.min(1, lum * 1.6));
+          m.metalness = 0.45; m.roughness = 0.5;
+          m.emissive = new THREE.Color(P.base).lerp(new THREE.Color(P.glow), 0.4); if (!m.userData.k1) m.userData.k1 = lum > 0.5 ? P.glowK : P.glowK * 0.25; m.emissiveIntensity = m.userData.k1;
+        }
+      }
+    };
+    paint();
     animator = createAnimator(model, g.animations, P.clips);
     // pose do clipe ANTES de medir (o Root dos clipes Quaternius tem escala própria)
     animator.update(0.0001, { loco: { idle: 1 }, fade: 0.00001 });
@@ -77,6 +83,24 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
       core.position.set(0, P.core.y / ws, P.core.z / ws);
       core.name = 'dragonCore';
       bone.add(core);
+    }
+    // 20261009berco — UPGRADE VISUAL do gigante: veias/olhos mais brilhantes na cor do elemento, AURA no chão (disco + anel aditivos) e BRASAS subindo (Points, 36 partículas)
+    if (opts.aura) {
+      for (const m of glowMats) m.emissiveIntensity *= 1.7;
+      const H = opts.height || P.height; const glowC = new THREE.Color(P.glow);
+      const discGeo = new THREE.CircleGeometry(H * 0.62, 40); discGeo.rotateX(-Math.PI / 2);
+      const discMat = new THREE.MeshBasicMaterial({ color: glowC, transparent: true, opacity: 0.2, depthWrite: false, blending: THREE.AdditiveBlending });
+      const disc = new THREE.Mesh(discGeo, discMat); disc.position.y = 0.05; disc.name = 'dragonAura';
+      const ringGeo = new THREE.RingGeometry(H * 0.6, H * 0.68, 48); ringGeo.rotateX(-Math.PI / 2);
+      const ringMat = new THREE.MeshBasicMaterial({ color: glowC, transparent: true, opacity: 0.45, depthWrite: false, blending: THREE.AdditiveBlending });
+      const ring = new THREE.Mesh(ringGeo, ringMat); ring.position.y = 0.06;
+      const N = 36; const pos = new Float32Array(N * 3); const seed = new Float32Array(N);
+      for (let i = 0; i < N; i++) seed[i] = Math.random();
+      const embGeo = new THREE.BufferGeometry(); embGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const embMat = new THREE.PointsMaterial({ color: glowC.clone().lerp(new THREE.Color(0xffffff), 0.3), size: H * 0.045, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+      const emb = new THREE.Points(embGeo, embMat); emb.frustumCulled = false; emb.name = 'dragonEmbers';
+      holder.add(disc, ring, emb);
+      ctl.aura = { discMat, ringMat, emb, pos, seed, H, ring };
     }
     hideProc();
     parent.add(holder);
@@ -101,6 +125,8 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
   else if (g0) setup(g0);
   else loadModel(P.model).then(setup).catch(() => { ctl.status = 'fallback'; stats[kind] = 'fallback'; });
 
+  /** repinta (companheiro escolhido no Berço): pal = { base, escuro, brilho } em '#rrggbb' */
+  ctl.setPalette = (pal) => { if (!pal) return; const hx = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff; P.base = hx(pal.base); P.dark = hx(pal.escuro); P.glow = hx(pal.brilho); if (paint) paint(); };
   ctl.box = () => { if (!holder) return null; holder.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(holder); return { min: b.min.toArray().map((x) => +x.toFixed(2)), max: b.max.toArray().map((x) => +x.toFixed(2)), vis: holder.visible, parentVis: !!holder.parent?.visible }; };
   /** @param {{ state?:string, progress?:number, speed?:number, attack?:string, charge?:number, hurt?:number }} v */
   ctl.update = (dt, v) => {
@@ -121,6 +147,12 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
     const pulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.004);
     for (const m of glowMats) if (m.userData.k0 === undefined) m.userData.k0 = m.emissiveIntensity;
     for (const m of glowMats) m.emissiveIntensity = m.userData.k0 * pulse * (1 + (v.charge || 0) * 1.5);
+    if (ctl.aura) { // aura pulsa com a carga do ataque; brasas sobem em espiral ao redor do corpo
+      const A = ctl.aura; const tt = performance.now() * 0.001; const ch = v.charge || 0;
+      A.discMat.opacity = 0.16 + 0.08 * Math.sin(tt * 2.2) + ch * 0.25; A.ringMat.opacity = 0.35 + 0.15 * Math.sin(tt * 3.1) + ch * 0.3; A.ring.scale.setScalar(1 + 0.04 * Math.sin(tt * 3.1) + ch * 0.12);
+      for (let i = 0; i < A.seed.length; i++) { const k = (A.seed[i] + tt * (0.07 + A.seed[i] * 0.05)) % 1; const ang = A.seed[i] * 40 + tt * 0.6; const r = A.H * (0.25 + 0.35 * A.seed[i]) * (1 - k * 0.4); A.pos[i * 3] = Math.cos(ang) * r; A.pos[i * 3 + 1] = k * A.H * 0.95; A.pos[i * 3 + 2] = Math.sin(ang) * r; }
+      A.emb.geometry.attributes.position.needsUpdate = true;
+    }
     ctl.anim = animator.state; ctl.clip = animator.clipOf(animator.state); ctl.changes = animator.changes;
   };
   return ctl;
