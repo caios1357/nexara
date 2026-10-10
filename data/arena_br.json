@@ -538,7 +538,8 @@
     },
     "avisoDist": 16,
     "hpMult": 55,
-    "danoMult": 1.5
+    "danoMult": 2.5,
+    "_doc_dano": "20261009berco: dano do dragão da Arena Principal = 2,5× o dano BASE (antes 1,5×; +67% sobre o anterior). Só multiplica o dano (atkScale); tempos de aviso/telegraph, alcance e recuperação intactos."
   },
   "lootOrdem": [
     "basico",
@@ -662,8 +663,8 @@
     "bonusMcbPorNivel": 8
   },
   "fast": {
-    "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica).",
-    "escala": 1.02,
+    "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica). DISTRITO ÚNICO (20261009fast3): cada partida acontece em UM distrito do mapa grande sorteado pela seed (Periferia, Ruínas Industriais, Floresta Selvagem, Complexo Abandonado, Zona de Elite ou Território do Dragão), com o layout/identidade da região (gerador v2), mapa de ≤ ~90 tiles por lado, zona segura encolhendo dentro dele, sem extração.",
+    "escala": 2,
     "fatorConteudo": 0.8,
     "rivais": 10,
     "rivaisDistInicialMin": 28,
@@ -691,6 +692,12 @@
           "raio": 9,
           "duracaoMs": 51000
         }
+      ],
+      "raios": [
+        36,
+        26,
+        16,
+        8
       ]
     },
     "eventos": {
@@ -795,6 +802,65 @@
       "primeiraMs": 60000,
       "intervaloMs": 45000,
       "espectadorMs": 8000
-    }
+    },
+    "distritos": {
+      "periferia": {
+        "escala": 2.2,
+        "spawn": {
+          "fx": 0.1,
+          "fy": 0.9
+        }
+      },
+      "ruinas": {
+        "escala": 2.2,
+        "spawn": {
+          "fx": 0.1,
+          "fy": 0.9
+        }
+      },
+      "floresta": {
+        "escala": 1.8,
+        "spawn": {
+          "fx": 0.12,
+          "fy": 0.92
+        }
+      },
+      "complexo": {
+        "escala": 1.8,
+        "spawn": {
+          "fx": 0.12,
+          "fy": 0.92
+        }
+      },
+      "elite": {
+        "escala": 2.3,
+        "spawn": {
+          "fx": 0.1,
+          "fy": 0.9
+        }
+      },
+      "dragao": {
+        "escala": 1.85,
+        "spawn": {
+          "fx": 0.14,
+          "fy": 0.92
+        },
+        "baus": 5,
+        "caixas": 3
+      }
+    },
+    "rivaisAlvo": {
+      "_doc": "20261009leve: alvo do rival entre TODOS os heróis (rivais + herói). Pontuação = distância × fator de fraqueza (alvo com pouca vida vale mais) × ameaça (quem me bateu há <5 s) × fidelidade; MENOR vence. jogadorMult 1 = o herói NÃO é preferido. Alvo rival: só se defende do herói num raio curto (defesaR). Sem esta chave (mapa completo) nada muda.",
+      "fracoPeso": 0.4,
+      "ameacaMult": 0.65,
+      "ameacaMs": 5000,
+      "fidelidade": 0.8,
+      "jogadorMult": 1.0,
+      "jogadorAlcance": 18,
+      "rivalAlcance": 28,
+      "defesaR": 3.2,
+      "reavaliaMs": 700
+    },
+    "campeaoGatilhoEstagio": 99
   }
 }

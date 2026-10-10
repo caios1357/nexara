@@ -7,8 +7,8 @@
  * Materiais/geometrias criados uma vez; tudo em coordenadas de mundo (1 tile = TILE m).
  */
 import * as THREE from 'three';
-import { TILE } from './fps-camera.js?v=20261009fast2';
-import { getConfig } from '../gameplay-config.js?v=20261009fast2';
+import { TILE } from './fps-camera.js?v=20261009leve';
+import { getConfig } from '../gameplay-config.js?v=20261009leve';
 
 const COLORS = {
   golpe_poderoso: 0x9ffbff,

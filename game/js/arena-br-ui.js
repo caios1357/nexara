@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009fast2';
+import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261009leve';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -40,6 +40,7 @@ export function createArenaBrUi(deps) {
         <div class="br-event hidden" id="br-event"></div>
       </div>
       <canvas id="br-minimap" class="br-minimap" width="168" height="168" title="Mapa (toque para ampliar · M)"></canvas>
+      <div class="br-distrito hidden" id="br-distrito"></div>
       <div class="br-arrow hidden" id="br-arrow"><span class="br-arrow-ico">▲</span><span class="br-arrow-txt"></span></div>
       <div class="br-progress hidden" id="br-progress"><i></i><span></span></div>
       <div class="br-outside hidden" id="br-outside">FORA DA ZONA SEGURA — volte para o círculo</div>`;
@@ -81,6 +82,7 @@ export function createArenaBrUi(deps) {
     if (!shown) return;
     const v = deps.getView(); const s = deps.getState(); if (!v || !s) return;
     setText('#br-reg', v.regionNome || '—');
+    { const fr = s._data.arena_br?.fastRun; const el = root.querySelector('#br-distrito'); if (el) { el.classList.toggle('hidden', !fr); if (fr) { setText('#br-distrito', `⚡ DISTRITO · ${fr.distritoNome}`); el.style.setProperty('--dc', fr.cor || '#3ecfbf'); } } } // FAST: o distrito sorteado fica sempre à vista (junto do minimapa)
     setText('#br-risk', '●'.repeat(v.risco || 0) + '○'.repeat(Math.max(0, 5 - (v.risco || 0))));
     setText('#br-time', `⏱ ${mmss(v.clock)}`);
     setText('#br-kills', `☠ ${v.kills}`);
@@ -225,7 +227,7 @@ export function createArenaBrUi(deps) {
   }
   function drawBig(v, s) {
     const cv = big.querySelector('canvas'); const b = baseMap(s); if (!b) return;
-    const hd = big.querySelector('.br-bigmap-head b'); if (hd) hd.textContent = s._data.arena_br?.fastRun ? `MAPA · NEXARA FAST ⚡ · seed ${s._data.arena_br.fastRun.seed}` : 'MAPA · ARENA PRINCIPAL';
+    const hd = big.querySelector('.br-bigmap-head b'); if (hd) hd.textContent = s._data.arena_br?.fastRun ? `MAPA · NEXARA FAST ⚡ · ${s._data.arena_br.fastRun.distritoNome} · seed ${s._data.arena_br.fastRun.seed}` : 'MAPA · ARENA PRINCIPAL';
     const g = cv.getContext('2d'); const m = s._data.zones.zones.find((q) => q.id === s.zoneId).brMap;
     const sc = Math.min(cv.width / m.W, cv.height / m.H);
     g.clearRect(0, 0, cv.width, cv.height); g.drawImage(b, 0, 0, m.W * sc, m.H * sc);

@@ -10,12 +10,12 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009fast2';
-import { pushLog } from './state.js?v=20261009fast2';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009fast2';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009fast2';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009fast2';
-import { createRivals } from './arena-rivals.js?v=20261009fast2';
+import { createArenaState } from './arena.js?v=20261009leve';
+import { pushLog } from './state.js?v=20261009leve';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009leve';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009leve';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261009leve';
+import { createRivals } from './arena-rivals.js?v=20261009leve';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -42,7 +42,7 @@ export function createBrState(data, { from = null, boss = null } = {}) {
   st.player.y = cfg.spawnHeroi.y;
   st.monstersAlive = [];
   const bossDef = boss && data.monsters.monsters.find((m) => m.id === boss.monsterId);
-  if (bossDef) {
+  if (bossDef && !cfg.dragao?.desativado) { // FAST em distrito sem covil: sem chefe (cada distrito ganha o seu gigante no estágio 2)
     const d = cfg.dragao;
     st.monstersAlive.push({
       uid: boss.uid, id: bossDef.id, zone: BR_ZONE_ID, x: d.x, y: d.y, homeX: d.x, homeY: d.y,
@@ -75,7 +75,10 @@ export function createArenaBr(deps) {
 
   function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   // RIVAIS (BOTS offline): heróis rivais da IA local — ver arena-rivals.js
+  /** covil do dragão: mapa completo = a região do dragão inteira · FAST (distrito único) = só um círculo de 16 tiles em volta do covil (no Território do Dragão o distrito inteiro é a região) */
+  const inCovil = (x, y, regionId) => { const c = cfg(); if (c.dragao?.desativado) return false; if (c.fastRun) return c.regioes[0]?.id === 'dragao' && Math.hypot(x - c.dragao.x, y - c.dragao.y) < 16; return regionId === 'dragao'; };
   const rivals = createRivals({
+    inCovil: (x, y, r) => inCovil(x, y, r),
     st: () => st, br: () => br, cfg, map: () => map(), R: () => R(), walk: (x, y) => walk(x, y), nearestFree: (x, y) => nearestFree(x, y),
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
     rollLootFor, credit: (n, why) => deps.credit?.(n, why), regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
@@ -427,7 +430,7 @@ export function createArenaBr(deps) {
     if (!kinds.length) return;
     const kind = kinds[br.eventSeq++ % kinds.length];
     const m = map();
-    const pts = m.spawnPoints.filter((q) => { const d = Math.hypot(q.x - p.x, q.y - p.y); return d >= 12 && d <= 26 && q.region !== 'dragao'; });
+    const pts = m.spawnPoints.filter((q) => { const d = Math.hypot(q.x - p.x, q.y - p.y); return d >= 12 && d <= 26 && !inCovil(q.x, q.y, q.region); });
     const q = pts[Math.floor(R() * pts.length)];
     if (!q) return;
     const T = E.tipos[kind];

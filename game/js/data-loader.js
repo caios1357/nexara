@@ -1,4 +1,4 @@
-import { scaleBrConfig } from './br-map.js?v=20261009fast2';
+import { scaleBrConfig } from './br-map.js?v=20261009leve';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 
@@ -14,7 +14,9 @@ export async function loadAllData() {
     // MCB/ARSENAL: moeda, recompensas, preços, atributos e classes de arma (config única)
     'arsenal',
     // ARENA PRINCIPAL (BR PvE): mapa/regiões/diretor/loot/zona segura/extração (config única)
-    'arena_br'
+    'arena_br',
+    // DRAGON BERÇO (20261009berco): filhotes (BB) e chefes — IDs novos, dados puros
+    'dragoes'
   ];
   const data = {};
   await Promise.all(

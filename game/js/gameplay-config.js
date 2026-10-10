@@ -161,6 +161,8 @@ export const DEFAULTS = Object.freeze({
     /** Abaixo deste FPS médio reduz; acima de upscaleFps sobe. */
     downscaleFps: 42,
     upscaleFps: 57,
+    /** 20261009leve — CELULAR: a escada de qualidade reage mais cedo (abaixo de 52 FPS), com intervalo/aquecimento menores e média mais rápida. */
+    downscaleFpsTouch: 52, upscaleFpsTouch: 58, adjustIntervalTouchMs: 650, adaptiveWarmupTouchMs: 1800, adaptiveEmaTouch: 0.2,
     /** Intervalo mínimo entre ajustes (ms). */
     adjustIntervalMs: 1200,
     /**
@@ -178,11 +180,11 @@ export const DEFAULTS = Object.freeze({
        *  high   = DESKTOP: bloom cheio + 1 sombra, env map, 24 luzes.
        * caps = limites por preset (inimigos ativos, partículas, projéteis/zonas de perigo, números de dano).
        */
-      low: { label: 'MOBILE LOW', models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 140, haze: 2, envMap: false, cityDensity: 0.45, maxPixelRatio: 1.0, pointLights: 3, antialias: false,
-        caps: { activeEnemies: 10, particles: 60, projectiles: 10, hazards: 4, damageNumbers: 8 } },
-      medium: { label: 'MOBILE MEDIUM', dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.5, shadows: false, rain: 260, haze: 3, envMap: false, cityDensity: 0.7, maxPixelRatio: 1.25, pointLights: 4, antialias: false,
-        caps: { activeEnemies: 12, particles: 90, projectiles: 14, hazards: 5, damageNumbers: 10 } },
-      high: { label: 'DESKTOP', composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true,
+      low: { label: 'MOBILE LOW', models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 90, haze: 2, envMap: false, cityDensity: 0.35, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 3,
+        caps: { activeEnemies: 10, particles: 45, projectiles: 10, hazards: 4, damageNumbers: 8 } },
+      medium: { label: 'MOBILE MEDIUM', dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.4, shadows: false, rain: 160, haze: 3, envMap: false, cityDensity: 0.55, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 4 /* 20261009leve: só os N rivais mais próximos com modelo completo; os demais (a partir de ~10 tiles) = etiqueta+anel */,
+        caps: { activeEnemies: 12, particles: 60, projectiles: 12, hazards: 5, damageNumbers: 10 } },
+      high: { label: 'DESKTOP', composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true, rivalModels: 8,
         caps: { activeEnemies: 18, particles: 160, projectiles: 24, hazards: 8, damageNumbers: 14 } }
     },
     /**
@@ -193,7 +195,7 @@ export const DEFAULTS = Object.freeze({
     // M10 fase 9: + chuva e decoração das regiões (Arena). Na Arena tudo isto só começa depois da DENSIDADE (arena-br densCut)
     // M10 fase 9 (final): inimigos distantes (LOD visual) → partículas (chuva + faíscas ×0,5) → efeitos (bloom/env/luzes)
     //   → detalhe de cenário (decoração/cidade) → frequência da IA longe. Na Arena, a densidade (arena-br) vem antes de tudo.
-    adaptiveLadder: ['enemyLod', 'particles', 'bloom', 'envMap', 'pointLights', 'brDecor', 'city', 'aiFar'],
+    adaptiveLadder: ['enemyLod', 'particles', 'aiFar', 'bloom', 'pointLights', 'envMap', 'brDecor', 'city'], // 20261009leve: a IA longe (CPU) e o bloom (GPU) entram antes
     adaptiveEnemyLodK: 0.75, adaptiveParticleK: 0.5, adaptiveAiLodK: 0.7,
     /** indicador de FPS/qualidade (CONFIGURAÇÕES → TELA) — números medidos de verdade */
     showFpsHud: false,

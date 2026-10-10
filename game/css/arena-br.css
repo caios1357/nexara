@@ -121,3 +121,8 @@
 .nx-spectate .ns-l i.dead { opacity: 0.35; text-decoration: line-through; }
 .nx-spectate .ns-f { max-height: 4.2rem; overflow: hidden; color: #cfe0ea; font-size: 0.68rem; text-align: left; }
 .nx-spectate button { margin: 0.3rem 0.2rem 0; padding: 0.35rem 0.9rem; border-radius: 8px; border: 1px solid #ffb020; background: #1b1405; color: #ffd27a; font-weight: 700; }
+
+/* NEXARA FAST — distrito sorteado (20261009fast3) */
+.br-distrito { position: absolute; top: calc(max(8px, env(safe-area-inset-top)) + 136px); right: max(8px, env(safe-area-inset-right)); max-width: 150px; padding: 0.12rem 0.45rem; border-radius: 99px; border: 1px solid var(--dc, #3ecfbf); background: rgba(5, 8, 12, 0.82); color: var(--dc, #3ecfbf); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em; text-align: center; pointer-events: none; }
+@media (max-height: 520px) { .br-distrito { top: calc(max(8px, env(safe-area-inset-top)) + 108px); } }
+.br-distrito.hidden { display: none; }

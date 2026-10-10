@@ -371,7 +371,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   }
   const ec = byId.elite?._ec || { x: D(82), y: D(61) };
   chests.push(...chestsFixed);
-  chests.push({ x: ec.x, y: ec.y, region: 'elite', id: 'bau_arena_elite', loot: 'alto', kind: 'bau' });
+  if (byId.elite) chests.push({ x: ec.x, y: ec.y, region: 'elite', id: 'bau_arena_elite', loot: 'alto', kind: 'bau' }); // FAST de 1 distrito: só onde a Arena de Elite existe
   // baús fixos isolados (gruta tapada por árvores): abre trilha até o tile alcançável mais próximo da mesma região
   let carved = false;
   for (const c of chestsFixed) {
@@ -411,7 +411,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   const per = byId.periferia; const ru = byId.ruinas;
   const tw = ru?._towers?.[0] || { x: D(51), y: D(62) };
   const fab = structures.find((s) => s.kind === 'ruina') || { x0: D(38), y0: D(49), x1: D(42), y1: D(53) };
-  const pois = [
+  const pois0 = [
     { id: 'poi_br_periferia', x: per ? Math.round((per.x0 + per.x1) / 2) : D(15), y: per ? Math.round((per.y0 + per.y1) / 2) : D(56), label: 'PERIFERIA', kind: 'regiao' },
     { id: 'poi_br_fabrica', x: Math.round((fab.x0 + fab.x1) / 2), y: fab.y1 + 1, label: 'RUÍNA DA FÁBRICA', kind: 'ruina' },
     { id: 'poi_br_torre', x: tw.x, y: tw.y, label: 'TORRE DE SINAL', kind: 'torre' },
@@ -421,6 +421,9 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     { id: 'poi_br_dragao', x: dc.x, y: dc.y, label: 'COVIL · GIGANTE VERDE', kind: 'dragao' },
     { id: 'poi_br_secreto', x: byId.floresta?._secret?.x ?? D(30), y: byId.floresta?._secret?.y ?? D(39), label: 'LOCAL SECRETO', kind: 'secreto', hidden: true }
   ];
+  // FAST de 1 distrito: só os pontos de interesse das regiões que existem no mapa (no mapa completo = todos, igual a antes)
+  const POI_REG = { poi_br_periferia: 'periferia', poi_br_fabrica: 'ruinas', poi_br_torre: 'ruinas', poi_br_complexo: 'complexo', poi_br_caverna: 'floresta', poi_br_elite: 'elite', poi_br_dragao: 'dragao', poi_br_secreto: 'floresta' };
+  const pois = pois0.filter((q) => !!byId[POI_REG[q.id]]);
   for (const r of regions) { delete r._towers; delete r._secret; delete r._cave; delete r._clear; delete r._lab; delete r._ec; }
   const tiles = g.map((row) => row.join(''));
   let walkN = 0; for (let i = 0; i < reach.length; i++) walkN += reach[i];

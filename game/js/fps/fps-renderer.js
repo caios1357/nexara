@@ -10,34 +10,34 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009fast2';
-import { buildArenaDressing } from './arena-dressing.js?v=20261009fast2';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009fast2';
-import { createHeroModel } from './hero-model.js?v=20261009fast2';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009fast2';
-import { attachHeroGlb } from './hero-glb.js?v=20261009fast2';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009fast2';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009fast2';
-import { createActionVfx } from './action-vfx.js?v=20261009fast2';
-import { createPassiveVfx } from './passive-vfx.js?v=20261009fast2';
-import { createFpsControls } from './fps-controls.js?v=20261009fast2';
-import { createViewmodel } from './viewmodel.js?v=20261009fast2';
-import { createDragonView } from './dragon-view.js?v=20261009fast2';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009fast2';
-import { getSprite } from '../assets.js?v=20261009fast2';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009fast2';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009fast2';
-import { mergeStaticParts } from './merge-util.js?v=20261009fast2';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009fast2';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009fast2';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009fast2';
-import { createPostFx } from './post-fx.js?v=20261009fast2';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009fast2';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009fast2';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009fast2';
-import { groundAt, setGroundFn } from './ground.js?v=20261009fast2';
-import { buildBrTerrain } from './br-terrain.js?v=20261009fast2';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009fast2';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261009leve';
+import { buildArenaDressing } from './arena-dressing.js?v=20261009leve';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261009leve';
+import { createHeroModel } from './hero-model.js?v=20261009leve';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261009leve';
+import { attachHeroGlb } from './hero-glb.js?v=20261009leve';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261009leve';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261009leve';
+import { createActionVfx } from './action-vfx.js?v=20261009leve';
+import { createPassiveVfx } from './passive-vfx.js?v=20261009leve';
+import { createFpsControls } from './fps-controls.js?v=20261009leve';
+import { createViewmodel } from './viewmodel.js?v=20261009leve';
+import { createDragonView } from './dragon-view.js?v=20261009leve';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261009leve';
+import { getSprite } from '../assets.js?v=20261009leve';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261009leve';
+import { createBossDragon } from './boss-dragon-view.js?v=20261009leve';
+import { mergeStaticParts } from './merge-util.js?v=20261009leve';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261009leve';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261009leve';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261009leve';
+import { createPostFx } from './post-fx.js?v=20261009leve';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261009leve';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261009leve';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261009leve';
+import { groundAt, setGroundFn } from './ground.js?v=20261009leve';
+import { buildBrTerrain } from './br-terrain.js?v=20261009leve';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261009leve';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -171,6 +171,7 @@ export function createFpsRenderer() {
     if (!renderer) {
       // EVO: descobre o preset ANTES de criar o renderer (antialias só no DESKTOP; no celular o bloom/ACES já suaviza)
       const touch = !!hooks.isTouchUi?.() || detectTouchMode();
+      isTouchDev = touch;
       try {
         const probe = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
         softwareGL = probe ? isSoftwareGL(probe) : '';
@@ -339,26 +340,28 @@ export function createFpsRenderer() {
     // EVO: aquecimento após trocar de zona (link de shaders/texturas) não conta — senão o adaptativo cortava luzes já no
     // 1º segundo, e cortar luz RECOMPILA todos os materiais iluminados (mais engasgo exatamente na entrada)
     if (perf.warmPending) { perf.warmPending = false; perf.zoneAt = now; perf.samples = 0; perf.emaMs = 16.7; }
-    if (now - (perf.zoneAt || 0) < (g.adaptiveWarmupMs ?? 3000)) return;
-    perf.emaMs += (frameMs - perf.emaMs) * 0.1;
+    const T = isTouchDev; // 20261009leve: celular reage mais cedo e mais forte
+    if (now - (perf.zoneAt || 0) < (T ? (g.adaptiveWarmupTouchMs ?? 1800) : (g.adaptiveWarmupMs ?? 3000))) return;
+    perf.emaMs += (frameMs - perf.emaMs) * (T ? (g.adaptiveEmaTouch ?? 0.2) : 0.1);
     perf.samples++;
-    if (perf.samples < 12 || now - perf.lastAdjust < g.adjustIntervalMs) return;
+    if (perf.samples < (T ? 8 : 12) || now - perf.lastAdjust < (T ? (g.adjustIntervalTouchMs ?? 650) : g.adjustIntervalMs)) return;
     const fps = 1000 / perf.emaMs;
+    const downFps = T ? (g.downscaleFpsTouch ?? g.downscaleFps) : g.downscaleFps, upFps = T ? (g.upscaleFpsTouch ?? g.upscaleFps) : g.upscaleFps;
     const devPr = Math.min(maxPr(), window.devicePixelRatio || 1);
     let next = perf.pr || devPr;
     // EVO: primeiro desliga EFEITOS (bloom → env map → luzes → cidade), depois resolução (piso 0,8 numa GPU real)
     // M10 fase 9: na Arena Principal a 1ª alavanca é a DENSIDADE (arena-br); efeitos/resolução só depois dela esgotar
-    if (fps < g.downscaleFps && effectGate && !effectGate()) { perf.gated = (perf.gated || 0) + 1; return; }
-    if (fps < g.downscaleFps && dropNextEffect(g)) {
+    if (fps < downFps && effectGate && !effectGate()) { perf.gated = (perf.gated || 0) + 1; return; }
+    if (fps < downFps && dropNextEffect(g)) {
       perf.lastAdjust = now;
       perf.samples = 0;
       return;
     }
     const floor = softwareGL ? g.minPixelRatio : Math.max(g.minPixelRatio, g.minPixelRatioHardware ?? 0.8);
-    if (fps < g.downscaleFps && next > floor) {
-      next = Math.max(floor, next * (fps < g.downscaleFps * 0.5 ? 0.65 : 0.8));
+    if (fps < downFps && next > floor) {
+      next = Math.max(floor, next * (fps < downFps * 0.5 ? 0.65 : 0.8));
     }
-    else if (fps > g.upscaleFps && next < devPr) next = Math.min(devPr, next * 1.1);
+    else if (fps > upFps && next < devPr) next = Math.min(devPr, next * 1.1);
     if (Math.abs(next - perf.pr) > 0.01) {
       perf.pr = next;
       perf.lastAdjust = now;
@@ -369,6 +372,7 @@ export function createFpsRenderer() {
   /** EVO: degraus de qualidade adaptativa (efeitos antes da resolução). */
   // M10 fase 9 — escada: inimigos distantes → partículas → efeitos → detalhe de cenário → frequência da IA longe
   const dropped = { enemyLod: false, particles: false, bloom: false, envMap: false, pointLights: false, city: false, rain: false, brDecor: false, aiFar: false };
+  let isTouchDev = false;
   let effectGate = null; let aiFarHook = null; let brLodK = 1; let particleK = 1;
   function dropNextEffect(g) {
     for (const step of g.adaptiveLadder || []) {
@@ -1774,6 +1778,13 @@ export function createFpsRenderer() {
     rivalStats.made++;
     return { mesh: root, body, kind: 'mon', uid: m.uid, rival: true, glb, tag, tagLvl: R0.level || 1, ring, ringMat: rgMat, fb, own, lastNow: 0, animAcc: 0, champ: false, fx: null, fy: null };
   }
+  const rivalRank = []; const rivalFull = new Set();
+  /** rival fora do grupo próximo: só posição + etiqueta/anel (sem animação/corpo) */
+  function updateRivalLite(entry, m, now) {
+    const v = getAiView(m); const synced = v && v.syncX === m.x && v.syncY === m.y;
+    const fx = synced ? v.fx : m.x + 0.5, fy = synced ? v.fy : m.y + 0.5;
+    entry.mesh.position.set(fx * TILE, groundAt(fx, fy), fy * TILE); entry.lastNow = now; rivalStats.lite = (rivalStats.lite || 0) + 1;
+  }
   function updateRivalEntity(entry, m, now, aiClock) {
     const v = getAiView(m); const synced = v && v.syncX === m.x && v.syncY === m.y;
     const fx = synced ? v.fx : m.x + 0.5, fy = synced ? v.fy : m.y + 0.5;
@@ -1826,6 +1837,11 @@ export function createFpsRenderer() {
     const aiClock = getAiClock();
     const ecfg = getConfig().enemyAi;
     const mons = state.monstersAlive;
+    // 20261009leve: rivais — só os N mais próximos do herói têm o modelo completo (GLB de herói ≈ muitos draw calls); os outros, a partir de 10 tiles, ficam só com etiqueta+anel
+    rivalRank.length = 0;
+    if (zone.br) { const cx = fpsCam.state.visX / TILE, cy = fpsCam.state.visZ / TILE; for (let i = 0; i < mons.length; i++) { const q = mons[i]; if (q.alive && q.rival) rivalRank.push({ uid: q.uid, d: Math.hypot(q.x + 0.5 - cx, q.y + 0.5 - cy) }); } rivalRank.sort((a, b) => a.d - b.d); }
+    const rivalCap = (tier?.rivalModels ?? 8) - (brLodK < 1 ? 1 : 0);
+    rivalFull.clear(); for (let i = 0; i < rivalRank.length; i++) if (i < rivalCap || rivalRank[i].d <= 10) rivalFull.add(rivalRank[i].uid);
     for (let i = 0; i < mons.length; i++) {
       const m = mons[i];
       if (!m.alive || m.zone !== zone.id) continue;
@@ -1848,7 +1864,8 @@ export function createFpsRenderer() {
       // RIVAIS (BOTS offline): herói rival com o MESMO GLB de herói (estilo + cores próprias), nome "BOT" e barra de vida
       if (m.rival) {
         if (!entry) { entry = makeRivalEntity(m); entityRoot.add(entry.mesh); entityMeshes.set(key, entry); }
-        updateRivalEntity(entry, m, now, aiClock);
+        const full = rivalFull.has(m.uid); if (entry.body.visible !== full) entry.body.visible = full; // sem corpo: nem desenha nem anima
+        if (full) updateRivalEntity(entry, m, now, aiClock); else updateRivalLite(entry, m, now);
         continue;
       }
       // Bloco 7: GIGANTE VERDE — modelo procedural próprio (dragão inimigo colossal) + telegraphs no chão

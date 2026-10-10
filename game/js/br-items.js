@@ -11,8 +11,8 @@
  * com preço de teste 0 isso viraria MCB infinito); venda remove o item de TODOS os estados espelhados no mesmo
  * passo; uid vendido entra em player.brVendidos (não vende 2×); preço com teto sobre o preço real de compra.
  */
-import { basePriceOf } from './mcb.js?v=20261009fast2';
-import { statSheet, compareSheets } from './vestiario.js?v=20261009fast2';
+import { basePriceOf } from './mcb.js?v=20261009leve';
+import { statSheet, compareSheets } from './vestiario.js?v=20261009leve';
 
 const RAR = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
 let uidSeq = 0;

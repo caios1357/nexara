@@ -5,7 +5,7 @@
  * (fallback idêntico ao nível 'low'). Bloom em meia resolução no nível 'medium'.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261009fast2';
+import { getConfig } from '../gameplay-config.js?v=20261009leve';
 
 const GradeShader = {
   uniforms: {

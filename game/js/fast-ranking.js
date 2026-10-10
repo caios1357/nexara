@@ -15,7 +15,7 @@ function clean(raw) {
   const r = blank(); if (!raw || typeof raw !== 'object') return r;
   for (const k of PLAYER_F) r.jogador[k] = num(raw.jogador?.[k]);
   for (const [name, o] of Object.entries(raw.rivais || {})) { if (typeof name !== 'string' || name.length > 40) continue; r.rivais[name] = Object.fromEntries(RIVAL_F.map((k) => [k, num(o?.[k])])); }
-  r.ultimas = (Array.isArray(raw.ultimas) ? raw.ultimas : []).slice(-10).map((m) => ({ at: num(m?.at), kind: String(m?.kind || '').slice(0, 12), seed: num(m?.seed), colocacao: num(m?.colocacao), vencedor: String(m?.vencedor || '').slice(0, 40), ms: num(m?.ms) }));
+  r.ultimas = (Array.isArray(raw.ultimas) ? raw.ultimas : []).slice(-10).map((m) => ({ at: num(m?.at), kind: String(m?.kind || '').slice(0, 12), seed: num(m?.seed), distrito: String(m?.distrito || '').replace(/[^a-z_]/g, '').slice(0, 16), distritoNome: String(m?.distritoNome || '').slice(0, 28), colocacao: num(m?.colocacao), vencedor: String(m?.vencedor || '').slice(0, 40), ms: num(m?.ms) }));
   return r;
 }
 export function loadRanking() { try { return clean(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch { return blank(); } }
@@ -47,7 +47,7 @@ export function recordMatch(m) {
     if (vencedor === x.name) o.vitorias++;
     o.melhorNivel = Math.max(o.melhorNivel, num(x.level));
   }
-  r.ultimas.push({ at: Date.now(), kind: m.kind, seed: num(m.seed), colocacao, vencedor, ms: num(m.ms) });
+  r.ultimas.push({ at: Date.now(), kind: m.kind, seed: num(m.seed), distrito: String(m.distrito || '').replace(/[^a-z_]/g, '').slice(0, 16), distritoNome: String(m.distritoNome || '').slice(0, 28), colocacao, vencedor, ms: num(m.ms) });
   saveRanking(r);
   return { vencedor, colocacao };
 }
@@ -74,7 +74,7 @@ export function showRanking(onClose) {
   const tr = todos.map((x, i) => x.isMe
     ? `<tr class="me" data-k="me"><td>${i + 1}</td><td class="nm"><b>VOCÊ</b></td><td>${x.partidas}</td><td>${x.vitorias}</td><td>${x.mortes}</td><td>${x.abatesMonstros}</td><td>${x.abatesRivais}</td><td>—</td><td>—</td><td>${x.melhorColocacao ? x.melhorColocacao + 'º' : '—'}</td></tr>`
     : `<tr data-k="rival"><td>${i + 1}</td><td class="nm">${esc(x.name)} <small>(BOT)</small></td><td>${x.partidas}</td><td>${x.vitorias}</td><td>${x.mortes}</td><td>${x.abatesMonstros}</td><td>${x.abatesRivais}</td><td>${x.derrotouJogador}</td><td>${x.derrotadoPeloJogador}</td><td>NV ${x.melhorNivel}</td></tr>`).join('');
-  const last = ultimas.slice(-5).reverse().map((m) => `<li>${m.kind === 'vitoria' ? 'VITÓRIA' : m.kind === 'derrotado' ? 'DERROTADO' : m.kind === 'abandonou' ? 'SAIU DA PARTIDA' : 'EXTRAÇÃO'} · ${m.colocacao ? `${m.colocacao}º lugar` : '—'}${m.vencedor ? ` · último herói: ${esc(m.vencedor)}` : ''} · ${Math.round(m.ms / 1000)} s</li>`).join('');
+  const last = ultimas.slice(-5).reverse().map((m) => `<li>${m.kind === 'vitoria' ? 'VITÓRIA' : m.kind === 'derrotado' ? 'DERROTADO' : m.kind === 'abandonou' ? 'SAIU DA PARTIDA' : 'EXTRAÇÃO'} · ${m.distritoNome ? `${esc(m.distritoNome)} · ` : ''}${m.colocacao ? `${m.colocacao}º lugar` : '—'}${m.vencedor ? ` · último herói: ${esc(m.vencedor)}` : ''} · ${Math.round(m.ms / 1000)} s</li>`).join('');
   const mm = Math.floor(J.tempoTotalMs / 60000), ss = Math.floor((J.tempoTotalMs % 60000) / 1000);
   el.innerHTML = `<div class="nfr-box"><div class="nfr-head"><b>RANKING · NEXARA FAST ⚡</b><button type="button" class="nfr-x">FECHAR</button></div>
     <p class="nfr-sub">Pessoal e local (este navegador). Só partidas reais; rivais são BOTS da IA local — não há jogadores online.</p>

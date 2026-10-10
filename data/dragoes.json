@@ -1,0 +1,204 @@
+{
+  "_doc": "DRAGON BERÇO (20261009berco): dragões data-driven. IDs NOVOS apenas (bb_brasa…bb_nexa). 'bb_azul' = Mini Dragão original do jogador (os números dele vêm de gameplay-config dragon.*). Habilidades de apoio: tipo = cuspe|raio|nuvem|escudo|cura|veu. Rivais (BOT) usam todas; o jogador usa as marcadas apoioJogador:true (as demais = EM DESENVOLVIMENTO para o jogador). Companheiro NUNCA é jogável.",
+  "escolhaPadrao": "bb_azul",
+  "bebes": [
+    {
+      "id": "bb_azul",
+      "nome": "Mini Dragão (Chama Azul)",
+      "elemento": "azul",
+      "icone": "🔵",
+      "original": true,
+      "cor": {
+        "base": "#2a62c8",
+        "escuro": "#0b1a3a",
+        "brilho": "#5ab8ff"
+      },
+      "descricao": "O companheiro original do herói: voa no ombro e ataca por conta própria. Evolui com o nível do herói.",
+      "habilidades": [
+        {
+          "id": "rajada_azul",
+          "fonte": "gameplay.dragon.attacks",
+          "apoioJogador": true
+        },
+        {
+          "id": "chama_concentrada",
+          "fonte": "gameplay.dragon.attacks",
+          "apoioJogador": true
+        }
+      ]
+    },
+    {
+      "id": "bb_brasa",
+      "nome": "Brasa",
+      "elemento": "fogo",
+      "icone": "🔥",
+      "cor": {
+        "base": "#d8481c",
+        "escuro": "#2a0c06",
+        "brilho": "#ffb03a"
+      },
+      "descricao": "Filhote de lava. Cospe bolas de brasa no inimigo mais próximo do seu herói.",
+      "habilidades": [
+        {
+          "id": "cuspe_brasa",
+          "nome": "Cuspe de Brasa",
+          "tipo": "cuspe",
+          "descricao": "Cospe uma bola de fogo no inimigo mais próximo (queima o alvo).",
+          "cooldownMs": 4200,
+          "alcance": 5.5,
+          "danoMult": 0.6,
+          "apoioJogador": true
+        }
+      ]
+    },
+    {
+      "id": "bb_geada",
+      "nome": "Geada",
+      "elemento": "gelo",
+      "icone": "❄️",
+      "cor": {
+        "base": "#6fd0ff",
+        "escuro": "#0a2233",
+        "brilho": "#d8f6ff"
+      },
+      "descricao": "Filhote glacial. Seu pulso congela o ar em volta do herói e amortece os golpes.",
+      "habilidades": [
+        {
+          "id": "pulso_gelo",
+          "nome": "Pulso de Gelo",
+          "tipo": "escudo",
+          "descricao": "Casca de gelo: o herói recebe 45% menos dano por 2,4 s.",
+          "cooldownMs": 10500,
+          "duracaoMs": 2400,
+          "reducao": 0.45,
+          "apoioJogador": false
+        }
+      ]
+    },
+    {
+      "id": "bb_faisca",
+      "nome": "Faísca",
+      "elemento": "raio",
+      "icone": "⚡",
+      "cor": {
+        "base": "#f2d21c",
+        "escuro": "#2b2204",
+        "brilho": "#fff3a0"
+      },
+      "descricao": "Filhote de tempestade. Descarrega raios que saltam entre inimigos próximos.",
+      "habilidades": [
+        {
+          "id": "raio_encadeado",
+          "nome": "Raio Encadeado",
+          "tipo": "raio",
+          "descricao": "Raio que salta em até 3 inimigos num raio de 4 tiles.",
+          "cooldownMs": 6000,
+          "alcance": 5,
+          "saltos": 3,
+          "danoMult": 0.4,
+          "apoioJogador": true
+        }
+      ]
+    },
+    {
+      "id": "bb_peconha",
+      "nome": "Peçonha",
+      "elemento": "veneno",
+      "icone": "☣️",
+      "cor": {
+        "base": "#7ad02a",
+        "escuro": "#0f1f06",
+        "brilho": "#c8ff6a"
+      },
+      "descricao": "Filhote tóxico. Solta uma nuvem que corrói quem ficar dentro.",
+      "habilidades": [
+        {
+          "id": "nuvem_toxica",
+          "nome": "Nuvem Tóxica",
+          "tipo": "nuvem",
+          "descricao": "Nuvem no inimigo mais próximo: 4 pulsos de dano em raio de 2,2 tiles.",
+          "cooldownMs": 8000,
+          "alcance": 5,
+          "pulsos": 4,
+          "pulsoMs": 500,
+          "raio": 2.2,
+          "danoMult": 0.22,
+          "apoioJogador": true
+        }
+      ]
+    },
+    {
+      "id": "bb_umbra",
+      "nome": "Umbra",
+      "elemento": "sombra",
+      "icone": "🌑",
+      "cor": {
+        "base": "#7a4ad8",
+        "escuro": "#120a22",
+        "brilho": "#c9a8ff"
+      },
+      "descricao": "Filhote das sombras. Dobra o espaço e devolve ao herói o fôlego da esquiva.",
+      "habilidades": [
+        {
+          "id": "veu_sombrio",
+          "nome": "Véu Sombrio",
+          "tipo": "veu",
+          "descricao": "Recarrega a esquiva do herói na hora e o torna evasivo por 0,9 s.",
+          "cooldownMs": 9500,
+          "duracaoMs": 900,
+          "apoioJogador": false
+        }
+      ]
+    },
+    {
+      "id": "bb_nexa",
+      "nome": "Nexa",
+      "elemento": "nexa",
+      "icone": "💠",
+      "cor": {
+        "base": "#34e0b4",
+        "escuro": "#06221c",
+        "brilho": "#b4fff0"
+      },
+      "descricao": "Filhote de Nexa pura. Seu pulso cura o herói.",
+      "habilidades": [
+        {
+          "id": "pulso_cura",
+          "nome": "Pulso de Cura",
+          "tipo": "cura",
+          "descricao": "Cura 14% do HP máximo do herói.",
+          "cooldownMs": 11000,
+          "curaFrac": 0.14,
+          "apoioJogador": true
+        }
+      ]
+    }
+  ],
+  "chefes": [
+    {
+      "id": "boss_gigante_verde",
+      "nome": "GIGANTE VERDE",
+      "elemento": "nexa verde",
+      "icone": "🐲",
+      "modelo": "boss-dragon",
+      "cor": {
+        "base": "#183a1e",
+        "escuro": "#0a120c",
+        "brilho": "#3aff6a"
+      },
+      "descricao": "Dragão colossal do covil da Arena Principal. Todo golpe tem aviso no chão (telegraph): leia o marcador e esquive.",
+      "fonte": "gameplay.arenaBoss"
+    }
+  ],
+  "rivais": {
+    "atribuicao": [
+      "bb_brasa",
+      "bb_geada",
+      "bb_faisca",
+      "bb_peconha",
+      "bb_umbra",
+      "bb_nexa"
+    ],
+    "_doc": "cada rival recebe 1 filhote (ciclo por índice do herói); até 6 elementos distintos e repetições com cor própria do herói quando houver mais de 6 rivais"
+  }
+}
