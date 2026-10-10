@@ -4,7 +4,7 @@
  * Mini-dragão companheiro: azul. Falha de carregamento → procedural continua.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261009berco';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261010ajustes';
 
 export const DRAGON_PRESETS = {
   boss: {
@@ -126,7 +126,7 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
   else loadModel(P.model).then(setup).catch(() => { ctl.status = 'fallback'; stats[kind] = 'fallback'; });
 
   /** repinta (companheiro escolhido no Berço): pal = { base, escuro, brilho } em '#rrggbb' */
-  ctl.setPalette = (pal) => { if (!pal) return; const hx = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff; P.base = hx(pal.base); P.dark = hx(pal.escuro); P.glow = hx(pal.brilho); if (paint) paint(); };
+  ctl.setPalette = (pal) => { if (!pal) { Object.assign(P, DRAGON_PRESETS[kind], opts.palette || {}); if (paint) paint(); return; } const hx = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff; P.base = hx(pal.base); P.dark = hx(pal.escuro); P.glow = hx(pal.brilho); if (paint) paint(); };
   ctl.box = () => { if (!holder) return null; holder.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(holder); return { min: b.min.toArray().map((x) => +x.toFixed(2)), max: b.max.toArray().map((x) => +x.toFixed(2)), vis: holder.visible, parentVis: !!holder.parent?.visible }; };
   /** @param {{ state?:string, progress?:number, speed?:number, attack?:string, charge?:number, hurt?:number }} v */
   ctl.update = (dt, v) => {

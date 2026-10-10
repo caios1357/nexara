@@ -5,8 +5,8 @@
  * O jogador pode ESCOLHER o filhote companheiro (persistido em localStorage 'nexara.berco.v1'; whitelist de ids). O companheiro NUNCA é jogável.
  * Sem botões falsos: o que não funciona para o herói aparece como EM DESENVOLVIMENTO.
  */
-import { bbList, getChosenBB, setChosenBB, bbPlayerSupported, bbAbility, describeAbilities } from './dragon-bb.js?v=20261009berco';
-import { describeBoss } from './boss-variants.js?v=20261009berco';
+import { bbList, getChosenBB, setChosenBB, bbPlayerSupported, bbAbility, describeAbilities } from './dragon-bb.js?v=20261010ajustes';
+import { describeBoss } from './boss-variants.js?v=20261010ajustes';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -76,7 +76,7 @@ export function createBerco(deps) {
     document.getElementById('modal-overlay')?.querySelector('.modal')?.classList.add('nx-brc-modal');
     open = true;
     document.querySelectorAll('#brc [data-brc-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.brcTab; sel = null; msg = ''; render(); showModel(); }; });
-    import('./fps/dragon-preview.js?v=20261009berco').then((m) => {
+    import('./fps/dragon-preview.js?v=20261010ajustes').then((m) => {
       const cv = document.getElementById('brc-canvas'); if (!cv || !open) return;
       try { preview = m.createDragonPreview(cv); showModel(); } catch (e) { console.warn('[berço] prévia 3D indisponível', e); const h = document.querySelector('.brc-hint'); if (h) h.textContent = 'prévia 3D indisponível neste aparelho'; }
     }).catch(() => {});

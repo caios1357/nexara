@@ -3,8 +3,8 @@
  * Numbers come from combat system — never fabricated.
  * Pass GRAFICO+: stronger slash arcs, impact sparks, bloom-ish overlays.
  */
-import { tileToWorld } from './camera.js?v=20261009berco';
-import { RARITY_COLOR } from './sprites.js?v=20261009berco';
+import { tileToWorld } from './camera.js?v=20261010ajustes';
+import { RARITY_COLOR } from './sprites.js?v=20261010ajustes';
 
 export function createVfx() {
   return { floats: [], arcs: [], impacts: [], loots: [], sparks: [], time: 0 };

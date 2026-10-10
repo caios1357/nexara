@@ -4,8 +4,8 @@
  * Falha de carregamento → o gigante cai no procedural (boss-dragon-view); o filhote avisa "modelo indisponível".
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261009berco';
-import { createBossDragon } from './boss-dragon-view.js?v=20261009berco';
+import { attachDragonGlb } from './dragon-glb.js?v=20261010ajustes';
+import { createBossDragon } from './boss-dragon-view.js?v=20261010ajustes';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 

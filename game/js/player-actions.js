@@ -14,9 +14,9 @@
  * applyDamageToMonster (XP/loot/quests) — o Núcleo Divino (+15% dano de habilidade) vale aqui.
  * Todos os números em gameplay-config (actions / dodge / defense / specials).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261009berco';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261009berco';
-import { getStat, STATS } from './modifiers.js?v=20261009berco';
+import { getConfig, DEG } from './gameplay-config.js?v=20261010ajustes';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261010ajustes';
+import { getStat, STATS } from './modifiers.js?v=20261010ajustes';
 
 export const ACTION_STATES = Object.freeze({
   DEAD: 'DEAD', CRITICAL_ANIM: 'CRITICAL_ANIM', DODGE: 'DODGE', SPECIAL: 'SPECIAL',
@@ -637,6 +637,7 @@ export function createPlayerActions(deps) {
   return {
     update, pressDodge, pressAttack, pressSpecial, setDefend, resolveIncoming, onHeroHit,
     blocksAttackStart, getActionState, getView, getButtonsInfo, getDebug, reset, inIFrames,
+    refreshDodge: () => { dodge.cooldownUntil = 0; }, // 20261010ajustes: Véu Sombrio do filhote recarrega a esquiva
     getEvents: () => events.slice(),
     clearEvents: () => { events.length = 0; },
     cooldownLeft, specialCfg,

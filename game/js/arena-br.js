@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261009berco';
-import { getConfig } from './gameplay-config.js?v=20261009berco';
-import { pushLog } from './state.js?v=20261009berco';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261009berco';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261009berco';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261009berco';
-import { createRivals } from './arena-rivals.js?v=20261009berco';
+import { createArenaState } from './arena.js?v=20261010ajustes';
+import { getConfig } from './gameplay-config.js?v=20261010ajustes';
+import { pushLog } from './state.js?v=20261010ajustes';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261010ajustes';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261010ajustes';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261010ajustes';
+import { createRivals } from './arena-rivals.js?v=20261010ajustes';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -497,7 +497,7 @@ export function createArenaBr(deps) {
     const z = br.zone; const f = nearestFree(Math.floor(z.cx), Math.floor(z.cy)) || nearestFree(Math.floor(m.W / 2), Math.floor(m.H / 2)); if (!f) { br.finalDragon = 'none'; return; }
     const D = C.dragao || {};
     const mon = { uid: bc.uid, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome,
-      territoryMinX: 1, territoryMaxX: m.W - 2, territoryMinY: 1, territoryMaxY: m.H - 2, hpMult: D.hpMult > 0 ? D.hpMult : 55, atkScale: D.danoMult > 0 ? D.danoMult : 2.5, finalEvent: true };
+      territoryMinX: 1, territoryMaxX: m.W - 2, territoryMinY: 1, territoryMaxY: m.H - 2, hpMult: D.hpMult > 0 ? D.hpMult : 33, atkScale: D.danoMult > 0 ? D.danoMult : 2.5, finalEvent: true };
     applyDragonProfile(mon, ch); st.monstersAlive.push(mon); br.finalDragon = ch.id; br.bossArmed = true; deps.armBoss?.();
     note('dragon_final', { id: ch.id, nome: ch.nome, aviso: ch.evento?.aviso || `${ch.nome} DESPERTA`, x: f.x, y: f.y, cor: ch.cor?.brilho });
   }

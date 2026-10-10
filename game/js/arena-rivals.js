@@ -11,9 +11,9 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261009berco';
-import { xpForLevel } from './state.js?v=20261009berco';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261009berco';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261010ajustes';
+import { xpForLevel } from './state.js?v=20261010ajustes';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261010ajustes';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -106,11 +106,13 @@ export function createRivals(ctx) {
   function pickGoal(rv, mon, mp, p) {
     const br = ctx.br(); const st = ctx.st(); const m = ctx.map();
     if (br.rivalFinal) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) };
+    // 20261010ajustes: ÚLTIMA CORRIDA — zona final e morte súbita há > 60 s: todos caçam o rival mais próximo (e reaparecem colados nele se não houver caminho) → a partida sempre chega ao confronto final
+    if (br.suddenSince && br.clock - br.suddenSince > 60000) { let bo = null, bd = 1e9; for (const o of st.monstersAlive) { if (!o.alive || o === mon || !o.rival) continue; const d = Math.hypot(o.x - mp.x, o.y - mp.y); if (d < bd) { bd = d; bo = o; } } if (bo) return { kind: 'rival', uid: bo.uid, x: bo.x, y: bo.y }; }
     // outro rival por perto (≤ 16 tiles) → caça o rival (a zona aproxima todos; eles se eliminam no caminho)
     // 20261009berco: XP vem de MONSTROS também — monstro colado (≤ 12 tiles) vence um rival distante (> 8 tiles); rival próximo continua prioridade
-    let nm = null, nd = RC().monstroPertoDist ?? 12;
+    let nm = null, nd = RC().monstroPertoDist ?? 18;
     for (const o of st.monstersAlive) { if (!o.alive || o === mon || !o.br || o.boss || o.rival) continue; const d = Math.hypot(o.x + 0.5 - mp.x, o.y + 0.5 - mp.y); if (d < nd && inZone(o.x, o.y)) { nd = d; nm = o; } }
-    const rivalFar = (om) => !om || Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y) > (RC().rivalPertoDist ?? 8);
+    const rivalFar = (om) => !om || Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y) > (RC().rivalPertoDist ?? 5);
     if (nm && rivalFar(rv.tgt?.kind === 'rival' ? monOf(list().find((q) => q.uid === rv.tgt.uid)) : (list().filter((o) => o !== rv && !o.out).map(monOf).filter((q) => q && q.alive).sort((x, y) => Math.hypot(x.x - mp.x, x.y - mp.y) - Math.hypot(y.x - mp.x, y.y - mp.y))[0]))) return { kind: 'monstro', uid: nm.uid, x: nm.x, y: nm.y };
     if (rv.tgt?.kind === 'rival' && rivalsCanKill()) { const om = monOf(list().find((q) => q.uid === rv.tgt.uid)); if (om && om.alive) return { kind: 'rival', uid: om.uid, x: om.x, y: om.y }; } // 20261009leve: alvo escolhido por proximidade/fraqueza/ameaça (herói = 1 alvo a mais)
     let rb = null, rd = rivalsCanKill() ? (br.spectate ? 90 : (RC().cacaRivalDist || 16)) : 0; // só quando podem se eliminar (zona fechando)
@@ -165,9 +167,9 @@ export function createRivals(ctx) {
   }
   function damageRival(rv, mon, n, byName, lethal, killer = null) {
     const c = RC().combate || {};
-    { // 20261009berco: MORTE SÚBITA — zona final + ≤ 3 rivais vivos há > 45 s: o dano entre rivais cresce (até ×5) p/ ninguém ficar em empate eterno (a partida não pode travar)
+    { // 20261009berco: MORTE SÚBITA — zona final + ≤ 6 rivais vivos há > 45 s (20261010: era ≤ 3; rivais já não convergem no herói): o dano entre rivais cresce (até ×5) p/ ninguém ficar em empate eterno (a partida não pode travar)
       const B = ctx.br(); const z = B?.zone;
-      if (z && z.stage >= 3 && aliveRivals().length <= 3) { B.suddenSince = B.suddenSince || B.clock; const t = B.clock - B.suddenSince; if (t > 45000) n = Math.round(n * Math.min(5, 1 + (t - 45000) / 15000)); } else if (B) B.suddenSince = 0;
+      if (z && z.stage >= 3 && aliveRivals().length <= (RC().morteSubitaMax ?? 6)) { B.suddenSince = B.suddenSince || B.clock; const t = B.clock - B.suddenSince; if (t > 45000) n = Math.round(n * Math.min(5, 1 + (t - 45000) / 15000)); } else if (B) B.suddenSince = 0;
     }
     { const ck = ctx.br()?.clock || 0; if (rv.shieldUntil > ck) n = Math.max(1, Math.round(n * (1 - (rv.shieldRed || 0)))); if (rv.veilUntil > ck) n = Math.max(1, Math.round(n * 0.25)); } // BB: escudo / véu
     if (lethal && killer && !elimAllowed(ctx.br())) lethal = false; // ainda não pode cair: fica no piso de HP (hpMinFrac)
@@ -274,13 +276,14 @@ export function createRivals(ctx) {
       const TL = lvlFor(rv); if (rv.forPlayerL !== TL) applyLevel(rv, mon, TL, false); // mapa completo: herói subiu → rivais acompanham · FAST: nível próprio do rival
       const dP = Math.hypot(mp.x - p.x, mp.y - p.y);
       if (dP <= (c.visaoMinimapa || 18)) rv.seenAt = clock;
-      const v = getAiView(mon); const engaged = v && ENGAGED.has(v.state) && dP < 14;
-      if (v && v.state === AI_STATES.ATTACK_PREPARE && rv.lastSt !== AI_STATES.ATTACK_PREPARE && dP < 9) countAtk('jogador'); // golpe do rival NO HERÓI (métrica 'ataques ao jogador')
+      const v = getAiView(mon); const engaged = v && ENGAGED.has(v.state) && dP < 14 && !(rv.tgt?.kind === 'rival' && clock >= (rv.threatPlayerUntil || 0) && v.state !== AI_STATES.ATTACK && v.state !== AI_STATES.ATTACK_PREPARE); // 20261010ajustes: rival com alvo RIVAL não conta como 'engajado com o herói' (antes, perto do herói só golpeava o herói)
+      if (v && v.state === AI_STATES.ATTACK_PREPARE && rv.lastSt !== AI_STATES.ATTACK_PREPARE && dP < 9) { countAtk('jogador'); const D = (br.atkDbg = br.atkDbg || {}); const k = `${rv.name}|t:${rv.tgt?.kind}|d${Math.round(dP)}`; D[k] = (D[k] || 0) + 1; } // golpe do rival NO HERÓI (métrica 'ataques ao jogador')
       if (v) rv.lastSt = v.state;
       if (c.alvo && !br.rivalFinal && (!rv.tgtAt || clock - rv.tgtAt >= (c.alvo.reavaliaMs ?? 700))) {
         const prev = rv.tgt; rv.tgt = pickTarget(rv, mon, mp, p, dP, clock); rv.tgtAt = clock;
-        if (rv.tgt?.kind === 'rival') { mon.aggroR = c.alvo.defesaR ?? 3.2; if (!prev || prev.kind !== 'rival' || prev.uid !== rv.tgt.uid) rv.goalAt = -1e9; } // alvo é outro rival: só se defende do herói (perto); caminha até o rival
-        else if (c.tatica?.aggro) { mon.aggroR = c.tatica.aggro; if (prev?.kind === 'rival') rv.goalAt = -1e9; }
+        if (rv.tgt?.kind === 'rival') { { const th = clock < (rv.threatPlayerUntil || 0); mon.aggroR = th ? (c.alvo.defesaR ?? 3.2) : (c.alvo.ignoraR ?? 0.6); mon.loseR = th ? (c.alvo.perdeR ?? 22) : 0.5; } if (!prev || prev.kind !== 'rival' || prev.uid !== rv.tgt.uid) rv.goalAt = -1e9; } // alvo é outro rival: só se defende do herói (perto); caminha até o rival
+        else if (c.tatica?.aggro || c.alvo) { // 20261010ajustes: só PERSEGUE o herói quem o escolheu como alvo (proximidade/fraqueza/ameaça); com alvo monstro/nenhum só reage a quem encosta (defesaR) — antes aggro 18 puxava todos para o herói
+          { const on = rv.tgt?.kind === 'jogador' || clock < (rv.threatPlayerUntil || 0); mon.aggroR = on ? (c.tatica?.aggro ?? c.alvo.jogadorAlcance ?? 12) : (c.alvo.ignoraR ?? 0.6); mon.loseR = on ? (c.alvo.perdeR ?? 22) : 0.5; } if (prev?.kind === 'rival') rv.goalAt = -1e9; } // sem alvo-herói: solta a perseguição já (loseR curto → RETURN)
       }
       // meta
       const reached = rv.goal && Math.hypot(rv.goal.x + 0.5 - mp.x, rv.goal.y + 0.5 - mp.y) < 1.8;
@@ -295,10 +298,13 @@ export function createRivals(ctx) {
       // longe do herói: IA congelada pelo LOD → anda grosso pelo caminho
       if (dP > lodMed && !engaged) {
         if (!rv.path || rv.pathGoal !== hp.x + hp.y * 10000) { rv.path = bfsPath(mon.x, mon.y, hp.x, hp.y) || []; rv.pathI = 0; rv.pathGoal = hp.x + hp.y * 10000; rv.pathAcc = 0; }
+        // 20261010ajustes: zona final + morte súbita há > 30 s e caminho até o rival-alvo inexistente (separados por parede) → reaparece colado nele, longe do herói (ninguém trava a partida)
+        if ((rv.path.length === 0 || br.clock - br.suddenSince > 90000) && rv.goal.kind === 'rival' && br.zone?.stage >= 3 && br.suddenSince && br.clock - br.suddenSince > 30000 && (mon.x !== hp.x || mon.y !== hp.y)) { placeMonster(st, mon.uid, hp.x + 0.5, hp.y + 0.5); rv.moved = (rv.moved || 0) + 1; }
         rv.pathAcc = (rv.pathAcc || 0) + dtS * 2.6 * (mon.walkMult || 1);
         while (rv.pathAcc >= 1 && rv.pathI < rv.path.length) { rv.pathAcc -= 1; rv.pathI++; }
         if (rv.pathI > 0 && rv.path.length) { const W = ctx.map().W; const ci = rv.path[Math.min(rv.pathI, rv.path.length) - 1]; const nx = ci % W, ny = (ci / W) | 0; if (nx !== mon.x || ny !== mon.y) { placeMonster(st, mon.uid, nx + 0.5, ny + 0.5); rv.moved = (rv.moved || 0) + 1; } }
       } else rv.path = null;
+      if (!engaged && rv.goal.kind === 'rival' && br.suddenSince && br.clock - br.suddenSince > 90000 && dP > 12 && Math.hypot(hp.x - mp.x, hp.y - mp.y) > 2.5 && clock - (rv.rushAt || -1e9) > 4000) { rv.rushAt = clock; placeMonster(st, mon.uid, hp.x + 0.5, hp.y + 0.5); rv.moved = (rv.moved || 0) + 1; } // última corrida (ver pickGoal): longe do herói, vai colar no rival
       // saque: baú ao lado → aberto (para todos); loot na bolsa do rival
       if (rv.goal.kind === 'bau' && Math.hypot(rv.goal.x + 0.5 - mp.x, rv.goal.y + 0.5 - mp.y) <= (c.saque?.raioBau || 1.4) + 0.6) {
         const sp = [...ctx.map().chests, ...ctx.map().crates].find((q) => q.id === rv.goal.id);
@@ -355,6 +361,7 @@ export function createRivals(ctx) {
     }
     // FAST: pressão em grupo — com ≥ 2 rivais colados no herói eles se espalham em vagas (cerco) e 1 atacante extra é liberado
     const T = c.tatica;
+    if (br.zone?.stage >= 3 && alive.length > 1 && alive.length <= (RC().morteSubitaMax ?? 6)) br.suddenSince = br.suddenSince || br.clock; else br.suddenSince = 0; // relógio da morte súbita corre mesmo sem golpes
     if (T?.pressaoGrupo && !br.spectate) {
       const near = alive.filter((rv) => { const m = monOf(rv); return m && Math.hypot(pos(m).x - p.x, pos(m).y - p.y) <= (T.pressaoDist || 13); });
       const on = near.length >= 2;
@@ -429,7 +436,7 @@ export function createRivals(ctx) {
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
         return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,
-          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
+          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, goal: rv.goal?.kind || null, tgt: rv.tgt?.kind || null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
     };
   }
   return { update, onKill, onHit, view, spawn, spawnOne, byUid: (uid) => list().find((q) => q.uid === uid) || null, startFinal: () => { const a = aliveRivals(); if (a.length && !ctx.br().rivalFinal) startFinal(a); }, aliveRivals, list };

@@ -7,8 +7,8 @@
  * AudioContext dos efeitos (sfx.js) → volume funciona também no iOS. Sem contexto, cai em element.volume.
  * Faixa com peso ~0 por >3 s é pausada (bateria/CPU). Aba escondida → pausa tudo.
  */
-import { getConfig } from './gameplay-config.js?v=20261009berco';
-import { getAudioContext } from './sfx.js?v=20261009berco';
+import { getConfig } from './gameplay-config.js?v=20261010ajustes';
+import { getAudioContext } from './sfx.js?v=20261010ajustes';
 
 const BASE = new URL('../../assets/audio/music/', import.meta.url);
 /** M10 passo 2 — ambiente por região (loops CC0 ~26 s, ver assets/audio/CREDITS.md) + camada de tensão do dragão. */

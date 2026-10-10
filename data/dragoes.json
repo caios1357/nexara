@@ -71,7 +71,7 @@
           "cooldownMs": 10500,
           "duracaoMs": 2400,
           "reducao": 0.45,
-          "apoioJogador": false
+          "apoioJogador": true
         }
       ]
     },
@@ -146,7 +146,7 @@
           "descricao": "Recarrega a esquiva do herói na hora e o torna evasivo por 0,9 s.",
           "cooldownMs": 9500,
           "duracaoMs": 900,
-          "apoioJogador": false
+          "apoioJogador": true
         }
       ]
     },

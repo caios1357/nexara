@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261009berco';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261009berco';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261009berco';
-import { addReputation } from '../../rules/reputation.js?v=20261009berco';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261009berco';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261009berco';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261009berco';
-import { reveal } from './arquivo.js?v=20261009berco';
-import { checkEventReady } from './events.js?v=20261009berco';
-import { getConfig } from './gameplay-config.js?v=20261009berco';
-import { getStat, STATS } from './modifiers.js?v=20261009berco';
+import { trainSkill } from '../../rules/skills.js?v=20261010ajustes';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261010ajustes';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261010ajustes';
+import { addReputation } from '../../rules/reputation.js?v=20261010ajustes';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261010ajustes';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261010ajustes';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261010ajustes';
+import { reveal } from './arquivo.js?v=20261010ajustes';
+import { checkEventReady } from './events.js?v=20261010ajustes';
+import { getConfig } from './gameplay-config.js?v=20261010ajustes';
+import { getStat, STATS } from './modifiers.js?v=20261010ajustes';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;

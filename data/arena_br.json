@@ -537,7 +537,8 @@
       "y1": 34
     },
     "avisoDist": 16,
-    "hpMult": 55,
+    "hpMult": 33,
+    "_doc_hp": "20261010ajustes: HP do dragão da Arena Principal/FAST = HP do herói × 33 (era ×55 no berco, ×101 antes): −40% sobre o anterior (×0,6). Cada gigante ainda multiplica por hpMult do dragoes.json. Campo/Arena de teste (arena-run, ×101) NÃO muda.",
     "danoMult": 2.5,
     "_doc_dano": "20261009berco: dano do dragão da Arena Principal = 2,5× o dano BASE (antes 1,5×; +67% sobre o anterior). Só multiplica o dano (atkScale); tempos de aviso/telegraph, alcance e recuperação intactos."
   },
@@ -578,6 +579,7 @@
     }
   },
   "rivais": {
+    "alvo": {"fracoPeso": 0.4, "ameacaMult": 0.65, "ameacaMs": 5000, "fidelidade": 0.8, "jogadorMult": 1.5, "jogadorAlcance": 10, "rivalAlcance": 28, "defesaR": 2.4, "ignoraR": 0.6, "reavaliaMs": 700, "_doc": "20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."},
     "bbDanoFrac": 0.3,
     "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
     "ativo": true,
@@ -856,10 +858,11 @@
       "ameacaMult": 0.65,
       "ameacaMs": 5000,
       "fidelidade": 0.8,
-      "jogadorMult": 1.0,
-      "jogadorAlcance": 18,
+      "jogadorMult": 1.5,
+      "jogadorAlcance": 10,
       "rivalAlcance": 28,
-      "defesaR": 3.2,
+      "defesaR": 2.4,
+      "ignoraR": 0.6,
       "reavaliaMs": 700
     },
     "campeaoGatilhoEstagio": 99
