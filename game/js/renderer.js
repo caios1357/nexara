@@ -6,13 +6,13 @@
 import {
   createCamera, resizeCameraCanvas, updateCamera, applyCamera,
   tileToWorld, worldToTile, canvasToWorld, tileToCanvasCss, adaptZoom, ISO
-} from './camera.js?v=20261010ajustes';
+} from './camera.js?v=20261010alvo';
 import {
   drawIsoTile, drawWallBlock, drawProp, drawPlayer, drawNpc, drawBot
-} from './sprites.js?v=20261010ajustes';
-import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261010ajustes';
-import { getTileType, monstersInZone } from './map.js?v=20261010ajustes';
-import { getMonsterPos } from './enemy-ai.js?v=20261010ajustes';
+} from './sprites.js?v=20261010alvo';
+import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261010alvo';
+import { getTileType, monstersInZone } from './map.js?v=20261010alvo';
+import { getMonsterPos } from './enemy-ai.js?v=20261010alvo';
 
 const TILE_FILL = {
   g6: {

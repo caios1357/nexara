@@ -11,9 +11,9 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261010ajustes';
-import { xpForLevel } from './state.js?v=20261010ajustes';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261010ajustes';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261010alvo';
+import { xpForLevel } from './state.js?v=20261010alvo';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261010alvo';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -215,6 +215,12 @@ export function createRivals(ctx) {
    * × ameaça × fidelidade (quanto MENOR, melhor). O herói NÃO tem preferência: é só mais um alvo (jogadorMult = 1 = neutro).
    * Sem `rivais.alvo` (mapa completo) tudo segue como antes.
    */
+  /** 20261010alvo (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
+  function playerFull(rv) {
+    const A = RC().alvo; const cap = A?.maxAlvoJogador; if (!cap) return false; let n = 0;
+    for (const o of list()) { if (o === rv || o.out) continue; if (o.tgt?.kind === 'jogador') { const m = monOf(o); if (m && m.alive && ++n >= cap) return true; } }
+    return false;
+  }
   function pickTarget(rv, mon, mp, p, dP, clock) {
     const A = RC().alvo; if (!A) return null;
     const st = ctx.st(); const pl = st.player; const cur = rv.tgt;
@@ -224,7 +230,7 @@ export function createRivals(ctx) {
       const s = d * (1 - wk * (1 - Math.max(0, Math.min(1, hpFrac)))) * (threat ? th : 1) * (cur && cur.kind === kind && cur.uid === uid ? stick : 1) * (kind === 'jogador' ? (A.jogadorMult ?? 1) : 1);
       if (s < bs) { bs = s; best = { kind, uid, d }; }
     };
-    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0)) consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
+    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0) && (clock < (rv.threatPlayerUntil || 0) || cur?.kind === 'jogador' || !playerFull(rv))) consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
     if (rivalsCanKill()) {
       for (const o of list()) {
         if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue;
@@ -233,6 +239,37 @@ export function createRivals(ctx) {
       }
     }
     return best;
+  }
+
+  /**
+   * 20261010alvo — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
+   * (a) o herói o atacou (ameaça), (b) o herói chegou a ≤ `jogadorPertoR` tiles, ou (c) o herói está fraco (≤ `jogadorFracoFrac` de vida) e a ≤ `jogadorFracoR`.
+   * VER o herói de longe NÃO cancela a briga. Trocas rival→rival: só com o compromisso vencido, com cooldown `trocaCooldownMs` por rival e histerese
+   * (o novo alvo só entra se o alvo atual saiu da zona de combate: morreu, fugiu > `soltaDist` tiles ou deixou de ser eliminável). Sem `compromissoMs`: comportamento anterior.
+   */
+  function stickTarget(rv, prev, nt, mp, p, dP, clock) {
+    const A = RC().alvo; if (!A || !A.compromissoMs || !prev) return nt;
+    if (prev.kind === 'jogador') { // troca legítima pelo herói também tem compromisso: não volta ao rival a cada 0,7 s
+      const plp = ctx.st().player;
+      if (nt && nt.kind === 'rival' && plp.hp > 0 && dP <= (A.ataqueR ?? 14) && clock - (rv.tgtSince || 0) < (A.compromissoJogadorMs ?? 4000)) return prev;
+      if (nt && nt.kind === 'rival') rv.noPlayerUntil = clock + (A.trocaCooldownMs ?? 3500); // largou o herói: cooldown antes de ser puxado de novo por 'perto/fraco'
+      return nt;
+    }
+    if (prev.kind !== 'rival') return nt;
+    const om = monOf(list().find((q) => q.uid === prev.uid)); const rk = rivalsCanKill();
+    const op = om && om.alive ? pos(om) : null; const dOp = op ? Math.hypot(op.x - mp.x, op.y - mp.y) : 1e9;
+    if (!op || !rk || dOp > (A.soltaDist ?? 20)) return nt; // alvo morreu / fugiu / não é mais eliminável → escolhe de novo
+    { // trocas legítimas pelo herói (mesmo quando o 'melhor' por pontuação seria outro rival)
+      const pl = ctx.st().player; const hpf = pl.hpMax > 0 ? pl.hp / pl.hpMax : 1;
+      const atacado = clock < (rv.threatPlayerUntil || 0) && dP <= (A.ataqueR ?? 14), perto = dP <= (A.jogadorPertoR ?? 4) && dP <= dOp + 0.8 && !(dOp <= (A.emCombateR ?? 2.6) && dP > (A.emCombateJogadorR ?? 1.8)), /* o herói só 'puxa' quem briga se estiver tão perto quanto o oponente (entrou na briga), não por estar a 3-4 tiles de uma luta */ fraco = hpf <= (A.jogadorFracoFrac ?? 0.35) && dP <= (A.jogadorFracoR ?? 6);
+      if (pl.hp > 0 && (atacado || ((perto || fraco) && clock >= (rv.noPlayerUntil || 0) && !playerFull(rv)))) return { kind: 'jogador', uid: 0, d: dP };
+      if (nt && nt.kind === 'jogador') return prev; // só vê o herói: não larga o duelo
+    }
+    if (nt && nt.kind === prev.kind && nt.uid === prev.uid) return nt;
+    if (clock - (rv.tgtSince || 0) < A.compromissoMs || clock < (rv.nextRetarget || 0)) return prev; // compromisso / cooldown
+    const hit = rv.lastAttacker === nt?.uid && clock - (rv.lastAttackedAt || -1e9) < 3000; // quem me bate agora vale uma troca
+    if (!hit) return prev; // histerese: alvo atual válido e perto → fica
+    rv.nextRetarget = clock + (A.trocaCooldownMs ?? 3500); return nt;
   }
   const countAtk = (k) => { const b = ctx.br(); if (!b) return; const a = (b.atk = b.atk || { jogador: 0, rival: 0, monstro: 0 }); a[k]++; };
 
@@ -280,7 +317,7 @@ export function createRivals(ctx) {
       if (v && v.state === AI_STATES.ATTACK_PREPARE && rv.lastSt !== AI_STATES.ATTACK_PREPARE && dP < 9) { countAtk('jogador'); const D = (br.atkDbg = br.atkDbg || {}); const k = `${rv.name}|t:${rv.tgt?.kind}|d${Math.round(dP)}`; D[k] = (D[k] || 0) + 1; } // golpe do rival NO HERÓI (métrica 'ataques ao jogador')
       if (v) rv.lastSt = v.state;
       if (c.alvo && !br.rivalFinal && (!rv.tgtAt || clock - rv.tgtAt >= (c.alvo.reavaliaMs ?? 700))) {
-        const prev = rv.tgt; rv.tgt = pickTarget(rv, mon, mp, p, dP, clock); rv.tgtAt = clock;
+        const prev = rv.tgt; rv.tgt = stickTarget(rv, prev, pickTarget(rv, mon, mp, p, dP, clock), mp, p, dP, clock); rv.tgtAt = clock; if ((prev?.kind || null) !== (rv.tgt?.kind || null) || prev?.uid !== rv.tgt?.uid) { rv.tgtSince = clock; rv.tgtSwitches = (rv.tgtSwitches || 0) + 1; }
         if (rv.tgt?.kind === 'rival') { { const th = clock < (rv.threatPlayerUntil || 0); mon.aggroR = th ? (c.alvo.defesaR ?? 3.2) : (c.alvo.ignoraR ?? 0.6); mon.loseR = th ? (c.alvo.perdeR ?? 22) : 0.5; } if (!prev || prev.kind !== 'rival' || prev.uid !== rv.tgt.uid) rv.goalAt = -1e9; } // alvo é outro rival: só se defende do herói (perto); caminha até o rival
         else if (c.tatica?.aggro || c.alvo) { // 20261010ajustes: só PERSEGUE o herói quem o escolheu como alvo (proximidade/fraqueza/ameaça); com alvo monstro/nenhum só reage a quem encosta (defesaR) — antes aggro 18 puxava todos para o herói
           { const on = rv.tgt?.kind === 'jogador' || clock < (rv.threatPlayerUntil || 0); mon.aggroR = on ? (c.tatica?.aggro ?? c.alvo.jogadorAlcance ?? 12) : (c.alvo.ignoraR ?? 0.6); mon.loseR = on ? (c.alvo.perdeR ?? 22) : 0.5; } if (prev?.kind === 'rival') rv.goalAt = -1e9; } // sem alvo-herói: solta a perseguição já (loseR curto → RETURN)
@@ -322,7 +359,7 @@ export function createRivals(ctx) {
         if (f) {
           rv.nextSwing = clock + (C.cadenciaMs || 900) * (0.85 + ctx.R() * 0.3); rv.swingAt = clock; mon.rivalSwingAt = performance.now(); mon.rivalSwingN = (mon.rivalSwingN || 0) + 1;
           const def = st._monsters[mon.id]; const dmg = Math.max(1, Math.round((def.ataque || 10) * 1.6 * (mon.atkScale || 1) * (C.danoMult || 1) * (0.8 + ctx.R() * 0.4)));
-          try { onMonsterHit(f.o, { fromX: mp.x, fromY: mp.y, noStun: true, knockbackScale: 0.4 }); } catch {}
+          try { onMonsterHit(f.o, { fromX: mp.x, fromY: mp.y, noStun: true, knockbackScale: 0.4, fromRival: !!f.o.rival }); } catch {}
           if (f.o.rival) {
             const orv = list().find((q) => q.uid === f.o.uid);
             // eliminação entre rivais só enquanto sobram mais que "minVivosFinal" (o confronto final sempre tem rival)
@@ -436,7 +473,7 @@ export function createRivals(ctx) {
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
         return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,
-          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, goal: rv.goal?.kind || null, tgt: rv.tgt?.kind || null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
+          champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, goal: rv.goal?.kind || null, tgt: rv.tgt?.kind || null, tgtUid: rv.tgt?.uid ?? null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
     };
   }
   return { update, onKill, onHit, view, spawn, spawnOne, byUid: (uid) => list().find((q) => q.uid === uid) || null, startFinal: () => { const a = aliveRivals(); if (a.length && !ctx.br().rivalFinal) startFinal(a); }, aliveRivals, list };

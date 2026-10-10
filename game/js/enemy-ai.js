@@ -19,12 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261010ajustes';
-import { getConfig, DEG } from './gameplay-config.js?v=20261010ajustes';
-import { isWalkable, getTileType } from './map.js?v=20261010ajustes';
-import { monsterAttackPlayer } from './actions.js?v=20261010ajustes';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261010ajustes';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261010ajustes';
+import { bossCfgFor } from './boss-variants.js?v=20261010alvo';
+import { getConfig, DEG } from './gameplay-config.js?v=20261010alvo';
+import { isWalkable, getTileType } from './map.js?v=20261010alvo';
+import { monsterAttackPlayer } from './actions.js?v=20261010alvo';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261010alvo';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261010alvo';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -1152,12 +1152,13 @@ export function onMonsterHit(mon, info) {
     r.move = null; r.atkPhase = '';
     setState(mon, r, S.STUN, { heavy: !!info.heavy });
     hitOut.stunned = true;
-  } else if (r.state === S.IDLE || r.state === S.PATROL || r.state === S.DETECT ||
-             r.state === S.ALERT || r.state === S.RETURN) {
+  } else if (!info.fromRival && (r.state === S.IDLE || r.state === S.PATROL || r.state === S.DETECT ||
+             r.state === S.ALERT || r.state === S.RETURN)) {
     // Foi atacado: entra em combate direto (sem tempo de reação)
+    // 20261010alvo: golpe vindo de OUTRO RIVAL (info.fromRival) não põe o alvo em CHASE — a perseguição nativa vai SEMPRE para o herói e arrastava o duelo até ele
     setState(mon, r, S.CHASE);
   }
-  if (r.state === S.CHASE && !r.isBoss && !(mon.rival && clock < (r.rivalArmorUntil || 0))) r.hitReactUntil = clock + ecfg.hitReactMs;
+  if (r.state === S.CHASE && !info.fromRival && !r.isBoss && !(mon.rival && clock < (r.rivalArmorUntil || 0))) r.hitReactUntil = clock + ecfg.hitReactMs;
   return hitOut;
 }
 
