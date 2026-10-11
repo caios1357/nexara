@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261010alvo';
-import { pushLog } from './state.js?v=20261010alvo';
-import { isArenaState } from './arena.js?v=20261010alvo';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261010alvo';
-import { ICONS } from './icons.js?v=20261010alvo';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261010voo1';
+import { pushLog } from './state.js?v=20261010voo1';
+import { isArenaState } from './arena.js?v=20261010voo1';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261010voo1';
+import { ICONS } from './icons.js?v=20261010voo1';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -158,6 +158,10 @@ export function createMobileControls(hooks) {
           <span class="mc-lbl">Falar</span>
         </button>
       </div>
+      <button type="button" class="mc-btn mc-mount mc-mount-off" data-power="mount" title="Montar no Gigante (M)" aria-label="Montar no dragão">
+        <span class="mc-ico">🐉</span>
+        <span class="mc-lbl">MONTAR</span>
+      </button>
     `;
     const wrap = document.getElementById('canvas-wrap') || document.getElementById('game-screen');
     (wrap || document.body).appendChild(root);
@@ -596,6 +600,11 @@ export function createMobileControls(hooks) {
     const g = joyGeom();
     const jr = joy?.getBoundingClientRect();
     if (jr && jr.width) itemRects.joystick = { cx: jr.left - rr.left + jr.width / 2, cy: jr.top - rr.top + jr.height / 2, size: 2 * g.r, opacity: g.op };
+    { // 20261010 MONTARIA: botão MONTAR logo acima do joystick (polegar esquerdo, fora do arco de combate)
+      const me = root.querySelector('.mc-mount');
+      if (me && jr && jr.width) { const sz = 58; me.style.position = 'absolute'; me.style.width = `${sz}px`; me.style.height = `${sz}px`; me.style.minHeight = `${sz}px`; me.style.right = 'auto'; me.style.bottom = 'auto';
+        me.style.left = `${(jr.left - rr.left + jr.width / 2 - sz / 2).toFixed(1)}px`; me.style.top = `${Math.max(4, jr.top - rr.top - sz - 6).toFixed(1)}px`; }
+    }
     layoutInfo.items = itemRects;
     layoutInfo.orient = land ? 'landscape' : 'portrait';
   }
@@ -615,6 +624,19 @@ export function createMobileControls(hooks) {
       root?.querySelector('.mc-act-defend')?.classList.remove('mc-pressed');
       hooks.onDefend?.(false);
     }
+  }
+
+  /** 20261010 MONTARIA: estado do voo → botões. show = MONTAR visível; flying = ESQUIVA vira DESCER/CANCELAR e as demais ações ficam desligadas. */
+  let mountKey = '';
+  function setMountUi(u) {
+    if (!root) return;
+    const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}`;
+    if (key === mountKey) return; mountKey = key;
+    root.querySelector('.mc-mount')?.classList.toggle('mc-mount-off', !u.show);
+    root.classList.toggle('mc-mounted', !!u.flying);
+    const d = root.querySelector('.mc-act-dodge'); const lbl = d?.querySelector('.mc-lbl');
+    if (lbl) lbl.textContent = u.flying ? (u.phase === 'landing' ? 'CANCELAR' : 'DESCER') : 'ESQUIVA';
+    d?.classList.toggle('mc-descend', !!u.flying);
   }
 
   /** Bloco 4: recarga (varredura radial + segundos) / Nexa insuficiente / ativo. */
@@ -694,6 +716,7 @@ export function createMobileControls(hooks) {
       return;
     }
 
+    if (id === 'mount') { hooks.onMount?.(); return; }
     if (id === 'dodge') { hooks.onDodge?.(); return; }
     if (SPECIAL_BTN.has(id)) { hooks.onSpecial?.(id); return; }
   }
@@ -751,6 +774,7 @@ export function createMobileControls(hooks) {
     isVisible: () => visible,
     releaseAll,
     updateActionButtons,
+    setMountUi,
     flashButton,
     setLockActive,
     buttonRects,

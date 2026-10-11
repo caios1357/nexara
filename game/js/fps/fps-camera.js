@@ -7,8 +7,8 @@
  * Todos os números vêm de gameplay-config.js.
  */
 import * as THREE from 'three';
-import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261010alvo';
-import { groundAt } from './ground.js?v=20261010alvo';
+import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261010voo1';
+import { groundAt } from './ground.js?v=20261010voo1';
 
 export const TILE = 2; // world units per tile
 /** Altura do olho — definida em gameplay-config.camera.eyeHeight (default 1.68). */
@@ -28,7 +28,7 @@ let aspectNow = 1;
 const isPortrait = () => aspectNow < 0.9;
 function baseFov() {
   const b = getConfig().arenaBoss?.camera;
-  const extra = b && bossFrame > 0 ? bossFrame * b.extraFovDeg : 0;
+  const extra = (b && bossFrame > 0 ? bossFrame * b.extraFovDeg : 0) + mountK * 5;
   if (VIEW_MODE !== 'third') return getConfig().camera.fovDeg + extra;
   const t = getConfig().thirdPerson;
   return (isPortrait() ? t.portraitFovDeg : t.fovDeg) + extra;
@@ -37,17 +37,21 @@ function baseFov() {
 let bossFrame = 0;
 export function setBossFraming(k) { bossFrame = Math.max(0, Math.min(1, Number(k) || 0)); }
 export function getBossFraming() { return bossFrame; }
+/** 20261010 MONTARIA: altura do voo (m) e fator 0..1 do enquadramento montado (braço mais longo, pivô mais alto, FOV +5°). Fora do voo = 0 (câmera idêntica). */
+let mountLift = 0; let mountK = 0;
+export function setMountFraming(lift, k) { mountLift = Math.max(0, Number(lift) || 0); mountK = Math.max(0, Math.min(1, Number(k) || 0)); }
+export function getMountFraming() { return { lift: mountLift, k: mountK }; }
 function bossCam() { return getConfig().arenaBoss?.camera || null; }
 /** Comprimento do braço e altura do pivô conforme a orientação da tela. */
 function armDistance() {
   const t = getConfig().thirdPerson;
   const b = bossCam();
-  return (isPortrait() ? t.portraitDistance : t.distance) + (b && bossFrame > 0 ? bossFrame * (isPortrait() ? b.extraDistancePortrait : b.extraDistance) : 0);
+  return (isPortrait() ? t.portraitDistance : t.distance) + (b && bossFrame > 0 ? bossFrame * (isPortrait() ? b.extraDistancePortrait : b.extraDistance) : 0) + mountK * (isPortrait() ? 2.4 : 1.6);
 }
 function pivotHeight() {
   const t = getConfig().thirdPerson;
   const b = bossCam();
-  return (isPortrait() ? t.portraitPivotHeight : t.pivotHeight) + (b && bossFrame > 0 ? bossFrame * b.extraHeight : 0);
+  return (isPortrait() ? t.portraitPivotHeight : t.pivotHeight) + (b && bossFrame > 0 ? bossFrame * b.extraHeight : 0) + mountLift;
 }
 
 export function createFpsCamera() {

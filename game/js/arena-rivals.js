@@ -11,9 +11,9 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261010alvo';
-import { xpForLevel } from './state.js?v=20261010alvo';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261010alvo';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261010voo1';
+import { xpForLevel } from './state.js?v=20261010voo1';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261010voo1';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -215,7 +215,7 @@ export function createRivals(ctx) {
    * × ameaça × fidelidade (quanto MENOR, melhor). O herói NÃO tem preferência: é só mais um alvo (jogadorMult = 1 = neutro).
    * Sem `rivais.alvo` (mapa completo) tudo segue como antes.
    */
-  /** 20261010alvo (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
+  /** 20261010voo1 (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
   function playerFull(rv) {
     const A = RC().alvo; const cap = A?.maxAlvoJogador; if (!cap) return false; let n = 0;
     for (const o of list()) { if (o === rv || o.out) continue; if (o.tgt?.kind === 'jogador') { const m = monOf(o); if (m && m.alive && ++n >= cap) return true; } }
@@ -242,7 +242,7 @@ export function createRivals(ctx) {
   }
 
   /**
-   * 20261010alvo — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
+   * 20261010voo1 — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
    * (a) o herói o atacou (ameaça), (b) o herói chegou a ≤ `jogadorPertoR` tiles, ou (c) o herói está fraco (≤ `jogadorFracoFrac` de vida) e a ≤ `jogadorFracoR`.
    * VER o herói de longe NÃO cancela a briga. Trocas rival→rival: só com o compromisso vencido, com cooldown `trocaCooldownMs` por rival e histerese
    * (o novo alvo só entra se o alvo atual saiu da zona de combate: morreu, fugiu > `soltaDist` tiles ou deixou de ser eliminável). Sem `compromissoMs`: comportamento anterior.

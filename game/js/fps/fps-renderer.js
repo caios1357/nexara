@@ -10,37 +10,37 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261010alvo';
-import { buildArenaDressing } from './arena-dressing.js?v=20261010alvo';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming } from './fps-camera.js?v=20261010alvo';
-import { createHeroModel } from './hero-model.js?v=20261010alvo';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261010alvo';
-import { attachHeroGlb } from './hero-glb.js?v=20261010alvo';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261010alvo';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261010alvo';
-import { createActionVfx } from './action-vfx.js?v=20261010alvo';
-import { createPassiveVfx } from './passive-vfx.js?v=20261010alvo';
-import { createFpsControls } from './fps-controls.js?v=20261010alvo';
-import { createViewmodel } from './viewmodel.js?v=20261010alvo';
-import { createDragonView } from './dragon-view.js?v=20261010alvo';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261010alvo';
-import { getSprite } from '../assets.js?v=20261010alvo';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261010alvo';
-import { createBossDragon } from './boss-dragon-view.js?v=20261010alvo';
-import { bossCfgFor } from '../boss-variants.js?v=20261010alvo';
-import { mergeStaticParts } from './merge-util.js?v=20261010alvo';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261010alvo';
-import { attachDragonGlb } from './dragon-glb.js?v=20261010alvo';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261010alvo';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261010alvo';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261010alvo';
-import { createPostFx } from './post-fx.js?v=20261010alvo';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261010alvo';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261010alvo';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261010alvo';
-import { groundAt, setGroundFn } from './ground.js?v=20261010alvo';
-import { buildBrTerrain } from './br-terrain.js?v=20261010alvo';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261010alvo';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261010voo1';
+import { buildArenaDressing } from './arena-dressing.js?v=20261010voo1';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261010voo1';
+import { createHeroModel } from './hero-model.js?v=20261010voo1';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261010voo1';
+import { attachHeroGlb } from './hero-glb.js?v=20261010voo1';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261010voo1';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261010voo1';
+import { createActionVfx } from './action-vfx.js?v=20261010voo1';
+import { createPassiveVfx } from './passive-vfx.js?v=20261010voo1';
+import { createFpsControls } from './fps-controls.js?v=20261010voo1';
+import { createViewmodel } from './viewmodel.js?v=20261010voo1';
+import { createDragonView } from './dragon-view.js?v=20261010voo1';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261010voo1';
+import { getSprite } from '../assets.js?v=20261010voo1';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261010voo1';
+import { createBossDragon } from './boss-dragon-view.js?v=20261010voo1';
+import { bossCfgFor } from '../boss-variants.js?v=20261010voo1';
+import { mergeStaticParts } from './merge-util.js?v=20261010voo1';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261010voo1';
+import { attachDragonGlb } from './dragon-glb.js?v=20261010voo1';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261010voo1';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261010voo1';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261010voo1';
+import { createPostFx } from './post-fx.js?v=20261010voo1';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261010voo1';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261010voo1';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261010voo1';
+import { groundAt, setGroundFn } from './ground.js?v=20261010voo1';
+import { buildBrTerrain } from './br-terrain.js?v=20261010voo1';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261010voo1';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -2464,6 +2464,7 @@ export function createFpsRenderer() {
     } else {
       fpsCam.syncFromPlayer(state.player.x, state.player.y);
     }
+    updateMountVisual(simDt);
     fpsCam.updateCameraTransform(simDt);
     if (hero) updateHero(dt, motion, cview);
     heroVis.x = fpsCam.state.visX;
@@ -2594,6 +2595,30 @@ export function createFpsRenderer() {
   }
 
   /** Herói 3ª pessoa: gira rumo ao movimento; ao atacar, rumo à mira (yaw da câmera = cone do golpe). */
+  // ── 20261010 MONTARIA: dragão do Gigante em escala ~0,4 sob o herói (só visual; sem entidade de combate) ──
+  const mountVis = { alt: 0, k: 0, mesh: null, view: null, heroLift: 0, shown: false, palKey: '' };
+  function updateMountVisual(dt) {
+    const mv = hooks.getMountView?.() || null; const want = mv ? 1 : 0;
+    const kk = 1 - Math.exp(-6 * Math.max(0, dt));
+    mountVis.k += (want - mountVis.k) * kk; if (Math.abs(mountVis.k - want) < 0.002) mountVis.k = want;
+    if (mv) mountVis.alt = mv.alt; else mountVis.alt = 0;
+    mountVis.heroLift = mv ? mv.alt + 1.1 * (mv.scale / 0.4) * mountVis.k : 0; // o herói fica no dorso (≈1,1 m acima do corpo do dragão)
+    setMountFraming(mv ? mv.alt : 0, mountVis.k);
+    if (mv && !mountVis.view) {
+      try {
+        const bc = bossCfgFor({}, getConfig().arenaBoss);
+        const view = createBossDragon({ height: (bc.visualHeight || 6.4) * mv.scale, palette: mv.pal || null });
+        entityRoot.add(view.root); mountVis.view = view; mountVis.mesh = view.root; mountVis.bc = bc;
+      } catch (e) { console.warn('[montaria] visual', e); }
+    }
+    const m = mountVis.mesh; if (!m) return;
+    const vis = !!mv; if (m.visible !== vis) m.visible = vis;
+    if (!vis) return;
+    const fx = fpsCam.state.visX / TILE, fy = fpsCam.state.visZ / TILE;
+    m.position.set(fpsCam.state.visX, groundAt(fx, fy) + mv.alt, fpsCam.state.visZ);
+    m.rotation.y = Math.PI - heroSt.yaw;
+    try { mountVis.view.update({ state: 'CHASE', progress: 0, speed: 4, attack: null, facing: heroSt.yaw, fx, fy }, { dt, now: performance.now(), cfg: mountVis.bc, flashing: false }); } catch (e) { if (!mountVis.err) { mountVis.err = String(e?.message || e); console.warn('[montaria] anim', e); } }
+  }
   function updateHero(dt, motion, cview) {
     const t = getConfig().thirdPerson;
     const mv = getConfig().movement;
@@ -2628,7 +2653,7 @@ export function createFpsRenderer() {
       runSpeed: mv.walkSpeed * mv.runMultiplier,
       attack: cview,
       action: act,
-      groundY: groundAt(fpsCam.state.visX / TILE, fpsCam.state.visZ / TILE),
+      groundY: groundAt(fpsCam.state.visX / TILE, fpsCam.state.visZ / TILE) + mountVis.heroLift,
       leapHeight: getConfig().specials.suprema.leapHeight,
       nexa: (() => { const P = getState()?.player; return P && P.nexaMax ? P.nexa / P.nexaMax : 0.5; })()
     });
@@ -2843,6 +2868,7 @@ export function createFpsRenderer() {
     getPerf: () => ({ pixelRatio: perf.pr, fps: +(1000 / perf.emaMs).toFixed(1) }),
     /** Bloco V: qualidade/pós/atmosfera (e2e). */
     getGraphics: () => ({
+      mount: { k: +mountVis.k.toFixed(2), alt: +mountVis.alt.toFixed(2), hasMesh: !!mountVis.mesh, visible: !!mountVis.mesh?.visible, err: mountVis.err || null, heroLift: +mountVis.heroLift.toFixed(2), h: mountVis.view?.height ?? null, y: mountVis.mesh ? +mountVis.mesh.position.y.toFixed(2) : null },
       tier: tierName,
       tierIfHardware: tierAuto,
       softwareGL,

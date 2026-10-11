@@ -380,3 +380,22 @@ body.has-mobile-controls #game-screen {
   font-size: 0.42rem;
   letter-spacing: 0.04em;
 }
+
+/* 20261010 MONTARIA — botão MONTAR (acima do joystick) e estado "montado" (ESQUIVA vira DESCER; especiais desligados) */
+.mc-btn.mc-mount {
+  z-index: 4; pointer-events: auto;
+  border-color: rgba(255, 190, 70, 0.85);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 190, 70, 0.4), transparent 58%), rgba(34, 22, 6, 0.82);
+  box-shadow: 0 0 14px rgba(255, 190, 70, 0.55);
+}
+.mc-btn.mc-mount .mc-ico { width: auto; height: auto; line-height: 1; font-size: 1.25rem; }
+.mc-btn.mc-mount.mc-mount-off { display: none !important; }
+.mobile-controls.mc-mounted .mc-act-golpe_poderoso,
+.mobile-controls.mc-mounted .mc-act-ataque_area,
+.mobile-controls.mc-mounted .mc-act-suprema,
+.mobile-controls.mc-mounted .mc-act-defend { opacity: 0.28 !important; pointer-events: none !important; filter: grayscale(1); }
+.mobile-controls.mc-mounted .mc-attack { opacity: 0.35 !important; pointer-events: none !important; filter: grayscale(1); }
+.mobile-controls.mc-mounted .mc-btn.mc-act-dodge.mc-descend {
+  transform: scale(1.2); border-color: #7ff6ff; box-shadow: 0 0 18px rgba(57, 240, 255, 0.85); background: rgba(10, 52, 60, 0.9);
+}
+.mobile-controls.mc-mounted .mc-btn.mc-act-dodge.mc-descend .mc-lbl { font-size: 0.55rem; letter-spacing: 0.04em; }
