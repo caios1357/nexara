@@ -35,7 +35,7 @@ export const DEFAULTS = Object.freeze({
    */
   mount: {
     enabled: true,
-    flyEnabled: false,
+    flyEnabled: true, // V2: voo + fogo + DESCER funcionam de ponta a ponta (e2e-montaria-v2 / -fogo)
     cruiseAltitude: 3.2, // m (alcance da espada 3,4 m; teto das coberturas ≥ 3,4 m)
     flightMs: 30000, callFlightMs: 15000, cooldownMs: 45000, respawnMs: 90000,
     speed: 6.5, // tiles/s (corrida a pé ≈ 3,4)
@@ -43,7 +43,7 @@ export const DEFAULTS = Object.freeze({
     hpFracOfHero: 0.6, // reserva de vida da montaria (absorve antes do herói)
     fall: { pctPerMeter: 0.05, maxFrac: 0.25, nonLethal: true, graceMs: 2000 },
     descendSpeed: 2.2, // m/s
-    breath: { max: 100, burst: 12, perSec: 18, regenPerSec: 8 },
+    breath: { max: 100, burst: 12, regenPerSec: 8, cadenceMs: 450, range: 7, halfAngleDeg: 28, dmgMult: 0.8, maxTargets: 3, rasanteAlt: 2.0 }, // sopro: cone à frente; dano = golpe básico do herói × dmgMult por alvo (até maxTargets); o dragão desce a rasanteAlt ao cuspir
     vertical: { bowStaff: 8, swordPlain: 3.4, swordHeavy: 4.2 }
   },
 

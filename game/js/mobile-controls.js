@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261010voo1';
-import { pushLog } from './state.js?v=20261010voo1';
-import { isArenaState } from './arena.js?v=20261010voo1';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261010voo1';
-import { ICONS } from './icons.js?v=20261010voo1';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261010voo2';
+import { pushLog } from './state.js?v=20261010voo2';
+import { isArenaState } from './arena.js?v=20261010voo2';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261010voo2';
+import { ICONS } from './icons.js?v=20261010voo2';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -630,13 +630,16 @@ export function createMobileControls(hooks) {
   let mountKey = '';
   function setMountUi(u) {
     if (!root) return;
-    const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}`;
+    const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}`;
     if (key === mountKey) return; mountKey = key;
     root.querySelector('.mc-mount')?.classList.toggle('mc-mount-off', !u.show);
     root.classList.toggle('mc-mounted', !!u.flying);
     const d = root.querySelector('.mc-act-dodge'); const lbl = d?.querySelector('.mc-lbl');
     if (lbl) lbl.textContent = u.flying ? (u.phase === 'landing' ? 'CANCELAR' : 'DESCER') : 'ESQUIVA';
     d?.classList.toggle('mc-descend', !!u.flying);
+    const at = root.querySelector('.mc-attack'); const al = at?.querySelector('.mc-lbl'); // montado: ATAQUE vira FOGO (anel de Fôlego)
+    if (al) al.textContent = u.flying ? 'FOGO' : 'ATAQUE';
+    at?.classList.toggle('mc-fogo', !!u.flying); at?.style.setProperty('--fogo', `${bp}%`);
   }
 
   /** Bloco 4: recarga (varredura radial + segundos) / Nexa insuficiente / ativo. */

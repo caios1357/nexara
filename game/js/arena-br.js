@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261010voo1';
-import { getConfig } from './gameplay-config.js?v=20261010voo1';
-import { pushLog } from './state.js?v=20261010voo1';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261010voo1';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261010voo1';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261010voo1';
-import { createRivals } from './arena-rivals.js?v=20261010voo1';
+import { createArenaState } from './arena.js?v=20261010voo2';
+import { getConfig } from './gameplay-config.js?v=20261010voo2';
+import { pushLog } from './state.js?v=20261010voo2';
+import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261010voo2';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261010voo2';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261010voo2';
+import { createRivals } from './arena-rivals.js?v=20261010voo2';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;

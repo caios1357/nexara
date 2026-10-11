@@ -394,7 +394,8 @@ body.has-mobile-controls #game-screen {
 .mobile-controls.mc-mounted .mc-act-ataque_area,
 .mobile-controls.mc-mounted .mc-act-suprema,
 .mobile-controls.mc-mounted .mc-act-defend { opacity: 0.28 !important; pointer-events: none !important; filter: grayscale(1); }
-.mobile-controls.mc-mounted .mc-attack { opacity: 0.35 !important; pointer-events: none !important; filter: grayscale(1); }
+.mobile-controls.mc-mounted .mc-attack.mc-fogo { background: radial-gradient(circle at 50% 60%, rgba(255,150,40,0.9), rgba(200,50,10,0.85)); box-shadow: 0 0 0 3px rgba(255,190,80,0.55), inset 0 -6px 0 rgba(0,0,0,0.25), 0 0 14px rgba(255,120,30,0.6); }
+.mobile-controls.mc-mounted .mc-attack.mc-fogo::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: -9px; height: 5px; border-radius: 3px; background: linear-gradient(90deg, #ffd24a var(--fogo, 100%), rgba(255,255,255,0.18) var(--fogo, 100%)); }
 .mobile-controls.mc-mounted .mc-btn.mc-act-dodge.mc-descend {
   transform: scale(1.2); border-color: #7ff6ff; box-shadow: 0 0 18px rgba(57, 240, 255, 0.85); background: rgba(10, 52, 60, 0.9);
 }

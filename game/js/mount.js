@@ -75,7 +75,7 @@ export function createMount(ctx) {
   function tryMount() {
     const br = ctx.br(); const c = canMount(); if (!c.ok) return c;
     const m = ensure(br); const C0 = C();
-    m.active = true; m.phase = 'takeoff'; m.alt = 0; m.mode = c.access; m.warned = false;
+    m.active = true; m.phase = 'takeoff'; m.alt = 0; m.mode = c.access; m.warned = false; m.breath = C0.breath?.max ?? 100; m.fireAt = -1e9; m.fireUntil = 0;
     m.leftMs = c.access === 'sela' ? (C0.flightMs ?? 30000) : (C0.callFlightMs ?? 15000);
     if (c.access === 'chamado') m.calledUsed = true;
     ctx.note('mount_up', { mode: c.access, ms: m.leftMs });
@@ -91,16 +91,30 @@ export function createMount(ctx) {
     const m = ctx.br()?.mount; if (!m?.active) return false;
     m.phase = 'landing'; m.forced = true; ctx.note('mount_forced', { why }); return true;
   }
+  /** SOPRO DE FOGO (ATAQUE montado): gasta Fôlego, cadência fixa; o main aplica o dano no cone. Não funciona pousando/decolando baixo. */
+  function fire() {
+    const br = ctx.br(); const m = br?.mount; if (!m?.active || !flyOn()) return { ok: false, why: 'off' };
+    const B = C().breath || {}; if (m.phase === 'landing') return { ok: false, why: 'pousando' };
+    if (m.alt < 1.2) return { ok: false, why: 'baixo' };
+    if (m.clock - (m.fireAt ?? -1e9) < (B.cadenceMs ?? 450)) return { ok: false, why: 'cadencia' };
+    if ((m.breath ?? 0) < (B.burst ?? 12)) { if (!m.noBreathWarned || m.clock - m.noBreathWarned > 2500) { m.noBreathWarned = m.clock; ctx.note('mount_nobreath', {}); } return { ok: false, why: 'sem_folego' }; }
+    m.breath -= B.burst ?? 12; m.fireAt = m.clock; m.fireUntil = m.clock + 700; m.fires = (m.fires || 0) + 1;
+    return { ok: true, range: B.range ?? 7, halfAngle: (B.halfAngleDeg ?? 28) * Math.PI / 180, dmgMult: B.dmgMult ?? 0.8, maxTargets: B.maxTargets ?? 3 };
+  }
   /** avança o voo `dtMs` (chamar todo frame de simulação com o jogo rodando). */
   function step(dtMs) {
     const br = ctx.br(); if (!br || !on()) return;
-    const m = ensure(br); m.clock += dtMs;
+    const m = ensure(br); m.clock += dtMs; settle();
     if (!m.active) return;
     const C0 = C(); const cruise = C0.cruiseAltitude ?? 3.2; const dt = dtMs / 1000;
     if (ctx.playerAlive && !ctx.playerAlive()) { endFlight(m, 'morreu'); return; }
     if (!flyOn()) { endFlight(m, 'desligado'); return; }
     if (finalState(br) && !m.forced) forceLand('final');
     if (m.phase === 'takeoff') { m.alt = Math.min(cruise, m.alt + (cruise / 1.2) * dt); if (m.alt >= cruise) m.phase = 'cruise'; }
+    if (m.phase === 'cruise') { // rasante: ao cuspir fogo o dragão desce a `rasanteAlt` (janela p/ a espada) e volta ao cruzeiro
+      const tgt = m.clock < (m.fireUntil || 0) ? Math.min(cruise, C0.breath?.rasanteAlt ?? 2.0) : cruise; const dz = tgt - m.alt; m.alt += Math.sign(dz) * Math.min(Math.abs(dz), 3 * dt);
+    }
+    if (m.phase !== 'landing' && m.clock - (m.fireAt ?? -1e9) > 600) m.breath = Math.min(C0.breath?.max ?? 100, (m.breath ?? 0) + (C0.breath?.regenPerSec ?? 8) * dt);
     if (m.phase === 'cruise' || m.phase === 'takeoff') {
       m.leftMs -= dtMs;
       if (!m.warned && m.leftMs <= 5000) { m.warned = true; ctx.note('mount_warn', { ms: Math.max(0, m.leftMs) }); }
@@ -116,17 +130,19 @@ export function createMount(ctx) {
     m.active = false; m.phase = 'ground'; m.alt = 0; m.forced = false; m.cdUntil = m.clock + (C().cooldownMs ?? 45000);
     ctx.note('mount_down', { why });
   }
-  const isActive = () => !!ctx.br()?.mount?.active && flyOn();
+  /** morreu com o jogo pausado (tela de derrota): encerra o voo sem depender do passo de simulação */
+  function settle() { const br = ctx.br(); const m = br?.mount; if (m?.active && ((ctx.playerAlive && !ctx.playerAlive()) || br.spectate || br.ended)) endFlight(m, 'morreu'); }
+  const isActive = () => { settle(); return !!ctx.br()?.mount?.active && flyOn(); };
   /** velocidade de voo em tiles/s (o main converte em multiplicador do movimento) */
   const speed = () => C().speed ?? 6.5;
   const view = () => {
-    const br = ctx.br(); const m = br?.mount || null; const cm = br && flyOn() ? canMount() : { ok: false, why: 'off' };
+    settle(); const br = ctx.br(); const m = br?.mount || null; const cm = br && flyOn() ? canMount() : { ok: false, why: 'off' };
     return { enabled: on(), flyEnabled: flyOn(), active: !!m?.active, phase: m?.phase || 'ground', alt: m ? +m.alt.toFixed(2) : 0, leftMs: m ? Math.max(0, Math.round(m.leftMs)) : 0,
-      cdLeftMs: m ? Math.max(0, Math.round(m.cdUntil - m.clock)) : 0, sela: !!m?.sela, por: m?.por || null, decidido: !!m?.decidido, mode: m?.mode || null, calledUsed: !!m?.calledUsed,
+      cdLeftMs: m ? Math.max(0, Math.round(m.cdUntil - m.clock)) : 0, sela: !!m?.sela, por: m?.por || null, decidido: !!m?.decidido, mode: m?.mode || null, calledUsed: !!m?.calledUsed, breath: m ? Math.round(m.breath ?? 0) : 0, fires: m?.fires || 0,
       canMount: cm.ok, why: cm.ok ? null : cm.why, domado: loadTamed(), key: MOUNT_KEY, cfg: JSON.parse(JSON.stringify(C())) };
   };
   /** leitura leve para o renderer (todo frame) */
-  const renderView = () => { const m = ctx.br()?.mount; return m && m.active && flyOn() ? { active: true, alt: m.alt, phase: m.phase, cruise: C().cruiseAltitude ?? 3.2, scale: C().scale ?? 0.4, pal: m.pal || loadPal() } : null; };
+  const renderView = () => { settle(); const m = ctx.br()?.mount; return m && m.active && flyOn() ? { active: true, alt: m.alt, phase: m.phase, cruise: C().cruiseAltitude ?? 3.2, scale: C().scale ?? 0.4, pal: m.pal || loadPal() } : null; };
   const status = () => { const br = ctx.br(); const m = br?.mount; return { active: !!m?.active && flyOn(), phase: m?.phase || 'ground', canMount: br && flyOn() ? canMount().ok : false }; };
-  return { onGiantKilled, view, has: () => !!ctx.br()?.mount?.sela, canMount, tryMount, toggleDescend, forceLand, step, isActive, speed, renderView, status };
+  return { onGiantKilled, fire, view, has: () => !!ctx.br()?.mount?.sela, canMount, tryMount, toggleDescend, forceLand, step, isActive, speed, renderView, status };
 }
