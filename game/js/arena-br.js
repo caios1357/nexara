@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261016foco';
-import { getConfig } from './gameplay-config.js?v=20261016foco';
-import { pushLog } from './state.js?v=20261016foco';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261016foco';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261016foco';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261016foco';
-import { createRivals } from './arena-rivals.js?v=20261016foco';
+import { createArenaState } from './arena.js?v=20261016gigantes';
+import { getConfig } from './gameplay-config.js?v=20261016gigantes';
+import { pushLog } from './state.js?v=20261016gigantes';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261016gigantes';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261016gigantes';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261016gigantes';
+import { createRivals } from './arena-rivals.js?v=20261016gigantes';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -110,8 +110,25 @@ export function createArenaBr(deps) {
     };
     br.rng = rng32((Date.now() & 0x7fffffff) ^ 0x5bd1e995);
     spawnGuardians();
+    spawnElementalGiants();
     setupEncounters();
     note('run_start', {});
+  }
+  /** 20261016 — ARENA PRINCIPAL: 4 GIGANTES ELEMENTAIS (fogo/gelo/raio/veneno = perfis de data/dragoes.json chefes[]), um no centro de cada região
+   *  distante (Ruínas, Complexo, Periferia, Floresta). O Território do Dragão (GIGANTE VERDE no covil) não é tocado. Quem MATA um deles ganha a sela. */
+  function spawnElementalGiants() {
+    const C = cfg(); const G = C.gigantesElementais; if (!G?.ativo || C.fastRun) return;
+    const bc = getConfig().arenaBoss; const def = st._data.monsters.monsters.find((m) => m.id === bc.monsterId); const m = map(); if (!def || !m) return;
+    const D = C.dragao || {}; const chefes = deps.getData().dragoes?.chefes || []; let k = 0;
+    for (const dist of G.distritos || []) {
+      const ch = chefes.find((c) => c.distrito === dist); const rg = C.regioes.find((r) => r.id === (G.regiao?.[dist] || dist)); if (!ch || !rg || rg.id === 'dragao') continue;
+      const f = nearestFree(Math.floor((rg.x0 + rg.x1) / 2), Math.floor((rg.y0 + rg.y1) / 2)); if (!f) continue;
+      const mon = { uid: (G.uidBase || 9101) + k++, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome, elemental: ch.elemento,
+        territoryMinX: rg.x0 + 1, territoryMaxX: rg.x1 - 1, territoryMinY: rg.y0 + 1, territoryMaxY: rg.y1 - 1, hpMult: G.hpMult || (D.hpMult > 0 ? D.hpMult : 33), atkScale: G.danoMult || (D.danoMult > 0 ? D.danoMult : 2.5) };
+      applyDragonProfile(mon, ch); mon.visualScale = G.escalaVisual || 1; mon.hp = mon.hpMax = Math.max(100, Math.round((st.player.hpMax || 100) * mon.hpMult)); st.monstersAlive.push(mon); // HP = HP do herói × multiplicador (mesma regra do gigante do covil)
+      (br.giants = br.giants || []).push({ uid: mon.uid, id: ch.id, nome: ch.nome, elemento: ch.elemento, regiao: rg.id, x: f.x, y: f.y });
+    }
+    if (br.giants?.length) note('giants', { n: br.giants.length });
   }
   function stop() { st = null; br = null; }
   const isActive = () => !!(st && br && !br.ended);
@@ -563,7 +580,7 @@ export function createArenaBr(deps) {
       note('hunt_done', { bonus: br.event.bonus || 0 });
     }
   }
-  function onBossKilled() { if (br) { br.bossKilled = true; note('boss_down', {}); } }
+  function onBossKilled(mon = null) { if (!br) return; if (mon?.elemental) { const g = br.giants?.find((q) => q.uid === mon.uid); if (g) g.killedAt = Date.now(); note('giant_down', { uid: mon.uid, elemento: mon.elemental }); return; } br.bossKilled = true; note('boss_down', {}); } /* gigantes elementais não apagam o COVIL */
   function addMcb(n) { if (br) br.mcbRun += n; }
 
   /** Morte → DERROTADO (nada permanente perdido; o save já tem tudo). */
@@ -618,11 +635,12 @@ export function createArenaBr(deps) {
     start, stop, update, isActive, onKill, spectateAdvance, isSpectating: () => !!(br && br.spectate && !br.ended),
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
     onRivalHit(mon) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos()); },
+    giants: () => (br?.giants || []).map((g) => { const m = st.monstersAlive.find((q) => q.uid === g.uid); return { ...g, alive: !!m?.alive, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0, mx: m?.x, my: m?.y }; }),
     rivals: () => (br ? rivals.view(deps.getPos()) : null), onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     densityExhausted,
-    /** 20261016foco: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
+    /** 20261016gigantes: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
     coverAt: (x, y) => { try { return br ? brCoverAt(map(), cfg(), x, y) : null; } catch { return null; } }, coverList: () => (br ? brCoverList(map(), cfg()).map((c) => ({ ...c })) : []),
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */

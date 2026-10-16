@@ -15,11 +15,11 @@
  * Um único dono do movimento: este módulo. Sem loop próprio — é chamado pelo
  * rAF único do renderer ativo (update(state, dt, yaw, opts)).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261016foco';
-import { tryMove, maybeRespawn } from './actions.js?v=20261016foco';
-import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261016foco';
-import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261016foco';
-import { getStat, STATS } from './modifiers.js?v=20261016foco';
+import { getConfig, DEG } from './gameplay-config.js?v=20261016gigantes';
+import { tryMove, maybeRespawn } from './actions.js?v=20261016gigantes';
+import { isWalkable, isWalkableHero, getTileType, TREE_TRUNK_R } from './map.js?v=20261016gigantes';
+import { moveAxisX, moveAxisY, wrapAngle } from './collision.js?v=20261016gigantes';
+import { getStat, STATS } from './modifiers.js?v=20261016gigantes';
 
 const KEY_MAP = {
   w: 'f', arrowup: 'f',
@@ -136,6 +136,20 @@ export function createPlayerMotion() {
       const n = npcs[i];
       if (n.zone === zone.id && n.x === tx && n.y === ty) return true;
     }
+    return false;
+  }
+
+  /** 20261016voo: VOANDO — passa por cima de paredes/bordas de distrito/obstáculos; só a borda do mapa e portões fechados (zonas trancadas) seguram */
+  function flyBlocked(tx, ty) {
+    const zone = colZone; const rows = zone.map.tiles; const h = rows.length, w = rows[0].length;
+    if (tx <= 0 || ty <= 0 || tx >= w - 1 || ty >= h - 1) return true;
+    const t = getTileType(zone, tx, ty); return !!(zone.closed && zone.closed[t]);
+  }
+  /** depois de pousar/cair em cima de um obstáculo: vai para o chão livre mais próximo */
+  function ensureWalkable(state) {
+    const zone = getZone(state); if (!zone) return false; const px = state.player.x, py = state.player.y;
+    if (isWalkableHero(zone, px, py)) return false;
+    for (let r = 1; r <= 14; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const x = px + dx, y = py + dy; if (isWalkableHero(zone, x, y)) { state.player.x = x; state.player.y = y; stopNow(); snapToTile(state); return true; } }
     return false;
   }
 
@@ -320,15 +334,15 @@ export function createPlayerMotion() {
       let hitX = false;
       let hitY = false;
       for (let i = 0; i < n; i++) {
-        if (!hitX && moveAxisX(pos, sx, r, blockedTile)) hitX = true;
-        if (!hitY && moveAxisY(pos, sy, r, blockedTile)) hitY = true;
+        const blk = opts.fly ? flyBlocked : blockedTile;
+        if (!hitX && moveAxisX(pos, sx, r, blk)) hitX = true;
+        if (!hitY && moveAxisY(pos, sy, r, blk)) hitY = true;
       }
       // Encostou na parede: zera o componente (desliza no outro eixo, sem "grudar")
       if (hitX) vel.x = 0;
       if (hitY) vel.y = 0;
     }
-    resolveBodies(opts.bodies, cfg.playerRadius);
-    resolveTrees(zone, cfg.playerRadius);
+    if (!opts.fly) { resolveBodies(opts.bodies, cfg.playerRadius); resolveTrees(zone, cfg.playerRadius); }
     return finishStep(state, dt, yaw, opts, prevX, prevY, speed, cfg, snapped);
   }
 
@@ -392,7 +406,7 @@ export function createPlayerMotion() {
       const dx = Math.sign(ntx - state.player.x);
       const dy = Math.sign(nty - state.player.y);
       const prevZone = state.zoneId;
-      const ok = tryMove(state, dx, dy, { ignoreMonsters: true });
+      let ok; if (opts.fly && state.brMode) { colZone = getZone(state); ok = !flyBlocked(ntx, nty); if (ok) { state.player.x = ntx; state.player.y = nty; } } /* 20261016voo: no ar a autoridade de tile não exige chão livre */ else ok = tryMove(state, dx, dy, { ignoreMonsters: true });
       if (!ok) {
         // Tile recusado pela autoridade → volta para a posição anterior
         pos.x = prevX;
@@ -437,6 +451,7 @@ export function createPlayerMotion() {
   }
 
   return {
+    ensureWalkable,
     movementInput,
     setStick,
     clearStick,

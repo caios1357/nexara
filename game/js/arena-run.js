@@ -13,11 +13,11 @@
  *    rollLoot, addToInventory) no personagem PERMANENTE + stats.arenaBossWins++ → saveToLocal;
  *    depois reset e nova tentativa.
  */
-import { getConfig } from './gameplay-config.js?v=20261016foco';
-import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261016foco';
-import { addXp, pushLog } from './state.js?v=20261016foco';
-import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261016foco';
-import { reveal } from './arquivo.js?v=20261016foco';
+import { getConfig } from './gameplay-config.js?v=20261016gigantes';
+import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261016gigantes';
+import { addXp, pushLog } from './state.js?v=20261016gigantes';
+import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261016gigantes';
+import { reveal } from './arquivo.js?v=20261016gigantes';
 
 /** Estatísticas medidas para a checagem "sem bônus sobrando" (valores exatos). */
 const SNAP_STATS = [
@@ -250,7 +250,7 @@ export function createArenaRun(deps) {
       if (!target.stats || typeof target.stats !== 'object') target.stats = {};
       const key = cfg().victoryStatKey || 'arenaBossWins';
       target.stats[key] = (target.stats[key] || 0) + 1;
-      pushLog(target, `Arena: GIGANTE VERDE derrotado! +${xp} XP${target.player.nivel > nivelAntes ? ` (nível ${target.player.nivel})` : ''}.`, 'sys');
+      pushLog(target, `Arena: ${mon?.arenaLabel || 'GIGANTE VERDE'} derrotado! +${xp} XP${target.player.nivel > nivelAntes ? ` (nível ${target.player.nivel})` : ''}.`, 'sys');
       try { perm.persist(target); persisted = true; } catch (e) { console.warn('[arena-run] persist', e); }
     }
     // mesmo XP/loot também no estado da tentativa (log e HUD da vitória); a tentativa é descartada no reset

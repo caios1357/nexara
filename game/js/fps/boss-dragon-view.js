@@ -13,10 +13,10 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016foco';
-import { TILE } from './fps-camera.js?v=20261016foco';
-import { mergeStaticParts } from './merge-util.js?v=20261016foco';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261016foco';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016gigantes';
+import { TILE } from './fps-camera.js?v=20261016gigantes';
+import { mergeStaticParts } from './merge-util.js?v=20261016gigantes';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261016gigantes';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -51,9 +51,9 @@ function mats(pal) {
     skin: std(P.dark, { flatShading: false, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v1, P.v2, 77), emissiveIntensity: 0.8, roughness: 0.55 }),
     skin2: std(P.mid, { flatShading: false, roughness: 0.7, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v3, P.v4, 91), emissiveIntensity: 0.6 }),
     plate: std(P.plate, { roughness: 0.3, metalness: 0.75, emissive: 0x040a05, emissiveIntensity: 1 }),
-    horn: std(0x1a1712, { roughness: 0.4, metalness: 0.5, emissive: 0x0b0a07, emissiveIntensity: 1 }),
+    horn: std(pal ? mix(hx(pal.escuro), 0x1a1712, 0.4) : 0x1a1712, { roughness: 0.4, metalness: 0.5, emissive: pal ? mix(P.nexa, 0x000000, 0.72) : 0x0b0a07, emissiveIntensity: 1 }), /* 20261016: chifres com brilho do elemento */
     claw: std(0x0a0a0a, { roughness: 0.3, metalness: 0.6 }),
-    membrane: std(P.mem, { flatShading: false, map: membraneTex(), roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide, transparent: true, opacity: 0.93, emissive: P.memE, emissiveIntensity: 1 }),
+    membrane: std(P.mem, { flatShading: false, map: membraneTex(), roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide, transparent: true, opacity: 0.93, emissive: P.memE, emissiveIntensity: pal ? 1.5 : 1 }), /* membrana translúcida acende um pouco mais na cor do elemento */
     rim: new THREE.MeshBasicMaterial({ color: P.nexa }),
     nexa: new THREE.MeshStandardMaterial({ color: P.nexa, emissive: P.nexa, emissiveIntensity: 2.2, roughness: 0.2, metalness: 0.1, flatShading: true }),
     eye: new THREE.MeshBasicMaterial({ color: P.eye }),
@@ -586,9 +586,23 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
       if (T > 2.6) st.introT = -1;
     }
 
+    // 20261016voo: VOO DE VERDADE (montaria) — asas batendo/planando, pernas recolhidas, inclina nas curvas; decolagem e pouso com pose própria
+    let legTuck = 0, legReach = 0, roll = 0; st.anim = 'chao';
+    const F = v && v.fly;
+    if (F) {
+      const ph = F.phase || 'cruise'; st.flyT = (st.flyT || 0) + dt;
+      if (ph === 'takeoff') { st.anim = 'decolagem'; wingSpread = 1; wingFlap = Math.sin(st.t * 11) * 0.75; hipPitch = 0.32; legTuck = Math.min(1, st.flyT * 1.2); neckBend = -0.25; }
+      else if (ph === 'landing') { st.anim = 'pouso'; wingSpread = 1; wingFlap = Math.sin(st.t * 9) * 0.55; hipPitch = 0.38; legReach = 1; neckBend = -0.1; }
+      else if (ph === 'falling') { st.anim = 'queda'; wingSpread = 0.6; wingFlap = Math.sin(st.t * 17) * 0.3; wobble = Math.sin(st.t * 7) * 0.2; legTuck = 0.3; }
+      else { const cyc = st.flyT % 4.2; const glide = cyc > 2.4 && Math.abs(F.turn || 0) < 0.6; st.anim = glide ? 'planando' : 'batendo-asas';
+        wingSpread = 1; wingFlap = glide ? 0.12 + Math.sin(st.t * 1.5) * 0.04 : Math.sin(st.t * 6.5) * 0.6; hipPitch = glide ? -0.06 : 0.04 + Math.sin(st.t * 6.5 + 1) * 0.04; legTuck = 1; neckBend = 0.08; }
+      roll = Math.max(-0.55, Math.min(0.55, -(F.turn || 0) * 0.45));
+      tailSwing = Math.sin(st.t * 2.2) * 0.08 - (F.turn || 0) * 0.35; jawOpen = Math.max(jawOpen, 0.1);
+      body.position.y = Math.sin(st.t * 6.5) * (st.anim === 'planando' ? 0.03 : 0.12);
+    } else st.flyT = 0;
     hips.rotation.x = -hipPitch;
-    body.position.y = lift + (S === 'ATTACK' && atk === 'investida' ? Math.sin(st.t * 8) * 0.08 : 0);
-    body.rotation.z = wobble;
+    if (!F) body.position.y = lift + (S === 'ATTACK' && atk === 'investida' ? Math.sin(st.t * 8) * 0.08 : 0);
+    body.rotation.z = wobble + roll;
     body.rotation.y = twist * 0.5;
     torsoMesh.scale.set(1.25 * breathe, 1.1 * breathe, 2.3);
     for (let i = 0; i < neckSegs.length; i++) neckSegs[i].rotation.x = -0.28 + neckBend * 0.25 + Math.sin(st.t * 0.8 + i) * 0.015;
@@ -613,6 +627,10 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     legBR.hip.rotation.x = legSw + hipPitch * 0.4 + (lift ? 0.6 : 0);
     legBL.knee.rotation.x = lift ? -0.6 : 0;
     legBR.knee.rotation.x = lift ? -0.6 : 0;
+    if (F) { /* pernas recolhidas contra a barriga (voo) ou esticadas para a frente (pouso) — sem passo de caminhada */
+      const fT = legTuck * 1.15 - legReach * 0.55, bT = legTuck * 1.35 - legReach * 0.25;
+      legFL.hip.rotation.x = fT; legFR.hip.rotation.x = fT; legFR.hip.rotation.z = 0; legFL.knee.rotation.x = -legTuck * 1.2; legFR.knee.rotation.x = -legTuck * 1.2;
+      legBL.hip.rotation.x = bT; legBR.hip.rotation.x = bT; legBL.knee.rotation.x = -legTuck * 1.4 + legReach * 0.2; legBR.knee.rotation.x = -legTuck * 1.4 + legReach * 0.2; }
     // núcleo / olhos
     const flashing = !!o.flashing;
     nexaMat.emissiveIntensity = flashing ? 5 : 1.4 + corePulse * 2.2 + (st.introT >= 0 ? 2.5 * Math.min(1, st.introT / 0.7) : 0);
@@ -736,5 +754,5 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     update(v, o);
     glb.update(o.dt || 0.016, { state: v ? v.state : 'IDLE', progress: v ? v.progress : 0, speed: v ? v.speed : 0, attack: v ? v.attack : null });
   }
-  return { root, update: updateAll, glb, getTelegraph: () => st.visibleTele, height, mergeInfo, playIntro, introActive: () => st.introT >= 0 };
+  return { root, update: updateAll, glb, getTelegraph: () => st.visibleTele, height, mergeInfo, playIntro, introActive: () => st.introT >= 0, anim: () => st.anim || 'chao' };
 }

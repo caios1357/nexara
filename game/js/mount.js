@@ -119,7 +119,7 @@ export function createMount(ctx) {
       if (m.alt <= 0) { const n = fallDamage(m.fallFrom ?? a0); if (n > 0) ctx.fallHurt?.(n); m.graceUntil = m.clock + (C0.fall?.graceMs ?? 2000); const sp = m.spot; endFlight(m, 'abatida'); m.cdUntil = m.clock; m.down = { at: m.clock, respawnAt: m.clock + (C0.respawnMs ?? 90000), spot: sp || null }; ctx.note('mount_shot_down', { fall: n, respawnMs: C0.respawnMs ?? 90000 }); }
       return;
     }
-    if (m.phase !== 'landing' && ctx.inCover?.()) forceLand('abrigo'); // entrou num esconderijo: pousa na borda e segue a pé
+    if (m.phase !== 'landing' && m.phase !== 'cruise' && ctx.inCover?.()) forceLand('abrigo'); /* 20261016voo: em cruzeiro o dragão sobrevoa telhados/abrigos (não pousa à força) */ // entrou num esconderijo: pousa na borda e segue a pé
     if (finalState(br) && !m.forced) forceLand('final');
     if (m.phase === 'takeoff') { m.alt = Math.min(cruise, m.alt + (cruise / 1.2) * dt); if (m.alt >= cruise) m.phase = 'cruise'; }
     if (m.phase === 'cruise') { // rasante: ao cuspir fogo o dragão desce a `rasanteAlt` (janela p/ a espada) e volta ao cruzeiro

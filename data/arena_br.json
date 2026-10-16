@@ -600,7 +600,7 @@
    "maxAlvoJogador": 2,
    "emCombateR": 2.6,
    "emCombateJogadorR": 2.5,
-   "_doc": "20261016foco: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
+   "_doc": "20261016gigantes: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
   },
   "bbDanoFrac": 0.3,
   "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
@@ -689,8 +689,8 @@
   "finalLivre": true,
   "cacaRivalDistArena": 45,
   "lutamSempre": true,
-  "_docLutam": "20261016foco: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
-  "_docFinal": "20261016foco: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói)."
+  "_docLutam": "20261016gigantes: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
+  "_docFinal": "20261016gigantes: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói)."
  },
  "fast": {
   "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica). DISTRITO ÚNICO (20261009fast3): cada partida acontece em UM distrito do mapa grande sorteado pela seed (Periferia, Ruínas Industriais, Floresta Selvagem, Complexo Abandonado, Zona de Elite ou Território do Dragão), com o layout/identidade da região (gerador v2), mapa de ≤ ~90 tiles por lado, zona segura encolhendo dentro dele, sem extração.",
@@ -900,5 +900,17 @@
    "ataqueR": 14
   },
   "campeaoGatilhoEstagio": 99
+ },
+ "gigantesElementais": {
+  "ativo": true,
+  "distritos": [
+   "ruinas",
+   "complexo",
+   "periferia",
+   "floresta"
+  ],
+  "uidBase": 9101,
+  "escalaVisual": 1.7,
+  "_doc": "20261016: 4 gigantes elementais na ARENA PRINCIPAL (fogo=Forja Rubra nas Ruínas, gelo=Gélido no Complexo, raio=Trovão de Neon na Periferia, veneno=Espinho de Musgo na Floresta), cada um no centro da sua região; o Território do Dragão não muda. Quem mata qualquer um ganha a sela do dragão (montaria com a cor dele)."
  }
 }

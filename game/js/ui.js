@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261016foco';
-import { drawMinimap } from './map.js?v=20261016foco';
+import { label, CATEGORIES } from './arquivo.js?v=20261016gigantes';
+import { drawMinimap } from './map.js?v=20261016gigantes';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261016foco';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261016foco';
-import { getEquippedStats } from './state.js?v=20261016foco';
-import { countItem } from '../../rules/loot.js?v=20261016foco';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261016foco';
-import { isArenaState } from './arena.js?v=20261016foco';
-import { spriteCount } from './assets.js?v=20261016foco';
-import { attrLines } from './equipment.js?v=20261016foco';
+} from './actions.js?v=20261016gigantes';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261016gigantes';
+import { getEquippedStats } from './state.js?v=20261016gigantes';
+import { countItem } from '../../rules/loot.js?v=20261016gigantes';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261016gigantes';
+import { isArenaState } from './arena.js?v=20261016gigantes';
+import { spriteCount } from './assets.js?v=20261016gigantes';
+import { attrLines } from './equipment.js?v=20261016gigantes';
 
 let rendererRef = null;
 
