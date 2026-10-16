@@ -1,6 +1,6 @@
-import { reveal } from './arquivo.js?v=20261015voofix';
-import { pushLog } from './state.js?v=20261015voofix';
-import { addToInventory } from '../../rules/loot.js?v=20261015voofix';
+import { reveal } from './arquivo.js?v=20261016foco';
+import { pushLog } from './state.js?v=20261016foco';
+import { addToInventory } from '../../rules/loot.js?v=20261016foco';
 
 /** Event 02:17 — 17s blackout then messages + Mara vision */
 export async function maybeTrigger0217(state, ui) {

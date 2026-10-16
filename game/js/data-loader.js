@@ -1,4 +1,4 @@
-import { scaleBrConfig } from './br-map.js?v=20261015voofix';
+import { scaleBrConfig } from './br-map.js?v=20261016foco';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 

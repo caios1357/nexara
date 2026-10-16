@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261015voofix';
-import { pushLog } from './state.js?v=20261015voofix';
-import { isArenaState } from './arena.js?v=20261015voofix';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261015voofix';
-import { ICONS } from './icons.js?v=20261015voofix';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261016foco';
+import { pushLog } from './state.js?v=20261016foco';
+import { isArenaState } from './arena.js?v=20261016foco';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261016foco';
+import { ICONS } from './icons.js?v=20261016foco';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -214,6 +214,12 @@ export function createMobileControls(hooks) {
           hooks.onDefend?.(true);
           return;
         }
+        if (id === 'mount' && root.classList.contains('mc-mounted')) { // 20261016: DESCER montado = SEGURAR 0,4 s ou TOQUE DUPLO (evita pouso sem querer)
+          const now = performance.now(); descendStats.downs = (descendStats.downs || 0) + 1; clearTimeout(btn._nxH); btn.classList.add('mc-holding');
+          if (now - (btn._nxLast || -1e9) < 500) { descendStats.gap = Math.round(now - btn._nxLast); btn._nxLast = -1e9; btn.classList.remove('mc-holding'); descendStats.double++; hooks.onDescend?.(); return; }
+          btn._nxLast = now; btn._nxH = setTimeout(() => { btn._nxH = null; btn._nxLast = -1e9; btn.classList.remove('mc-holding'); descendStats.hold++; hooks.onDescend?.(); }, 400);
+          return;
+        }
         if (id !== 'attack' && id !== 'interact') {
           btn.classList.add('mc-pressed');
           clearTimeout(btn._nxT);
@@ -221,6 +227,7 @@ export function createMobileControls(hooks) {
         }
         handlePower(id);
       }, { passive: false });
+      if (id === 'mount') { const up = () => { if (btn._nxH) { clearTimeout(btn._nxH); btn._nxH = null; descendStats.short++; } btn.classList.remove('mc-holding'); }; btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up); }
       if (id === 'defend') {
         const up = (e) => {
           if (defendPointer == null || (e.pointerId != null && e.pointerId !== defendPointer)) return;
@@ -250,6 +257,7 @@ export function createMobileControls(hooks) {
     });
   }
   let attackPointer = null;
+  const descendStats = { hold: 0, double: 0, short: 0 };
   let defendPointer = null;
   const lookTaps = { lastAt: -1e9, doubleTaps: 0, swipes: 0, taps: 0 };
 
@@ -632,11 +640,12 @@ export function createMobileControls(hooks) {
     if (!root) return;
     const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}`;
     if (key === mountKey) return; mountKey = key;
-    root.querySelector('.mc-mount')?.classList.toggle('mc-mount-off', !u.show);
+    { const me = root.querySelector('.mc-mount'); me?.classList.toggle('mc-mount-off', !u.show && !u.flying); me?.classList.toggle('mc-descer', !!u.flying); const ml = me?.querySelector('.mc-lbl'); const mi = me?.querySelector('.mc-ico');
+      if (ml) ml.textContent = u.flying ? (u.phase === 'landing' ? 'SUBIR' : 'DESCER') : 'MONTAR'; if (mi) mi.textContent = u.flying ? (u.phase === 'landing' ? '⏫' : '⏬') : '🐉'; if (me) me.title = u.flying ? 'Segure 0,4 s ou toque 2× para pousar' : 'Montar no Gigante (M)'; }
     root.classList.toggle('mc-mounted', !!u.flying);
     const d = root.querySelector('.mc-act-dodge'); const lbl = d?.querySelector('.mc-lbl');
-    if (lbl) lbl.textContent = u.flying ? (u.phase === 'landing' ? 'CANCELAR' : 'DESCER') : 'ESQUIVA';
-    d?.classList.toggle('mc-descend', !!u.flying);
+    if (lbl) lbl.textContent = 'ESQUIVA';
+    d?.classList.toggle('mc-descend', false);
     const at = root.querySelector('.mc-attack'); const al = at?.querySelector('.mc-lbl'); // montado: ATAQUE vira FOGO (anel de Fôlego)
     if (al) al.textContent = u.flying ? 'FOGO' : 'ATAQUE';
     at?.classList.toggle('mc-fogo', !!u.flying); at?.style.setProperty('--fogo', `${bp}%`);
@@ -778,6 +787,7 @@ export function createMobileControls(hooks) {
     releaseAll,
     updateActionButtons,
     setMountUi,
+    descendStats: () => ({ ...descendStats }),
     flashButton,
     setLockActive,
     buttonRects,

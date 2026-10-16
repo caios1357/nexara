@@ -6,7 +6,7 @@
  * paredes) e nunca atravessando. `blocked(tx, ty)` é uma função estável do
  * chamador (sem closures por frame). Também: linha de visão por DDA de tiles.
  */
-import { isWalkable } from './map.js?v=20261015voofix';
+import { isWalkable } from './map.js?v=20261016foco';
 
 const EPS = 1e-6;
 const SKIN = 1e-4;

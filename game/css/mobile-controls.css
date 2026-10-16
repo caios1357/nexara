@@ -400,3 +400,12 @@ body.has-mobile-controls #game-screen {
   transform: scale(1.2); border-color: #7ff6ff; box-shadow: 0 0 18px rgba(57, 240, 255, 0.85); background: rgba(10, 52, 60, 0.9);
 }
 .mobile-controls.mc-mounted .mc-btn.mc-act-dodge.mc-descend .mc-lbl { font-size: 0.55rem; letter-spacing: 0.04em; }
+
+/* 20261016 — DESCER montado: botão PRÓPRIO no lugar do MONTAR (polegar esquerdo, acima do joystick), longe do FOGO; segurar 0,4 s ou toque duplo */
+.mobile-controls.mc-mounted .mc-act-dodge { opacity: 0.28 !important; pointer-events: none !important; filter: grayscale(1); }
+.mc-btn.mc-mount.mc-descer { border-color: rgba(120, 200, 255, 0.9); background: radial-gradient(circle at 35% 30%, rgba(120, 200, 255, 0.35), transparent 58%), rgba(6, 20, 34, 0.82); box-shadow: 0 0 10px rgba(120, 200, 255, 0.5); }
+.mc-btn.mc-mount.mc-descer .mc-lbl { font-size: 0.55rem; }
+.mc-btn.mc-mount.mc-descer::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 3px solid transparent; }
+.mc-btn.mc-mount.mc-descer.mc-holding::after { border-color: rgba(120, 200, 255, 0.95); animation: mcHold 0.4s linear forwards; }
+@keyframes mcHold { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.mobile-controls.mc-mounted .mc-btn.mc-attack.mc-fogo { transform: scale(1.12); }

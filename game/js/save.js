@@ -1,5 +1,5 @@
-import { walletSig, verifyWallet } from './mcb.js?v=20261015voofix';
-import { getLocalProfile } from './auth.js?v=20261015voofix';
+import { walletSig, verifyWallet } from './mcb.js?v=20261016foco';
+import { getLocalProfile } from './auth.js?v=20261016foco';
 
 const SAVE_KEY = 'nexara_phase01_save';
 const SETTINGS_KEY = 'nexara.settings.v1';

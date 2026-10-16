@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261015voofix';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261016foco';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -61,7 +61,7 @@ export function createArenaBrUi(deps) {
     if (!shown) return;
     if (e.code === 'KeyM' && !e.repeat && !panel) { toggleBigMap(); e.preventDefault(); }
     if (popCur && !e.repeat) {
-      if (e.code === 'Digit1') { popAct('equip'); e.preventDefault(); }
+      if (e.code === 'Digit1') { popAct(popCur?.full ? 'swap' : 'equip'); e.preventDefault(); }
       else if (e.code === 'Digit2') { popAct(popCur.full ? 'back' : 'keep'); e.preventDefault(); }
       else if (e.code === 'Digit3') { popAct('sell'); e.preventDefault(); }
       else if (e.code === 'Digit4') { popAct('discard'); e.preventDefault(); }
@@ -264,7 +264,7 @@ export function createArenaBrUi(deps) {
     // M10: item INFERIOR não oferece EQUIPAR; bolsa cheia: VENDER / DESCARTAR (confirma) / VOLTAR (fica no chão)
     const btn = (a, label, k, primary) => `<button type="button" data-a="${a}"${primary ? ' class="primary"' : ''}>${label} <kbd>${k}</kbd></button>`;
     const acts = full
-      ? btn('sell', `VENDER +${price}`, 3, true) + btn('discard', 'DESCARTAR', 4, false) + btn('back', 'VOLTAR', 2, false)
+      ? (verdict !== 'inferior' ? btn('swap', cmp?.equipped ? 'TROCAR' : 'EQUIPAR', 1, true) : '') + btn('sell', `VENDER +${price}`, 3, verdict === 'inferior') + btn('discard', 'DESCARTAR', 4, false) + btn('back', 'VOLTAR', 2, false)
       : (verdict !== 'inferior' ? btn('equip', 'EQUIPAR', 1, verdict === 'melhor') : '') + btn('keep', 'GUARDAR', 2, verdict === 'equivalente') + btn('sell', `VENDER +${price}`, 3, verdict === 'inferior');
     popup.innerHTML = `<div class="br-pop-card${full ? ' full' : ''}" style="--rar:${rarColor(def.rarity)}" data-mode="${full ? 'full' : verdict}">
       <div class="br-pop-head"><span class="br-pop-rar">${esc(RAR_N[def.rarity] || def.rarity)}</span><b>${esc(def.name)}</b></div>
@@ -272,7 +272,7 @@ export function createArenaBrUi(deps) {
       ${sum ? `<div class="br-pop-sum ${V[1]}">${esc(sum)}</div>` : ''}
       ${rows ? `<ul class="br-pop-rows">${rows}</ul>` : ''}
       ${verdict === 'inferior' && !full ? '<div class="br-pop-note">Pior que o equipado — guarde ou venda.</div>' : ''}
-      ${full ? `<div class="br-pop-full">Bolsa cheia (${n}/${cap}). Venda ou descarte este item — ou VOLTAR e ele fica no chão.</div>` : ''}
+      ${full ? `<div class="br-pop-full">Bolsa cheia (${n}/${cap}). ${verdict !== 'inferior' ? 'TROCAR equipa este item (a peça antiga vai para a bolsa ou para o baú). ' : ''}Ou venda/descarte — VOLTAR deixa no chão.</div>` : ''}
       <div class="br-pop-actions">${acts}</div></div>`;
     popup.querySelectorAll('button[data-a]').forEach((b) => { b.onclick = () => popAct(b.dataset.a); });
     popup.classList.remove('hidden'); popup.classList.remove('pop-in'); void popup.offsetWidth; popup.classList.add('pop-in');
@@ -300,7 +300,7 @@ export function createArenaBrUi(deps) {
   function closePanel() { panel?.remove(); panel = null; }
   function bagRows(s, mode) {
     const list = bagEntries(s);
-    if (!list.length) return '<p class="br-empty">Bolsa vazia — o loot da Arena aparece aqui.</p>';
+    if (!list.length) return '<p class="br-empty">Bolsa vazia — o loot da Arena aparece aqui.</p>' + stashRows(s, mode);
     return list.map((e) => {
       const d = s._items[e.item_id]; if (!d) return '';
       const rar = d.rarity || (e.bolsa ? 'material' : 'comum'); const price = sellPriceOfEntry(s, e);
@@ -308,7 +308,14 @@ export function createArenaBrUi(deps) {
       const tag = cmp ? `<em class="v-${cmp.verdict}">${cmp.verdict === 'melhor' ? '↑ MELHOR' : cmp.verdict === 'inferior' ? '↓ INFERIOR' : '= EQUIVALENTE'}</em>` : '';
       return `<div class="br-row" data-id="${esc(e.item_id)}" style="--rar:${rarColor(rar)}"><span class="br-row-name"><b>${esc(d.name)}</b>${!isBrItemId(e.item_id) ? ` ×${e.qty}` : ''}<small>${esc(RAR_N[rar] || rar)}</small>${tag}</span>
         <span class="br-row-act">${mode === 'bag' && d.equip_slot ? '<button type="button" data-a="equip">EQUIPAR</button>' : ''}<button type="button" data-a="sell">VENDER +${price}</button></span></div>`;
-    }).join('');
+    }).join('') + stashRows(s, mode);
+  }
+  /** 20261016: BAÚ = itens de partidas anteriores (inventário permanente). Na partida, o jogador escolhe o que LEVAR para a bolsa (ou EQUIPA direto). */
+  function stashRows(s, mode) {
+    if (mode !== 'bag' || !s?.brMode) return '';
+    const st = stashEntries(s); if (!st.length) return '';
+    return `<div class="br-stash-head">🧰 BAÚ — ${st.length} item(ns) guardados (não ocupam a bolsa)</div>` + st.slice(0, 60).map((e) => { const d = s._items[e.item_id]; if (!d) return ''; const rar = d.rarity || (e.bolsa ? 'material' : 'comum');
+      return `<div class="br-row br-stash" data-id="${esc(e.item_id)}" style="--rar:${rarColor(rar)}"><span class="br-row-name"><b>${esc(d.name)}</b>${!isBrItemId(e.item_id) ? ` ×${e.qty}` : ''}<small>${esc(RAR_N[rar] || rar)} · baú</small></span><span class="br-row-act">${d.equip_slot ? '<button type="button" data-a="equip">EQUIPAR</button>' : ''}<button type="button" data-a="bring">LEVAR</button></span></div>`; }).join('');
   }
   function openPanel(kind) {
     ensure(); closePanel();
@@ -330,7 +337,7 @@ export function createArenaBrUi(deps) {
       panel.querySelectorAll('.br-row button[data-a]').forEach((b) => {
         b.onclick = () => {
           const id = b.closest('.br-row').dataset.id;
-          const r = b.dataset.a === 'equip' ? deps.equip(id) : deps.sell(id);
+          const r = b.dataset.a === 'bring' ? (bagAdd(s, id) ? (deps.commit?.(s), { ok: true, msg: 'Levado para a bolsa.' }) : { ok: false, msg: 'Bolsa cheia.' }) : b.dataset.a === 'equip' ? deps.equip(id) : deps.sell(id);
           deps.toast?.(r?.msg || (r?.ok ? 'OK' : r?.reason || 'Não foi possível.'));
           render(tab);
         };

@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261015voofix';
-import { getConfig } from './gameplay-config.js?v=20261015voofix';
-import { pushLog } from './state.js?v=20261015voofix';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261015voofix';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261015voofix';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261015voofix';
-import { createRivals } from './arena-rivals.js?v=20261015voofix';
+import { createArenaState } from './arena.js?v=20261016foco';
+import { getConfig } from './gameplay-config.js?v=20261016foco';
+import { pushLog } from './state.js?v=20261016foco';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261016foco';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261016foco';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261016foco';
+import { createRivals } from './arena-rivals.js?v=20261016foco';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -100,7 +100,7 @@ export function createArenaBr(deps) {
     const R0 = Math.max(80, Math.round((c.zonaSegura?.estagios?.[0]?.raio || 46) * 1.74)); // raio inicial escala com o mapa (S=1 → 80, igual ao original)
     br = st.br = {
       clock: 0, startedAt: Date.now(), kills: 0, killsBy: {}, mcbRun: 0, mcbStart: st.player.mcb || 0, itemsFound: [], best: null,
-      lootOpened: [], lootOpenedDirty: [], drops: [], dropSeq: 1, region: null, visited: [],
+      bolsa: [] /* 20261016: bolsa da partida começa VAZIA (itens antigos ficam no baú/inventário) */, lootOpened: [], lootOpenedDirty: [], drops: [], dropSeq: 1, region: null, visited: [],
       explored: null, exploredN: 0, found: [], fogCell: -1,
       densK: 0, fpsEma: 0, densAt: 0, nests: [], ambushAreas: [], ambushDone: [],
       zone: { phase: 'wait', stage: -1, r: R0, fromR: R0, toR: R0, cx: c.zonaSegura.centro.x + 0.5, cy: c.zonaSegura.centro.y + 0.5, phaseAt: 0, warned: false, outside: false },
@@ -622,7 +622,7 @@ export function createArenaBr(deps) {
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     densityExhausted,
-    /** 20261015voofix: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
+    /** 20261016foco: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
     coverAt: (x, y) => { try { return br ? brCoverAt(map(), cfg(), x, y) : null; } catch { return null; } }, coverList: () => (br ? brCoverList(map(), cfg()).map((c) => ({ ...c })) : []),
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */

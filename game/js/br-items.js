@@ -11,8 +11,8 @@
  * com preço de teste 0 isso viraria MCB infinito); venda remove o item de TODOS os estados espelhados no mesmo
  * passo; uid vendido entra em player.brVendidos (não vende 2×); preço com teto sobre o preço real de compra.
  */
-import { basePriceOf } from './mcb.js?v=20261015voofix';
-import { statSheet, compareSheets } from './vestiario.js?v=20261015voofix';
+import { basePriceOf } from './mcb.js?v=20261016foco';
+import { statSheet, compareSheets } from './vestiario.js?v=20261016foco';
 
 const RAR = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
 let uidSeq = 0;
@@ -50,9 +50,17 @@ export function hydrateBrItems(s) {
   return n;
 }
 
+/** 20261016: a BOLSA DA PARTIDA começa VAZIA — só conta o que foi pego NESTA partida (s.br.bolsa = chaves). Itens de partidas anteriores
+ *  continuam no inventário permanente (baú), nunca são apagados; fora da partida (Mercado Negro) a vista mostra todos. */
+const bagKey = (e) => (isBrItemId(e.item_id) ? e.item_id : `mat:${e.item_id}`);
+function matchBag(s) { if (!s?.brMode || !s.br) return null; if (!Array.isArray(s.br.bolsa)) s.br.bolsa = []; return s.br.bolsa; }
 export function bagEntries(s) {
-  return (s?.inventory || []).filter((e) => !e.equipped && (isBrItemId(e.item_id) || e.bolsa));
+  const mb = matchBag(s); const set = mb ? new Set(mb) : null;
+  return (s?.inventory || []).filter((e) => !e.equipped && (isBrItemId(e.item_id) || e.bolsa) && (!set || set.has(bagKey(e))));
 }
+/** põe na bolsa da partida (se houver espaço) um item que já está no inventário (ex.: peça trocada) */
+export function bagAdd(s, itemId) { const mb = matchBag(s); if (!mb) return false; const k = isBrItemId(itemId) ? itemId : `mat:${itemId}`; if (mb.includes(k)) return true; if (bagCount(s) >= bagCap(s)) return false; mb.push(k); return true; }
+export function stashEntries(s) { const mb = matchBag(s); const set = new Set(mb || []); return (s?.inventory || []).filter((e) => !e.equipped && (isBrItemId(e.item_id) || e.bolsa) && !set.has(bagKey(e))); }
 export function bagCount(s) { return bagEntries(s).length; }
 
 /** Sorteio ponderado {a: peso}. */
@@ -88,15 +96,17 @@ const uniq = (states) => (Array.isArray(states) ? states : [states]).filter((x, 
  * Coloca um loot na BOLSA de todos os estados espelhados (corrida + permanente). Bolsa cheia → recusa.
  * @returns {{ok:boolean, reason?:string, uid?:string, def?:object}}
  */
-export function addLootToBag(states, loot) {
+export function addLootToBag(states, loot, opt = {}) {
   const list = uniq(states); const ref = list[0]; if (!ref) return { ok: false, reason: 'sem jogo' };
+  const reg = (k) => { for (const q of list) { const mb = matchBag(q); if (mb && !mb.includes(k)) mb.push(k); } };
   if (loot.kind === 'mat') {
-    const has = ref.inventory.find((e) => e.bolsa && e.item_id === loot.id && !e.equipped);
+    const has = bagEntries(ref).find((e) => e.bolsa && e.item_id === loot.id);
     if (!has && bagCount(ref) >= bagCap(ref)) { stats.bagFull++; return { ok: false, reason: 'Bolsa cheia.' }; }
+    reg(`mat:${loot.id}`);
     for (const s of list) { const e = s.inventory.find((q) => q.bolsa && q.item_id === loot.id); if (e) e.qty = Math.min(99, (e.qty || 0) + loot.qty); else s.inventory.push({ item_id: loot.id, qty: loot.qty, bolsa: true }); }
     return { ok: true, id: loot.id, def: ref._items[loot.id] };
   }
-  if (bagCount(ref) >= bagCap(ref)) { stats.bagFull++; return { ok: false, reason: 'Bolsa cheia.' }; }
+  if (!opt.force && bagCount(ref) >= bagCap(ref)) { stats.bagFull++; return { ok: false, reason: 'Bolsa cheia.' }; }
   const uid = `brx_${Date.now().toString(36)}${(uidSeq++).toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
   const rec = { b: loot.b, r: loot.r, at: Date.now() };
   for (const s of list) {
@@ -106,6 +116,7 @@ export function addLootToBag(states, loot) {
     s._items[uid] = d;
     s.inventory.push({ item_id: uid, qty: 1 });
   }
+  reg(uid);
   return { ok: true, uid, def: ref._items[uid] };
 }
 

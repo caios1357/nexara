@@ -476,6 +476,7 @@
   max-width: min(90%, 420px); text-align: center; box-sizing: border-box;
 }
 .toast.show { display: block; }
+.toast { pointer-events: none; } /* 20261016: aviso nunca bloqueia o toque na BOLSA/HUD */
 .skill-row { display: flex; justify-content: space-between; padding: 0.2rem 0; gap: 0.5rem; }
 
 /* Arena: even more compact float info */
