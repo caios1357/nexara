@@ -11,9 +11,9 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261016gigantes';
-import { xpForLevel } from './state.js?v=20261016gigantes';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261016gigantes';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261016herois';
+import { xpForLevel } from './state.js?v=20261016herois';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261016herois';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -50,9 +50,9 @@ export function createRivals(ctx) {
     const m = ctx.map(); const n = Math.max(3, Math.min(c.nMax || 5, c.n || 4)); // NEXARA FAST: nMax 10
     const pts = m.spawnPoints.filter((q) => !ctx.inCovil(q.x, q.y, q.region) && Math.hypot(q.x - p.x, q.y - p.y) >= (c.distInicialMin || 30));
     const chosen = [];
-    for (let k = 0; k < 200 && chosen.length < n && pts.length; k++) {
+    for (let k = 0; k < 900 && chosen.length < n && pts.length; k++) { /* 20 rivais: separação vai cedendo (22 → 12 → 6) */
       const q = pts[Math.floor(ctx.R() * pts.length)];
-      const minSep = k < 120 ? 22 : 10;
+      const minSep = k < 200 ? 22 : k < 500 ? 12 : 6;
       if (chosen.every((o) => Math.hypot(o.x - q.x, o.y - q.y) >= minSep)) chosen.push(q);
     }
     chosen.forEach((q, i) => { const h = c.herois[i % c.herois.length]; spawnOne(h, q.x, q.y, i); });
@@ -105,7 +105,7 @@ export function createRivals(ctx) {
   /** meta do rival: monstro perto → baú não aberto → ponto dentro da zona (final: o herói) */
   function pickGoal(rv, mon, mp, p) {
     const br = ctx.br(); const st = ctx.st(); const m = ctx.map();
-    if (br.rivalFinal && (!RC().finalLivre || rv.champion || rv.tgt?.kind === 'jogador')) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) }; // 20261016gigantes: com finalLivre só o CAMPEÃO (ou quem escolheu o herói) caça o herói na reta final; os demais seguem brigando entre si
+    if (br.rivalFinal && (!RC().finalLivre || rv.champion || rv.tgt?.kind === 'jogador')) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) }; // 20261016herois: com finalLivre só o CAMPEÃO (ou quem escolheu o herói) caça o herói na reta final; os demais seguem brigando entre si
     // 20261010ajustes: ÚLTIMA CORRIDA — zona final e morte súbita há > 60 s: todos caçam o rival mais próximo (e reaparecem colados nele se não houver caminho) → a partida sempre chega ao confronto final
     if (br.suddenSince && br.clock - br.suddenSince > 60000) { let bo = null, bd = 1e9; for (const o of st.monstersAlive) { if (!o.alive || o === mon || !o.rival) continue; const d = Math.hypot(o.x - mp.x, o.y - mp.y); if (d < bd) { bd = d; bo = o; } } if (bo) return { kind: 'rival', uid: bo.uid, x: bo.x, y: bo.y }; }
     // outro rival por perto (≤ 16 tiles) → caça o rival (a zona aproxima todos; eles se eliminam no caminho)
@@ -115,7 +115,7 @@ export function createRivals(ctx) {
     const rivalFar = (om) => !om || Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y) > (RC().rivalPertoDist ?? 5);
     if (nm && rivalFar(rv.tgt?.kind === 'rival' ? monOf(list().find((q) => q.uid === rv.tgt.uid)) : (list().filter((o) => o !== rv && !o.out).map(monOf).filter((q) => q && q.alive).sort((x, y) => Math.hypot(x.x - mp.x, x.y - mp.y) - Math.hypot(y.x - mp.x, y.y - mp.y))[0]))) return { kind: 'monstro', uid: nm.uid, x: nm.x, y: nm.y };
     if (rv.tgt?.kind === 'rival' && rivalsCanKill()) { const om = monOf(list().find((q) => q.uid === rv.tgt.uid)); if (om && om.alive) return { kind: 'rival', uid: om.uid, x: om.x, y: om.y }; } // 20261009leve: alvo escolhido por proximidade/fraqueza/ameaça (herói = 1 alvo a mais)
-    let rb = null, rd = rivalsCanKill() ? (br.spectate || (br.rivalFinal && RC().finalLivre) ? 200 : (fastRules() ? (RC().cacaRivalDist || 16) : (RC().cacaRivalDistArena || RC().cacaRivalDist || 16))) : 0; /* 20261016gigantes: mapa grande da ARENA — rivais procuram rival mais longe; na reta final vão atrás uns dos outros */ // só quando podem se eliminar (zona fechando)
+    let rb = null, rd = rivalsCanKill() ? (br.spectate || (br.rivalFinal && RC().finalLivre) ? 200 : (fastRules() ? (RC().cacaRivalDist || 16) : (RC().cacaRivalDistArena || RC().cacaRivalDist || 16))) : 0; /* 20261016herois: mapa grande da ARENA — rivais procuram rival mais longe; na reta final vão atrás uns dos outros */ // só quando podem se eliminar (zona fechando)
     for (const o of list()) { if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue; const d = Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y); if (d < rd) { rd = d; rb = om; } }
     if (rb) return { kind: 'rival', uid: rb.uid, x: rb.x, y: rb.y };
     let best = null, bd = 13;
@@ -197,7 +197,7 @@ export function createRivals(ctx) {
   function rivalsCanKill() {
     const br = ctx.br(); const n = aliveRivals().length;
     if (br.spectate) return n > 1; // espectador: a briga vai até sobrar 1 (campeão também pode cair)
-    return (!br.rivalFinal || !!RC().finalLivre) && (br.zone.phase !== 'wait' || !!RC().lutamSempre) && n > 1 && (n > (RC().minVivosFinal ?? 2) || br.zone.stage >= 2); // FAST: lutam a partida toda
+    return (!br.rivalFinal || !!RC().finalLivre) && (br.zone.phase !== 'wait' || !!RC().lutamSempre) && n > 1 && (n > (RC().minVivosFinal ?? 2) || br.zone.stage >= 2) && !(Array.isArray(RC().pisoVivos) && n <= (RC().pisoVivos[(br.zone.phase === 'wait' && br.zone.stage < 0 ? 0 : br.zone.stage + 1)] ?? 0)); /* 20 rivais: eliminação em etapas */ // FAST: lutam a partida toda
   }
   function nearestFoe(rv, mon, mp, maxD) {
     const st = ctx.st(); let best = null, bd = maxD; const rk = rivalsCanKill();
@@ -215,7 +215,7 @@ export function createRivals(ctx) {
    * × ameaça × fidelidade (quanto MENOR, melhor). O herói NÃO tem preferência: é só mais um alvo (jogadorMult = 1 = neutro).
    * Sem `rivais.alvo` (mapa completo) tudo segue como antes.
    */
-  /** 20261016gigantes (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
+  /** 20261016herois (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
   function playerFull(rv) {
     const A = RC().alvo; const cap = A?.maxAlvoJogador; if (!cap) return false; let n = 0;
     for (const o of list()) { if (o === rv || o.out) continue; if (o.tgt?.kind === 'jogador') { const m = monOf(o); if (m && m.alive && ++n >= cap) return true; } }
@@ -230,7 +230,7 @@ export function createRivals(ctx) {
       const s = d * (1 - wk * (1 - Math.max(0, Math.min(1, hpFrac)))) * (threat ? th : 1) * (cur && cur.kind === kind && cur.uid === uid ? stick : 1) * (kind === 'jogador' ? (A.jogadorMult ?? 1) : 1);
       if (s < bs) { bs = s; best = { kind, uid, d }; }
     };
-    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0) && (clock < (rv.threatPlayerUntil || 0) || cur?.kind === 'jogador' || (!playerFull(rv) && (dP <= (A.jogadorPertoR ?? 4) || (pl.hpMax > 0 && pl.hp / pl.hpMax <= (A.jogadorFracoFrac ?? 0.35) && dP <= (A.jogadorFracoR ?? 6)))))) /* 20261016gigantes: herói só entra na escolha se atacou, encostou (≤ 4) ou está fraco e perto — antes qualquer herói a ≤ 10 tiles podia ser escolhido */ consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
+    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0) && (clock < (rv.threatPlayerUntil || 0) || cur?.kind === 'jogador' || (!playerFull(rv) && (dP <= (A.jogadorPertoR ?? 4) || (pl.hpMax > 0 && pl.hp / pl.hpMax <= (A.jogadorFracoFrac ?? 0.35) && dP <= (A.jogadorFracoR ?? 6)))))) /* 20261016herois: herói só entra na escolha se atacou, encostou (≤ 4) ou está fraco e perto — antes qualquer herói a ≤ 10 tiles podia ser escolhido */ consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
     if (rivalsCanKill()) {
       for (const o of list()) {
         if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue;
@@ -242,7 +242,7 @@ export function createRivals(ctx) {
   }
 
   /**
-   * 20261016gigantes — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
+   * 20261016herois — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
    * (a) o herói o atacou (ameaça), (b) o herói chegou a ≤ `jogadorPertoR` tiles, ou (c) o herói está fraco (≤ `jogadorFracoFrac` de vida) e a ≤ `jogadorFracoR`.
    * VER o herói de longe NÃO cancela a briga. Trocas rival→rival: só com o compromisso vencido, com cooldown `trocaCooldownMs` por rival e histerese
    * (o novo alvo só entra se o alvo atual saiu da zona de combate: morreu, fugiu > `soltaDist` tiles ou deixou de ser eliminável). Sem `compromissoMs`: comportamento anterior.

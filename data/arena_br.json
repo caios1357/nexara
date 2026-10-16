@@ -600,13 +600,13 @@
    "maxAlvoJogador": 2,
    "emCombateR": 2.6,
    "emCombateJogadorR": 2.5,
-   "_doc": "20261016gigantes: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
+   "_doc": "20261016herois: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
   },
   "bbDanoFrac": 0.3,
   "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
   "ativo": true,
   "monstro": "mon_br_rival",
-  "n": 4,
+  "n": 20,
   "herois": [
    {
     "style": "cavaleiro",
@@ -637,6 +637,96 @@
     "nome": "Brasa Rubra",
     "primary": "#ff6a1a",
     "glow": "#ffc08a"
+   },
+   {
+    "style": "cacador",
+    "nome": "Nyx Lâmina",
+    "primary": "#ff4fd8",
+    "glow": "#ffb0ef"
+   },
+   {
+    "style": "runico",
+    "nome": "Taro Glifo",
+    "primary": "#5c8bff",
+    "glow": "#b0c8ff"
+   },
+   {
+    "style": "ciborgue",
+    "nome": "Zed-9",
+    "primary": "#c8ff3b",
+    "glow": "#eaffa8"
+   },
+   {
+    "style": "cavaleiro",
+    "nome": "Iara Aço",
+    "primary": "#3bffb0",
+    "glow": "#b0ffe0"
+   },
+   {
+    "style": "runico",
+    "nome": "Lume Vórtex",
+    "primary": "#ffe14a",
+    "glow": "#fff3a8"
+   },
+   {
+    "style": "ciborgue",
+    "nome": "Sora Circuito",
+    "primary": "#ff7a3b",
+    "glow": "#ffc8a8"
+   },
+   {
+    "style": "cacador",
+    "nome": "Rax Corvo",
+    "primary": "#8a8f9c",
+    "glow": "#d6dbe6"
+   },
+   {
+    "style": "cavaleiro",
+    "nome": "Duna Ferro",
+    "primary": "#c89a5a",
+    "glow": "#f0d6a8"
+   },
+   {
+    "style": "runico",
+    "nome": "Mira Eco",
+    "primary": "#3be0ff",
+    "glow": "#a8f2ff"
+   },
+   {
+    "style": "ciborgue",
+    "nome": "Volt-12",
+    "primary": "#5affd2",
+    "glow": "#c4fff0"
+   },
+   {
+    "style": "cacador",
+    "nome": "Pira Ruiva",
+    "primary": "#ff2e2e",
+    "glow": "#ff9a9a"
+   },
+   {
+    "style": "cavaleiro",
+    "nome": "Gael Prisma",
+    "primary": "#ffffff",
+    "glow": "#bfe8ff"
+   },
+   {
+    "style": "runico",
+    "nome": "Ônix Véu",
+    "primary": "#5a3cff",
+    "glow": "#a99aff"
+   },
+   {
+    "style": "ciborgue",
+    "nome": "Kobra-3",
+    "primary": "#7dff3b",
+    "glow": "#cfffa8"
+   },
+   {
+    "style": "cacador",
+    "nome": "Lis Neon",
+    "primary": "#ff8af0",
+    "glow": "#ffd2fa"
    }
   ],
   "hpPorNivel": 0.18,
@@ -689,8 +779,17 @@
   "finalLivre": true,
   "cacaRivalDistArena": 45,
   "lutamSempre": true,
-  "_docLutam": "20261016gigantes: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
-  "_docFinal": "20261016gigantes: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói)."
+  "_docLutam": "20261016herois: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
+  "_docFinal": "20261016herois: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói).",
+  "nMax": 20,
+  "_doc20": "20261016herois: ARENA PRINCIPAL com 20 heróis rivais (BOT) variados — 4 estilos × cores próprias; FAST continua com os seus 10.",
+  "pisoVivos": [
+   14,
+   10,
+   6,
+   3
+  ],
+  "_docPiso": "20261016herois: com 20 rivais, eliminações vão por etapas — enquanto a zona espera mínimo 14 vivos; estágio 0: 10; 1: 6; 2: 3; depois livre (reta final)."
  },
  "fast": {
   "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica). DISTRITO ÚNICO (20261009fast3): cada partida acontece em UM distrito do mapa grande sorteado pela seed (Periferia, Ruínas Industriais, Floresta Selvagem, Complexo Abandonado, Zona de Elite ou Território do Dragão), com o layout/identidade da região (gerador v2), mapa de ≤ ~90 tiles por lado, zona segura encolhendo dentro dele, sem extração.",

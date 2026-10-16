@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261016gigantes';
-import { drawMinimap } from './map.js?v=20261016gigantes';
+import { label, CATEGORIES } from './arquivo.js?v=20261016herois';
+import { drawMinimap } from './map.js?v=20261016herois';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261016gigantes';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261016gigantes';
-import { getEquippedStats } from './state.js?v=20261016gigantes';
-import { countItem } from '../../rules/loot.js?v=20261016gigantes';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261016gigantes';
-import { isArenaState } from './arena.js?v=20261016gigantes';
-import { spriteCount } from './assets.js?v=20261016gigantes';
-import { attrLines } from './equipment.js?v=20261016gigantes';
+} from './actions.js?v=20261016herois';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261016herois';
+import { getEquippedStats } from './state.js?v=20261016herois';
+import { countItem } from '../../rules/loot.js?v=20261016herois';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261016herois';
+import { isArenaState } from './arena.js?v=20261016herois';
+import { spriteCount } from './assets.js?v=20261016herois';
+import { attrLines } from './equipment.js?v=20261016herois';
 
 let rendererRef = null;
 

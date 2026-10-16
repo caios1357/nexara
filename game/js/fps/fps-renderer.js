@@ -10,37 +10,37 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016gigantes';
-import { buildArenaDressing } from './arena-dressing.js?v=20261016gigantes';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016gigantes';
-import { createHeroModel } from './hero-model.js?v=20261016gigantes';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016gigantes';
-import { attachHeroGlb } from './hero-glb.js?v=20261016gigantes';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016gigantes';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016gigantes';
-import { createActionVfx } from './action-vfx.js?v=20261016gigantes';
-import { createPassiveVfx } from './passive-vfx.js?v=20261016gigantes';
-import { createFpsControls } from './fps-controls.js?v=20261016gigantes';
-import { createViewmodel } from './viewmodel.js?v=20261016gigantes';
-import { createDragonView } from './dragon-view.js?v=20261016gigantes';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016gigantes';
-import { getSprite } from '../assets.js?v=20261016gigantes';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016gigantes';
-import { createBossDragon } from './boss-dragon-view.js?v=20261016gigantes';
-import { bossCfgFor } from '../boss-variants.js?v=20261016gigantes';
-import { mergeStaticParts } from './merge-util.js?v=20261016gigantes';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016gigantes';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016gigantes';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016gigantes';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016gigantes';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016gigantes';
-import { createPostFx } from './post-fx.js?v=20261016gigantes';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016gigantes';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016gigantes';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016gigantes';
-import { groundAt, setGroundFn } from './ground.js?v=20261016gigantes';
-import { buildBrTerrain } from './br-terrain.js?v=20261016gigantes';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016gigantes';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016herois';
+import { buildArenaDressing } from './arena-dressing.js?v=20261016herois';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016herois';
+import { createHeroModel } from './hero-model.js?v=20261016herois';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016herois';
+import { attachHeroGlb } from './hero-glb.js?v=20261016herois';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016herois';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016herois';
+import { createActionVfx } from './action-vfx.js?v=20261016herois';
+import { createPassiveVfx } from './passive-vfx.js?v=20261016herois';
+import { createFpsControls } from './fps-controls.js?v=20261016herois';
+import { createViewmodel } from './viewmodel.js?v=20261016herois';
+import { createDragonView } from './dragon-view.js?v=20261016herois';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016herois';
+import { getSprite } from '../assets.js?v=20261016herois';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016herois';
+import { createBossDragon } from './boss-dragon-view.js?v=20261016herois';
+import { bossCfgFor } from '../boss-variants.js?v=20261016herois';
+import { mergeStaticParts } from './merge-util.js?v=20261016herois';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016herois';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016herois';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016herois';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016herois';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016herois';
+import { createPostFx } from './post-fx.js?v=20261016herois';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016herois';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016herois';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016herois';
+import { groundAt, setGroundFn } from './ground.js?v=20261016herois';
+import { buildBrTerrain } from './br-terrain.js?v=20261016herois';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016herois';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -1790,7 +1790,7 @@ export function createFpsRenderer() {
     const fb = makeHumanoid(new THREE.Color(R0.primary).getHex()); body.add(fb);
     fb.traverse((o) => { if (o.geometry && !o.geometry.userData?.shared) own.push(o.geometry); if (o.material && !o.material.userData?.shared) own.push(o.material); });
     const glb = attachHeroGlb({ root: body, setProceduralBodyVisible(v) { fb.visible = !!v; } }, { styleId: R0.style, custom: { primary: R0.primary, glow: R0.glow } });
-    const tagMat = rivalTagMat(`${R0.name} · BOT NV ${R0.level || 1}`, R0.primary);
+    const tagMat = rivalTagMat(`${R0.name} · RIVAL (BOT) NV ${R0.level || 1}`, R0.primary);
     const tag = new THREE.Sprite(tagMat); tag.scale.set(1.25, 0.235, 1); tag.position.y = 2.45; tag.renderOrder = 13; root.add(tag);
     // sem barra de vida sobre o rival (pedido do Caio): só números de dano, como inimigos comuns
     // anel no chão (cor do rival; pulsa vermelho no aviso de golpe)
@@ -1824,7 +1824,7 @@ export function createFpsRenderer() {
       B.P.mouthGlow.scale.setScalar(wind ? 1.4 : 1); B.P.mouthHalo.scale.setScalar(wind ? 0.3 : 0.12);
     }
     // etiqueta acompanha o nível (sobe com o herói; CAMPEÃO = +2)
-    if ((m.rival.level || 1) !== entry.tagLvl) { const old = entry.tag.material; entry.tag.material = rivalTagMat(`${m.rival.name} · BOT NV ${m.rival.level || 1}`, m.rival.primary); old.map?.dispose(); old.dispose(); entry.tagLvl = m.rival.level || 1; }
+    if ((m.rival.level || 1) !== entry.tagLvl) { const old = entry.tag.material; entry.tag.material = rivalTagMat(`${m.rival.name} · RIVAL (BOT) NV ${m.rival.level || 1}`, m.rival.primary); old.map?.dispose(); old.dispose(); entry.tagLvl = m.rival.level || 1; }
     if (m.rival.champion && !entry.champ) { entry.champ = true; entry.ring.scale.setScalar(1.5); entry.tag.position.y = 2.45 * sm + 0.1; }
     const st = synced ? v.state : AI_STATES.IDLE; const stT = synced ? aiClock - v.stateAt : 0;
     const prep = st === AI_STATES.ATTACK_PREPARE;

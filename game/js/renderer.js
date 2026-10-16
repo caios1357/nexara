@@ -6,13 +6,13 @@
 import {
   createCamera, resizeCameraCanvas, updateCamera, applyCamera,
   tileToWorld, worldToTile, canvasToWorld, tileToCanvasCss, adaptZoom, ISO
-} from './camera.js?v=20261016gigantes';
+} from './camera.js?v=20261016herois';
 import {
   drawIsoTile, drawWallBlock, drawProp, drawPlayer, drawNpc, drawBot
-} from './sprites.js?v=20261016gigantes';
-import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261016gigantes';
-import { getTileType, monstersInZone } from './map.js?v=20261016gigantes';
-import { getMonsterPos } from './enemy-ai.js?v=20261016gigantes';
+} from './sprites.js?v=20261016herois';
+import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261016herois';
+import { getTileType, monstersInZone } from './map.js?v=20261016herois';
+import { getMonsterPos } from './enemy-ai.js?v=20261016herois';
 
 const TILE_FILL = {
   g6: {

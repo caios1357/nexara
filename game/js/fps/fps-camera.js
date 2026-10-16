@@ -7,8 +7,8 @@
  * Todos os números vêm de gameplay-config.js.
  */
 import * as THREE from 'three';
-import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261016gigantes';
-import { groundAt } from './ground.js?v=20261016gigantes';
+import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261016herois';
+import { groundAt } from './ground.js?v=20261016herois';
 
 export const TILE = 2; // world units per tile
 /** Altura do olho — definida em gameplay-config.camera.eyeHeight (default 1.68). */
