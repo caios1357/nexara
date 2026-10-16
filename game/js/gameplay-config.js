@@ -39,6 +39,7 @@ export const DEFAULTS = Object.freeze({
     cruiseAltitude: 3.2, // m (alcance da espada 3,4 m; teto das coberturas ≥ 3,4 m)
     flightMs: 30000, callFlightMs: 15000, cooldownMs: 45000, respawnMs: 90000,
     speed: 6.5, // tiles/s (corrida a pé ≈ 3,4)
+    visualAltMult: 2, // voofix: altura desenhada = alt × 2 (cruzeiro 3,2 m → ~6,4 m na tela); alcance/combate usam a alt real
     scale: 0.4, // dragão montado ≈ 0,4 do Gigante (só visual)
     hpFracOfHero: 0.6, // reserva de vida da montaria (absorve antes do herói)
     fall: { pctPerMeter: 0.05, maxFrac: 0.25, nonLethal: true, graceMs: 2000 },

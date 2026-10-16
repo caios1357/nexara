@@ -7,8 +7,8 @@
  * Todos os números vêm de gameplay-config.js.
  */
 import * as THREE from 'three';
-import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261010voo2';
-import { groundAt } from './ground.js?v=20261010voo2';
+import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261015voofix';
+import { groundAt } from './ground.js?v=20261015voofix';
 
 export const TILE = 2; // world units per tile
 /** Altura do olho — definida em gameplay-config.camera.eyeHeight (default 1.68). */
@@ -46,7 +46,7 @@ function bossCam() { return getConfig().arenaBoss?.camera || null; }
 function armDistance() {
   const t = getConfig().thirdPerson;
   const b = bossCam();
-  return (isPortrait() ? t.portraitDistance : t.distance) + (b && bossFrame > 0 ? bossFrame * (isPortrait() ? b.extraDistancePortrait : b.extraDistance) : 0) + mountK * (isPortrait() ? 2.4 : 1.6);
+  return (isPortrait() ? t.portraitDistance : t.distance) + (b && bossFrame > 0 ? bossFrame * (isPortrait() ? b.extraDistancePortrait : b.extraDistance) : 0) + mountK * (isPortrait() ? 4.6 : 3.4); // voofix: braço mais longo montado → o chão aparece lá embaixo
 }
 function pivotHeight() {
   const t = getConfig().thirdPerson;

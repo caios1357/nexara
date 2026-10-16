@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261010voo2';
-import { getConfig } from './gameplay-config.js?v=20261010voo2';
-import { pushLog } from './state.js?v=20261010voo2';
-import { buildBrZone, BR_ZONE_ID, brRegionAt } from './br-map.js?v=20261010voo2';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261010voo2';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261010voo2';
-import { createRivals } from './arena-rivals.js?v=20261010voo2';
+import { createArenaState } from './arena.js?v=20261015voofix';
+import { getConfig } from './gameplay-config.js?v=20261015voofix';
+import { pushLog } from './state.js?v=20261015voofix';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261015voofix';
+import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261015voofix';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261015voofix';
+import { createRivals } from './arena-rivals.js?v=20261015voofix';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -622,6 +622,8 @@ export function createArenaBr(deps) {
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     densityExhausted,
+    /** 20261015voofix: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
+    coverAt: (x, y) => { try { return br ? brCoverAt(map(), cfg(), x, y) : null; } catch { return null; } }, coverList: () => (br ? brCoverList(map(), cfg()).map((c) => ({ ...c })) : []),
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */
     debug: {

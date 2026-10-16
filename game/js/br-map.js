@@ -7,7 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261010voo2';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261015voofix';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -255,4 +255,40 @@ export function brHeightAt(m, fx, fy) {
 export function brRegionAt(m, cfg, x, y) {
   const n = m.regionGrid[Math.floor(x) + Math.floor(y) * m.W] || 0;
   return cfg.regioes.find((r) => r.n === n) || null;
+}
+
+/**
+ * 20261015voofix — COBERTURA (esconderijos): estruturas fechadas (ruína, caverna, casa, sala) ganham a marca `cobertura:true` (só dado: tile e colisão não mudam).
+ * NUNCA no Território do Dragão (região 'dragao'): lá nada é marcado. Atacantes AÉREOS (o Gigante) não acertam o herói a pé dentro de uma cobertura; o dragão montado pousa na borda.
+ */
+const COVER_KINDS = ['ruina', 'caverna', 'casa', 'sala'];
+export function brCoverList(m, cfg) {
+  if (!m) return [];
+  if (m._cover) return m._cover;
+  const kinds = cfg?.cobertura?.tipos || COVER_KINDS; const out = [];
+  for (const st of m.structures || []) {
+    if (!kinds.includes(st.kind)) continue;
+    const cx = Math.floor((st.x0 + st.x1) / 2), cy = Math.floor((st.y0 + st.y1) / 2); const reg = brRegionAt(m, cfg, cx, cy);
+    if (!reg || reg.id === 'dragao') { st.cobertura = false; continue; }
+    st.cobertura = true; out.push({ kind: st.kind, x0: st.x0, y0: st.y0, x1: st.x1 + 1, y1: st.y1 + 1, region: reg.id });
+  }
+  // regiões com poucas estruturas fechadas (Floresta, Zona de Elite): COPAS densas (janela 5×5 cercada de árvores 'T') viram esconderijo — só dado, nada muda no tile
+  const minN = cfg?.cobertura?.minPorRegiao ?? 3; const W = m.W, H = m.H;
+  for (const r of cfg?.regioes || []) {
+    if (r.id === 'dragao') continue; const have = out.filter((c) => c.region === r.id).length; if (have >= minN) continue;
+    const cand = [];
+    for (let y = 3; y < H - 8; y += 2) for (let x = 3; x < W - 8; x += 2) {
+      let ok = true; for (let yy = y; yy < y + 5 && ok; yy++) for (let xx = x; xx < x + 5; xx++) if ((m.regionGrid[xx + yy * W] || 0) !== r.n) { ok = false; break; }
+      if (!ok || !m.reachable || !m.reachable[(x + 2) + (y + 2) * W]) continue;
+      let sc = 0; for (let yy = y - 2; yy < y + 7; yy++) for (let xx = x - 2; xx < x + 7; xx++) { if (yy >= y && yy < y + 5 && xx >= x && xx < x + 5) continue; if (m.tiles[yy]?.[xx] === 'T') sc++; }
+      cand.push({ x, y, sc });
+    }
+    cand.sort((a, b) => b.sc - a.sc); let need = minN - have;
+    for (const c of cand) { if (need <= 0) break; if (out.some((o) => o.region === r.id && Math.hypot((o.x0 + o.x1) / 2 - (c.x + 2.5), (o.y0 + o.y1) / 2 - (c.y + 2.5)) < 9)) continue; out.push({ kind: 'copa', x0: c.x, y0: c.y, x1: c.x + 5, y1: c.y + 5, region: r.id, sintetica: true }); need--; }
+  }
+  m._cover = out; return out;
+}
+export function brCoverAt(m, cfg, x, y) {
+  for (const c of brCoverList(m, cfg)) if (x >= c.x0 && x < c.x1 && y >= c.y0 && y < c.y1) return c;
+  return null;
 }
