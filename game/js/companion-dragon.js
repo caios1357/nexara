@@ -12,11 +12,11 @@
  * Dano sempre por deps.damage (main.damageMonsterFrom → applyDamageToMonster),
  * então XP/loot/quests contam como os do herói.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261017hud';
-import { getConfig, DEG } from './gameplay-config.js?v=20261017hud';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017hud';
-import { isWalkable } from './map.js?v=20261017hud';
-import { getStat, STATS } from './modifiers.js?v=20261017hud';
+import { bossCfgFor } from './boss-variants.js?v=20261017hud2';
+import { getConfig, DEG } from './gameplay-config.js?v=20261017hud2';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017hud2';
+import { isWalkable } from './map.js?v=20261017hud2';
+import { getStat, STATS } from './modifiers.js?v=20261017hud2';
 
 export const DRAGON_STATES = Object.freeze({
   FOLLOW: 'FOLLOW', IDLE: 'IDLE', SEARCH_TARGET: 'SEARCH_TARGET', COMBAT: 'COMBAT', ATTACK: 'ATTACK', RETURN: 'RETURN'
@@ -234,7 +234,7 @@ export function createDragon(deps) {
     const bossK = bossNear(px, py);
     let side = portrait ? c.followSidePortrait : c.followSide;
     let fwd = portrait ? c.followForwardPortrait : c.followForward;
-    if (bossK) { side = portrait ? (c.followSideBossPortrait ?? 0.55) : (c.followSideBoss ?? 0.95); fwd = c.followForwardBoss ?? -0.55; }
+    if (bossK) { const cov = !stateRef?.brMode; side = portrait ? ((cov ? c.followSideBossCovilPortrait : null) ?? c.followSideBossPortrait ?? 0.55) : ((cov ? c.followSideBossCovil : null) ?? c.followSideBoss ?? 0.95); fwd = (cov ? c.followForwardBossCovil : null) ?? c.followForwardBoss ?? -0.55; }
     const fx = Math.sin(yaw);
     const fy = -Math.cos(yaw);
     // esquerda = rotaciona frente -90°

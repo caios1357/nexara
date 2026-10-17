@@ -624,6 +624,6 @@
 }
 .game-banner b { color: #fff; display: block; font-size: 15px; text-shadow: 0 0 10px #49c6ff; }
 .game-banner.hidden { display: none; }
-/* 20261017hud: aviso DRAGÃO MONTADO compacto, colado no topo — nunca sobre o DESCER (centro-alto) */
+/* 20261017hud2: aviso DRAGÃO MONTADO compacto, colado no topo — nunca sobre o DESCER (centro-alto) */
 .game-banner:has(.gb-mount) { top: 10%; padding: 4px 12px; font-size: 11px; line-height: 1.25; max-width: min(70vw, 300px); }
 .game-banner:has(.gb-mount) b { font-size: 12px; }

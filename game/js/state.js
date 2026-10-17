@@ -1,9 +1,9 @@
-import { createSkillsFromRace } from '../../rules/skills.js?v=20261017hud';
-import { initReputation } from '../../rules/reputation.js?v=20261017hud';
-import { createEmptyArquivo, reveal } from './arquivo.js?v=20261017hud';
-import { indexById } from './data-loader.js?v=20261017hud';
-import { getConfig } from './gameplay-config.js?v=20261017hud';
-import { getStat, STATS } from './modifiers.js?v=20261017hud';
+import { createSkillsFromRace } from '../../rules/skills.js?v=20261017hud2';
+import { initReputation } from '../../rules/reputation.js?v=20261017hud2';
+import { createEmptyArquivo, reveal } from './arquivo.js?v=20261017hud2';
+import { indexById } from './data-loader.js?v=20261017hud2';
+import { getConfig } from './gameplay-config.js?v=20261017hud2';
+import { getStat, STATS } from './modifiers.js?v=20261017hud2';
 
 export function createNewGame(data, { name, raceId }) {
   const race = data.races.races.find((r) => r.id === raceId);
@@ -175,7 +175,7 @@ export function xpForLevel(n) {
 function gainAt(per, n) { return Math.round(per * Math.max(0, n - 1)); }
 
 export function addXp(state, amount) {
-  // 20261017hud: NÍVEL DA PARTIDA — no FAST do zero o XP vem mais rápido; todo XP da partida é somado (vai p/ o permanente no fim)
+  // 20261017hud2: NÍVEL DA PARTIDA — no FAST do zero o XP vem mais rápido; todo XP da partida é somado (vai p/ o permanente no fim)
   if (state?.brMode && state.br) {
     const np = state._data?.arena_br?.nivelPartida;
     if (state.fastZero && np?.xpMult > 0) amount = Math.round(amount * np.xpMult);

@@ -383,9 +383,13 @@ export const DEFAULTS = Object.freeze({
     followForwardPortrait: 0.5,
     /** Covil: chefe vivo a ≤ N tiles → voa atrás do ombro (fora da silhueta do chefe na câmera). */
     bossFollowRange: 14,
-    followForwardBoss: -0.5,
-    followSideBoss: 1.3,
-    followSideBossPortrait: 0.75,
+    followForwardBoss: -0.3,
+    followSideBoss: 0.95,
+    followSideBossPortrait: 0.55,
+    /** 20261017drag: no COVIL (fora da Arena) o chefe ficou do tamanho da montaria → ombro mais afastado p/ não cobrir o chefe na tela. Na Arena fica o de cima. */
+    followForwardBossCovil: -0.5,
+    followSideBossCovil: 1.3,
+    followSideBossCovilPortrait: 0.75,
     /** Distância aceitável ao ponto de voo (1.2–1.8 tiles do herói na prática). */
     followArriveDist: 0.18,
     hoverHeight: 2.25,
