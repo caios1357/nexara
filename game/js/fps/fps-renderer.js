@@ -10,39 +10,40 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016graf2';
-import { buildArenaDressing } from './arena-dressing.js?v=20261016graf2';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016graf2';
-import { createHeroModel } from './hero-model.js?v=20261016graf2';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016graf2';
-import { attachHeroGlb } from './hero-glb.js?v=20261016graf2';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016graf2';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016graf2';
-import { createActionVfx } from './action-vfx.js?v=20261016graf2';
-import { createPassiveVfx } from './passive-vfx.js?v=20261016graf2';
-import { createFpsControls } from './fps-controls.js?v=20261016graf2';
-import { createViewmodel } from './viewmodel.js?v=20261016graf2';
-import { createDragonView } from './dragon-view.js?v=20261016graf2';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016graf2';
-import { getSprite } from '../assets.js?v=20261016graf2';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016graf2';
-import { createBossDragon } from './boss-dragon-view.js?v=20261016graf2';
-import { bossCfgFor } from '../boss-variants.js?v=20261016graf2';
-import { mergeStaticParts } from './merge-util.js?v=20261016graf2';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016graf2';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016graf2';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016graf2';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016graf2';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016graf2';
-import { createPostFx } from './post-fx.js?v=20261016graf2';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016graf2';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261016graf2';
-import { createContactShadows } from './contact-shadows.js?v=20261016graf2';
-import { surfaceFxStats } from './surface-fx.js?v=20261016graf2';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016graf2';
-import { groundAt, setGroundFn } from './ground.js?v=20261016graf2';
-import { buildBrTerrain } from './br-terrain.js?v=20261016graf2';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016graf2';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017heroi3';
+import { buildArenaDressing } from './arena-dressing.js?v=20261017heroi3';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017heroi3';
+import { createHeroModel } from './hero-model.js?v=20261017heroi3';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017heroi3';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017heroi3';
+import { attachHeroGlb } from './hero-glb.js?v=20261017heroi3';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017heroi3';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017heroi3';
+import { createActionVfx } from './action-vfx.js?v=20261017heroi3';
+import { createPassiveVfx } from './passive-vfx.js?v=20261017heroi3';
+import { createFpsControls } from './fps-controls.js?v=20261017heroi3';
+import { createViewmodel } from './viewmodel.js?v=20261017heroi3';
+import { createDragonView } from './dragon-view.js?v=20261017heroi3';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017heroi3';
+import { getSprite } from '../assets.js?v=20261017heroi3';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017heroi3';
+import { createBossDragon } from './boss-dragon-view.js?v=20261017heroi3';
+import { bossCfgFor } from '../boss-variants.js?v=20261017heroi3';
+import { mergeStaticParts } from './merge-util.js?v=20261017heroi3';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017heroi3';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017heroi3';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017heroi3';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017heroi3';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017heroi3';
+import { createPostFx } from './post-fx.js?v=20261017heroi3';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017heroi3';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017heroi3';
+import { createContactShadows } from './contact-shadows.js?v=20261017heroi3';
+import { surfaceFxStats } from './surface-fx.js?v=20261017heroi3';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017heroi3';
+import { groundAt, setGroundFn } from './ground.js?v=20261017heroi3';
+import { buildBrTerrain } from './br-terrain.js?v=20261017heroi3';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017heroi3';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -128,8 +129,11 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  const heroWantsGlb = () => !((heroLookUrl || getConfig().graphics.heroLook) !== 'glb' && heroStyleId === 'cavaleiro');
-  function buildHero() { return createHeroModel({ styleId: heroStyleId, glb: heroWantsGlb() ? undefined : false, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } }); }
+  /* HERÓI 3 (20261017heroi3): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
+  const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
+  let heroKitSig = '';
+  function buildHero() { const kit = heroKitNow(); heroKitSig = kitSig(kit); return createHeroModel({ styleId: heroStyleId, kit, glb: heroWantsGlb() ? undefined : false, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } }); }
   let heroExtra = {};
   const modelReadyAt = {};
   const heroSt = { yaw: 0, init: false };
@@ -1799,7 +1803,14 @@ export function createFpsRenderer() {
     // sem GLB (preset baixo desliga modelos, igual ao herói do jogador): humanoide procedural na cor do rival
     const fb = makeHumanoid(new THREE.Color(R0.primary).getHex()); body.add(fb);
     fb.traverse((o) => { if (o.geometry && !o.geometry.userData?.shared) own.push(o.geometry); if (o.material && !o.material.userData?.shared) own.push(o.material); });
-    const glb = attachHeroGlb({ root: body, setProceduralBodyVisible(v) { fb.visible = !!v; } }, { styleId: R0.style, custom: { primary: R0.primary, glow: R0.glow } });
+    let glb;
+    if (getConfig().graphics.rivalLook !== 'glb' && !/[?&]rivallook=glb\b/.test(location.search) && tier?.models !== false) {
+      // HERÓI 3: rival = o MESMO herói procedural do jogador, com KIT variado (cabeça/rosto/capa/arma/ombreiras) na cor do rival
+      const kit = rivalKit(R0); const hm = createHeroModel({ styleId: R0.style, kit, glb: false }); body.remove(fb); body.add(hm.root);
+      hm.root.traverse((o) => { if (o.geometry && !o.geometry.userData?.shared) own.push(o.geometry); if (o.material && !o.material.userData?.shared) (Array.isArray(o.material) ? o.material : [o.material]).forEach((q) => own.push(q)); });
+      const info = { status: 'ready', style: R0.style, kind: 'procedural', kit: { head: kit.head, face: kit.face, weapon: kit.weapon, cape: kit.cape, crest: kit.crest || null, plates: !!kit.plates } };
+      glb = { info, hm, update(dt, i) { hm.update(dt, { x: 0, z: 0, yaw: Math.PI, speed: i.speed || 0, walkSpeed: i.walkSpeed, runSpeed: i.runSpeed, attack: i.attacking ? { phase: i.attackPhase, t: i.attackT, comboIndex: i.combo || 0, swingId: i.swingId } : null, action: i.action, groundY: 0, leapHeight: 0.9 }); } };
+    } else glb = attachHeroGlb({ root: body, setProceduralBodyVisible(v) { fb.visible = !!v; } }, { styleId: R0.style, custom: { primary: R0.primary, glow: R0.glow } });
     const tagMat = rivalTagMat(`${R0.name} · RIVAL (BOT) NV ${R0.level || 1}`, R0.primary);
     const tag = new THREE.Sprite(tagMat); tag.scale.set(1.25, 0.235, 1); tag.position.y = 2.45; tag.renderOrder = 13; root.add(tag);
     // sem barra de vida sobre o rival (pedido do Caio): só números de dano, como inimigos comuns
@@ -1872,7 +1883,7 @@ export function createFpsRenderer() {
       attackPhase = k < 0.35 ? 'STARTUP' : k < 0.55 ? 'ACTIVE' : 'RECOVERY'; attackT = k < 0.35 ? k / 0.35 : k < 0.55 ? (k - 0.35) / 0.2 : (k - 0.55) / 0.45;
     }
     const hurtT = 0; // sem tinta vermelha de dano no rival (pedido do Caio) — só os números de dano
-    entry.glb.update(adt, { action, attacking, combo: (m.rivalSwingN || 0) % 3, attackPhase, attackT, hurtT, moveK, runK, speed, walkSpeed: 2.4, runSpeed: 3.4, yaw: synced ? v.facing : 0, charge: m.rival.champion ? 0.4 : 0.1, time: now / 1000 });
+    entry.glb.update(adt, { swingId: m.rivalSwingN || 0, action, attacking, combo: (m.rivalSwingN || 0) % 3, attackPhase, attackT, hurtT, moveK, runK, speed, walkSpeed: 2.4, runSpeed: 3.4, yaw: synced ? v.facing : 0, charge: m.rival.champion ? 0.4 : 0.1, time: now / 1000 });
     rivalStats.shown++;
   }
 
@@ -2883,13 +2894,14 @@ export function createFpsRenderer() {
     /** M3D: estilo do herói (cosmético) — troca o GLB sem perder o estado */
     hasPostFx: () => !!postFx,
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
-    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && !!hero.glb !== heroWantsGlb()) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
+    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && (!!hero.glb !== heroWantsGlb() || (!heroWantsGlb() && kitSig(heroKitNow()) !== heroKitSig))) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
     getRivalMounts: () => ({ ...rivalMountStats }),
     mountSpecial: (el, x, y, r, cor) => mountSpecialFx(el, x, y, r, cor), getSpecialFx: () => ({ n: spFx.n, live: spFx.list.filter((f) => f.on).length }),
     getAbrigos: () => (abrigoVis ? { n: abrigoVis.n, drawn: !!abrigoVis.group, err: abrigoVis.err || null } : null),
     getMountAnim: () => ({ palKey: mountVis.palKey, parked: !!mountVis.park, anim: mountVis.view?.anim?.() || null, visible: !!mountVis.mesh?.visible, turn: +(mountVis.turn || 0).toFixed(2), roll: +(mountVis.view?.root?.children?.find?.((c) => c.type === "Group")?.rotation?.z || 0).toFixed(2) }), // 20261016voo: estado da animação de voo (testes)
     getModelInfo: () => ({ hero: hero?.glb ? { ...hero.glb.info } : null, readyAt: { ...modelReadyAt }, enemies: getEnemyGlbStats(), dragons: getDragonGlbStats(), lib: getModelStats(),
       enemyAnims: [...entityMeshes.values()].filter((e) => e.kind === 'mon' && !e.boss && e.mesh.userData.glb).map((e) => ({ uid: e.uid, status: e.mesh.userData.glb.status, model: e.mesh.userData.glb.model, anim: e.mesh.userData.glb.anim, clip: e.mesh.userData.glb.clip, changes: e.mesh.userData.glb.changes })) }),
+    heroKit: () => (hero ? { glb: !!hero.glb, kit: hero.kit || null, info: hero.kitInfo || null, rebuilds: heroRebuilds } : null),
     getHero: () => (hero ? { ...hero.getDebug(), weapon: hero.weaponClass?.() || null, x: hero.root.position.x / TILE, y: hero.root.position.z / TILE } : null),
     getCamArm: () => ({ ...fpsCam.getArm(), cam: { x: fpsCam.camera.position.x, y: fpsCam.camera.position.y, z: fpsCam.camera.position.z }, inWall: fpsCam.cameraInWall() }),
     tileToScreen(tx, ty) {
@@ -3042,7 +3054,7 @@ export function createFpsRenderer() {
       enemyProjectiles: enemyFx ? enemyFx.proj.count : 0,
       enemyHazards: enemyFx ? enemyFx.haz.count : 0,
       precompile: { ...precompileInfo },
-      rivals: { ...rivalStats, modelsOn: modelsEnabled(), live: [...entityMeshes.values()].filter((e) => e.rival).map((e) => ({ uid: e.uid, visible: e.mesh.visible, glb: e.glb.info.status, style: e.glb.info.style, bb: e.bb ? e.bb.g.visible : null, bbInfo: e.bb ? { scale: e.bb.model.scale.x, meshes: countMeshes(e.bb.model), glb: e.bb.glb.status, pal: e.bb.palKey || null } : null })) },
+      rivals: { ...rivalStats, modelsOn: modelsEnabled(), live: [...entityMeshes.values()].filter((e) => e.rival).map((e) => ({ uid: e.uid, visible: e.mesh.visible, glb: e.glb.info.status, style: e.glb.info.style, kit: e.glb.info.kit || null, bb: e.bb ? e.bb.g.visible : null, bbInfo: e.bb ? { scale: e.bb.model.scale.x, meshes: countMeshes(e.bb.model), glb: e.bb.glb.status, pal: e.bb.palKey || null } : null })) },
       dragon: dragonView?.info?.() || null,
       botPool: Object.fromEntries(Object.entries(botPool).map(([k, v]) => [k, v.length])),
       scenery: dressing ? { ...dressing.stats } : null,

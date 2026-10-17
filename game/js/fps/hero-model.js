@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261016graf2';
-import { mergeStaticParts } from './merge-util.js?v=20261016graf2';
-import { attachHeroGlb } from './hero-glb.js?v=20261016graf2';
-import { addArmorDetail } from './surface-fx.js?v=20261016graf2';
+import { getConfig } from '../gameplay-config.js?v=20261017heroi3';
+import { mergeStaticParts } from './merge-util.js?v=20261017heroi3';
+import { attachHeroGlb } from './hero-glb.js?v=20261017heroi3';
+import { addArmorDetail } from './surface-fx.js?v=20261017heroi3';
 
 const CYAN = 0x39f0ff;
 
@@ -35,8 +35,23 @@ export function createHeroModel(opts = {}) {
   const matHalo = new THREE.MeshBasicMaterial({ color: 0x3a9cff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
   const matBladeAura = new THREE.MeshBasicMaterial({ color: 0x3a9cff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
   const matEdge = new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  // HERÓI 3: KIT (estilo + editor + equipamento → cores/cabeça/rosto/capa/arma). Sem kit = cavaleiro clássico idêntico ao de antes.
+  const K = opts.kit || null;
+  const WHITE = new THREE.Color(0xffffff);
+  const matSkin = new THREE.MeshStandardMaterial({ color: 0x9a7560, roughness: 0.62, metalness: 0.02 });
+  const matFaceDark = new THREE.MeshStandardMaterial({ color: 0x0c0f14, roughness: 0.4, metalness: 0.5 });
+  if (K) {
+    matArmor.color.setHex(K.armor); matArmor.emissive.copy(new THREE.Color(K.armor).multiplyScalar(0.18));
+    matArmor2.color.copy(new THREE.Color(K.armor).lerp(new THREE.Color(0x8a96a6), 0.2));
+    matCloth.color.setHex(K.cloth); matUnder.color.copy(new THREE.Color(K.armor).multiplyScalar(0.62));
+    if (K.glow != null) { const G = new THREE.Color(K.glow); matGlow.color.copy(G); matGlow.emissive.copy(G); matCore.color.copy(G.clone().lerp(WHITE, 0.7)); matHalo.color.copy(G); }
+    const bg = K.bladeGlow ?? K.glow;
+    if (bg != null) { const B = new THREE.Color(bg); matBlade.emissive.copy(B); matBlade.color.copy(B.clone().lerp(WHITE, 0.6)); matBladeAura.color.copy(B); matEdge.color.copy(B.clone().lerp(WHITE, 0.6)); }
+  }
+  const glowHex = K?.glow ?? CYAN;
+  const matEye = new THREE.MeshBasicMaterial({ color: new THREE.Color(glowHex).lerp(WHITE, 0.45) });
   // GRÁFICOS 2: linhas de painel + micro-arranhões + borda ciano na armadura (shader, sem textura)
-  if (getConfig().graphics.heroDetail !== false) { addArmorDetail(matArmor, { rim: CYAN, rimK: 0.42, panel: 9 }); addArmorDetail(matArmor2, { rim: CYAN, rimK: 0.3, panel: 12, scratch: 0.8 }); }
+  if (getConfig().graphics.heroDetail !== false) { addArmorDetail(matArmor, { rim: glowHex, rimK: 0.42, panel: 9 }); addArmorDetail(matArmor2, { rim: glowHex, rimK: 0.3, panel: 12, scratch: 0.8 }); }
   const flashMats = [matArmor, matArmor2, matCloth];
   const baseEmissive = flashMats.map((m) => m.emissive.getHex());
 
@@ -94,15 +109,15 @@ export function createHeroModel(opts = {}) {
   mantle.position.set(0, 0.34, -0.01); chest.add(mantle);
 
   // ── braços ──
-  const arms = {};
+  const arms = {}; const pads = []; const fores = {};
   for (const side of ['L', 'R']) {
     const sx = side === 'L' ? 0.27 : -0.27;
     const shoulder = joint(`shoulder${side}`, sx, 0.3, 0, chest);
-    const pad = box(0.19, 0.12, 0.24, matArmor2); pad.position.set(side === 'L' ? 0.03 : -0.03, 0.03, 0); pad.rotation.z = side === 'L' ? -0.25 : 0.25; shoulder.add(pad);
+    const pad = box(0.19, 0.12, 0.24, matArmor2); pad.position.set(side === 'L' ? 0.03 : -0.03, 0.03, 0); pad.rotation.z = side === 'L' ? -0.25 : 0.25; shoulder.add(pad); pads.push(pad);
     glowLine(shoulder, 0.2, 0.016, 0.02, side === 'L' ? 0.03 : -0.03, 0.02, -0.125).rotation.z = side === 'L' ? -0.25 : 0.25;
     const upper = box(0.11, 0.3, 0.12, matUnder); upper.position.y = -0.16; shoulder.add(upper);
     const elbow = joint(`elbow${side}`, 0, -0.31, 0, shoulder);
-    const fore = box(0.12, 0.27, 0.13, matArmor); fore.position.y = -0.14; elbow.add(fore);
+    const fore = box(0.12, 0.27, 0.13, matArmor); fore.position.y = -0.14; elbow.add(fore); fores[side] = fore;
     glowLine(elbow, 0.018, 0.2, 0.02, 0, -0.14, -0.068);
     const wrist = joint(`wrist${side}`, 0, -0.29, 0, elbow);
     const hand = box(0.09, 0.09, 0.1, matArmor2); hand.position.y = -0.03; wrist.add(hand);
@@ -122,14 +137,95 @@ export function createHeroModel(opts = {}) {
   // ── capa segmentada (3 elos que balançam) ──
   const cape = [];
   let capeParent = joint('cape0', 0, 0.33, -0.16, chest);
-  const capeW = [0.5, 0.56, 0.6];
+  // HERÓI 3: capa CURVA e afunilada (gomo de cilindro aberto: estreita nos ombros, abre embaixo, envolve o corpo) + bordas acesas
+  const CR = [[0.2, 0.25], [0.25, 0.29], [0.29, 0.32]]; const CL = 1.95; // raios topo/base por elo; ângulo do gomo (rad)
   for (let i = 0; i < 3; i++) {
-    const seg = new THREE.Mesh(new THREE.PlaneGeometry(capeW[i], 0.34), matCloth);
-    seg.position.y = -0.17;
+    const [rt, rb] = CR[i];
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, 0.34, 9, 1, true, Math.PI - CL / 2, CL), matCloth);
+    seg.position.set(0, -0.17, (rt + rb) / 2);
     capeParent.add(seg);
-    if (i === 2) { const hem = glowLine(capeParent, capeW[i], 0.016, 0.01, 0, -0.335, -0.004); hem.material = matGlow; }
+    for (const sd of [-1, 1]) { const ang = Math.PI + sd * CL / 2; const rm = (rt + rb) / 2; const ed = glowLine(capeParent, 0.012, 0.34, 0.012, Math.sin(ang) * rm, -0.17, (rt + rb) / 2 + Math.cos(ang) * rm); ed.rotation.z = -sd * Math.atan2(rb - rt, 0.34) * 0; }
+    if (i === 2) { const hem = new THREE.Mesh(new THREE.CylinderGeometry(rb + 0.004, rb + 0.004, 0.018, 9, 1, true, Math.PI - CL / 2, CL), matGlow); hem.position.set(0, -0.335, (rt + rb) / 2); capeParent.add(hem); }
     cape.push(capeParent);
     if (i < 2) capeParent = joint(`cape${i + 1}`, 0, -0.34, 0, capeParent);
+  }
+
+  const kitInfo = { head: K ? K.head : 'classico', face: K ? K.face : 'visor', weapon: K ? K.weapon : 'espada', cape: K ? K.cape !== false : true, parts: 0 };
+  if (K) {
+    const rm = (o) => { if (o?.parent) o.parent.remove(o); };
+    const add = (geo, mat, x, y, z, parent = head) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); kitInfo.parts++; return m; };
+    // ── ROSTO ──
+    if (K.face !== 'visor') rm(visor);
+    if (K.face === 'olhos' || K.face === 'mascara' || K.face === 'ciber') {
+      skull.material = matSkin;
+      const brow = add(new THREE.BoxGeometry(0.15, 0.022, 0.03), matFaceDark, 0, 0.045, 0.118); brow.rotation.x = -0.25;
+      add(new THREE.BoxGeometry(0.026, 0.05, 0.03), matSkin, 0, -0.005, 0.135); // nariz
+      for (const sx of [-0.045, 0.045]) {
+        const cyb = K.face === 'ciber' && sx < 0;
+        const e = add(cyb ? new THREE.SphereGeometry(0.024, 10, 8) : new THREE.BoxGeometry(0.036, 0.015, 0.02), cyb ? matEye : matEye, sx, 0.018, 0.124);
+        if (!cyb) e.rotation.z = sx > 0 ? -0.2 : 0.2;
+      }
+      if (K.face === 'mascara') { const mk = add(new THREE.BoxGeometry(0.2, 0.075, 0.07), matCloth, 0, -0.045, 0.1); mk.scale.set(1, 1, 1.1); }
+      else add(new THREE.BoxGeometry(0.06, 0.008, 0.02), matFaceDark, 0, -0.05, 0.125); // boca
+      if (K.face === 'ciber') { // meia-placa de sucata + aro do olho biônico
+        const hp = add(new THREE.SphereGeometry(0.138, 10, 8, 0, Math.PI, 0, Math.PI * 0.75), matArmor2, 0, 0.0, 0); hp.rotation.y = -Math.PI / 2; hp.scale.set(1.04, 1.12, 1.08);
+        const ring = add(new THREE.TorusGeometry(0.03, 0.007, 5, 12), matArmor2, -0.045, 0.018, 0.128);
+        add(new THREE.BoxGeometry(0.16, 0.04, 0.05), matArmor2, 0, -0.085, 0.07); // mandíbula de metal
+        ring.rotation.y = 0;
+      }
+    }
+    // ── CABEÇA ──
+    if (K.head !== 'capuz') { rm(hood); rm(hoodPeak); }
+    else { const seam = add(new THREE.BoxGeometry(0.014, 0.012, 0.3), matGlow, 0, 0.2, -0.06); seam.rotation.x = -0.9; }
+    if (K.head === 'chapeu') { // chapéu rúnico: aba larga + cone torto + faixa de runas acesa + estrela na ponta
+      add(new THREE.CylinderGeometry(0.3, 0.32, 0.02, 18), matCloth, 0, 0.1, -0.01);
+      const cone = add(new THREE.ConeGeometry(0.155, 0.46, 12), matCloth, 0, 0.33, -0.04); cone.rotation.x = -0.22;
+      const band = add(new THREE.TorusGeometry(0.152, 0.013, 4, 20), matGlow, 0, 0.13, -0.012); band.rotation.x = Math.PI / 2;
+      add(new THREE.OctahedronGeometry(0.03, 0), matEye, 0, 0.555, -0.095);
+    } else if (K.head === 'elmo') { // elmo do Arsenal: casco + viseira em T + crista/chifres
+      const hm = new THREE.MeshStandardMaterial({ color: new THREE.Color(K.helmColor ?? K.armor).lerp(new THREE.Color(0x8a96a6), K.helmColor != null ? 0.3 : 0.25).getHex(), metalness: 0.78, roughness: 0.3, emissive: new THREE.Color(K.helmGlow ?? glowHex).multiplyScalar(0.06) });
+      flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
+      const hg = new THREE.MeshBasicMaterial({ color: new THREE.Color(K.helmGlow ?? glowHex).lerp(WHITE, 0.3) });
+      const shell = add(new THREE.SphereGeometry(0.158, 14, 10), hm, 0, 0.02, -0.005); shell.scale.set(1, 1.12, 1.12);
+      add(new THREE.BoxGeometry(0.2, 0.03, 0.06), hm, 0, 0.055, 0.12); // sobrancelha do elmo
+      visor.material = hg; visor.position.set(0, 0.012, 0.15); visor.scale.set(0.85, 1, 1);
+      add(new THREE.BoxGeometry(0.026, 0.09, 0.02), hg, 0, -0.03, 0.158);
+      add(new THREE.BoxGeometry(0.17, 0.05, 0.08), hm, 0, -0.1, 0.07); // queixeira
+      const nape = add(new THREE.TorusGeometry(0.168, 0.011, 4, 22, Math.PI * 1.2), hg, 0, -0.03, -0.005); nape.rotation.set(Math.PI / 2, 0, Math.PI * 0.4);
+      if (K.crest === 'crista') { const c = add(new THREE.BoxGeometry(0.034, 0.13, 0.36), hg, 0, 0.19, -0.04); c.rotation.x = 0.15; }
+      else if (K.crest === 'chifres' || K.crest === 'demonio') {
+        const big = K.crest === 'demonio';
+        const hornM = new THREE.MeshStandardMaterial({ color: big ? 0x2a1210 : 0x3b302b, roughness: 0.5, metalness: 0.35, emissive: big ? new THREE.Color(K.helmGlow ?? 0xff3a1e).multiplyScalar(0.25) : new THREE.Color(0x000000) });
+        for (const sd of [-1, 1]) { const h = add(new THREE.ConeGeometry(big ? 0.042 : 0.032, big ? 0.3 : 0.24, 7), hornM, sd * 0.13, 0.14, 0.0); h.rotation.set(big ? -0.35 : 0.1, 0, sd * -(big ? 0.55 : 1.05)); if (big) add(new THREE.SphereGeometry(0.016, 6, 5), hg, sd * 0.2, 0.28, -0.05); }
+      }
+    } else if (K.head === 'careca') { /* rosto descoberto já montado acima */ }
+    if (K.scarf) { const sc = add(new THREE.CylinderGeometry(0.15, 0.2, 0.09, 12, 1, true), matCloth, 0, 0.4, 0.0, chest); sc.rotation.x = 0.1; }
+    // ── OMBROS / PLACAS / BRAÇO BIÔNICO ──
+    for (const pd of pads) pd.scale.multiplyScalar(K.pad || 1);
+    if (K.plates) {
+      const pm = new THREE.MeshStandardMaterial({ color: K.plates.color ?? 0x5a6070, metalness: 0.82, roughness: 0.28, emissive: new THREE.Color(K.plates.glow ?? glowHex), emissiveIntensity: K.plates.glow ? 0.28 : 0.06 });
+      flashMats.push(pm); baseEmissive.push(pm.emissive.getHex());
+      add(new THREE.BoxGeometry(0.38, 0.17, 0.04), pm, 0, 0.21, 0.165, chest);
+      add(new THREE.BoxGeometry(0.36, 0.22, 0.035), pm, 0, 0.18, -0.175, chest);
+      for (const pd of pads) { pd.material = pm; }
+      add(new THREE.BoxGeometry(0.3, 0.012, 0.02), matGlow, 0, 0.12, 0.19, chest);
+    }
+    if (K.cyberArm && fores.L) { fores.L.scale.set(1.4, 1.12, 1.4); fores.L.material = matArmor2; add(new THREE.BoxGeometry(0.17, 0.02, 0.18), matGlow, 0, -0.08, 0, arms.L.elbow); add(new THREE.BoxGeometry(0.17, 0.02, 0.18), matGlow, 0, -0.2, 0, arms.L.elbow); }
+    if (K.bulk) root.scale.set(K.bulk, 1, K.bulk);
+    // ── ARMA ──
+    if (K.weapon === 'montante') blade.scale.set(1.9, 1.6, 1.3);
+    else if (K.weapon === 'lanca') { blade.scale.set(0.85, 1, 1.6); add(new THREE.ConeGeometry(0.04, 0.16, 4), matBlade, 0, 0, 0.1 + bladeLen + 0.05, blade).rotation.x = Math.PI / 2; }
+    else if (K.weapon === 'adagas') {
+      blade.scale.set(1.2, 1.3, 0.42);
+      const off = joint('bladeOff', 0, -0.05, 0.02, arms.L.wrist);
+      const g2 = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.12, 6), matUnder); g2.rotation.x = Math.PI / 2; off.add(g2);
+      const b2 = box(0.032, 0.008, 0.36, matBlade); b2.position.z = 0.24; off.add(b2);
+      const a2 = box(0.08, 0.03, 0.4, matBladeAura); a2.position.z = 0.24; off.add(a2);
+      off.rotation.x = 1.25; kitInfo.parts += 3;
+    }
+    // ── CAPA ──
+    if (K.cape === false) { for (const g of cape) for (const c of [...g.children]) if (c.isMesh) g.remove(c); }
+    else if (K.rune) { const em = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.13), new THREE.MeshBasicMaterial({ color: new THREE.Color(glowHex).lerp(WHITE, 0.2), side: THREE.DoubleSide })); em.rotation.set(0, Math.PI, Math.PI / 4); em.position.set(0, -0.17, (0.25 + 0.29) / 2 - 0.27 - 0.008); em.scale.setScalar(1.25); cape[1].add(em); kitInfo.parts++; }
   }
 
   // ── arco do golpe (rastro aditivo durante o impacto) ──
@@ -370,7 +466,7 @@ export function createHeroModel(opts = {}) {
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
     mergeInfo = mergeStaticParts(root, keep);
   }
-  // ARMAS DUPLAS (20261016graf2): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  // ARMAS DUPLAS (20261017heroi3): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
   const altW = {};
   {
     const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });
@@ -395,7 +491,7 @@ export function createHeroModel(opts = {}) {
     for (const k of ['arco', 'cajado', 'varinha']) altW[k].visible = k === weaponCls && procBodyVisible;
     if (glow != null) altW._g.color.setHex(glow);
   }
-  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls };
+  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls, kit: K, kitInfo };
   // ANTES do merge? não: o merge roda acima; o GLB entra depois e não é mesclado
   const glb = opts.glb === false ? null : attachHeroGlb(api, { styleId: opts.styleId, onReady: opts.onGlbReady });
   api.glb = glb;

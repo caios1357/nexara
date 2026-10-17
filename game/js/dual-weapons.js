@@ -1,5 +1,5 @@
 /**
- * NEXARA — ARMAS DUPLAS (20261016graf2, pedido do Caio).
+ * NEXARA — ARMAS DUPLAS (20261017heroi3, pedido do Caio).
  *  Slot 1 = ESPADA (obrigatória). Slot 2 = ARCO | CAJADO | VARINHA (escolha no vestiário/arsenal).
  *  TROCAR alterna na hora (recarga curta). Estado no save: state.player.armas = { s2, ativo, s1Id, s2Id: { arco, cajado, varinha } }.
  *  Nada é resetado: o equipamento existente vira o slot certo na primeira vez.

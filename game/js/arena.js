@@ -3,11 +3,11 @@
  * 1 jogador + 2 inimigos, regras de combate existentes.
  * Simplicidade extrema: piso industrial aberto, pouca decoração.
  */
-import { createSkillsFromRace } from '../../rules/skills.js?v=20261016graf2';
-import { initReputation } from '../../rules/reputation.js?v=20261016graf2';
-import { createEmptyArquivo } from './arquivo.js?v=20261016graf2';
-import { indexById } from './data-loader.js?v=20261016graf2';
-import { pushLog } from './state.js?v=20261016graf2';
+import { createSkillsFromRace } from '../../rules/skills.js?v=20261017heroi3';
+import { initReputation } from '../../rules/reputation.js?v=20261017heroi3';
+import { createEmptyArquivo } from './arquivo.js?v=20261017heroi3';
+import { indexById } from './data-loader.js?v=20261017heroi3';
+import { pushLog } from './state.js?v=20261017heroi3';
 
 export const ARENA_ZONE_ID = 'zone_arena';
 
