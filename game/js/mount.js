@@ -44,9 +44,9 @@ export function createMount(ctx) {
   /** o Gigante do mapa morreu. `by` = 'player' | nome do rival. Retorna o estado da posse (ou null se desligado). */
   function onGiantKilled(by = 'player', extra = null) {
     const br = ctx.br(); if (!br || !on()) return null;
-    const m = ensure(br); if (m.decidido) return { ...m };
+    const m = ensure(br); if (m.decidido && !(by === 'player' && extra)) return { ...m }; // 20261016: cada gigante elemental abatido pelo herói troca a sela p/ ESSE dragão (cor/elemento)
     m.decidido = true; m.at = br.clock || 0;
-    if (by === 'player') { m.sela = true; m.por = 'player'; m.pal = cleanPal(extra?.pal); if (Number.isFinite(extra?.x) && Number.isFinite(extra?.y)) m.spot = { x: extra.x, y: extra.y }; saveTamed(true, m.pal); ctx.note('saddle_player', {}); }
+    if (by === 'player') { m.sela = true; m.por = 'player'; m.pal = cleanPal(extra?.pal); m.elemento = extra?.elemento || null; if (Number.isFinite(extra?.x) && Number.isFinite(extra?.y)) m.spot = { x: extra.x, y: extra.y }; saveTamed(true, m.pal); ctx.note('saddle_player', {}); }
     else { m.sela = false; m.por = String(by); ctx.note('saddle_lost', { by: m.por }); } // rival abateu: a sela some, ninguém voa
     return { ...m };
   }
@@ -120,14 +120,14 @@ export function createMount(ctx) {
       return;
     }
     if (m.phase !== 'landing' && m.phase !== 'cruise' && ctx.inCover?.()) forceLand('abrigo'); /* 20261016voo: em cruzeiro o dragão sobrevoa telhados/abrigos (não pousa à força) */ // entrou num esconderijo: pousa na borda e segue a pé
-    if (finalState(br) && !m.forced) forceLand('final');
+    if (finalState(br) && !m.forced && !(m.mode === 'sela' && C().semLimite)) forceLand('final'); // 20261016 (Caio): com a sela o voo só acaba no DESCER ou se o dragão morrer
     if (m.phase === 'takeoff') { m.alt = Math.min(cruise, m.alt + (cruise / 1.2) * dt); if (m.alt >= cruise) m.phase = 'cruise'; }
     if (m.phase === 'cruise') { // rasante: ao cuspir fogo o dragão desce a `rasanteAlt` (janela p/ a espada) e volta ao cruzeiro
       const tgt = m.clock < (m.fireUntil || 0) ? Math.min(cruise, C0.breath?.rasanteAlt ?? 2.0) : cruise; const dz = tgt - m.alt; m.alt += Math.sign(dz) * Math.min(Math.abs(dz), 3 * dt);
     }
     if (m.phase !== 'landing' && m.clock - (m.fireAt ?? -1e9) > 600) m.breath = Math.min(C0.breath?.max ?? 100, (m.breath ?? 0) + (C0.breath?.regenPerSec ?? 8) * dt);
     if (m.phase === 'cruise' || m.phase === 'takeoff') {
-      m.leftMs -= dtMs;
+      if (!(m.mode === 'sela' && C().semLimite)) m.leftMs -= dtMs; // sem limite de tempo com a sela
       if (!m.warned && m.leftMs <= 5000) { m.warned = true; ctx.note('mount_warn', { ms: Math.max(0, m.leftMs) }); }
       if (m.leftMs <= 0) forceLand('energia');
     }
@@ -138,7 +138,7 @@ export function createMount(ctx) {
     }
   }
   function endFlight(m, why) {
-    m.active = false; m.phase = 'ground'; m.alt = 0; m.forced = false; m.cdUntil = m.clock + (C().cooldownMs ?? 45000);
+    m.active = false; m.phase = 'ground'; m.alt = 0; m.forced = false; m.cdUntil = m.clock + (m.mode === 'sela' && C().semLimite && why !== 'abatida' ? 0 : (C().cooldownMs ?? 45000)); // pousou com a sela → remonta na hora
     ctx.note('mount_down', { why });
   }
   /** dano de queda (herói derrubado): min(0,25×HPmáx, 0,05×HPmáx×max(0, altitude−0,5 m)); nunca letal (o main deixa ≥ 1 HP) */

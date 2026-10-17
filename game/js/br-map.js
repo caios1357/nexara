@@ -7,7 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261016herois';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261016montaria';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -258,7 +258,7 @@ export function brRegionAt(m, cfg, x, y) {
 }
 
 /**
- * 20261016herois — COBERTURA (esconderijos): estruturas fechadas (ruína, caverna, casa, sala) ganham a marca `cobertura:true` (só dado: tile e colisão não mudam).
+ * 20261016montaria — COBERTURA (esconderijos): estruturas fechadas (ruína, caverna, casa, sala) ganham a marca `cobertura:true` (só dado: tile e colisão não mudam).
  * NUNCA no Território do Dragão (região 'dragao'): lá nada é marcado. Atacantes AÉREOS (o Gigante) não acertam o herói a pé dentro de uma cobertura; o dragão montado pousa na borda.
  */
 const COVER_KINDS = ['ruina', 'caverna', 'casa', 'sala'];
@@ -285,6 +285,23 @@ export function brCoverList(m, cfg) {
     }
     cand.sort((a, b) => b.sc - a.sc); let need = minN - have;
     for (const c of cand) { if (need <= 0) break; if (out.some((o) => o.region === r.id && Math.hypot((o.x0 + o.x1) / 2 - (c.x + 2.5), (o.y0 + o.y1) / 2 - (c.y + 2.5)) < 9)) continue; out.push({ kind: 'copa', x0: c.x, y0: c.y, x1: c.x + 5, y1: c.y + 5, region: r.id, sintetica: true }); need--; }
+  }
+  // 20261016abrigos: ABRIGOS perto dos 4 gigantes elementais (cobertura V3; telhado leve desenhado pelo renderer) — Território do Dragão intocado
+  const GE = cfg?.gigantesElementais; const AB = cfg?.cobertura?.abrigosGigante || {};
+  if (GE?.ativo && AB.ativo !== false) {
+    const nA = AB.n ?? 3, dMin = AB.distMin ?? 6, dMax = AB.distMax ?? 13, S = AB.tam ?? 3;
+    const free = (x, y) => !!m.reachable?.[x + y * W] && !'WTRCP'.includes(m.tiles[y]?.[x] || 'W');
+    for (const dist of GE.distritos || []) {
+      const r = (cfg.regioes || []).find((q) => q.id === dist); if (!r || r.id === 'dragao') continue;
+      const gs = m._giantSpots?.[dist]; const cx = gs ? gs.x : Math.floor((r.x0 + r.x1) / 2), cy = gs ? gs.y : Math.floor((r.y0 + r.y1) / 2); let got = 0; // em volta do ponto REAL do gigante
+      for (let k = 0; k < 240 && got < nA; k++) {
+        const a = (k * 2.399) % (Math.PI * 2); const d = dMin + ((k * 7) % (dMax - dMin + 1)) + Math.floor(k / 80) * 2; // anéis maiores se faltar espaço
+        const x0 = Math.round(cx + Math.cos(a) * d - S / 2), y0 = Math.round(cy + Math.sin(a) * d - S / 2);
+        let ok = x0 > 2 && y0 > 2 && x0 + S < W - 2 && y0 + S < H - 2; for (let yy = y0; yy < y0 + S && ok; yy++) for (let xx = x0; xx < x0 + S; xx++) if (!free(xx, yy) || (m.regionGrid[xx + yy * W] || 0) !== r.n) { ok = false; break; }
+        if (!ok || out.some((o) => x0 < o.x1 + 1 && x0 + S > o.x0 - 1 && y0 < o.y1 + 1 && y0 + S > o.y0 - 1)) continue;
+        out.push({ kind: 'abrigo', x0, y0, x1: x0 + S, y1: y0 + S, region: r.id, gigante: dist }); got++;
+      }
+    }
   }
   m._cover = out; return out;
 }

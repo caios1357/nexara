@@ -13,10 +13,10 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016herois';
-import { TILE } from './fps-camera.js?v=20261016herois';
-import { mergeStaticParts } from './merge-util.js?v=20261016herois';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261016herois';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016montaria';
+import { TILE } from './fps-camera.js?v=20261016montaria';
+import { mergeStaticParts } from './merge-util.js?v=20261016montaria';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261016montaria';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -252,6 +252,15 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     head.add(eg);
     eyes.push(e, eg);
   }
+  // 20261016 (Caio): rosto mais realista — pupila em fenda, arcada superior com presas, cristas nas bochechas, chifre no queixo, cristas nas narinas
+  for (const sx of [-1, 1]) {
+    const pu = mesh(new THREE.SphereGeometry(0.06, 6, 6), M.plate, sx * 0.47, 0.32, 0.8); pu.scale.set(0.35, 1.5, 0.6); head.add(pu); // pupila vertical (fenda de réptil)
+    const lid = mesh(new THREE.BoxGeometry(0.32, 0.07, 0.36), M.plate, sx * 0.42, 0.42, 0.72); lid.rotation.set(0.15, sx * -0.25, sx * 0.3); head.add(lid); // pálpebra/arcada pesada
+    for (let i = 0; i < 4; i++) { const ft = mesh(new THREE.ConeGeometry(0.045 + (i === 1 ? 0.03 : 0), i === 1 ? 0.26 : 0.16, 4), M.eye, sx * (0.34 - i * 0.03), -0.2, 1.05 + i * 0.22); ft.rotation.x = Math.PI; head.add(ft); } // presas de cima (canino maior)
+    for (let i = 0; i < 3; i++) { const ck = mesh(hornGeo(0.32 - i * 0.07, 0.07), M.horn, sx * (0.58 + i * 0.05), -0.05 - i * 0.12, 0.25 - i * 0.18); ck.rotation.set(-1.7, 0, sx * -1.25); head.add(ck); } // cristas da bochecha (leque)
+    const nr = mesh(hornGeo(0.16, 0.05), M.horn, sx * 0.2, 0.24, 1.72); nr.rotation.set(-0.5, 0, sx * -0.4); head.add(nr); // cristinha da narina
+  }
+  { const chin = mesh(hornGeo(0.28, 0.07), M.horn, 0, -0.42, 0.55); chin.rotation.set(-2.6, 0, 0); head.add(chin); } // chifre do queixo
   // chifres: 2 grandes curvos para trás + 2 menores
   const horns = [];
   for (const sx of [-1, 1]) {

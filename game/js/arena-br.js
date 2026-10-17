@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261016herois';
-import { getConfig } from './gameplay-config.js?v=20261016herois';
-import { pushLog } from './state.js?v=20261016herois';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261016herois';
-import { resetMonsterRuntime, getAiView, AI_STATES } from './enemy-ai.js?v=20261016herois';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261016herois';
-import { createRivals } from './arena-rivals.js?v=20261016herois';
+import { createArenaState } from './arena.js?v=20261016montaria';
+import { getConfig } from './gameplay-config.js?v=20261016montaria';
+import { pushLog } from './state.js?v=20261016montaria';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261016montaria';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261016montaria';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261016montaria';
+import { createRivals } from './arena-rivals.js?v=20261016montaria';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -54,7 +54,7 @@ export function createBrState(data, { from = null, boss = null } = {}) {
     const d = cfg.dragao;
     st.monstersAlive.push({
       uid: boss.uid, id: bossDef.id, zone: BR_ZONE_ID, x: d.x, y: d.y, homeX: d.x, homeY: d.y,
-      hp: bossDef.hp, hpMax: bossDef.hp, alive: true, boss: true, arenaLabel: 'GIGANTE VERDE',
+      hp: bossDef.hp, hpMax: bossDef.hp, alive: true, boss: true, arenaLabel: 'GIGANTE VERDE', visualScale: cfg.gigantesElementais?.escalaGigantes ?? 0.5, /* 20261016: gigantes −50% (acerto junto) */
       territoryMinX: d.territorio.x0, territoryMaxY: d.territorio.y1 + 8,
       // ajuste do Caio (20261009fast2): dragão da Arena Principal com MENOS HP (× do HP do herói) e MAIS dano; telegraphs/tempos intocados
       ...(d.hpMult > 0 ? { hpMult: d.hpMult } : {}), ...(d.danoMult > 0 ? { atkScale: d.danoMult } : {})
@@ -90,7 +90,7 @@ export function createArenaBr(deps) {
     inCovil: (x, y, r) => inCovil(x, y, r), damageHero: (n, why) => deps.damageHero?.(n, why),
     st: () => st, br: () => br, cfg, map: () => map(), R: () => R(), walk: (x, y) => walk(x, y), nearestFree: (x, y) => nearestFree(x, y),
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
-    rollLootFor, credit: (n, why) => deps.credit?.(n, why), regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
+    rollLootFor, credit: (n, why) => deps.credit?.(n, why), onGiantByRival: (g, rv) => { const q = br?.giants?.find((x) => x.uid === g.uid); if (q) { q.killedAt = Date.now(); q.by = rv.name; } }, regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
   });
   function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
 
@@ -122,10 +122,11 @@ export function createArenaBr(deps) {
     const D = C.dragao || {}; const chefes = deps.getData().dragoes?.chefes || []; let k = 0;
     for (const dist of G.distritos || []) {
       const ch = chefes.find((c) => c.distrito === dist); const rg = C.regioes.find((r) => r.id === (G.regiao?.[dist] || dist)); if (!ch || !rg || rg.id === 'dragao') continue;
-      const f = nearestFree(Math.floor((rg.x0 + rg.x1) / 2), Math.floor((rg.y0 + rg.y1) / 2)); if (!f) continue;
+      const cx0 = Math.floor((rg.x0 + rg.x1) / 2), cy0 = Math.floor((rg.y0 + rg.y1) / 2); const f = nearestOpenIn(cx0, cy0, 3, rg) || nearestOpen(cx0, cy0, 2); if (!f) continue; // 20261016: arena aberta (7×7 livre) dentro do distrito
       const mon = { uid: (G.uidBase || 9101) + k++, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome, elemental: ch.elemento,
         territoryMinX: rg.x0 + 1, territoryMaxX: rg.x1 - 1, territoryMinY: rg.y0 + 1, territoryMaxY: rg.y1 - 1, hpMult: G.hpMult || (D.hpMult > 0 ? D.hpMult : 33), atkScale: G.danoMult || (D.danoMult > 0 ? D.danoMult : 2.5) };
       applyDragonProfile(mon, ch); mon.visualScale = G.escalaVisual || 1; mon.hp = mon.hpMax = Math.max(100, Math.round((st.player.hpMax || 100) * mon.hpMult)); st.monstersAlive.push(mon); // HP = HP do herói × multiplicador (mesma regra do gigante do covil)
+      { const mm = map(); (mm._giantSpots = mm._giantSpots || {})[dist] = { x: f.x, y: f.y }; mm._cover = null; }
       (br.giants = br.giants || []).push({ uid: mon.uid, id: ch.id, nome: ch.nome, elemento: ch.elemento, regiao: rg.id, x: f.x, y: f.y });
     }
     if (br.giants?.length) note('giants', { n: br.giants.length });
@@ -204,6 +205,15 @@ export function createArenaBr(deps) {
     }
   }
   function walk(x, y) { const m = map(); return x >= 0 && y >= 0 && x < m.W && y < m.H && m.reachable[x + y * m.W] === 1; }
+  /** 20261016: tile livre com FOLGA (todos os tiles num raio r andáveis) — gigantes nascem/reaparecem longe de paredes */
+  function nearestOpen(x, y, r0 = 2) { for (let r = 0; r < 18; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const cx = x + dx, cy = y + dy; let ok = true; for (let yy = -r0; yy <= r0 && ok; yy++) for (let xx = -r0; xx <= r0; xx++) if (!walk(cx + xx, cy + yy)) { ok = false; break; } if (ok) return { x: cx, y: cy }; } return nearestFree(x, y); }
+  /** 20261016: gigante preso na parede (centro fora do andável ou sem sair do lugar perseguindo) → volta p/ o tile aberto mais perto */
+  function unstickGiants() { if (!st || !br) return; const ck = br.clock || 0; if (ck - (br.unstickAt || 0) < 1000) return; br.unstickAt = ck;
+    for (const q of st.monstersAlive) { if (!q.alive || !q.boss || q.rival) continue; const v = getBossView(q); const fx = v?.fx ?? q.x + 0.5, fy = v?.fy ?? q.y + 0.5; const tx = Math.floor(fx), ty = Math.floor(fy);
+      const moved = Math.hypot(fx - (q._ux ?? fx), fy - (q._uy ?? fy)); q._ux = fx; q._uy = fy; const chasing = v && (v.state === 'CHASE' || v.state === 'RETURN');
+      q._still = chasing && moved < 0.05 ? (q._still || 0) + 1 : 0;
+      if (!walk(tx, ty) || q._still >= 4) { const f = nearestOpen(tx, ty, 2); if (f) { placeMonster(st, q.uid, f.x + 0.5, f.y + 0.5); q.homeX = f.x; q.homeY = f.y; q._still = 0; br.giantUnstuck = (br.giantUnstuck || 0) + 1; } } } }
+  function nearestOpenIn(x, y, r0, rg) { for (let r = 0; r < 30; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const cx = x + dx, cy = y + dy; if (cx - r0 < rg.x0 + 1 || cx + r0 > rg.x1 - 1 || cy - r0 < rg.y0 + 1 || cy + r0 > rg.y1 - 1) continue; let ok = true; for (let yy = -r0; yy <= r0 && ok; yy++) for (let xx = -r0; xx <= r0; xx++) if (!walk(cx + xx, cy + yy)) { ok = false; break; } if (ok) return { x: cx, y: cy }; } return null; }
   function nearestFree(x, y) { for (let r = 0; r < 5; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (walk(x + dx, y + dy)) return { x: x + dx, y: y + dy }; return null; }
 
   function pickType(region) {
@@ -511,9 +521,9 @@ export function createArenaBr(deps) {
     if (!C.dragao?.desativado) { br.finalDragon = ch.id; return; } // covil: já existe desde o início
     if (br.zone.stage < (ch.evento?.estagio ?? 2)) return;
     const bc = getConfig().arenaBoss; const def = st._data.monsters.monsters.find((m) => m.id === bc.monsterId); const m = map(); if (!def || !m) { br.finalDragon = 'none'; return; }
-    const z = br.zone; const f = nearestFree(Math.floor(z.cx), Math.floor(z.cy)) || nearestFree(Math.floor(m.W / 2), Math.floor(m.H / 2)); if (!f) { br.finalDragon = 'none'; return; }
+    const z = br.zone; const f = nearestOpen(Math.floor(z.cx), Math.floor(z.cy), 2) || nearestFree(Math.floor(m.W / 2), Math.floor(m.H / 2)); if (!f) { br.finalDragon = 'none'; return; }
     const D = C.dragao || {};
-    const mon = { uid: bc.uid, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome,
+    const mon = { uid: bc.uid, id: def.id, zone: BR_ZONE_ID, x: f.x, y: f.y, homeX: f.x, homeY: f.y, hp: def.hp, hpMax: def.hp, alive: true, boss: true, arenaLabel: ch.nome, visualScale: cfg().gigantesElementais?.escalaGigantes ?? 0.5,
       territoryMinX: 1, territoryMaxX: m.W - 2, territoryMinY: 1, territoryMaxY: m.H - 2, hpMult: D.hpMult > 0 ? D.hpMult : 33, atkScale: D.danoMult > 0 ? D.danoMult : 2.5, finalEvent: true };
     applyDragonProfile(mon, ch); st.monstersAlive.push(mon); br.finalDragon = ch.id; br.bossArmed = true; deps.armBoss?.();
     note('dragon_final', { id: ch.id, nome: ch.nome, aviso: ch.evento?.aviso || `${ch.nome} DESPERTA`, x: f.x, y: f.y, cor: ch.cor?.brilho });
@@ -547,6 +557,7 @@ export function createArenaBr(deps) {
     return !!br?.ended;
   }
   function update(dtMs, p) {
+    try { unstickGiants(); } catch { /* */ }
     if (!isActive()) return;
     if (br.spectate) { updateSpectate(dtMs); return; }
     br.clock += dtMs; stats.ticks++;
@@ -639,8 +650,8 @@ export function createArenaBr(deps) {
     rivals: () => (br ? rivals.view(deps.getPos()) : null), onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
-    densityExhausted,
-    /** 20261016herois: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
+    densityExhausted, walkable: (x, y) => (br ? walk(x, y) : false),
+    /** 20261016montaria: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
     coverAt: (x, y) => { try { return br ? brCoverAt(map(), cfg(), x, y) : null; } catch { return null; } }, coverList: () => (br ? brCoverList(map(), cfg()).map((c) => ({ ...c })) : []),
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */
@@ -648,6 +659,7 @@ export function createArenaBr(deps) {
       /** RIVAIS (testes): lista, gera rival num ponto, força o confronto final */
       rivals: () => (br ? rivals.view(deps.getPos()) : null),
       /** testes: morte do herói pela MESMA rota da morte real (regra do último herói / espectador) */
+      placeRival(uid, x, y) { return br ? rivals.debugPlace(uid, x, y) : false; },
       killHero() { return st ? onPlayerDeath(st) : false; },
       spectate(ms, skip) { return spectateAdvance(ms || 0, !!skip); },
       spawnRivals() { if (br && !br.rivals) rivals.spawn(deps.getPos()); return br?.rivals?.length || 0; },

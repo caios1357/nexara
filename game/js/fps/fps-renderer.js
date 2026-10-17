@@ -10,37 +10,37 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016herois';
-import { buildArenaDressing } from './arena-dressing.js?v=20261016herois';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016herois';
-import { createHeroModel } from './hero-model.js?v=20261016herois';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016herois';
-import { attachHeroGlb } from './hero-glb.js?v=20261016herois';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016herois';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016herois';
-import { createActionVfx } from './action-vfx.js?v=20261016herois';
-import { createPassiveVfx } from './passive-vfx.js?v=20261016herois';
-import { createFpsControls } from './fps-controls.js?v=20261016herois';
-import { createViewmodel } from './viewmodel.js?v=20261016herois';
-import { createDragonView } from './dragon-view.js?v=20261016herois';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016herois';
-import { getSprite } from '../assets.js?v=20261016herois';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016herois';
-import { createBossDragon } from './boss-dragon-view.js?v=20261016herois';
-import { bossCfgFor } from '../boss-variants.js?v=20261016herois';
-import { mergeStaticParts } from './merge-util.js?v=20261016herois';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016herois';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016herois';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016herois';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016herois';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016herois';
-import { createPostFx } from './post-fx.js?v=20261016herois';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016herois';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016herois';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016herois';
-import { groundAt, setGroundFn } from './ground.js?v=20261016herois';
-import { buildBrTerrain } from './br-terrain.js?v=20261016herois';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016herois';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016montaria';
+import { buildArenaDressing } from './arena-dressing.js?v=20261016montaria';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016montaria';
+import { createHeroModel } from './hero-model.js?v=20261016montaria';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016montaria';
+import { attachHeroGlb } from './hero-glb.js?v=20261016montaria';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016montaria';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016montaria';
+import { createActionVfx } from './action-vfx.js?v=20261016montaria';
+import { createPassiveVfx } from './passive-vfx.js?v=20261016montaria';
+import { createFpsControls } from './fps-controls.js?v=20261016montaria';
+import { createViewmodel } from './viewmodel.js?v=20261016montaria';
+import { createDragonView } from './dragon-view.js?v=20261016montaria';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016montaria';
+import { getSprite } from '../assets.js?v=20261016montaria';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016montaria';
+import { createBossDragon } from './boss-dragon-view.js?v=20261016montaria';
+import { bossCfgFor } from '../boss-variants.js?v=20261016montaria';
+import { mergeStaticParts } from './merge-util.js?v=20261016montaria';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016montaria';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016montaria';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016montaria';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016montaria';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016montaria';
+import { createPostFx } from './post-fx.js?v=20261016montaria';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016montaria';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016montaria';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016montaria';
+import { groundAt, setGroundFn } from './ground.js?v=20261016montaria';
+import { buildBrTerrain } from './br-terrain.js?v=20261016montaria';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016montaria';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -121,8 +121,13 @@ export function createFpsRenderer() {
   /** gp3: visual do Mini Dragão (lógica em companion-dragon.js). */
   let dragonView = null; let dragonPalKey = null;
   /** Bloco V: herói em 3ª pessoa. */
-  let hero = null;
+  let hero = null; let heroRebuilds = 0;
   let heroStyleId = 'cavaleiro';
+  /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
+     Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
+  const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
+  const heroWantsGlb = () => !((heroLookUrl || getConfig().graphics.heroLook) !== 'glb' && heroStyleId === 'cavaleiro');
+  function buildHero() { return createHeroModel({ styleId: heroStyleId, glb: heroWantsGlb() ? undefined : false, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } }); }
   let heroExtra = {};
   const modelReadyAt = {};
   const heroSt = { yaw: 0, init: false };
@@ -249,7 +254,7 @@ export function createFpsRenderer() {
       } else if (!tier.composer) ensureVignette();
       if (VIEW_MODE === 'third') {
         // M3D: modelo GLB animado (KayKit) carrega preguiçoso; até lá (ou se falhar) fica o procedural
-        hero = createHeroModel({ styleId: heroStyleId, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } });
+        hero = buildHero();
         scene.add(hero.root);
         hero.glb?.setStyle(heroStyleId, heroExtra);
       } else {
@@ -769,7 +774,7 @@ export function createFpsRenderer() {
       worldRoot.add(rune);
     }
     // EVO gráficos: pilares rúnicos, cabos, placas holo e selos (poucos draw calls, instanciados)
-    dressing = null;
+    dressing = null; abrigoVis = null; /* abrigos dos gigantes: refaz no mundo novo */
     if (evoSky) {
       try {
         dressing = buildArenaDressing(zone, (tx, ty) => getTileType(zone, tx, ty), TILE, { accent: key === 'ca' ? 0x39e8ff : 0x39c6ff, accent2: key === 'ca' ? 0x2cff9a : 0x49c6ff, density: tier?.cityDensity ?? 1, reflections: getConfig().graphics.wetReflections !== false, maxReflections: tierName === 'high' ? 64 : tierName === 'medium' ? 40 : 24, skyDragon: key === 'ca' && tierName !== 'low' && getConfig().graphics.skyDragon !== false, dragonGlow: 0x3aa8ff });
@@ -1802,17 +1807,28 @@ export function createFpsRenderer() {
   }
   const rivalRank = []; const rivalFull = new Set();
   /** rival fora do grupo próximo: só posição + etiqueta/anel (sem animação/corpo) */
+  /* 20261016abrigos: rival montado/voando — dragão sob o rival (até 3 modelos; mesma pose de voo da montaria do herói) */
+  const rivalMountStats = { views: 0, shown: 0 };
+  function rivalLift(entry, m, fx, fy, dt) {
+    const F = m.rivalFly; const vm = getConfig().mount?.visualAltMult ?? 2;
+    if (!F) { if (entry.rdv) entry.rdv.root.visible = false; return 0; }
+    if (!entry.rdv && rivalMountStats.views < 3) { try { const bc = bossCfgFor({}, getConfig().arenaBoss); const sc = getConfig().mount?.scale ?? 0.4; const view = createBossDragon({ height: (bc.visualHeight || 6.4) * sc, palette: F.pal || null }); entry.mesh.add(view.root); view.root.rotation.y = Math.PI; entry.rdv = view; entry.rdvBc = bc; entry.rdvSc = sc; rivalMountStats.views++; } catch (e) { entry.rdvErr = String(e?.message || e); } }
+    const lift = F.alt * vm + (entry.rdv ? 1.1 * (entry.rdvSc / 0.4) : 0);
+    if (entry.rdv) { const r = entry.rdv.root; r.visible = true; r.position.set(0, -1.1 * (entry.rdvSc / 0.4), 0); rivalMountStats.shown++;
+      try { entry.rdv.update({ state: 'CHASE', progress: 0, speed: 0, attack: null, facing: 0, fx, fy, fly: { phase: F.phase, turn: 0 } }, { dt: dt || 0.016, now: performance.now(), cfg: entry.rdvBc, flashing: false }); r.rotation.y = Math.PI; } catch (e) { entry.rdvErr = String(e?.message || e); } }
+    return lift;
+  }
   function updateRivalLite(entry, m, now) {
     const v = getAiView(m); const synced = v && v.syncX === m.x && v.syncY === m.y;
     const fx = synced ? v.fx : m.x + 0.5, fy = synced ? v.fy : m.y + 0.5;
-    entry.mesh.position.set(fx * TILE, groundAt(fx, fy), fy * TILE); entry.lastNow = now; rivalStats.lite = (rivalStats.lite || 0) + 1;
+    entry.mesh.position.set(fx * TILE, groundAt(fx, fy) + rivalLift(entry, m, fx, fy, 0.05), fy * TILE); entry.lastNow = now; rivalStats.lite = (rivalStats.lite || 0) + 1;
   }
   function updateRivalEntity(entry, m, now, aiClock) {
     const v = getAiView(m); const synced = v && v.syncX === m.x && v.syncY === m.y;
     const fx = synced ? v.fx : m.x + 0.5, fy = synced ? v.fy : m.y + 0.5;
     const dt = entry.lastNow ? Math.min(0.1, (now - entry.lastNow) / 1000) : 0.016; entry.lastNow = now;
     const root = entry.mesh;
-    root.position.set(fx * TILE, groundAt(fx, fy), fy * TILE);
+    root.position.set(fx * TILE, groundAt(fx, fy) + rivalLift(entry, m, fx, fy, dt), fy * TILE);
     if (synced) root.rotation.y = Math.PI - v.facing;
     const sm = m.sizeMult || 1; entry.body.scale.setScalar(sm);
     if (entry.bb) { // BB voa no ombro (mesma regra do companheiro do herói: ao lado/à frente, a altura de pairar) com bater de asas e boca acesa no aviso da habilidade
@@ -2106,7 +2122,7 @@ export function createFpsRenderer() {
       if (live.has(key)) continue;
       entityRoot.remove(entry.mesh);
       // RIVAIS: o GLB do herói compartilha geometria com o cache de modelos → só remove (sem dispose); libera o próprio
-      if (entry.rival) { entry.own.forEach((o) => o.dispose?.()); entry.tag.material.map?.dispose(); entry.tag.material.dispose(); entityMeshes.delete(key); rivalStats.removed++; continue; }
+      if (entry.rival) { if (entry.rdv) rivalMountStats.views--; entry.own.forEach((o) => o.dispose?.()); entry.tag.material.map?.dispose(); entry.tag.material.dispose(); entityMeshes.delete(key); rivalStats.removed++; continue; }
       // EVO: bots voltam para o pool (cap por visual) — sem dispose de material compartilhável
       const lk = entry.kind === 'mon' && !entry.boss ? entry.mesh.userData?.lookKey : null;
       if (lk) {
@@ -2637,7 +2653,37 @@ export function createFpsRenderer() {
     const x = (rv.x + 0.5) * TILE, z = (rv.y + 0.5) * TILE; m.position.set(x, groundAt(rv.x + 0.5, rv.y + 0.5), z);
     try { restVis.view.update({ state: 'IDLE', progress: 0, speed: 0, attack: null, facing: 0, fx: rv.x, fy: rv.y }, { dt, now: performance.now(), cfg: restVis.bc, flashing: false }); } catch (e) { restVis.err = String(e?.message || e); }
   }
+  /* 20261016abrigos: telhados leves dos ABRIGOS perto dos gigantes (2 InstancedMesh: postes + telhado; construídos 1x quando a lista existe) */
+  var abrigoVis = null; // eslint-disable-line no-var
+  function ensureAbrigos() {
+    if (abrigoVis !== null) return; const L = hooks.getCoverList?.(); if (!L) return; const A = L.filter((c) => c.kind === 'abrigo'); abrigoVis = { n: A.length, group: null }; if (!A.length) return;
+    const g = new THREE.Group(); g.name = 'abrigosGigante';
+    const post = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 2.4, 0.18), new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.7, metalness: 0.4 }), A.length * 4);
+    const roof = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.16, 1), new THREE.MeshStandardMaterial({ color: 0x3b3328, roughness: 0.85, emissive: 0x2a1a08, emissiveIntensity: 0.6 }), A.length);
+    const edge = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.05, 1), new THREE.MeshBasicMaterial({ color: 0x39e8ff }), A.length);
+    const M = new THREE.Matrix4(); let pi = 0;
+    A.forEach((c, i) => { const w = (c.x1 - c.x0) * TILE, d = (c.y1 - c.y0) * TILE, cx = (c.x0 + c.x1) / 2 * TILE, cz = (c.y0 + c.y1) / 2 * TILE; const gy = groundAt((c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2);
+      for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { M.makeTranslation(cx + sx * (w / 2 - 0.15), gy + 1.2, cz + sz * (d / 2 - 0.15)); post.setMatrixAt(pi++, M); }
+      M.makeScale(w + 0.4, 1, d + 0.4).setPosition(cx, gy + 2.45, cz); roof.setMatrixAt(i, M); M.makeScale(w + 0.5, 1, d + 0.5).setPosition(cx, gy + 2.36, cz); edge.setMatrixAt(i, M); });
+    g.add(post, roof, edge); worldRoot.add(g); abrigoVis.group = g;
+  }
+  /* 20261016: efeito do PODER ESPECIAL do dragão — anel + disco no chão na cor do elemento (2 malhas reaproveitadas, sem custo extra parado) */
+  const spFx = { list: [], n: 0 };
+  function mountSpecialFx(el, x, y, r, cor) {
+    let f = spFx.list.find((q) => !q.on);
+    if (!f) { const ring = new THREE.Mesh(new THREE.RingGeometry(0.85, 1, 40), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2;
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })); disc.rotation.x = -Math.PI / 2;
+      const g = new THREE.Group(); g.add(ring, disc); entityRoot.add(g); f = { g, ring, disc, on: false }; spFx.list.push(f); }
+    const c = new THREE.Color(cor || '#9fffb0'); f.ring.material.color.copy(c); f.disc.material.color.copy(c);
+    f.on = true; f.t = 0; f.dur = el === 'fogo' ? 5 : el === 'veneno' ? 6 : 1.2; f.r = r * TILE; f.el = el; f.g.visible = true;
+    f.g.position.set(x * TILE, groundAt(x, y) + 0.08, y * TILE); spFx.n++;
+  }
+  function updateSpecialFx(dt) { for (const f of spFx.list) { if (!f.on) continue; f.t += dt; const k = Math.min(1, f.t / 0.35); const s = f.r * (0.3 + 0.7 * k); f.ring.scale.setScalar(s); f.disc.scale.setScalar(s);
+      const fade = Math.max(0, 1 - Math.max(0, f.t - (f.dur - 0.6)) / 0.6); f.ring.material.opacity = 0.9 * fade; f.disc.material.opacity = (f.dur > 2 ? 0.28 + 0.1 * Math.sin(f.t * 9) : 0.4 * (1 - k * 0.6)) * fade;
+      if (f.t >= f.dur) { f.on = false; f.g.visible = false; } } }
   function updateMountVisual(dt) {
+    updateSpecialFx(dt);
+    if (abrigoVis === null) { try { ensureAbrigos(); } catch (e) { abrigoVis = { n: 0, err: String(e) }; } }
     updateMountFire(dt);
     updateMountRest(dt, hooks.getMountView?.() || null);
     const mv0 = hooks.getMountView?.() || null; const mv = mv0 && mv0.dragon === false ? null : mv0; const want = mv ? 1 : 0;
@@ -2648,6 +2694,7 @@ export function createFpsRenderer() {
     const vAlt = mv0 ? mv0.alt * visMult : 0; mountVis.vAlt = vAlt;
     mountVis.heroLift = mv0 ? vAlt + (mv ? 1.1 * (mv.scale / 0.4) * mountVis.k : 0) : 0; // o herói fica no dorso (≈1,1 m acima do corpo do dragão)
     setMountFraming(mountVis.heroLift, mv0 ? Math.max(mountVis.k, 0.001) : 0);
+    { const pk = mv?.pal?.brilho || (mv ? 'verde' : null); if (pk && mountVis.view && mountVis.palKey !== pk) { entityRoot.remove(mountVis.view.root); try { mountVis.view.dispose?.(); } catch { /* */ } mountVis.view = null; mountVis.mesh = null; mountVis.park = null; } if (pk) mountVis.palKey = pk; } // troca de sela → modelo/cor do dragão abatido
     if (mv && !mountVis.view) {
       try {
         const bc = bossCfgFor({}, getConfig().arenaBoss);
@@ -2659,15 +2706,15 @@ export function createFpsRenderer() {
     // voofix: ao POUSAR o dragão não some — fica no chão ~2,5 s e depois levanta voo para o covil (sobe e some no céu). Abatido (falling) continua sumindo.
     if (mv) { mountVis.lastPhase = mv.phase; mountVis.park = null; }
     else if (mv0 && mv0.dragon === false) { mountVis.lastPhase = 'falling'; mountVis.park = null; }
-    else if (!mountVis.park && m.visible && mountVis.lastPhase === 'landing') { { const yw = heroSt.yaw; mountVis.park = { t: 0, x: m.position.x + Math.cos(yw) * 2.4 + Math.sin(yw) * 1.2, y: m.position.y, z: m.position.z + Math.sin(yw) * 2.4 - Math.cos(yw) * 1.2 }; } /* pousa ao lado do herói (não em cima da câmera) */ mountVis.parks = (mountVis.parks || 0) + 1; mountVis.lastPhase = 'parked'; }
+    else if (!mountVis.park && m.visible && mountVis.lastPhase && mountVis.lastPhase !== 'falling' && mountVis.lastPhase !== 'parked') { /* 20261016: qualquer fim de voo (pouso, energia, abrigo, final) estaciona */ { const yw = heroSt.yaw; mountVis.park = { t: 0, x: m.position.x + Math.cos(yw) * 2.4 + Math.sin(yw) * 1.2, y: m.position.y, z: m.position.z + Math.sin(yw) * 2.4 - Math.cos(yw) * 1.2 }; } /* pousa ao lado do herói (não em cima da câmera) */ mountVis.parks = (mountVis.parks || 0) + 1; mountVis.lastPhase = 'parked'; }
     const pk = mountVis.park;
     const vis = !!mv || !!pk; if (m.visible !== vis) m.visible = vis;
     if (!vis) return;
     if (pk) {
-      pk.t += dt; const up = Math.max(0, pk.t - 2.5);
-      m.position.set(pk.x, pk.y + up * up * 3, pk.z);
+      pk.t += dt; const up = 0; // 20261016 (Caio): o dragão POUSADO FICA no chão, visível, até montar de novo (não voa embora)
+      m.position.set(pk.x, groundAt(pk.x / TILE, pk.z / TILE), pk.z);
       try { mountVis.view.update({ state: up > 0 ? 'CHASE' : 'IDLE', progress: 0, speed: 0, fly: up > 0 ? { phase: 'takeoff', turn: 0 } : null, attack: null, facing: Math.PI - m.rotation.y, fx: pk.x / TILE, fy: pk.z / TILE }, { dt, now: performance.now(), cfg: mountVis.bc, flashing: false }); } catch { /* visual */ }
-      if (pk.t > 5) { mountVis.park = null; m.visible = false; }
+      if (!hooks.getMountHas?.()) { mountVis.park = null; m.visible = false; } // só some se a sela acabar (partida terminou)
       return;
     }
     const fx = fpsCam.state.visX / TILE, fy = fpsCam.state.visZ / TILE;
@@ -2805,8 +2852,11 @@ export function createFpsRenderer() {
     /** M3D: estilo do herói (cosmético) — troca o GLB sem perder o estado */
     hasPostFx: () => !!postFx,
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
-    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; hero?.glb?.setStyle(heroStyleId, heroExtra); },
-    getMountAnim: () => ({ anim: mountVis.view?.anim?.() || null, visible: !!mountVis.mesh?.visible, turn: +(mountVis.turn || 0).toFixed(2), roll: +(mountVis.view?.root?.children?.find?.((c) => c.type === "Group")?.rotation?.z || 0).toFixed(2) }), // 20261016voo: estado da animação de voo (testes)
+    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && !!hero.glb !== heroWantsGlb()) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); },
+    getRivalMounts: () => ({ ...rivalMountStats }),
+    mountSpecial: (el, x, y, r, cor) => mountSpecialFx(el, x, y, r, cor), getSpecialFx: () => ({ n: spFx.n, live: spFx.list.filter((f) => f.on).length }),
+    getAbrigos: () => (abrigoVis ? { n: abrigoVis.n, drawn: !!abrigoVis.group, err: abrigoVis.err || null } : null),
+    getMountAnim: () => ({ palKey: mountVis.palKey, parked: !!mountVis.park, anim: mountVis.view?.anim?.() || null, visible: !!mountVis.mesh?.visible, turn: +(mountVis.turn || 0).toFixed(2), roll: +(mountVis.view?.root?.children?.find?.((c) => c.type === "Group")?.rotation?.z || 0).toFixed(2) }), // 20261016voo: estado da animação de voo (testes)
     getModelInfo: () => ({ hero: hero?.glb ? { ...hero.glb.info } : null, readyAt: { ...modelReadyAt }, enemies: getEnemyGlbStats(), dragons: getDragonGlbStats(), lib: getModelStats(),
       enemyAnims: [...entityMeshes.values()].filter((e) => e.kind === 'mon' && !e.boss && e.mesh.userData.glb).map((e) => ({ uid: e.uid, status: e.mesh.userData.glb.status, model: e.mesh.userData.glb.model, anim: e.mesh.userData.glb.anim, clip: e.mesh.userData.glb.clip, changes: e.mesh.userData.glb.changes })) }),
     getHero: () => (hero ? { ...hero.getDebug(), x: hero.root.position.x / TILE, y: hero.root.position.z / TILE } : null),
@@ -2951,7 +3001,7 @@ export function createFpsRenderer() {
       antialias: !!renderer?.getContextAttributes?.()?.antialias,
       adaptiveDropped: (perf.dropLog || []).slice(),
       // M10 passo 3 (e2e): leitura visual
-      gfx3: { teleMarks: teleMarkStats.shown, floats: { ...floatStats }, dragonK: +dragonFx.k.toFixed(2), embers: !!dragonFx.pts?.visible, embersN: dragonFx.n, vignette: !!dragonFx.on, heroRimK: hero?.glb?.info?.rimK ?? null, heroGlb: hero?.glb?.info?.status || null },
+      gfx3: { teleMarks: teleMarkStats.shown, floats: { ...floatStats }, dragonK: +dragonFx.k.toFixed(2), embers: !!dragonFx.pts?.visible, embersN: dragonFx.n, vignette: !!dragonFx.on, heroRimK: hero?.glb?.info?.rimK ?? null, heroLook: hero ? (hero.glb ? 'glb' : 'classico') : null, heroRebuilds, heroGlb: hero?.glb?.info?.status || null },
       pointLights: (() => { let n = 0; scene?.traverse((o) => { if (o.isPointLight && o.visible && o.intensity > 0) n++; }); return n; })(),
       programs: renderer?.info?.programs?.length || 0,
       particles: (sparks ? sparks.alive : 0) + (dragonView?.getCounts?.().trail || 0),

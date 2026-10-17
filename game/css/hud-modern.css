@@ -587,3 +587,6 @@ html:fullscreen, html:fullscreen body { background: #000; }
 @keyframes nxNexaSpend { 0% { box-shadow: 0 0 14px 4px rgba(150, 245, 255, 0.95); } 100% { box-shadow: 0 0 0 0 rgba(57, 230, 255, 0); } }
 /* M10 passo 3 — números de dano: tipos (o "pop" é feito por transform no JS) */
 .nx-dmg { will-change: transform, opacity; }
+/* 20261016 (Caio): na ARENA a barra do gigante não fica sob as pílulas de região/tempo — paisagem: embaixo no centro (entre joystick e botões); retrato: abaixo das pílulas */
+@media (orientation: landscape) { #game-screen.br-mode .nx-boss-bar { top: auto; bottom: 0.4rem; width: min(400px, 44%); } }
+@media (orientation: portrait) { #game-screen.br-mode .nx-boss-bar { top: 11.5rem; width: min(380px, 92%); } }

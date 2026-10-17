@@ -1,77 +1,77 @@
-import { loadAllData } from './data-loader.js?v=20261016herois';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261016herois';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261016herois';
-import { addToInventory } from '../../rules/loot.js?v=20261016herois';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261016herois';
-import { rollLoot } from '../../rules/loot.js?v=20261016herois';
-import { isWalkable } from './map.js?v=20261016herois';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261016herois';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261016herois';
+import { loadAllData } from './data-loader.js?v=20261016montaria';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261016montaria';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261016montaria';
+import { addToInventory } from '../../rules/loot.js?v=20261016montaria';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261016montaria';
+import { rollLoot } from '../../rules/loot.js?v=20261016montaria';
+import { isWalkable } from './map.js?v=20261016montaria';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261016montaria';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261016montaria';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, swordStats, resetSwordStats
-} from './actions.js?v=20261016herois';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261016herois';
-import { createMcbUi } from './mcb-ui.js?v=20261016herois';
-import { createVestiario } from './vestiario.js?v=20261016herois';
-import { createBerco } from './dragon-berco.js?v=20261016herois';
-import { bossCfgFor } from './boss-variants.js?v=20261016herois';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261016herois';
-import { createMount } from './mount.js?v=20261016herois';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261016herois';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261016herois';
-import { getLocalProfile, authProviders } from './auth.js?v=20261016herois';
-import { lastWalletCheck } from './save.js?v=20261016herois';
-import { maybeTrigger0217 } from './events.js?v=20261016herois';
-import { createRenderer } from './renderer.js?v=20261016herois';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261016herois';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261016herois';
-import { itemRarity } from './sprites.js?v=20261016herois';
-import { createArenaState, isArenaState } from './arena.js?v=20261016herois';
-import { createMobileControls } from './mobile-controls.js?v=20261016herois';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261016herois';
+} from './actions.js?v=20261016montaria';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261016montaria';
+import { createMcbUi } from './mcb-ui.js?v=20261016montaria';
+import { createVestiario } from './vestiario.js?v=20261016montaria';
+import { createBerco } from './dragon-berco.js?v=20261016montaria';
+import { bossCfgFor } from './boss-variants.js?v=20261016montaria';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261016montaria';
+import { createMount } from './mount.js?v=20261016montaria';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261016montaria';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261016montaria';
+import { getLocalProfile, authProviders } from './auth.js?v=20261016montaria';
+import { lastWalletCheck } from './save.js?v=20261016montaria';
+import { maybeTrigger0217 } from './events.js?v=20261016montaria';
+import { createRenderer } from './renderer.js?v=20261016montaria';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261016montaria';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261016montaria';
+import { itemRarity } from './sprites.js?v=20261016montaria';
+import { createArenaState, isArenaState } from './arena.js?v=20261016montaria';
+import { createMobileControls } from './mobile-controls.js?v=20261016montaria';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261016montaria';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261016herois';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261016herois';
-import { createArenaRun } from './arena-run.js?v=20261016herois';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261016herois';
+} from './enemy-ai.js?v=20261016montaria';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261016montaria';
+import { createArenaRun } from './arena-run.js?v=20261016montaria';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261016montaria';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261016herois';
-import { generateBrMap } from './br-map.js?v=20261016herois';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261016herois';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261016herois';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261016herois';
-import { createMusic } from './music.js?v=20261016herois';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261016herois';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261016herois';
-import { createBossHud } from './boss-hud.js?v=20261016herois';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261016herois';
-import { createPlayerMotion } from './player-motion.js?v=20261016herois';
-import { createPlayerCombat } from './player-combat.js?v=20261016herois';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261016herois';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261016montaria';
+import { generateBrMap } from './br-map.js?v=20261016montaria';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261016montaria';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261016montaria';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261016montaria';
+import { createMusic } from './music.js?v=20261016montaria';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261016montaria';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261016montaria';
+import { createBossHud } from './boss-hud.js?v=20261016montaria';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261016montaria';
+import { createPlayerMotion } from './player-motion.js?v=20261016montaria';
+import { createPlayerCombat } from './player-combat.js?v=20261016montaria';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261016montaria';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261016herois';
+} from './sfx.js?v=20261016montaria';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261016herois';
-import { createPassiveUi } from './passives-ui.js?v=20261016herois';
-import { createSettingsMenu } from './settings-menu.js?v=20261016herois';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261016herois';
-import { createPassiveHud } from './passive-hud.js?v=20261016herois';
-import { createDragon } from './companion-dragon.js?v=20261016herois';
-import { createFullscreenUi } from './fullscreen.js?v=20261016herois';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016herois';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261016herois';
+} from './passives.js?v=20261016montaria';
+import { createPassiveUi } from './passives-ui.js?v=20261016montaria';
+import { createSettingsMenu } from './settings-menu.js?v=20261016montaria';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261016montaria';
+import { createPassiveHud } from './passive-hud.js?v=20261016montaria';
+import { createDragon } from './companion-dragon.js?v=20261016montaria';
+import { createFullscreenUi } from './fullscreen.js?v=20261016montaria';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016montaria';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261016montaria';
 
 let DATA = null;
 let state = null;
@@ -424,7 +424,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261016herois').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261016montaria').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -768,7 +768,12 @@ function updateBossHud(s) {
   v.visible = false;
   const arenaRun = curRun();
   if (s && isArenaState(s) && arenaRun.isActive() && isGameVisible()) {
-    const boss = arenaRun.bossMon();
+    let boss = arenaRun.bossMon();
+    if (s.brMode) { // 20261016: barra de vida p/ QUALQUER gigante dragão (covil, 4 elementais, caçada) — o travado ou o mais perto (rivais seguem sem barra)
+      const p0 = motion.getPos(); const lk = validLockOn(); let best = null, bd = 16;
+      for (const q of s.monstersAlive) { if (!q.alive || !q.boss || q.rival) continue; if (q.uid === lk) { best = q; break; } const d = Math.hypot(q.x + 0.5 - p0.x, q.y + 0.5 - p0.y); if (d < bd) { bd = d; best = q; } }
+      if (best) boss = best; else if (boss && !(s.br?.inDragon)) boss = null;
+    }
     if (boss && boss.alive) {
       const bv = getBossView(boss);
       const p = motion.getPos();
@@ -777,7 +782,8 @@ function updateBossHud(s) {
       const locked = validLockOn() === boss.uid;
       const engaged = bv && bv.state !== 'IDLE' && bv.state !== 'RETURN';
       const minX = Number.isFinite(boss.territoryMinX) ? boss.territoryMinX : bc.territoryMinX;
-      v.visible = !!(engaged || locked || (s.brMode ? !!s.br?.inDragon : p.x >= minX - 1.5)); // ARENA PRINCIPAL: só no território do dragão
+      v.visible = !!(engaged || locked || (s.brMode ? (!!s.br?.inDragon || Math.hypot(boss.x + 0.5 - p.x, boss.y + 0.5 - p.y) <= 14) : p.x >= minX - 1.5));
+      v.dragonName = boss.dragonId || boss.elemental ? boss.arenaLabel : (s.brMode ? boss.arenaLabel || '' : ''); // ARENA PRINCIPAL: só no território do dragão
       // EVO: fase + postura do chefe
       v.phase = bv ? (bv.phase ?? 0) + 1 : 1;
       v.phaseName = bv?.phaseName || '';
@@ -832,7 +838,7 @@ setMonsterKillHook((s, mon, def) => {
   } else safeSave();
 });
 setBossKillHook((s, mon, def) => {
-  if (s?.brMode) { arenaBr.onBossKilled(mon); try { if (mon?.dragonId || def?.boss) mount.onGiantKilled('player', { pal: mon.dragonCor || null, x: mon.homeX ?? mon.x, y: mon.homeY ?? mon.y }); } catch (e) { console.warn('[montaria]', e); } return brRun.onBossKilled(s, mon, def); }
+  if (s?.brMode) { arenaBr.onBossKilled(mon); try { if (mon?.dragonId || def?.boss) mount.onGiantKilled('player', { pal: mon.dragonCor || null, elemento: mon.elemental || null, x: mon.homeX ?? mon.x, y: mon.homeY ?? mon.y }); } catch (e) { console.warn('[montaria]', e); } return brRun.onBossKilled(s, mon, def); }
   if (s?.campoMode) { campo.onBossVictory(); return campoRun.onBossKilled(s, mon, def); }
   return arenaRun.onBossKilled(s, mon, def);
 });
@@ -1358,6 +1364,29 @@ function dragonFire() {
   return { ok: true, hits };
 }
 const mountFireStats = { n: 0, hits: 0, lastHits: 0 };
+/* 20261016 (Caio): PODER ESPECIAL do dragão por elemento (botão próprio, recarga) — fogo: chão em brasa · gelo: cone que congela · raio: corrente · veneno: nuvem tóxica · verde (covil): explosão da natureza que cura */
+const dSpecialStats = { n: 0, hits: 0, heal: 0, ticks: 0, last: null };
+function specialEl() { const m = state?.br?.mount; return m?.elemento || 'natureza'; }
+function specialUi() { const E = getConfig().mount?.especiais?.[specialEl()]; const m = state?.br?.mount; if (!E || !m) return {}; const left = Math.max(0, (m.spUntil || 0) - (m.clock || 0)); return { spName: E.nome, spIco: E.ico, spColor: E.cor, spCdPct: left > 0 ? left / E.cdMs * 100 : 0 }; }
+function dragonSpecial() {
+  if (!state || !mount.isActive()) return { ok: false, why: 'off' };
+  const m = state.br.mount; const el = specialEl(); const E = getConfig().mount?.especiais?.[el]; if (!E) return { ok: false, why: 'sem' };
+  if ((m.clock || 0) < (m.spUntil || 0)) return { ok: false, why: 'recarga', leftMs: Math.round(m.spUntil - m.clock) };
+  m.spUntil = (m.clock || 0) + E.cdMs;
+  const p = motion.getPos(); const yaw = actionCtx.yaw; const dx = Math.sin(yaw), dy = -Math.cos(yaw);
+  const foes = () => state.monstersAlive.filter((q) => q.alive && q.zone === state.zoneId);
+  const hit = (q, mult, stunMs = 0) => { const mp = getMonsterPos(q); fireHit.fromX = p.x; fireHit.fromY = p.y; fireHit.x = mp.x; fireHit.y = mp.y; fireHit.dmgMult = mult; fireHit.stunMs = stunMs; const r = hitSpecial(state, q, 'poder_dragao', fireHit); fireHit.stunMs = 0; if (r) dSpecialStats.hits++; return !!r; };
+  const inR = (cx, cy, r) => foes().filter((q) => { const mp = getMonsterPos(q); return Math.hypot(mp.x - cx, mp.y - cy) <= r; });
+  let n = 0, cx = p.x, cy = p.y;
+  if (el === 'fogo') { cx = p.x + dx * E.dist; cy = p.y + dy * E.dist; for (const q of inR(cx, cy, E.raio).slice(0, E.maxAlvos)) n += hit(q, E.dano); let k = 0; const tick = () => { if (!state || ++k > E.ticks) return; dSpecialStats.ticks++; for (const q of inR(cx, cy, E.raio).slice(0, E.maxAlvos)) hit(q, E.danoTick); setTimeout(tick, 1000); }; setTimeout(tick, 1000); }
+  else if (el === 'gelo') { for (const q of foes()) { if (n >= E.maxAlvos) break; const mp = getMonsterPos(q); const vx = mp.x - p.x, vy = mp.y - p.y, d = Math.hypot(vx, vy); if (d > E.alcance || d < 0.2) continue; if (Math.abs(Math.atan2(dx * vy - dy * vx, dx * vx + dy * vy)) > E.meioAngulo * Math.PI / 180) continue; n += hit(q, E.dano, E.congelaMs); } cx = p.x + dx * E.alcance * 0.5; cy = p.y + dy * E.alcance * 0.5; }
+  else if (el === 'raio') { let cur = { x: p.x, y: p.y }; const done = new Set(); let mult = E.dano; for (let j = 0; j < E.saltos; j++) { let best = null, bd = j === 0 ? E.alcance : E.salto; for (const q of foes()) { if (done.has(q.uid)) continue; const mp = getMonsterPos(q); const d = Math.hypot(mp.x - cur.x, mp.y - cur.y); if (d < bd) { bd = d; best = q; } } if (!best) break; done.add(best.uid); n += hit(best, mult, E.atordoaMs); cur = getMonsterPos(best); mult *= E.decai; } cx = cur.x; cy = cur.y; }
+  else if (el === 'veneno') { for (const q of inR(cx, cy, E.raio).slice(0, E.maxAlvos)) n += hit(q, E.dano); let k = 0; const tick = () => { if (!state || ++k > E.ticks) return; dSpecialStats.ticks++; for (const q of inR(cx, cy, E.raio).slice(0, E.maxAlvos)) hit(q, E.danoTick); setTimeout(tick, 1000); }; setTimeout(tick, 1000); }
+  else { const h = Math.round(state.player.hpMax * E.curaFrac); state.player.hp = Math.min(state.player.hpMax, state.player.hp + h); if (m.hpMax) m.hp = Math.min(m.hpMax, (m.hp || 0) + Math.round(m.hpMax * E.curaFrac)); dSpecialStats.heal += h; for (const q of inR(cx, cy, E.raio).slice(0, E.maxAlvos)) n += hit(q, E.dano); }
+  try { renderer.mountSpecial?.(el, cx, cy, E.raio || E.alcance || 3, E.cor); } catch { /* visual */ }
+  dSpecialStats.n++; dSpecialStats.last = { el, hits: n }; ui.showToast?.(`${E.ico} ${E.nome}!`, 'ok');
+  return { ok: true, el, hits: n };
+}
 /** MONTAR (botão/tecla M): só existe com a sela + mount.flyEnabled; sem isso não faz nada. */
 function mountPress() {
   if (!canCommand()) return null;
@@ -1596,7 +1625,7 @@ function pushButtonInfo(dt) {
   if (btnInfoAcc < 0.09 || !mobile?.updateActionButtons || !state) return;
   btnInfoAcc = 0;
   mobile.updateActionButtons(actions.getButtonsInfo(state));
-  { const mv = mount.status(); { const vb = mv.active ? mount.view() : null; mobile.setMountUi?.({ show: mv.canMount, flying: mv.active, phase: mv.phase, breathPct: vb ? vb.breath / Math.max(1, vb.cfg?.breath?.max ?? 100) * 100 : 100 }); } }
+  { const mv = mount.status(); { const vb = mv.active ? mount.view() : null; mobile.setMountUi?.({ show: mv.canMount, flying: mv.active, phase: mv.phase, breathPct: vb ? vb.breath / Math.max(1, vb.cfg?.breath?.max ?? 100) * 100 : 100, ...specialUi() }); } }
   if (isGameVisible()) passiveHud.update(procs.getBuffs(), { firstPerson: renderer.mode === 'fps' && renderer.viewMode === 'first' });
 }
 
@@ -1625,7 +1654,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261016herois').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261016montaria').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1788,6 +1817,7 @@ async function boot() {
     // Bloco 4: ESQUIVA / DEFESA (segurar) / ESPECIAIS / LOCK-ON
     onDodge: () => (mount.isActive() ? null : dodgePress()) /* 20261016: montado no toque, ESQUIVA não faz nada — DESCER é o botão próprio (segurar/toque duplo), longe do FOGO */, onDescend: () => (canCommand() && mount.isActive() ? mount.toggleDescend() : null),
     onMount: () => mountPress(),
+    onDragonSpecial: () => (canCommand() ? dragonSpecial() : null),
     onDefend: (v) => defendSet(v),
     onSpecial: (id) => specialPress(id),
     // Bloco 6: sem botão ALVO — tocar no inimigo trava; nele de novo ou no vazio solta
@@ -1854,6 +1884,7 @@ async function boot() {
       bigMap: (on) => brUi.toggleBigMap(on),
       debug: navigator.webdriver ? arenaBr.debug : null,
       finish: (kind) => (navigator.webdriver ? arenaBr.finish(kind || 'extraido', {}) : null),
+      walkable: (x, y) => !!arenaBr.walkable?.(x, y),
       teleport: (x, y) => { if (!navigator.webdriver || !state?.brMode) return false; state.player.x = x; state.player.y = y; motion.stopNow(); motion.snapToTile(state); return true; },
       /** M10: coordenada do mapa de PROJETO (100×76) → tile andável mais próximo no mapa escalado */
       at: (dx, dy) => {
@@ -1875,7 +1906,7 @@ async function boot() {
       config: () => DATA.arena_br
     },
     /** DRAGON BERÇO (testes/debug) */
-    mount: { coverStats: () => ({ ...coverStats }), cover: (x, y) => arenaBr.coverAt(x, y), coverList: () => arenaBr.coverList(), testHit: (uid) => (navigator.webdriver ? monsterAttackPlayer(state, uid, { rangeChecked: true }) : null), fire: () => dragonFire(), fireStats: () => ({ ...mountFireStats }), view: () => mount.view(), tryMount: () => mountPress(), descend: () => mount.toggleDescend(), step: (ms) => mount.step(ms), forceLand: (w) => mount.forceLand(w || 'teste'), render: () => mount.renderView(), grantForTest: (by) => mount.onGiantKilled(by || 'player'), has: () => mount.has() },
+    mount: { coverStats: () => ({ ...coverStats }), cover: (x, y) => arenaBr.coverAt(x, y), coverList: () => arenaBr.coverList(), testHit: (uid) => (navigator.webdriver ? monsterAttackPlayer(state, uid, { rangeChecked: true }) : null), fire: () => dragonFire(), fireStats: () => ({ ...mountFireStats }), special: () => dragonSpecial(), specialStats: () => ({ ...dSpecialStats, el: specialEl(), ui: specialUi() }), view: () => mount.view(), tryMount: () => mountPress(), descend: () => mount.toggleDescend(), step: (ms) => mount.step(ms), forceLand: (w) => mount.forceLand(w || 'teste'), render: () => mount.renderView(), grantForTest: (by) => mount.onGiantKilled(by || 'player'), has: () => mount.has() },
     berco: { open: (tab) => berco.open(tab), close: () => berco.close(), isOpen: () => berco.isOpen(), info: () => berco.info(), tab: (t) => berco.tab(t), select: (id) => berco.select(id), chosen: () => getChosenBB(DATA), pbb: () => ({ ...pbb, S: pbb.S && { ...pbb.S } }), palette: () => bbPalette() },
     /** VESTIÁRIO (testes/debug) */
     vest: {
@@ -1939,6 +1970,8 @@ async function boot() {
     hero: () => renderer.getHero?.() ?? null,
     models: () => renderer.getModelInfo?.() ?? null,
     mountAnim: () => renderer.getMountAnim?.() ?? null,
+    rivalMounts: () => renderer.getRivalMounts?.() ?? null,
+    abrigos: () => renderer.getAbrigos?.() ?? null,
     camArm: () => renderer.getCamArm?.() ?? null,
     graphics: () => renderer.getGraphics?.() ?? null,
     debugThree: () => renderer.debugThree?.() ?? null,
@@ -2145,7 +2178,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261016herois');
+      const { addXp } = await import('./state.js?v=20261016montaria');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2679,7 +2712,7 @@ function onBrEvent(kind, info) {
   }
   else if (kind === 'spectate_end') specFeed.push(info.winner ? `Último herói: ${info.winner} (BOT).` : 'Todos os rivais caíram.');
   else if (kind === 'saddle_player') { big('<b>SELA DO GIGANTE CONQUISTADA!</b>Toque em MONTAR (ou tecla M) para voar. ATAQUE = fogo · ESQUIVA = DESCER.', 3600); }
-  else if (kind === 'mount_up') { big(`<b>DRAGÃO MONTADO</b>${info.mode === 'chamado' ? 'Chamado do Gigante' : 'Sela do Gigante'} · ${Math.round((info.ms || 0) / 1000)} s de voo · toque DESCER para pousar.`, 2400); }
+  else if (kind === 'mount_up') { big(`<b>DRAGÃO MONTADO</b>${info.mode === 'chamado' ? 'Chamado do Gigante' : 'Sela do Gigante'} · ${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'} · toque DESCER para pousar.`, 2400); }
   else if (kind === 'mount_forced' && info?.why === 'abrigo') { ui.showToast('ABRIGO: o dragão pousou na borda — siga a pé.'); }
   else if (kind === 'mount_hit_down') { big('<b>DRAGÃO ABATIDO!</b>Você está caindo…', 1600); brSfx('warn'); }
   else if (kind === 'mount_shot_down') { big(`<b>VOCÊ CAIU${info?.fall ? ' (−' + info.fall + ' HP)' : ''}</b>O dragão renasce no covil em ${Math.round((info?.respawnMs || 90000) / 1000)} s.`, 2600); }
@@ -2888,6 +2921,8 @@ function showGame(opts = {}) {
       getActionView: () => actions.getView(),
       getAimYaw: () => actionCtx.yaw,
       getMountView: () => mount.renderView(),
+      getCoverList: () => (state?.brMode && arenaBr.isActive?.() ? arenaBr.coverList() : null), // 20261016abrigos
+      getMountHas: () => !!(state?.brMode && mount.has()),
       getMountRest: () => mount.restView(),
       getLockOnUid: () => validLockOn(),
       getTargetUid: () => (playerTarget.uid != null && state?.monstersAlive.some((m) => m.uid === playerTarget.uid && m.alive) ? playerTarget.uid : null),
@@ -3051,6 +3086,7 @@ function wireGameControls() {
     }
     if (!isInputBlocked() && !e.repeat) {
       if (k === 'm') { mountPress(); return; }
+      if (k === 'r' && mount.isActive()) { dragonSpecial(); return; }
       if (k === 'q') { defendSet(true); return; }
       if (k === 'e') { attackPress(); return; }
       if (k === '1') { specialPress('golpe_poderoso'); return; }

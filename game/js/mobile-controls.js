@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261016herois';
-import { pushLog } from './state.js?v=20261016herois';
-import { isArenaState } from './arena.js?v=20261016herois';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261016herois';
-import { ICONS } from './icons.js?v=20261016herois';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261016montaria';
+import { pushLog } from './state.js?v=20261016montaria';
+import { isArenaState } from './arena.js?v=20261016montaria';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261016montaria';
+import { ICONS } from './icons.js?v=20261016montaria';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -161,6 +161,10 @@ export function createMobileControls(hooks) {
       <button type="button" class="mc-btn mc-mount mc-mount-off" data-power="mount" title="Montar no Gigante (M)" aria-label="Montar no dragão">
         <span class="mc-ico">🐉</span>
         <span class="mc-lbl">MONTAR</span>
+      </button>
+      <button type="button" class="mc-btn mc-dspecial" data-power="dspecial" title="Poder especial do dragão (R)" aria-label="Poder especial do dragão">
+        <span class="mc-ico">✦</span>
+        <span class="mc-lbl">PODER</span>
       </button>
     `;
     const wrap = document.getElementById('canvas-wrap') || document.getElementById('game-screen');
@@ -638,7 +642,7 @@ export function createMobileControls(hooks) {
   let mountKey = '';
   function setMountUi(u) {
     if (!root) return;
-    const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}`;
+    const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}|${u.spName || ''}|${Math.round((u.spCdPct ?? 0) / 10)}`;
     if (key === mountKey) return; mountKey = key;
     { const me = root.querySelector('.mc-mount'); me?.classList.toggle('mc-mount-off', !u.show && !u.flying); me?.classList.toggle('mc-descer', !!u.flying); const ml = me?.querySelector('.mc-lbl'); const mi = me?.querySelector('.mc-ico');
       if (ml) ml.textContent = u.flying ? (u.phase === 'landing' ? 'SUBIR' : 'DESCER') : 'MONTAR'; if (mi) mi.textContent = u.flying ? (u.phase === 'landing' ? '⏫' : '⏬') : '🐉'; if (me) me.title = u.flying ? 'Segure 0,4 s ou toque 2× para pousar' : 'Montar no Gigante (M)'; }
@@ -648,6 +652,7 @@ export function createMobileControls(hooks) {
     d?.classList.toggle('mc-descend', false);
     const at = root.querySelector('.mc-attack'); const al = at?.querySelector('.mc-lbl'); // montado: ATAQUE vira FOGO (anel de Fôlego)
     if (al) al.textContent = u.flying ? 'FOGO' : 'ATAQUE';
+    { const sp = root.querySelector('.mc-dspecial'); if (sp) { const sl = sp.querySelector('.mc-lbl'), si = sp.querySelector('.mc-ico'); if (sl) sl.textContent = u.spName || 'PODER'; if (si) si.textContent = u.spIco || '✦'; sp.style.setProperty('--spc', u.spColor || '#9fffb0'); sp.classList.toggle('mc-cd', (u.spCdPct ?? 0) > 0); sp.style.setProperty('--cd', `${Math.round(u.spCdPct ?? 0)}%`); } }
     at?.classList.toggle('mc-fogo', !!u.flying); at?.style.setProperty('--fogo', `${bp}%`);
   }
 
@@ -729,6 +734,7 @@ export function createMobileControls(hooks) {
     }
 
     if (id === 'mount') { hooks.onMount?.(); return; }
+    if (id === 'dspecial') { hooks.onDragonSpecial?.(); return; }
     if (id === 'dodge') { hooks.onDodge?.(); return; }
     if (SPECIAL_BTN.has(id)) { hooks.onSpecial?.(id); return; }
   }

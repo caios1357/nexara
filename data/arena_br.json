@@ -600,13 +600,13 @@
    "maxAlvoJogador": 2,
    "emCombateR": 2.6,
    "emCombateJogadorR": 2.5,
-   "_doc": "20261016herois: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
+   "_doc": "20261016montaria: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo)."
   },
   "bbDanoFrac": 0.3,
   "_doc": "RIVAIS (BOTS offline, IA local — não são jogadores online). Exploram, caçam monstros, saqueiam e enfrentam o herói; no último estágio da zona o mais forte vira CAMPEÃO RIVAL.",
   "ativo": true,
   "monstro": "mon_br_rival",
-  "n": 20,
+  "n": 30,
   "herois": [
    {
     "style": "cavaleiro",
@@ -727,7 +727,17 @@
     "nome": "Lis Neon",
     "primary": "#ff8af0",
     "glow": "#ffd2fa"
-   }
+   },
+      {"style": "runico", "nome": "Kael Prisma", "primary": "#7a5cff", "glow": "#c8b8ff"},
+      {"style": "ciborgue", "nome": "Taro Ferrugem", "primary": "#c86a2a", "glow": "#ffb27a"},
+      {"style": "cacador", "nome": "Mira Vapor", "primary": "#2ad1a8", "glow": "#a8ffe8"},
+      {"style": "cavaleiro", "nome": "Dante Aurora", "primary": "#ffd23b", "glow": "#fff1a8"},
+      {"style": "runico", "nome": "Yara Eco", "primary": "#3bd1ff", "glow": "#bdf2ff"},
+      {"style": "ciborgue", "nome": "Bruno Volt", "primary": "#e0e63b", "glow": "#f9ffb0"},
+      {"style": "cacador", "nome": "Nina Cinza", "primary": "#9aa3b3", "glow": "#e2e7ef"},
+      {"style": "cavaleiro", "nome": "Raul Brasa", "primary": "#ff5a2a", "glow": "#ffb59a"},
+      {"style": "runico", "nome": "Luma Orquídea", "primary": "#d23bff", "glow": "#f0b8ff"},
+      {"style": "ciborgue", "nome": "Igor Basalto", "primary": "#5a6b7a", "glow": "#b8c6d4"}
   ],
   "hpPorNivel": 0.18,
   "atkPorNivel": 0.13,
@@ -779,17 +789,18 @@
   "finalLivre": true,
   "cacaRivalDistArena": 45,
   "lutamSempre": true,
-  "_docLutam": "20261016herois: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
-  "_docFinal": "20261016herois: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói).",
-  "nMax": 20,
-  "_doc20": "20261016herois: ARENA PRINCIPAL com 20 heróis rivais (BOT) variados — 4 estilos × cores próprias; FAST continua com os seus 10.",
+    "gigantes": { "ativo": true, "frac": 0.35, "dist": 45, "alcance": 3.4, "danoMult": 1.4, "danoRecebidoMult": 0.5, "hpMinFrac": 0.6, "vooDistMin": 14 },
+  "_docLutam": "20261016montaria: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
+  "_docFinal": "20261016montaria: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói).",
+  "nMax": 30,
+  "_doc20": "20261016montaria: ARENA PRINCIPAL com 20 heróis rivais (BOT) variados — 4 estilos × cores próprias; FAST continua com os seus 10.",
   "pisoVivos": [
+   21,
    14,
-   10,
-   6,
+   8,
    3
   ],
-  "_docPiso": "20261016herois: com 20 rivais, eliminações vão por etapas — enquanto a zona espera mínimo 14 vivos; estágio 0: 10; 1: 6; 2: 3; depois livre (reta final)."
+  "_docPiso": "20261016montaria: com 30 rivais, eliminações vão por etapas — enquanto a zona espera mínimo 21 vivos; estágio 0: 14; 1: 8; 2: 3; depois livre (reta final)."
  },
  "fast": {
   "_doc": "NEXARA FAST ⚡ (br-fast.js): mesmas 6 regiões em escala menor, POSIÇÃO de cada região sorteada por partida (seed), 10 RIVAIS (BOT) com nível PRÓPRIO (sobem matando monstros e outros rivais, saqueiam o derrotado), lutam entre si a partida toda, zona segura curta (~6–10 min). 'comecarDoZero': herói da partida começa no NV1 com equipamento inicial — o save permanente não é tocado. Não altera a ARENA NEXARA (mapa completo). AJUSTES (20261009fast2): mapa ~60% do anterior (escala 1,02 → 102×78), sem extração, fim só quando o ÚLTIMO herói cai (todos os rivais mortos = vitória; morte do jogador com ≥2 rivais vivos = espectador até sobrar 1), rivais mais fortes (rivaisForca/rivaisTatica). DISTRITO ÚNICO (20261009fast3): cada partida acontece em UM distrito do mapa grande sorteado pela seed (Periferia, Ruínas Industriais, Floresta Selvagem, Complexo Abandonado, Zona de Elite ou Território do Dragão), com o layout/identidade da região (gerador v2), mapa de ≤ ~90 tiles por lado, zona segura encolhendo dentro dele, sem extração.",
@@ -1009,7 +1020,7 @@
    "floresta"
   ],
   "uidBase": 9101,
-  "escalaVisual": 1.7,
+  "escalaVisual": 0.85, "escalaGigantes": 0.5,
   "_doc": "20261016: 4 gigantes elementais na ARENA PRINCIPAL (fogo=Forja Rubra nas Ruínas, gelo=Gélido no Complexo, raio=Trovão de Neon na Periferia, veneno=Espinho de Musgo na Floresta), cada um no centro da sua região; o Território do Dragão não muda. Quem mata qualquer um ganha a sela do dragão (montaria com a cor dele)."
  }
 }

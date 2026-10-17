@@ -36,6 +36,16 @@ export const DEFAULTS = Object.freeze({
   mount: {
     enabled: true,
     flyEnabled: true, // V2: voo + fogo + DESCER funcionam de ponta a ponta (e2e-montaria-v2 / -fogo)
+    /** 20261016 (Caio): com a SELA não há limite de tempo nem recarga ao pousar — só DESCER ou a morte do dragão encerram o voo */
+    semLimite: true,
+    /** PODER ESPECIAL por elemento (dano relativo ao golpe do herói; DPS médio ≈ sopro, recarga 10–14 s) */
+    especiais: {
+      fogo: { nome: 'CHÃO EM BRASA', ico: '🔥', cor: '#ff7a2a', cdMs: 12000, dist: 4, raio: 3, dano: 1.0, danoTick: 0.45, ticks: 4, maxAlvos: 6 },
+      gelo: { nome: 'SOPRO GÉLIDO', ico: '❄', cor: '#9fe8ff', cdMs: 11000, alcance: 7, meioAngulo: 38, dano: 0.9, congelaMs: 1800, maxAlvos: 6 },
+      raio: { nome: 'CORRENTE', ico: '⚡', cor: '#ffe95a', cdMs: 10000, alcance: 8, salto: 4.5, saltos: 5, dano: 1.4, decai: 0.8, atordoaMs: 500 },
+      veneno: { nome: 'NUVEM TÓXICA', ico: '☣', cor: '#9dff4a', cdMs: 13000, raio: 3.5, dano: 0.4, danoTick: 0.4, ticks: 5, maxAlvos: 6 },
+      natureza: { nome: 'FÚRIA DA NATUREZA', ico: '✿', cor: '#5dff6a', cdMs: 14000, raio: 3.5, dano: 0.8, curaFrac: 0.25, maxAlvos: 6 }
+    },
     cruiseAltitude: 3.2, // m (alcance da espada 3,4 m; teto das coberturas ≥ 3,4 m)
     flightMs: 30000, callFlightMs: 15000, cooldownMs: 45000, respawnMs: 90000,
     speed: 6.5, // tiles/s (corrida a pé ≈ 3,4)
@@ -191,6 +201,8 @@ export const DEFAULTS = Object.freeze({
     quality: 'auto',
     /** Automático: GPU por software (SwiftShader/llvmpipe) cai para 'low' (sem pós/sombras). */
     softwareGLLow: true,
+    /** 20261016visual: 'classico' = CAVALEIRO NEXA escuro com espada de luz (procedural); 'glb' = modelo KayKit. */
+    heroLook: 'classico',
     tiers: {
       /**
        * EVO — presets nomeados (sem duplicar sistemas; os mesmos sistemas com orçamentos diferentes):
@@ -1076,6 +1088,7 @@ const ENUMS = {
   'combat.aimAssist': ['off', 'low', 'medium', 'high'],
   'rightStick.aimAssist': ['off', 'low', 'medium', 'high'],
   'graphics.quality': ['auto', 'low', 'medium', 'high'],
+  'graphics.heroLook': ['classico', 'glb'],
   'lockOn.mode': ['manual', 'automatico']
 };
 

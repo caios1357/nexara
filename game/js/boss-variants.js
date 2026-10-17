@@ -15,11 +15,12 @@ const cache = new Map();
 
 /** config final do chefe para este monstro (base = gameplay-config.arenaBoss); sem variante → a própria base (nada muda para o GIGANTE VERDE) */
 export function bossCfgFor(mon, base) {
-  const P = mon && mon.dragonPoder;
-  if (!P || !base) return base;
-  const vs = mon.visualScale > 1 ? mon.visualScale : 1; const key = (mon.dragonId || 'x') + '|' + vs; const hit = cache.get(key);
+  const P = mon && mon.dragonPoder; const vs = mon?.visualScale > 0 ? mon.visualScale : 1;
+  if ((!P && vs === 1) || !base) return base;
+  const key = (mon.dragonId || 'x') + '|' + vs; const hit = cache.get(key);
   if (hit && hit.base === base) return hit.cfg;
-  const cfg = deriveBossCfg(base, P);
+  const cfg = P ? deriveBossCfg(base, P) : JSON.parse(JSON.stringify(base));
+  if (vs < 1 && cfg.bodyRadius > 0) cfg.bodyRadius = +(cfg.bodyRadius * vs).toFixed(3); /* 20261016: gigantes −50% → corpo/acerto encolhe na mesma proporção */
   if (vs > 1 && cfg.bodyRadius > 0) cfg.bodyRadius = +(cfg.bodyRadius * (1 + (vs - 1) * 0.5)).toFixed(3); /* 20261016: gigante elemental maior → corpo (acerto) cresce junto, metade da escala visual */
   cache.set(key, { base, cfg });
   return cfg;
