@@ -14,9 +14,9 @@
  * applyDamageToMonster (XP/loot/quests) — o Núcleo Divino (+15% dano de habilidade) vale aqui.
  * Todos os números em gameplay-config (actions / dodge / defense / specials).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261017riv';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017riv';
-import { getStat, STATS } from './modifiers.js?v=20261017riv';
+import { getConfig, DEG } from './gameplay-config.js?v=20261017ctrl';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017ctrl';
+import { getStat, STATS } from './modifiers.js?v=20261017ctrl';
 
 export const ACTION_STATES = Object.freeze({
   DEAD: 'DEAD', CRITICAL_ANIM: 'CRITICAL_ANIM', DODGE: 'DODGE', SPECIAL: 'SPECIAL',
@@ -255,7 +255,7 @@ export function createPlayerActions(deps) {
   /** 20261009espada: com ESPADA, a variante do especial (gameplay-config.sword.especiais) sobrepõe a base */
   function specialCfg(id) {
     const b = cfgAll().specials[id]; let o = deps.swordSpecial?.(id);
-    if (!o && b) { const w = deps.weaponSpecial?.(id); if (w?.custoMult > 0 && Number.isFinite(b.cost)) o = w._costO || (w._costO = { cost: Math.max(1, Math.round(b.cost * w.custoMult)) }); } // 20261017riv: VARINHA = especiais mais baratos
+    if (!o && b) { const w = deps.weaponSpecial?.(id); if (w?.custoMult > 0 && Number.isFinite(b.cost)) o = w._costO || (w._costO = { cost: Math.max(1, Math.round(b.cost * w.custoMult)) }); } // 20261017ctrl: VARINHA = especiais mais baratos
     if (!o || !b) return b;
     const c = swMerge.get(id); if (c && c.b === b && c.o === o) return c.v;
     const v = { ...b, ...o }; swMerge.set(id, { b, o, v }); return v;

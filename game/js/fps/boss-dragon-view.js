@@ -13,12 +13,12 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017riv';
-import { TILE } from './fps-camera.js?v=20261017riv';
-import { mergeStaticParts } from './merge-util.js?v=20261017riv';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261017riv';
-import { getConfig } from '../gameplay-config.js?v=20261017riv';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261017riv';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017ctrl';
+import { TILE } from './fps-camera.js?v=20261017ctrl';
+import { mergeStaticParts } from './merge-util.js?v=20261017ctrl';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261017ctrl';
+import { getConfig } from '../gameplay-config.js?v=20261017ctrl';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261017ctrl';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;

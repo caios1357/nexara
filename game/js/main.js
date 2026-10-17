@@ -1,78 +1,78 @@
-import { loadAllData } from './data-loader.js?v=20261017riv';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261017riv';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261017riv';
-import { addToInventory } from '../../rules/loot.js?v=20261017riv';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261017riv';
-import { rollLoot } from '../../rules/loot.js?v=20261017riv';
-import { isWalkable } from './map.js?v=20261017riv';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261017riv';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261017riv';
+import { loadAllData } from './data-loader.js?v=20261017ctrl';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261017ctrl';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261017ctrl';
+import { addToInventory } from '../../rules/loot.js?v=20261017ctrl';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261017ctrl';
+import { rollLoot } from '../../rules/loot.js?v=20261017ctrl';
+import { isWalkable } from './map.js?v=20261017ctrl';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261017ctrl';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261017ctrl';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, swordStats, resetSwordStats
-} from './actions.js?v=20261017riv';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261017riv';
-import { createMcbUi } from './mcb-ui.js?v=20261017riv';
-import { createVestiario } from './vestiario.js?v=20261017riv';
-import { createBerco } from './dragon-berco.js?v=20261017riv';
-import { bossCfgFor } from './boss-variants.js?v=20261017riv';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261017riv';
-import { createMount } from './mount.js?v=20261017riv';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261017riv';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261017riv';
-import { getLocalProfile, authProviders } from './auth.js?v=20261017riv';
-import { lastWalletCheck } from './save.js?v=20261017riv';
-import { maybeTrigger0217 } from './events.js?v=20261017riv';
-import { createRenderer } from './renderer.js?v=20261017riv';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261017riv';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261017riv';
-import { itemRarity } from './sprites.js?v=20261017riv';
-import { createArenaState, isArenaState } from './arena.js?v=20261017riv';
-import { createMobileControls } from './mobile-controls.js?v=20261017riv';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261017riv';
+} from './actions.js?v=20261017ctrl';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261017ctrl';
+import { createMcbUi } from './mcb-ui.js?v=20261017ctrl';
+import { createVestiario } from './vestiario.js?v=20261017ctrl';
+import { createBerco } from './dragon-berco.js?v=20261017ctrl';
+import { bossCfgFor } from './boss-variants.js?v=20261017ctrl';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261017ctrl';
+import { createMount } from './mount.js?v=20261017ctrl';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261017ctrl';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261017ctrl';
+import { getLocalProfile, authProviders } from './auth.js?v=20261017ctrl';
+import { lastWalletCheck } from './save.js?v=20261017ctrl';
+import { maybeTrigger0217 } from './events.js?v=20261017ctrl';
+import { createRenderer } from './renderer.js?v=20261017ctrl';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261017ctrl';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261017ctrl';
+import { itemRarity } from './sprites.js?v=20261017ctrl';
+import { createArenaState, isArenaState } from './arena.js?v=20261017ctrl';
+import { createMobileControls } from './mobile-controls.js?v=20261017ctrl';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261017ctrl';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261017riv';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261017riv';
-import { createArenaRun } from './arena-run.js?v=20261017riv';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261017riv';
+} from './enemy-ai.js?v=20261017ctrl';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261017ctrl';
+import { createArenaRun } from './arena-run.js?v=20261017ctrl';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261017ctrl';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261017riv';
-import { generateBrMap } from './br-map.js?v=20261017riv';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261017riv';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261017riv';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261017riv';
-import { createMusic } from './music.js?v=20261017riv';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261017riv';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261017riv';
-import { createBossHud } from './boss-hud.js?v=20261017riv';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261017riv';
-import { createPlayerMotion } from './player-motion.js?v=20261017riv';
-import { createPlayerCombat } from './player-combat.js?v=20261017riv';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261017riv';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261017ctrl';
+import { generateBrMap } from './br-map.js?v=20261017ctrl';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261017ctrl';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261017ctrl';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261017ctrl';
+import { createMusic } from './music.js?v=20261017ctrl';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261017ctrl';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261017ctrl';
+import { createBossHud } from './boss-hud.js?v=20261017ctrl';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261017ctrl';
+import { createPlayerMotion } from './player-motion.js?v=20261017ctrl';
+import { createPlayerCombat } from './player-combat.js?v=20261017ctrl';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261017ctrl';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261017riv';
+} from './sfx.js?v=20261017ctrl';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261017riv';
-import { createPassiveUi } from './passives-ui.js?v=20261017riv';
-import { createSettingsMenu } from './settings-menu.js?v=20261017riv';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261017riv';
-import { createPassiveHud } from './passive-hud.js?v=20261017riv';
-import { createDragon } from './companion-dragon.js?v=20261017riv';
-import { createFullscreenUi } from './fullscreen.js?v=20261017riv';
-import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261017riv';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017riv';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261017riv';
+} from './passives.js?v=20261017ctrl';
+import { createPassiveUi } from './passives-ui.js?v=20261017ctrl';
+import { createSettingsMenu } from './settings-menu.js?v=20261017ctrl';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261017ctrl';
+import { createPassiveHud } from './passive-hud.js?v=20261017ctrl';
+import { createDragon } from './companion-dragon.js?v=20261017ctrl';
+import { createFullscreenUi } from './fullscreen.js?v=20261017ctrl';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261017ctrl';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017ctrl';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261017ctrl';
 
 let DATA = null;
 let state = null;
@@ -174,7 +174,7 @@ function fireHeroShot(s, wc, target, shot, pc, range) {
   const color = familyColor(s);
   const bow = wc === 'arco';
   const p = motion.getPos();
-  const n = Math.max(1, pc.rajada || 1); const per = pc.dmgMult ?? 1; // 20261017riv: VARINHA = rajada de 2 raios rápidos (½ dano cada)
+  const n = Math.max(1, pc.rajada || 1); const per = pc.dmgMult ?? 1; // 20261017ctrl: VARINHA = rajada de 2 raios rápidos (½ dano cada)
   const one = (k) => { const yaw = shot.yaw + (n > 1 ? (k - (n - 1) / 2) * 0.05 : 0); const pp = k ? motion.getPos() : p; heroShots.fire({
     x: pp.x + Math.sin(yaw) * 0.35, y: pp.y - Math.cos(yaw) * 0.35, yaw, target,
     kind: bow ? 'arrow' : 'bolt', speed: pc.velocidade || (bow ? 22 : 15), range: range + 0.6, radius: pc.raio || 0.35,
@@ -428,7 +428,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261017riv').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261017ctrl').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -845,7 +845,7 @@ setBossKillHook((s, mon, def) => {
   if (s?.brMode) { arenaBr.onBossKilled(mon); try { if (mon?.dragonId || def?.boss) mount.onGiantKilled('player', { pal: mon.dragonCor || null, elemento: mon.elemental || null, x: mon.homeX ?? mon.x, y: mon.homeY ?? mon.y }); } catch (e) { console.warn('[montaria]', e); } return brRun.onBossKilled(s, mon, def); }
   if (s?.campoMode) { campo.onBossVictory(); return campoRun.onBossKilled(s, mon, def); }
   const out = arenaRun.onBossKilled(s, mon, def);
-  if (s?.brMode && s.fastZero && def?.xp > 0) addXpState(s, def.xp); // 20261017riv: no FAST do zero o gigante dá XP ao NÍVEL DA PARTIDA (o permanente recebe no fim)
+  if (s?.brMode && s.fastZero && def?.xp > 0) addXpState(s, def.xp); // 20261017ctrl: no FAST do zero o gigante dá XP ao NÍVEL DA PARTIDA (o permanente recebe no fim)
   return out;
 });
 
@@ -1156,8 +1156,21 @@ function postureHit(mon, amount) {
 addModifier(STATS.DAMAGE, (v, ctx) => (ctx && ctx.mon && isPostureBroken(ctx.mon)
   ? v * getStat(STATS.BREAK_DAMAGE, getConfig().posture?.breakDamageMult || 1) : v));
 
+/** LOTE-b: vibração curta (Android/Chrome; iOS ignora) — sutil, com intervalo mínimo e desligável em BOTÕES. */
+const hapticStats = { calls: 0, last: 0, skipped: 0, supported: typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function' };
+let hapticAt = -1e9;
+function haptic(kind) {
+  const cc = getConfig().controles;
+  if (!cc || !cc.vibracao || !hapticStats.supported) return false;
+  const now = performance.now();
+  if (now - hapticAt < (cc.vibraMinGapMs || 110)) { hapticStats.skipped++; return false; }
+  hapticAt = now;
+  const ms = kind === 'dano' ? cc.vibraDanoMs : cc.vibraAcertoMs;
+  try { navigator.vibrate(ms); hapticStats.calls++; hapticStats.last = ms; return true; } catch (_) { return false; }
+}
 function onPlayerHit(result, mon, info) {
   const cfg = getConfig().combat;
+  haptic('acerto');
   playerTarget.uid = mon.uid;
   playerTarget.at = getAiClock();
   heroDamaged.add(mon.uid);
@@ -1674,7 +1687,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261017riv').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261017ctrl').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1790,6 +1803,8 @@ async function boot() {
     fpSync(); setInterval(fpSync, 600);
     window.__nxFpToggle = fpToggle;
   }
+  // LOTE-b: vibração ao levar dano (queda de HP do herói)
+  { let lastHp = null; setInterval(() => { const hp = state?.player?.hp; if (hp == null) { lastHp = null; return; } if (lastHp != null && hp < lastHp - 0.5 && isGameVisible()) haptic('dano'); lastHp = hp; }, 100); }
   // LOTE-b M2: densidade do HUD (CONFIGURAÇÕES → TELA → HUD) → classe no <body>; ?hud=normal|compacto|minimo sobrepõe (testes/prints)
   {
     const qh = (location.search.match(/[?&]hud=(normal|compacto|minimo)\b/) || [])[1];
@@ -2010,6 +2025,8 @@ async function boot() {
     /** LOTE-b M6: 1ª pessoa ao vivo — estado e troca (mesmo caminho do botão 👁) */
     firstPerson: () => renderer.firstPerson?.() || null,
     toggleFirstPerson: () => window.__nxFpToggle?.(),
+    haptics: () => ({ ...hapticStats }),
+    combatStats: () => combat.getDebug?.(),
     hero: () => renderer.getHero?.() ?? null,
     models: () => renderer.getModelInfo?.() ?? null,
     mountAnim: () => renderer.getMountAnim?.() ?? null,
@@ -2222,7 +2239,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261017riv');
+      const { addXp } = await import('./state.js?v=20261017ctrl');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2366,6 +2383,8 @@ async function boot() {
       get: () => getOverrides(), set: (o) => setOverrides(o), reset: () => resetOverrides(),
       // Bloco 5: menu / editor
       open: () => { getSettingsMenu().open(); return true; },
+      close: () => { ui.closeModal?.(); return true; },
+      effective: () => JSON.parse(JSON.stringify(getConfig())),
       openHeroStyle: () => openHeroStyleModal(),
       heroStyleValue: () => heroStyleEditor?.value() || null,
       heroStylePreview: () => heroStyleEditor?.previewInfo() || null,
@@ -2617,7 +2636,7 @@ function enterArenaBr(mode = 'full') {
   mobile?.updateVisibility();
   return true;
 }
-/** 20261017riv: fim da partida do zero → o XP ganho na partida SOMA ao herói permanente (nível sobe; nada mais muda no save). */
+/** 20261017ctrl: fim da partida do zero → o XP ganho na partida SOMA ao herói permanente (nível sobe; nada mais muda no save). */
 const matchXpStats = { n: 0, last: null };
 function transferMatchXp(s) {
   const xp = Math.max(0, Math.round(s?.br?.matchXp || 0)); const np = DATA?.arena_br?.nivelPartida || {};
@@ -2778,7 +2797,7 @@ function onBrEvent(kind, info) {
   }
   else if (kind === 'spectate_end') specFeed.push(info.winner ? `Último herói: ${info.winner} (BOT).` : 'Todos os rivais caíram.');
   else if (kind === 'saddle_player') { big('<b>SELA DO GIGANTE CONQUISTADA!</b>Toque em MONTAR (ou tecla M) para voar. ATAQUE = fogo · ESQUIVA = DESCER.', 3600); }
-  else if (kind === 'mount_up') { big(`<b class="gb-mount">🐉 DRAGÃO MONTADO</b>${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'}`, 1600); } // 20261017riv: compacto e no alto — não cobre DESCER
+  else if (kind === 'mount_up') { big(`<b class="gb-mount">🐉 DRAGÃO MONTADO</b>${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'}`, 1600); } // 20261017ctrl: compacto e no alto — não cobre DESCER
   else if (kind === 'mount_forced' && info?.why === 'abrigo') { ui.showToast('ABRIGO: o dragão pousou na borda — siga a pé.'); }
   else if (kind === 'mount_hit_down') { big('<b>DRAGÃO ABATIDO!</b>Você está caindo…', 1600); brSfx('warn'); }
   else if (kind === 'mount_shot_down') { big(`<b>VOCÊ CAIU${info?.fall ? ' (−' + info.fall + ' HP)' : ''}</b>O dragão renasce no covil em ${Math.round((info?.respawnMs || 90000) / 1000)} s.`, 2600); }

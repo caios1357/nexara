@@ -931,6 +931,9 @@ export const DEFAULTS = Object.freeze({
   },
   /** LOTE-b M2 (pedido do Caio): densidade do HUD. 'normal' = tudo (antigo) · 'compacto' (padrão) = sem log de combate na partida,
    *  sem bolinhas de risco, faixa ZONA+EVENTO numa linha só, minimapa menor, botões sem rótulo · 'minimo' = só o essencial. */
+  /** LOTE-b (pesquisa CoD Mobile): modo SIMPLES = ataca sozinho quando há inimigo à frente/ao alcance (como o auto-disparo
+   *  do CODM) e a assistência de mira vale no mínimo MÉDIA; AVANÇADO = manual (como sempre). Vibração curta (10–25 ms, Android). */
+  controles: { modo: 'avancado', autoAnguloDeg: 55, autoAlcanceExtra: 0.15, vibracao: true, vibraAcertoMs: 12, vibraDanoMs: 22, vibraMinGapMs: 110 },
   hud: { modo: 'compacto' },
   layoutEditor: {
     minScale: 0.6,
@@ -970,6 +973,7 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'firstPerson', label: 'Câmera em 1ª pessoa (botão 👁 no topo troca rápido)', type: 'toggle', path: 'camera.firstPerson' }
   ] },
   { group: 'COMBATE', items: [
+    { id: 'ctrlModo', label: 'Modo de controle (SIMPLES: ataca sozinho com inimigo à frente + mira assistida)', type: 'choice', path: 'controles.modo', options: [['simples', 'SIMPLES'], ['avancado', 'AVANÇADO']] },
     { id: 'aim', label: 'Assistência de mira', type: 'choice', path: ['combat.aimAssist', 'rightStick.aimAssist'], options: [['off', 'DESLIGADA'], ['low', 'BAIXA'], ['medium', 'MÉDIA'], ['high', 'ALTA']] },
     { id: 'lock', label: 'Trava de alvo', type: 'choice', path: 'lockOn.mode', options: [['manual', 'MANUAL'], ['automatico', 'AUTOMÁTICA']] },
     { id: 'auto', label: 'Ataque automático (segurar ATAQUE)', type: 'toggle', path: 'combat.autoAttack' }
@@ -977,7 +981,8 @@ export const SETTINGS_UI = Object.freeze([
   { group: 'BOTÕES', items: [
     { id: 'btnSize', label: 'Tamanho dos botões', type: 'range', path: 'buttons.sizeScale', min: 0.75, max: 1.35, step: 0.05, fmt: '%' },
     { id: 'btnOpacity', label: 'Transparência dos botões', type: 'range', path: 'buttons.opacity', min: 0.3, max: 1, step: 0.05, fmt: 'op' },
-    { id: 'showDefend', label: 'Mostrar botão DEFESA', type: 'toggle', path: 'buttons.showDefend' }
+    { id: 'showDefend', label: 'Mostrar botão DEFESA', type: 'toggle', path: 'buttons.showDefend' },
+    { id: 'vibra', label: 'Vibração ao acertar / levar dano (celular)', type: 'toggle', path: 'controles.vibracao' }
   ] },
   { group: 'TELA', items: [
     { id: 'hudModo', label: 'HUD (densidade da tela)', type: 'choice', path: 'hud.modo', options: [['normal', 'COMPLETO'], ['compacto', 'COMPACTO'], ['minimo', 'HUD MÍNIMO']] },
@@ -1109,7 +1114,8 @@ const ENUMS = {
   'graphics.quality': ['auto', 'low', 'medium', 'high'],
   'graphics.heroLook': ['classico', 'glb'],
   'lockOn.mode': ['manual', 'automatico'],
-  'hud.modo': ['normal', 'compacto', 'minimo']
+  'hud.modo': ['normal', 'compacto', 'minimo'],
+  'controles.modo': ['simples', 'avancado']
 };
 
 function isObj(v) {

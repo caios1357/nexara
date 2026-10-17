@@ -127,7 +127,7 @@
 @media (max-height: 520px) { .br-distrito { top: calc(max(8px, env(safe-area-inset-top)) + 108px); } }
 .br-distrito.hidden { display: none; }
 
-/* 20261017riv: XP da partida → herói permanente */
+/* 20261017ctrl: XP da partida → herói permanente */
 .br-summary .br-sum-xp { margin: 0.25rem 0; color: #ffe08a; font-size: 0.78rem; font-weight: 700; text-shadow: 0 0 8px rgba(255,200,80,0.45); }
 
 /* ===== LOTE-b M2 (pedido do Caio): HUD COMPACTO (padrão) e HUD MÍNIMO — CONFIGURAÇÕES → TELA → HUD ===== */

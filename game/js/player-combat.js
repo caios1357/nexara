@@ -18,9 +18,9 @@
  * Relógio próprio (ms) avançado por update(dt): congela no hit-stop/pausa.
  * Sem alocação por frame (objetos reutilizados).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261017riv';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017riv';
-import { getStat, STATS } from './modifiers.js?v=20261017riv';
+import { getConfig, DEG } from './gameplay-config.js?v=20261017ctrl';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017ctrl';
+import { getStat, STATS } from './modifiers.js?v=20261017ctrl';
 
 export const ATK = Object.freeze({ IDLE: 'IDLE', STARTUP: 'STARTUP', ACTIVE: 'ACTIVE', RECOVERY: 'RECOVERY' });
 const EVENT_CAP = 120;
@@ -50,7 +50,7 @@ export function createPlayerCombat(deps) {
   let swingId = 0;
   const hitSet = new Set();
   const events = [];
-  const stats = { presses: 0, started: 0, impacts: 0, hits: 0, deduped: 0, buffered: 0, bufferUsed: 0, bufferExpired: 0 };
+  const stats = { presses: 0, started: 0, impacts: 0, hits: 0, deduped: 0, buffered: 0, bufferUsed: 0, bufferExpired: 0, autoStarts: 0 };
   const view = { phase: ATK.IDLE, t: 0, comboIndex: 0, elapsed: 0, swingId: 0 };
   const hitInfo = { comboIndex: 0, heavy: false, dmgMult: 1, fromX: 0, fromY: 0, yaw: 0, swingId: 0 };
   const box = { range: 0, halfAngle: 0, assistAngle: 0, assistRange: 0, single: false };
@@ -95,6 +95,32 @@ export function createPlayerCombat(deps) {
     return -1;
   }
 
+  /** LOTE-b (CoD Mobile "modo simples"): há um inimigo à frente e ao alcance da arma? → o golpe sai sozinho. */
+  function autoTargetReady(cfg) {
+    const cc = getConfig().controles;
+    if (!cc || cc.modo !== 'simples' || !ctx || !ctx.state) return false;
+    const state = ctx.state;
+    const wc = deps.weaponClass ? deps.weaponClass(state) : 'espada';
+    const far = wc === 'arco' || wc === 'cajado' || wc === 'varinha' || deps.isRanged(state);
+    const range = (far ? cfg.rangedRange : cfg.attackRange) + (cc.autoAlcanceExtra || 0);
+    const half = (cc.autoAnguloDeg || 55) * DEG;
+    const fyaw = ctx.yaw;
+    const mons = state.monstersAlive;
+    for (let i = 0; i < mons.length; i++) {
+      const mon = mons[i];
+      if (!mon.alive || mon.zone !== state.zoneId || mon.ally || mon.tamed || mon.passive) continue;
+      const p = deps.getMonsterPos(mon);
+      const dx = p.x - ctx.px, dy = p.y - ctx.py;
+      const dc = Math.hypot(dx, dy);
+      const edge = dc - deps.bodyRadius(mon);
+      if (edge > range) continue;
+      if (dc < cfg.closeHitRadius) return true;
+      const ang = Math.atan2(dx, -dy);
+      if (Math.abs(wrapAngle(ang - fyaw)) <= half) return true;
+    }
+    return false;
+  }
+
   function tryStart(cfg) {
     const idx = acceptIndex(cfg);
     if (idx < 0) return false;
@@ -134,7 +160,8 @@ export function createPlayerCombat(deps) {
 
   // —— HITBOX ——
   function fillHitbox(cfg, idx, ranged) {
-    const lvl = cfg.aimAssist;
+    let lvl = cfg.aimAssist;
+    if (getConfig().controles?.modo === 'simples' && (lvl === 'off' || lvl === 'low')) lvl = 'medium'; // LOTE-b: modo SIMPLES → mira no mínimo MÉDIA
     box.assistAngle = (cfg.aimAssistExtraAngleDeg[lvl] || 0) * DEG;
     box.assistRange = cfg.aimAssistExtraRange[lvl] || 0;
     if (ranged) {
@@ -325,6 +352,7 @@ export function createPlayerCombat(deps) {
     if (frameCtx && frameCtx.noStart) return;
     if (bufferedAt >= 0 && tryStart(cfg)) stats.bufferUsed++;
     else if (held && cfg.autoAttack) tryStart(cfg);
+    else if (!held && (phase === ATK.IDLE || phase === ATK.RECOVERY) && autoTargetReady(cfg) && tryStart(cfg)) { stats.autoStarts++; logEvent('auto'); }
   }
 
   function getView() {
