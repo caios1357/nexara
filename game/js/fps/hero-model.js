@@ -12,9 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261016nivel';
-import { mergeStaticParts } from './merge-util.js?v=20261016nivel';
-import { attachHeroGlb } from './hero-glb.js?v=20261016nivel';
+import { getConfig } from '../gameplay-config.js?v=20261016graf2';
+import { mergeStaticParts } from './merge-util.js?v=20261016graf2';
+import { attachHeroGlb } from './hero-glb.js?v=20261016graf2';
+import { addArmorDetail } from './surface-fx.js?v=20261016graf2';
 
 const CYAN = 0x39f0ff;
 
@@ -34,6 +35,8 @@ export function createHeroModel(opts = {}) {
   const matHalo = new THREE.MeshBasicMaterial({ color: 0x3a9cff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
   const matBladeAura = new THREE.MeshBasicMaterial({ color: 0x3a9cff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
   const matEdge = new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  // GRÁFICOS 2: linhas de painel + micro-arranhões + borda ciano na armadura (shader, sem textura)
+  if (getConfig().graphics.heroDetail !== false) { addArmorDetail(matArmor, { rim: CYAN, rimK: 0.42, panel: 9 }); addArmorDetail(matArmor2, { rim: CYAN, rimK: 0.3, panel: 12, scratch: 0.8 }); }
   const flashMats = [matArmor, matArmor2, matCloth];
   const baseEmissive = flashMats.map((m) => m.emissive.getHex());
 
@@ -367,7 +370,7 @@ export function createHeroModel(opts = {}) {
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
     mergeInfo = mergeStaticParts(root, keep);
   }
-  // ARMAS DUPLAS (20261016nivel): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  // ARMAS DUPLAS (20261016graf2): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
   const altW = {};
   {
     const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });

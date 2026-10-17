@@ -1,3 +1,3 @@
-build=20261016nivel
-publicado=2026-10-16 23:55 -04
+build=20261016graf2
+publicado=2026-10-17 00:53 -04
 origem=/workspace/nexara

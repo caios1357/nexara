@@ -10,37 +10,39 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016nivel';
-import { buildArenaDressing } from './arena-dressing.js?v=20261016nivel';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016nivel';
-import { createHeroModel } from './hero-model.js?v=20261016nivel';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016nivel';
-import { attachHeroGlb } from './hero-glb.js?v=20261016nivel';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016nivel';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016nivel';
-import { createActionVfx } from './action-vfx.js?v=20261016nivel';
-import { createPassiveVfx } from './passive-vfx.js?v=20261016nivel';
-import { createFpsControls } from './fps-controls.js?v=20261016nivel';
-import { createViewmodel } from './viewmodel.js?v=20261016nivel';
-import { createDragonView } from './dragon-view.js?v=20261016nivel';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016nivel';
-import { getSprite } from '../assets.js?v=20261016nivel';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016nivel';
-import { createBossDragon } from './boss-dragon-view.js?v=20261016nivel';
-import { bossCfgFor } from '../boss-variants.js?v=20261016nivel';
-import { mergeStaticParts } from './merge-util.js?v=20261016nivel';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016nivel';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016nivel';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016nivel';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016nivel';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016nivel';
-import { createPostFx } from './post-fx.js?v=20261016nivel';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016nivel';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016nivel';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016nivel';
-import { groundAt, setGroundFn } from './ground.js?v=20261016nivel';
-import { buildBrTerrain } from './br-terrain.js?v=20261016nivel';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016nivel';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016graf2';
+import { buildArenaDressing } from './arena-dressing.js?v=20261016graf2';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016graf2';
+import { createHeroModel } from './hero-model.js?v=20261016graf2';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016graf2';
+import { attachHeroGlb } from './hero-glb.js?v=20261016graf2';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016graf2';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016graf2';
+import { createActionVfx } from './action-vfx.js?v=20261016graf2';
+import { createPassiveVfx } from './passive-vfx.js?v=20261016graf2';
+import { createFpsControls } from './fps-controls.js?v=20261016graf2';
+import { createViewmodel } from './viewmodel.js?v=20261016graf2';
+import { createDragonView } from './dragon-view.js?v=20261016graf2';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016graf2';
+import { getSprite } from '../assets.js?v=20261016graf2';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016graf2';
+import { createBossDragon } from './boss-dragon-view.js?v=20261016graf2';
+import { bossCfgFor } from '../boss-variants.js?v=20261016graf2';
+import { mergeStaticParts } from './merge-util.js?v=20261016graf2';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016graf2';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016graf2';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016graf2';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016graf2';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016graf2';
+import { createPostFx } from './post-fx.js?v=20261016graf2';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016graf2';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261016graf2';
+import { createContactShadows } from './contact-shadows.js?v=20261016graf2';
+import { surfaceFxStats } from './surface-fx.js?v=20261016graf2';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016graf2';
+import { groundAt, setGroundFn } from './ground.js?v=20261016graf2';
+import { buildBrTerrain } from './br-terrain.js?v=20261016graf2';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016graf2';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -158,6 +160,7 @@ export function createFpsRenderer() {
   const dragonFx = { pts: null, vel: null, on: false, k: 0, el: null, n: 0, last: 0 };
   const brLod = { hidden: 0, shown: 0 };
   let puddleTex = null;
+  let motes = null; let contactSh = null; // GRÁFICOS 2
   let atmoT = 0;
   const frameStats = { calls: 0, tris: 0, ms: 16.7 };
 
@@ -239,6 +242,8 @@ export function createFpsRenderer() {
         rain = createRain(tier.rain);
         scene.add(rain.object);
       }
+      if ((tier.motes || 0) > 0 && !/[?&]motes=0\b/.test(location.search)) { motes = createMotes(tier.motes); scene.add(motes.object); }
+      contactSh = createContactShadows(scene);
       if (tier.composer && !postFx && !postFxPending) {
         postFxPending = true;
         createPostFx(renderer, scene, fpsCam.camera, tier).then((fx) => {
@@ -390,7 +395,7 @@ export function createFpsRenderer() {
         brLodK = getConfig().graphics.adaptiveEnemyLodK ?? 0.75; // inimigos longe somem mais cedo (IA/HUD seguem)
       } else if (step === 'particles') {
         if (particleK < 1 && (!rain?.object || !rain.object.visible)) { dropped.particles = true; continue; }
-        particleK = getConfig().graphics.adaptiveParticleK ?? 0.5; if (rain?.object) rain.object.visible = false; dropped.rain = true;
+        particleK = getConfig().graphics.adaptiveParticleK ?? 0.5; if (rain?.object) rain.object.visible = false; if (motes?.object) motes.object.visible = false; dropped.rain = true;
       } else if (step === 'aiFar') {
         if (!aiFarHook) { dropped.aiFar = true; continue; }
         aiFarHook(getConfig().graphics.adaptiveAiLodK ?? 0.7);
@@ -2548,6 +2553,8 @@ export function createFpsRenderer() {
 
     atmoT += dt;
     if (rain) rain.update(atmoT, fpsCam.camera.position);
+    if (motes) { motes.update(atmoT, fpsCam.camera.position); if (scene.fog) motes.setColor(scene.fog.color); motes.setPixelScale(renderer.getPixelRatio() * (lastSize.h || 412) / 412); }
+    updateContactShadows();
     haze?.update(dt);
     city?.update(dt);
     dressing?.update?.(dt, fpsCam.camera.position);
@@ -2558,6 +2565,30 @@ export function createFpsRenderer() {
     frameStats.tris = renderer.info.render.triangles;
     frameStats.ms += (frameMs - frameStats.ms) * 0.1;
     maybeRenderPortrait();
+  }
+
+  /** GRÁFICOS 2: sombras de contato (só sem shadow map) — herói/dragão montado + monstros/rivais/NPCs visíveis perto da câmera. */
+  const csCam = new THREE.Vector3();
+  function updateContactShadows() {
+    if (!contactSh) return;
+    const on = !renderer.shadowMap.enabled && getConfig().graphics.contactShadows !== false && !/[?&]contactSh=0\b/.test(location.search);
+    contactSh.begin();
+    if (on) {
+      csCam.copy(fpsCam.camera.position);
+      if (hero && hero.root.visible) {
+        const gy = groundAt(heroVis.x / TILE, heroVis.z / TILE); const lift = mountVis.heroLift || 0;
+        if (lift > 0.3) contactSh.add(heroVis.x, heroVis.z, gy, Math.max(0, lift - 1.4), 1.9, 0.5);
+        else contactSh.add(heroVis.x, heroVis.z, gy, hero.root.position.y - gy, 0.52, 0.58);
+      }
+      if (entityRoot.visible) for (const e of entityMeshes.values()) {
+        const m = e.mesh; if (!m || !m.visible || e.boss || m.parent !== entityRoot) continue;
+        const dx = m.position.x - csCam.x, dz = m.position.z - csCam.z; if (dx * dx + dz * dz > 900) continue;
+        const gy = groundAt(m.position.x / TILE, m.position.z / TILE);
+        const r = (e.rival ? 0.55 : e.kind === 'npc' ? 0.5 : 0.62) * Math.max(0.5, Math.min(3, m.scale.x || 1));
+        contactSh.add(m.position.x, m.position.z, gy, m.position.y - gy, r, 0.52);
+      }
+    }
+    contactSh.end(on);
   }
 
   /** M3D: RETRATO do HUD = render do modelo 3D atual (rosto, de frente), só quando estilo/equipamento muda. */
@@ -2989,6 +3020,9 @@ export function createFpsRenderer() {
       toneMapping: renderer?.toneMapping === THREE.ACESFilmicToneMapping ? 'ACESFilmic' : String(renderer?.toneMapping),
       outputColorSpace: renderer?.outputColorSpace,
       rain: rain ? rain.count : 0,
+      motes: motes ? { n: motes.count, visible: motes.object.visible } : null,
+      contactShadows: contactSh ? { ...contactSh.stats(), heroWorld: hero ? [+heroVis.x.toFixed(2), +heroVis.z.toFixed(2)] : null } : null,
+      surfaceFx: surfaceFxStats(),
       city: !!city,
       vignetteCss: !!vignetteEl,
       drawCalls: frameStats.calls,

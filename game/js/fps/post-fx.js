@@ -5,13 +5,15 @@
  * (fallback idêntico ao nível 'low'). Bloom em meia resolução no nível 'medium'.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261016nivel';
+import { getConfig } from '../gameplay-config.js?v=20261016graf2';
 
 const GradeShader = {
   uniforms: {
     tDiffuse: { value: null },
     amount: { value: 0.5 },
-    vignette: { value: 0.45 }
+    vignette: { value: 0.45 },
+    texel: { value: new THREE.Vector2(1 / 1024, 1 / 512) },
+    fxaa: { value: 0 }
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;
@@ -20,10 +22,33 @@ const GradeShader = {
     uniform sampler2D tDiffuse;
     uniform float amount;
     uniform float vignette;
+    uniform vec2 texel;
+    uniform float fxaa;
     varying vec2 vUv;
+    // GRÁFICOS 2: FXAA (luma em espaço comprimido p/ HDR) dentro da MESMA passada da cor — sem render target extra
+    float lumaC(vec3 c) { float l = dot(c, vec3(0.299, 0.587, 0.114)); return l / (1.0 + l); }
+    vec3 fxaaSample(vec2 uv) {
+      vec3 nw = texture2D(tDiffuse, uv + vec2(-1.0, -1.0) * texel).rgb;
+      vec3 ne = texture2D(tDiffuse, uv + vec2(1.0, -1.0) * texel).rgb;
+      vec3 sw = texture2D(tDiffuse, uv + vec2(-1.0, 1.0) * texel).rgb;
+      vec3 se = texture2D(tDiffuse, uv + vec2(1.0, 1.0) * texel).rgb;
+      vec3 m = texture2D(tDiffuse, uv).rgb;
+      float lNW = lumaC(nw), lNE = lumaC(ne), lSW = lumaC(sw), lSE = lumaC(se), lM = lumaC(m);
+      float lMin = min(lM, min(min(lNW, lNE), min(lSW, lSE)));
+      float lMax = max(lM, max(max(lNW, lNE), max(lSW, lSE)));
+      if (lMax - lMin < max(0.0312, lMax * 0.125)) return m;
+      vec2 dir = vec2(-((lNW + lNE) - (lSW + lSE)), ((lNW + lSW) - (lNE + lSE)));
+      float red = max((lNW + lNE + lSW + lSE) * 0.03125, 1.0 / 128.0);
+      float rcp = 1.0 / (min(abs(dir.x), abs(dir.y)) + red);
+      dir = clamp(dir * rcp, vec2(-8.0), vec2(8.0)) * texel;
+      vec3 a = 0.5 * (texture2D(tDiffuse, uv + dir * (1.0 / 3.0 - 0.5)).rgb + texture2D(tDiffuse, uv + dir * (2.0 / 3.0 - 0.5)).rgb);
+      vec3 b = a * 0.5 + 0.25 * (texture2D(tDiffuse, uv - dir * 0.5).rgb + texture2D(tDiffuse, uv + dir * 0.5).rgb);
+      float lB = lumaC(b);
+      return (lB < lMin || lB > lMax) ? a : b;
+    }
     void main() {
       vec4 tex = texture2D(tDiffuse, vUv);
-      vec3 c = tex.rgb;
+      vec3 c = fxaa > 0.5 ? fxaaSample(vUv) : tex.rgb;
       float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
       // split-toning: sombras → azul-petróleo, luzes → âmbar (HDR linear, antes do ACES)
       vec3 shadowTint = vec3(-0.012, 0.018, 0.03);
@@ -73,12 +98,15 @@ export async function createPostFx(renderer, scene, camera, tier) {
   const grade = new ShaderPass(GradeShader);
   composer.addPass(grade);
   composer.addPass(new OutputPass());
-  const st = { frames: 0, bloomScale: tier.bloomScale, w: 0, h: 0, pr: 0 };
+  const st = { frames: 0, bloomScale: tier.bloomScale, w: 0, h: 0, pr: 0, fxaa: !!tier.fxaa };
+  const fxaaOff = /[?&]fxaa=0\b/.test(location.search); const fxaaOn = /[?&]fxaa=1\b/.test(location.search);
 
   function syncUniforms() {
     const c = getConfig().graphics;
     grade.uniforms.amount.value = c.gradeAmount;
     grade.uniforms.vignette.value = c.vignette;
+    st.fxaa = !fxaaOff && (fxaaOn || (!!tier.fxaa && c.fxaa !== false));
+    grade.uniforms.fxaa.value = st.fxaa ? 1 : 0;
     if (bloom) { bloom.strength = c.bloomStrength; bloom.radius = c.bloomRadius; bloom.threshold = c.bloomThreshold; }
   }
   return {
@@ -89,13 +117,14 @@ export async function createPostFx(renderer, scene, camera, tier) {
       st.w = w; st.h = h; st.pr = pr;
       composer.setPixelRatio(pr);
       composer.setSize(w, h);
+      grade.uniforms.texel.value.set(1 / Math.max(1, Math.round(w * pr)), 1 / Math.max(1, Math.round(h * pr)));
     },
     render(dt) {
       syncUniforms();
       composer.render(dt);
       st.frames++;
     },
-    getDebug: () => ({ active: true, bloom: !!bloom, bloomScale: st.bloomScale, frames: st.frames, passes: composer.passes.length }),
+    getDebug: () => ({ active: true, bloom: !!bloom, bloomScale: st.bloomScale, frames: st.frames, passes: composer.passes.length, fxaa: st.fxaa }),
     dispose() { composer.dispose?.(); rt.dispose(); }
   };
 }

@@ -155,3 +155,56 @@ export function createHaze(count, bounds, color = 0x5a8a9a) {
     dispose() { mat.dispose(); }
   };
 }
+
+/**
+ * GRÁFICOS 2 — PARTÍCULAS DE AMBIENTE: poeira/vagalumes de Nexa que flutuam em volta da câmera
+ * (1 draw call, animação 100% na GPU, envolvem a câmera num cubo de `span` m — nunca "acabam").
+ * A cor segue a névoa da região (setColor). Preset baixo: não é criado.
+ */
+export function createMotes(count, span = 26) {
+  const n = Math.max(1, count | 0);
+  const pos = new Float32Array(n * 3); const seed = new Float32Array(n);
+  for (let i = 0; i < n; i++) { pos[i * 3] = Math.random() * span; pos[i * 3 + 1] = 0.2 + Math.random() * 5.5; pos[i * 3 + 2] = Math.random() * span; seed[i] = Math.random(); }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uOrigin: { value: new THREE.Vector3() }, uSpan: { value: span }, uColor: { value: new THREE.Color(0x9fe8ff) }, uSize: { value: 34 } },
+    vertexShader: /* glsl */`
+      attribute float aSeed; uniform float uTime; uniform vec3 uOrigin; uniform float uSpan; uniform float uSize;
+      varying float vA; varying float vTw;
+      void main() {
+        vec3 p = position;
+        p.x += sin(uTime * (0.21 + aSeed * 0.3) + aSeed * 40.0) * 1.3 + uTime * 0.12;
+        p.z += cos(uTime * (0.17 + aSeed * 0.25) + aSeed * 23.0) * 1.3;
+        p.y += sin(uTime * (0.5 + aSeed) + aSeed * 9.0) * 0.35;
+        vec3 w = vec3(uOrigin.x + mod(p.x - uOrigin.x, uSpan) - uSpan * 0.5, p.y, uOrigin.z + mod(p.z - uOrigin.z, uSpan) - uSpan * 0.5);
+        vec4 mv = modelViewMatrix * vec4(w, 1.0);
+        float d = -mv.z;
+        vA = smoothstep(0.6, 2.2, d) * (1.0 - smoothstep(uSpan * 0.32, uSpan * 0.5, length(w.xz - uOrigin.xz)));
+        vTw = 0.55 + 0.45 * sin(uTime * (1.4 + aSeed * 2.6) + aSeed * 31.0);
+        gl_PointSize = uSize * (0.45 + aSeed * 0.75) / max(d, 0.5);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform vec3 uColor; varying float vA; varying float vTw;
+      void main() {
+        vec2 c = gl_PointCoord - 0.5; float r = length(c) * 2.0;
+        float a = (1.0 - smoothstep(0.0, 1.0, r)); a *= a;
+        gl_FragColor = vec4(uColor * (0.7 + 0.8 * vTw), a * vA * vTw * 0.75);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false; pts.name = 'motes'; pts.renderOrder = 4;
+  const tmpC = new THREE.Color();
+  return {
+    object: pts,
+    count: n,
+    update(t, camPos) { mat.uniforms.uTime.value = t; mat.uniforms.uOrigin.value.set(camPos.x, 0, camPos.z); },
+    /** cor (névoa da região) clareada → partículas sempre visíveis, nunca brancas puras */
+    setColor(c) { tmpC.set(c); const hsl = {}; tmpC.getHSL(hsl); tmpC.setHSL(hsl.h, Math.min(1, hsl.s * 0.9 + 0.25), 0.62); mat.uniforms.uColor.value.lerp(tmpC, 0.05); },
+    setPixelScale(k) { mat.uniforms.uSize.value = 34 * k; },
+    dispose() { geo.dispose(); mat.dispose(); }
+  };
+}

@@ -4,7 +4,8 @@
  * Mini-dragão companheiro: azul. Falha de carregamento → procedural continua.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261016nivel';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261016graf2';
+import { addScales } from './surface-fx.js?v=20261016graf2';
 
 export const DRAGON_PRESETS = {
   boss: {
@@ -53,6 +54,7 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
       const m = o.material.clone();
       const eye = /Eye/i.test(o.name); const lum = m.color.r * 0.3 + m.color.g * 0.59 + m.color.b * 0.11; // luminância ORIGINAL (antes de pintar)
       meshesPaint.push({ m, eye, lum }); glowMats.push(m);
+      if (!eye) { o.geometry.computeBoundingBox(); const bb = o.geometry.boundingBox; const ext = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z) || 1; addScales(m, { freq: (lum > 0.5 ? 6 : 10) / ext, bump: 0.8, crease: 0.6, rim: P.glow, rimK: 0.3 }); }
       o.material = m;
       o.castShadow = true;
     });

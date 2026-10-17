@@ -7,7 +7,7 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261016nivel';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261016graf2';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -258,7 +258,7 @@ export function brRegionAt(m, cfg, x, y) {
 }
 
 /**
- * 20261016nivel — COBERTURA (esconderijos): estruturas fechadas (ruína, caverna, casa, sala) ganham a marca `cobertura:true` (só dado: tile e colisão não mudam).
+ * 20261016graf2 — COBERTURA (esconderijos): estruturas fechadas (ruína, caverna, casa, sala) ganham a marca `cobertura:true` (só dado: tile e colisão não mudam).
  * NUNCA no Território do Dragão (região 'dragao'): lá nada é marcado. Atacantes AÉREOS (o Gigante) não acertam o herói a pé dentro de uma cobertura; o dragão montado pousa na borda.
  */
 const COVER_KINDS = ['ruina', 'caverna', 'casa', 'sala'];

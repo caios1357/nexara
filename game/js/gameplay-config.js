@@ -203,6 +203,9 @@ export const DEFAULTS = Object.freeze({
     softwareGLLow: true,
     /** 20261016visual: 'classico' = CAVALEIRO NEXA escuro com espada de luz (procedural); 'glb' = modelo KayKit. */
     heroLook: 'classico',
+    contactShadows: true, // GRÁFICOS 2: sombra de contato sob personagens quando o shadow map está desligado
+    fxaa: true, // GRÁFICOS 2: FXAA dentro da passada de cor (médio/alto)
+    heroDetail: true, // GRÁFICOS 2: painéis/arranhões/borda na armadura do herói clássico
     tiers: {
       /**
        * EVO — presets nomeados (sem duplicar sistemas; os mesmos sistemas com orçamentos diferentes):
@@ -211,11 +214,11 @@ export const DEFAULTS = Object.freeze({
        *  high   = DESKTOP: bloom cheio + 1 sombra, env map, 24 luzes.
        * caps = limites por preset (inimigos ativos, partículas, projéteis/zonas de perigo, números de dano).
        */
-      low: { label: 'MOBILE LOW', models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 90, haze: 2, envMap: false, cityDensity: 0.35, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 3,
+      low: { label: 'MOBILE LOW', motes: 0, fxaa: false, models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 90, haze: 2, envMap: false, cityDensity: 0.35, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 3,
         caps: { activeEnemies: 10, particles: 45, projectiles: 10, hazards: 4, damageNumbers: 8 } },
-      medium: { label: 'MOBILE MEDIUM', dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.4, shadows: false, rain: 160, haze: 3, envMap: false, cityDensity: 0.55, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 4 /* 20261009leve: só os N rivais mais próximos com modelo completo; os demais (a partir de ~10 tiles) = etiqueta+anel */,
+      medium: { label: 'MOBILE MEDIUM', motes: 70, fxaa: true, dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.4, shadows: false, rain: 160, haze: 3, envMap: false, cityDensity: 0.55, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 4 /* 20261009leve: só os N rivais mais próximos com modelo completo; os demais (a partir de ~10 tiles) = etiqueta+anel */,
         caps: { activeEnemies: 12, particles: 60, projectiles: 12, hazards: 5, damageNumbers: 10 } },
-      high: { label: 'DESKTOP', composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true, rivalModels: 8,
+      high: { label: 'DESKTOP', motes: 160, fxaa: true, composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true, rivalModels: 8,
         caps: { activeEnemies: 18, particles: 160, projectiles: 24, hazards: 8, damageNumbers: 14 } }
     },
     /**
