@@ -393,6 +393,106 @@
       "resumo": "Empilhável: regeneração de HP.",
       "build": "DEFESA",
       "maxStacks": 3
+    },
+    {
+      "id": "atr_forca",
+      "nome": "FORÇA DA PARTIDA",
+      "descricao": "+7% de dano por pilha. Só vale nesta partida.",
+      "icone": "⚔",
+      "raridade": "comum",
+      "empilhavel": true,
+      "maxStacks": 5,
+      "soPartida": true,
+      "categoria": "ATRIBUTO",
+      "resumo": "Atributo da partida (some no fim).",
+      "build": "ATAQUE",
+      "efeitos": [
+        {
+          "stat": "damage",
+          "tipo": "mult",
+          "valor": 0.07
+        }
+      ]
+    },
+    {
+      "id": "atr_vigor",
+      "nome": "VIGOR DA PARTIDA",
+      "descricao": "+10% de HP máximo por pilha. Só vale nesta partida.",
+      "icone": "❤",
+      "raridade": "comum",
+      "empilhavel": true,
+      "maxStacks": 5,
+      "soPartida": true,
+      "categoria": "ATRIBUTO",
+      "resumo": "Atributo da partida (some no fim).",
+      "build": "DEFESA",
+      "efeitos": [
+        {
+          "stat": "maxHp",
+          "tipo": "mult",
+          "valor": 0.1
+        }
+      ]
+    },
+    {
+      "id": "atr_agilidade",
+      "nome": "AGILIDADE DA PARTIDA",
+      "descricao": "+5% de velocidade de movimento por pilha. Só vale nesta partida.",
+      "icone": "➶",
+      "raridade": "comum",
+      "empilhavel": true,
+      "maxStacks": 5,
+      "soPartida": true,
+      "categoria": "ATRIBUTO",
+      "resumo": "Atributo da partida (some no fim).",
+      "build": "MOBILIDADE",
+      "efeitos": [
+        {
+          "stat": "moveSpeed",
+          "tipo": "mult",
+          "valor": 0.05
+        }
+      ]
+    },
+    {
+      "id": "atr_foco",
+      "nome": "FOCO DA PARTIDA",
+      "descricao": "+15% de regeneração de Nexa por pilha. Só vale nesta partida.",
+      "icone": "✦",
+      "raridade": "comum",
+      "empilhavel": true,
+      "maxStacks": 5,
+      "soPartida": true,
+      "categoria": "ATRIBUTO",
+      "resumo": "Atributo da partida (some no fim).",
+      "build": "NEXA",
+      "efeitos": [
+        {
+          "stat": "nexaRegen",
+          "tipo": "mult",
+          "valor": 0.15
+        }
+      ]
+    },
+    {
+      "id": "atr_precisao",
+      "nome": "PRECISÃO DA PARTIDA",
+      "descricao": "+4 pontos de chance de crítico por pilha. Só vale nesta partida.",
+      "icone": "◎",
+      "raridade": "comum",
+      "empilhavel": true,
+      "maxStacks": 5,
+      "soPartida": true,
+      "categoria": "ATRIBUTO",
+      "resumo": "Atributo da partida (some no fim).",
+      "build": "ATAQUE",
+      "efeitos": [
+        {
+          "stat": "critChance",
+          "tipo": "add",
+          "valor": 0.04
+        }
+      ]
     }
   ]
 }

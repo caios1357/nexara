@@ -426,7 +426,7 @@ body.has-mobile-controls #game-screen {
 @media (orientation: landscape) { .mobile-controls.mc-mounted .mc-btn.mc-dspecial { right: calc(env(safe-area-inset-right, 0px) + 175px); bottom: calc(env(safe-area-inset-bottom, 0px) + 125px); } }
 @media (orientation: portrait) { .mobile-controls.mc-mounted .mc-btn.mc-dspecial { right: calc(env(safe-area-inset-right, 0px) + 140px); bottom: calc(env(safe-area-inset-bottom, 0px) + 175px); } }
 
-/* 20261016armas — TROCAR (espada ⇄ arma 2): botão próprio, longe de ATAQUE/ESQUIVA/joystick/DESCER; some montado */
+/* 20261016nivel — TROCAR (espada ⇄ arma 2): botão próprio, longe de ATAQUE/ESQUIVA/joystick/DESCER; some montado */
 .mobile-controls .mc-btn.mc-trocar { display: flex !important; position: fixed !important; width: 56px; height: 56px; z-index: 9997 !important; pointer-events: auto !important; border: 2px solid #ffd27a; box-shadow: 0 0 10px rgba(255,210,122,0.45); background: rgba(30,22,8,0.72); }
 .mobile-controls .mc-btn.mc-trocar .mc-lbl { font-size: 0.46rem; letter-spacing: 0.02em; }
 .mobile-controls .mc-btn.mc-trocar.mc-swcd::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(rgba(0,0,0,0.6) var(--cd, 0%), transparent 0); }

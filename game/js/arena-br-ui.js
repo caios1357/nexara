@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261016armas';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261016nivel';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -353,7 +353,7 @@ export function createArenaBrUi(deps) {
 
   /* ── resumo DERROTADO / EXTRAÇÃO ── */
   function closeSummary() { summaryEl?.remove(); summaryEl = null; }
-  function showSummary(sum, { onAgain, onMenu, zero = false, fast = null, onRanking = null }) {
+  function showSummary(sum, { onAgain, onMenu, zero = false, fast = null, onRanking = null, xp = null }) {
     closeSummary(); toggleBigMap(false);
     const win = sum.kind === 'vitoria'; // RIVAIS: CAMPEÃO RIVAL e todos os rivais derrotados
     const ok = sum.kind === 'extraido' || win;
@@ -363,7 +363,8 @@ export function createArenaBrUi(deps) {
       <h2 class="${win ? 'br-sum-win' : ''}">${win ? 'VITÓRIA' : ok ? 'EXTRAÇÃO CONCLUÍDA' : 'DERROTADO'}</h2>
       ${sum.spectated ? `<p class="br-sum-fast">Você caiu aos ${mmss(sum.diedAtMs || 0)} (${sum.placement || '?'}º lugar) e acompanhou a briga até o fim${sum.winner ? ` — último herói: <b>${esc(sum.winner)}</b> (BOT)` : ''}.</p>` : ''}
       ${fast ? `<p class="br-sum-fast">NEXARA FAST ⚡ · ${fast.colocacao ? `<b>${fast.colocacao}º lugar</b>` : ''}${fast.vencedor && fast.vencedor !== 'VOCÊ' ? ` · último sobrevivente: <b>${esc(fast.vencedor)}</b> (BOT)` : ''}${fast.killer ? ` · derrotado por <b>${esc(fast.killer)}</b> (BOT)` : ''}</p>` : ''}
-      ${zero ? '<p class="br-sum-zero">Partida do zero (NV1): seu herói salvo, itens, MCB e passivas NÃO foram alterados.</p>' : ''}
+      ${zero ? `<p class="br-sum-zero">Partida do zero: chegou ao <b>NÍVEL ${xp?.nivelPartida ?? 1} DA PARTIDA</b> (atributos/passivas da partida somem agora). Itens, MCB e passivas do seu herói salvo NÃO foram alterados.</p>` : ''}
+      ${xp && xp.xp > 0 ? `<p class="br-sum-xp" data-k="xp">✦ XP DA PARTIDA <b>+${xp.xp}</b>${xp.modo === 'zero' && xp.ok ? ` → herói permanente <b>NV ${xp.antes}${xp.depois > xp.antes ? ` → ${xp.depois}` : ''}</b> (${xp.xpPerm}/${xp.xpNext} XP)` : xp.modo === 'sem_save' ? ' (sem herói salvo: crie um personagem para guardar o XP)' : ''}</p>` : ''}
       <p class="br-sum-sub" ${zero ? 'hidden' : ''}>${win ? `Você derrotou <b>TODOS os rivais (BOT)</b>${sum.champion ? ` — o último foi o CAMPEÃO RIVAL <b>${esc(sum.champion)}</b>` : ''}: você é o ÚLTIMO HERÓI. Tudo que você pegou já está salvo.` : ok ? `Bônus de extração: <b>+${sum.bonus} MCB</b>` : 'Nada permanente foi perdido — tudo que você pegou já está salvo.'}</p>
       <dl>
         <dt>Tempo sobrevivido</dt><dd data-k="time">${mmss(sum.timeMs)}</dd>

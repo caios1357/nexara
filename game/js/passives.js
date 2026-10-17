@@ -12,8 +12,8 @@
  * - Estado por partida em state.passives = { owned:[ids], pending:n, lastOffer:[ids], offer:[ids]|null }
  *   (salvo no save do mundo; saves antigos carregam owned=[]).
  */
-import { addModifier, getStat, STATS } from './modifiers.js?v=20261016armas';
-import { getConfig } from './gameplay-config.js?v=20261016armas';
+import { addModifier, getStat, STATS } from './modifiers.js?v=20261016nivel';
+import { getConfig } from './gameplay-config.js?v=20261016nivel';
 
 const registry = new Map(); // id → def normalizada
 let rarities = {};
@@ -78,6 +78,7 @@ export function registerPassive(def) {
     // EVO: empilháveis têm teto (o pool pode esgotar; sem bônus infinito)
     maxStacks: def.empilhavel ? Math.max(1, Number(def.maxStacks) || 3) : 1,
     build: def.build || null,
+    soPartida: !!def.soPartida, // 20261016nivel: ATRIBUTO da partida (só no FAST do zero; o herói temporário some no fim)
     efeitos: (def.efeitos || []).filter((e) => e && e.stat && Number.isFinite(e.valor)).map((e) => ({
       stat: e.stat,
       tipo: e.tipo === 'add' ? 'add' : 'mult',
@@ -188,6 +189,7 @@ export function availablePool(state) {
   for (const id of order) {
     const d = registry.get(id);
     if (!d || weightOf(d) <= 0) continue;
+    if (d.soPartida && !state?.fastZero) continue;
     if (owned.has(id) && !d.empilhavel) continue;
     if (d.empilhavel && ownedList.filter((x) => x === id).length >= d.maxStacks) continue;
     out.push(d);
@@ -234,6 +236,16 @@ export function rollOffer(state, n, { rng = Math.random, attempts = 12 } = {}) {
   const canDiffer = pool.length > k;
   for (let i = 0; canDiffer && i < attempts && sameSet(pick, ps.lastOffer); i++) {
     pick = weightedPick(pool, k, rng).map((d) => d.id);
+  }
+  // 20261016nivel: no FAST do zero, cada nível da partida traz ≥ 1 carta de ATRIBUTO (o resto segue o sorteio normal)
+  if (state?.fastZero && k >= 2) {
+    const want = Math.min(k - 1, state._data?.arena_br?.nivelPartida?.atributosNaOferta ?? 1);
+    const atr = pool.filter((d) => d.soPartida && !pick.includes(d.id));
+    let have = pick.filter((id) => registry.get(id)?.soPartida).length;
+    for (let j = pick.length - 1; j >= 0 && have < want && atr.length; j--) {
+      if (registry.get(pick[j])?.soPartida) continue;
+      const a = weightedPick(atr, 1, rng)[0]; if (!a) break; atr.splice(atr.indexOf(a), 1); pick[j] = a.id; have++;
+    }
   }
   return pick;
 }
