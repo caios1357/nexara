@@ -12,10 +12,36 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261017hud2';
-import { mergeStaticParts } from './merge-util.js?v=20261017hud2';
-import { attachHeroGlb } from './hero-glb.js?v=20261017hud2';
-import { addArmorDetail } from './surface-fx.js?v=20261017hud2';
+import { getConfig } from '../gameplay-config.js?v=20261017riv';
+import { mergeStaticParts } from './merge-util.js?v=20261017riv';
+import { attachHeroGlb } from './hero-glb.js?v=20261017riv';
+import { addArmorDetail } from './surface-fx.js?v=20261017riv';
+
+/* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
+   esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
+const SQUARE = typeof location !== 'undefined' && /[?&]heroiQuadrado=1\b/.test(location.search);
+const _rbCache = new Map();
+export function roundedBoxGeo(w, h, d, r) {
+  r = Math.max(0.001, Math.min(r, w / 2 - 1e-4, h / 2 - 1e-4, d / 2 - 1e-4));
+  const key = `${w.toFixed(3)}|${h.toFixed(3)}|${d.toFixed(3)}|${r.toFixed(3)}`; const c = _rbCache.get(key); if (c) return c;
+  const g = new THREE.BoxGeometry(w, h, d, 2, 2, 2); const P = g.attributes.position, N = g.attributes.normal;
+  const hx = w / 2 - r, hy = h / 2 - r, hz = d / 2 - r;
+  for (let i = 0; i < P.count; i++) {
+    const x = P.getX(i), y = P.getY(i), z = P.getZ(i);
+    const cx = Math.max(-hx, Math.min(hx, x)), cy = Math.max(-hy, Math.min(hy, y)), cz = Math.max(-hz, Math.min(hz, z));
+    let dx = x - cx, dy = y - cy, dz = z - cz; const L = Math.hypot(dx, dy, dz);
+    if (L > 1e-6) { dx /= L; dy /= L; dz /= L; P.setXYZ(i, cx + dx * r, cy + dy * r, cz + dz * r); N.setXYZ(i, dx, dy, dz); }
+  }
+  // vértice do centro de cada face: normal da face (fica plano no meio, curva nas bordas)
+  P.needsUpdate = true; N.needsUpdate = true; g.userData.rounded = true; g.userData.shared = true; _rbCache.set(key, g); return g;
+}
+const _capCache = new Map();
+/** membro em cápsula com seção elíptica (w × d), altura total h */
+export function limbGeo(w, h, d) {
+  const key = `${w.toFixed(3)}|${h.toFixed(3)}|${d.toFixed(3)}`; const c = _capCache.get(key); if (c) return c;
+  const r = Math.min(w, d) / 2; const g = new THREE.CapsuleGeometry(r, Math.max(0.01, h - 2 * r), 3, 10);
+  g.scale(w / (2 * r), 1, d / (2 * r)); g.userData.shared = true; _capCache.set(key, g); return g;
+}
 
 const CYAN = 0x39f0ff;
 
@@ -55,13 +81,18 @@ export function createHeroModel(opts = {}) {
   const flashMats = [matArmor, matArmor2, matCloth];
   const baseEmissive = flashMats.map((m) => m.emissive.getHex());
 
-  const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); // peças finas (linhas de brilho, lâmina, guarda)
+  /** volume arredondado (raio ~35% da menor medida, máx. 6 cm) */
+  let roundN = 0;
+  const rbox = (w, h, d, mat, k = 0.36) => (SQUARE ? box(w, h, d, mat) : (roundN++, new THREE.Mesh(roundedBoxGeo(w, h, d, Math.min(0.06, Math.min(w, h, d) * k)), mat)));
+  /** membro (coxa/canela/braço/antebraço) em cápsula */
+  const limb = (w, h, d, mat) => (SQUARE ? box(w, h, d, mat) : (roundN++, new THREE.Mesh(limbGeo(w, h, d), mat)));
   const joint = (name, x, y, z, parent) => { const g = new THREE.Group(); g.name = name; g.position.set(x, y, z); parent.add(g); return g; };
   const glowLine = (parent, w, h, d, x, y, z) => { const m = box(w, h, d, matGlow); m.position.set(x, y, z); parent.add(m); return m; };
 
   // ── quadril / pernas ──
   const hips = joint('hips', 0, 0.94, 0, root);
-  const pelvis = box(0.36, 0.16, 0.24, matArmor);
+  const pelvis = rbox(0.36, 0.16, 0.24, matArmor, 0.45);
   hips.add(pelvis);
   const belt = glowLine(hips, 0.37, 0.025, 0.25, 0, 0.06, 0);
   belt.scale.set(1, 1, 1);
@@ -69,23 +100,23 @@ export function createHeroModel(opts = {}) {
   for (const side of ['L', 'R']) {
     const sx = side === 'L' ? 0.11 : -0.11;
     const thigh = joint(`thigh${side}`, sx, -0.06, 0, hips);
-    const th = box(0.15, 0.42, 0.17, matUnder); th.position.y = -0.21; thigh.add(th);
-    const plate = box(0.16, 0.26, 0.05, matArmor); plate.position.set(0, -0.18, 0.08); thigh.add(plate);
+    const th = limb(0.15, 0.42, 0.17, matUnder); th.position.y = -0.21; thigh.add(th);
+    const plate = rbox(0.16, 0.26, 0.05, matArmor, 0.45); plate.position.set(0, -0.18, 0.08); thigh.add(plate);
     const knee = joint(`knee${side}`, 0, -0.42, 0, thigh);
-    const sh = box(0.13, 0.42, 0.15, matArmor); sh.position.y = -0.21; knee.add(sh);
-    const greave = box(0.14, 0.3, 0.05, matArmor2); greave.position.set(0, -0.2, 0.075); knee.add(greave);
+    const sh = limb(0.13, 0.42, 0.15, matArmor); sh.position.y = -0.21; knee.add(sh);
+    const greave = rbox(0.14, 0.3, 0.05, matArmor2, 0.45); greave.position.set(0, -0.2, 0.075); knee.add(greave);
     glowLine(knee, 0.02, 0.26, 0.02, 0, -0.2, -0.078); // linha na panturrilha (visível de costas)
-    const foot = box(0.14, 0.08, 0.26, matArmor); foot.position.set(0, -0.44, 0.05); knee.add(foot);
+    const foot = rbox(0.14, 0.08, 0.26, matArmor, 0.45); foot.position.set(0, -0.44, 0.05); knee.add(foot);
     legs[side] = { thigh, knee };
   }
 
   // ── tronco ──
   const spine = joint('spine', 0, 0.08, 0, hips);
-  const abdomen = box(0.32, 0.22, 0.2, matUnder); abdomen.position.y = 0.1; spine.add(abdomen);
+  const abdomen = rbox(0.32, 0.22, 0.2, matUnder, 0.45); abdomen.position.y = 0.1; spine.add(abdomen);
   const chest = joint('chest', 0, 0.22, 0, spine);
-  const torso = box(0.44, 0.34, 0.26, matArmor); torso.position.y = 0.16; chest.add(torso);
-  const breast = box(0.36, 0.2, 0.06, matArmor2); breast.position.set(0, 0.2, 0.13); chest.add(breast);
-  const back = box(0.34, 0.28, 0.05, matArmor2); back.position.set(0, 0.17, -0.14); chest.add(back);
+  const torso = rbox(0.44, 0.34, 0.26, matArmor, 0.42); torso.position.y = 0.16; chest.add(torso);
+  const breast = rbox(0.36, 0.2, 0.06, matArmor2, 0.45); breast.position.set(0, 0.2, 0.13); chest.add(breast);
+  const back = rbox(0.34, 0.28, 0.05, matArmor2, 0.45); back.position.set(0, 0.17, -0.14); chest.add(back);
   // linhas de brilho nas costas: espinha + chevron (leitura em 3ª pessoa)
   glowLine(chest, 0.022, 0.26, 0.02, 0, 0.17, -0.168);
   const chevL = glowLine(chest, 0.16, 0.02, 0.02, 0.07, 0.25, -0.168); chevL.rotation.z = -0.5;
@@ -100,7 +131,7 @@ export function createHeroModel(opts = {}) {
   const neck = joint('neck', 0, 0.36, 0, chest);
   const head = joint('head', 0, 0.1, 0, neck);
   const skull = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), matUnder); skull.scale.set(1, 1.1, 1.05); head.add(skull);
-  const visor = box(0.2, 0.035, 0.05, matGlow); visor.position.set(0, 0.01, 0.12); head.add(visor);
+  const visor = rbox(0.2, 0.035, 0.05, matGlow, 0.45); visor.position.set(0, 0.01, 0.12); head.add(visor);
   const hood = new THREE.Mesh(new THREE.SphereGeometry(0.175, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62), matCloth);
   hood.scale.set(1, 1.18, 1.12); hood.position.set(0, 0.02, -0.02); head.add(hood);
   const hoodPeak = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.26, 8), matCloth);
@@ -113,14 +144,14 @@ export function createHeroModel(opts = {}) {
   for (const side of ['L', 'R']) {
     const sx = side === 'L' ? 0.27 : -0.27;
     const shoulder = joint(`shoulder${side}`, sx, 0.3, 0, chest);
-    const pad = box(0.19, 0.12, 0.24, matArmor2); pad.position.set(side === 'L' ? 0.03 : -0.03, 0.03, 0); pad.rotation.z = side === 'L' ? -0.25 : 0.25; shoulder.add(pad); pads.push(pad);
+    const pad = rbox(0.19, 0.12, 0.24, matArmor2, 0.48); pad.position.set(side === 'L' ? 0.03 : -0.03, 0.03, 0); pad.rotation.z = side === 'L' ? -0.25 : 0.25; shoulder.add(pad); pads.push(pad);
     glowLine(shoulder, 0.2, 0.016, 0.02, side === 'L' ? 0.03 : -0.03, 0.02, -0.125).rotation.z = side === 'L' ? -0.25 : 0.25;
-    const upper = box(0.11, 0.3, 0.12, matUnder); upper.position.y = -0.16; shoulder.add(upper);
+    const upper = limb(0.11, 0.3, 0.12, matUnder); upper.position.y = -0.16; shoulder.add(upper);
     const elbow = joint(`elbow${side}`, 0, -0.31, 0, shoulder);
-    const fore = box(0.12, 0.27, 0.13, matArmor); fore.position.y = -0.14; elbow.add(fore); fores[side] = fore;
+    const fore = limb(0.12, 0.27, 0.13, matArmor); fore.position.y = -0.14; elbow.add(fore); fores[side] = fore;
     glowLine(elbow, 0.018, 0.2, 0.02, 0, -0.14, -0.068);
     const wrist = joint(`wrist${side}`, 0, -0.29, 0, elbow);
-    const hand = box(0.09, 0.09, 0.1, matArmor2); hand.position.y = -0.03; wrist.add(hand);
+    const hand = rbox(0.09, 0.09, 0.1, matArmor2, 0.45); hand.position.y = -0.03; wrist.add(hand);
     arms[side] = { shoulder, elbow, wrist };
   }
 
@@ -150,7 +181,7 @@ export function createHeroModel(opts = {}) {
     if (i < 2) capeParent = joint(`cape${i + 1}`, 0, -0.34, 0, capeParent);
   }
 
-  const kitInfo = { head: K ? K.head : 'classico', face: K ? K.face : 'visor', weapon: K ? K.weapon : 'espada', cape: K ? K.cape !== false : true, parts: 0 };
+  const kitInfo = { head: K ? K.head : 'classico', face: K ? K.face : 'visor', weapon: K ? K.weapon : 'espada', cape: K ? K.cape !== false : true, parts: 0, get rounded() { return roundN; } };
   if (K) {
     const rm = (o) => { if (o?.parent) o.parent.remove(o); };
     const add = (geo, mat, x, y, z, parent = head) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); kitInfo.parts++; return m; };
@@ -170,7 +201,7 @@ export function createHeroModel(opts = {}) {
       if (K.face === 'ciber') { // meia-placa de sucata + aro do olho biônico
         const hp = add(new THREE.SphereGeometry(0.138, 10, 8, 0, Math.PI, 0, Math.PI * 0.75), matArmor2, 0, 0.0, 0); hp.rotation.y = -Math.PI / 2; hp.scale.set(1.04, 1.12, 1.08);
         const ring = add(new THREE.TorusGeometry(0.03, 0.007, 5, 12), matArmor2, -0.045, 0.018, 0.128);
-        add(new THREE.BoxGeometry(0.16, 0.04, 0.05), matArmor2, 0, -0.085, 0.07); // mandíbula de metal
+        add(SQUARE ? new THREE.BoxGeometry(0.16, 0.04, 0.05) : roundedBoxGeo(0.16, 0.04, 0.05, 0.018), matArmor2, 0, -0.085, 0.07); // mandíbula de metal
         ring.rotation.y = 0;
       }
     }
@@ -190,7 +221,7 @@ export function createHeroModel(opts = {}) {
       add(new THREE.BoxGeometry(0.2, 0.03, 0.06), hm, 0, 0.055, 0.12); // sobrancelha do elmo
       visor.material = hg; visor.position.set(0, 0.012, 0.15); visor.scale.set(0.85, 1, 1);
       add(new THREE.BoxGeometry(0.026, 0.09, 0.02), hg, 0, -0.03, 0.158);
-      add(new THREE.BoxGeometry(0.17, 0.05, 0.08), hm, 0, -0.1, 0.07); // queixeira
+      add(SQUARE ? new THREE.BoxGeometry(0.17, 0.05, 0.08) : roundedBoxGeo(0.17, 0.05, 0.08, 0.022), hm, 0, -0.1, 0.07); // queixeira
       const nape = add(new THREE.TorusGeometry(0.168, 0.011, 4, 22, Math.PI * 1.2), hg, 0, -0.03, -0.005); nape.rotation.set(Math.PI / 2, 0, Math.PI * 0.4);
       if (K.crest === 'crista') { const c = add(new THREE.BoxGeometry(0.034, 0.13, 0.36), hg, 0, 0.19, -0.04); c.rotation.x = 0.15; }
       else if (K.crest === 'chifres' || K.crest === 'demonio') {
@@ -205,8 +236,8 @@ export function createHeroModel(opts = {}) {
     if (K.plates) {
       const pm = new THREE.MeshStandardMaterial({ color: K.plates.color ?? 0x5a6070, metalness: 0.82, roughness: 0.28, emissive: new THREE.Color(K.plates.glow ?? glowHex), emissiveIntensity: K.plates.glow ? 0.28 : 0.06 });
       flashMats.push(pm); baseEmissive.push(pm.emissive.getHex());
-      add(new THREE.BoxGeometry(0.38, 0.17, 0.04), pm, 0, 0.21, 0.165, chest);
-      add(new THREE.BoxGeometry(0.36, 0.22, 0.035), pm, 0, 0.18, -0.175, chest);
+      add(SQUARE ? new THREE.BoxGeometry(0.38, 0.17, 0.04) : roundedBoxGeo(0.38, 0.17, 0.04, 0.018), pm, 0, 0.21, 0.165, chest);
+      add(SQUARE ? new THREE.BoxGeometry(0.36, 0.22, 0.035) : roundedBoxGeo(0.36, 0.22, 0.035, 0.016), pm, 0, 0.18, -0.175, chest);
       for (const pd of pads) { pd.material = pm; }
       add(new THREE.BoxGeometry(0.3, 0.012, 0.02), matGlow, 0, 0.12, 0.19, chest);
     }
@@ -466,7 +497,7 @@ export function createHeroModel(opts = {}) {
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
     mergeInfo = mergeStaticParts(root, keep);
   }
-  // ARMAS DUPLAS (20261017hud2): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  // ARMAS DUPLAS (20261017riv): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
   const altW = {};
   {
     const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });

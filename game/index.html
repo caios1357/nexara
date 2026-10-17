@@ -15,16 +15,16 @@
   <meta name="apple-mobile-web-app-title" content="NEXARA" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/app-192.png" />
   <link rel="apple-touch-icon" href="assets/icons/app-192.png" />
-  <link rel="stylesheet" href="css/theme.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/ui.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/mobile-controls.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/hud-modern.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/inventory.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/hero-style.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/vestiario.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/berco.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/arsenal.css?v=20261017hud2" />
-  <link rel="stylesheet" href="css/arena-br.css?v=20261017hud2" />
+  <link rel="stylesheet" href="css/theme.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/ui.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/mobile-controls.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/hud-modern.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/inventory.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/hero-style.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/vestiario.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/berco.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/arsenal.css?v=20261017riv" />
+  <link rel="stylesheet" href="css/arena-br.css?v=20261017riv" />
   <script type="importmap">
   {
     "imports": {
@@ -40,7 +40,7 @@
   <div id="title-screen" class="screen">
     <div class="logo">NEXARA</div>
     <div class="subtitle">ANO 2847 — FASE 02 · CONTROLE</div>
-    <div id="build-stamp" style="margin:0.4rem 0 0.8rem;padding:0.35rem 0.7rem;display:inline-block;border:1px solid #3ecfbf;color:#3ecfbf;font-size:0.75rem;letter-spacing:0.06em;border-radius:4px">BUILD 20261017hud2 · ALVO FIEL</div>
+    <div id="build-stamp" style="margin:0.4rem 0 0.8rem;padding:0.35rem 0.7rem;display:inline-block;border:1px solid #3ecfbf;color:#3ecfbf;font-size:0.75rem;letter-spacing:0.06em;border-radius:4px">BUILD 20261017riv · ALVO FIEL</div>
     <div class="menu-col panel nx-main-menu">
       <!-- ARENA PRINCIPAL: menu com 4 entradas; os modos antigos continuam em ARENA → Outros modos (nada removido) -->
       <button class="primary nx-main" id="btn-main-arena" type="button">⚔ ARENA</button>
@@ -110,6 +110,7 @@
         <div class="bar-group" id="hud-skills"></div>
       </div>
       <div id="hud-mcb" class="hud-mcb" title="Moeda MCB">🪙 MCB: <b id="hud-mcb-n">0</b></div>
+      <button type="button" id="btn-cam-fp" class="hud-menu-fab hud-fp-fab" aria-label="Câmera: 1ª / 3ª pessoa" title="Câmera 1ª / 3ª pessoa (V)" aria-pressed="false">👁</button>
       <button type="button" id="btn-fullscreen" class="hud-menu-fab hud-fs-fab" aria-label="Tela inteira" title="Tela inteira" aria-pressed="false">⛶</button>
       <button type="button" id="btn-hud-menu" class="hud-menu-fab" aria-label="Abrir menu" title="Menu">☰</button>
     </div>
@@ -179,6 +180,6 @@
   <div id="modal-overlay" class="modal-overlay hidden"></div>
   <div id="mcb-pop-layer" class="mcb-pop-layer" aria-live="polite"></div>
 
-  <script type="module" src="js/main.js?v=20261017hud2"></script>
+  <script type="module" src="js/main.js?v=20261017riv"></script>
 </body>
 </html>

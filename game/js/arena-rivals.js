@@ -11,10 +11,10 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261017hud2';
-import { xpForLevel } from './state.js?v=20261017hud2';
-import { getConfig } from './gameplay-config.js?v=20261017hud2';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261017hud2';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261017riv';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261017riv';
+import { getConfig } from './gameplay-config.js?v=20261017riv';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261017riv';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -89,15 +89,27 @@ export function createRivals(ctx) {
     // entra em rampa até o herói chegar ao NV "rampaNivel" (o +2 de nível continua valendo sempre)
     const ramp = Math.min(1, Math.max(0.2, playerL / (CP.rampaNivel ?? 5)));
     const cH = champ ? 1 + ((CP.hpMult ?? 1.6) - 1) * ramp : 1; const cA = champ ? 1 + ((CP.atkMult ?? 1.3) - 1) * ramp : 1;
-    const hp = Math.round(def.hp * (F.hpMult ?? 1.5) * (1 + (c.hpPorNivel ?? 0.12) * (L - 1)) * cH);
-    const atk = (F.atkMult ?? 1.3) * (1 + (c.atkPorNivel ?? 0.06) * (L - 1)) * cA;
-    return { hp, atk };
+    // LOTE-b M3 (pedido do Caio: "rivais fracos no meu nível"): medido no NV27 o rival tirava só 30% do HP do herói parado e caía em 12 s
+    // (NV10: 64% / 15 s) → CURVA ALTA acima do NV 'aPartirNv' + bônus pelo EQUIPAMENTO do herói (ataque dele → HP do rival, defesa dele → dano do rival)
+    const CA = c.curvaAlta || {}; const over = Math.max(0, playerL - (CA.aPartirNv ?? 10));
+    const G0 = gearBonus(); const gk = Math.min(1, over / 10); const G = { hp: 1 + (G0.hp - 1) * gk, atk: 1 + (G0.atk - 1) * gk }; // equipamento só pesa acima do NV10 (início igual ao balanço medido)
+    const hp = Math.round(def.hp * (F.hpMult ?? 1.5) * (1 + (c.hpPorNivel ?? 0.12) * (L - 1)) * cH * (1 + (CA.hpPorNivel ?? 0) * over) * G.hp);
+    const atk = (F.atkMult ?? 1.3) * (1 + (c.atkPorNivel ?? 0.06) * (L - 1)) * cA * (1 + (CA.atkPorNivel ?? 0) * over) * G.atk;
+    return { hp, atk, over };
+  }
+  /** bônus do equipamento do herói (mapa completo; FAST usa o nível próprio do rival e não entra) */
+  function gearBonus() {
+    const E = RC().curvaAlta?.equip; const st = ctx.st(); if (!E || fastRules() || !st?.equipment) return { hp: 1, atk: 1, sig: '' };
+    let g = null; try { g = getEquippedStats(st); } catch { g = null; } if (!g) return { hp: 1, atk: 1, sig: '' };
+    return { hp: 1 + Math.min(E.max ?? 0.8, (E.hpPorAtk ?? 0) * g.weaponAtk), atk: 1 + Math.min(E.max ?? 0.8, (E.atkPorDef ?? 0) * g.armorDef), sig: `${g.weaponAtk}|${g.armorDef}` };
   }
   function applyLevel(rv, mon, playerL, full) {
     const champ = !!rv.champion; const L = Math.max(1, playerL + (champ ? (RC().campeao?.nivelExtra ?? 2) : 0));
     const S = rivalStats(L, champ, playerL); const frac = full || !(mon.hpMax > 0) ? 1 : Math.max(0, Math.min(1, mon.hp / mon.hpMax));
     mon.hpMax = S.hp; mon.hp = Math.max(1, Math.round(S.hp * frac)); mon.atkScale = S.atk;
     const T = RC().tatica; if (T) { mon.cdMult = T.cdMult ?? 1; mon.tacSpeed = T.velMult ?? 1; if (T.aggro) mon.aggroR = T.aggro; } // FAST: reação mais rápida, mais agressivos
+    else { const CA = RC().curvaAlta || {}; mon.cdMult = Math.max(CA.cdMin ?? 0.75, 1 - (CA.cdPorNivel ?? 0) * S.over); } // LOTE-b M3: NV alto → golpeia com menos espera entre ataques
+    rv.gearSig = gearBonus().sig;
     rv.level = L; rv.forPlayerL = playerL; mon.rival.level = L;
     mon.arenaLabel = `${champ ? 'CAMPEÃO RIVAL' : 'RIVAL'} (BOT) NV ${L} · ${rv.name}`;
   }
@@ -106,7 +118,7 @@ export function createRivals(ctx) {
   /** meta do rival: monstro perto → baú não aberto → ponto dentro da zona (final: o herói) */
   function pickGoal(rv, mon, mp, p) {
     const br = ctx.br(); const st = ctx.st(); const m = ctx.map();
-    if (br.rivalFinal && (!RC().finalLivre || rv.champion || rv.tgt?.kind === 'jogador')) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) }; // 20261017hud2: com finalLivre só o CAMPEÃO (ou quem escolheu o herói) caça o herói na reta final; os demais seguem brigando entre si
+    if (br.rivalFinal && (!RC().finalLivre || rv.champion || rv.tgt?.kind === 'jogador')) return { kind: 'heroi', x: Math.floor(p.x), y: Math.floor(p.y) }; // 20261017riv: com finalLivre só o CAMPEÃO (ou quem escolheu o herói) caça o herói na reta final; os demais seguem brigando entre si
     { const g = giantGoal(rv, mp); if (g) return g; } // 20261016abrigos: rivais também caçam GIGANTES (sela) — competem com o herói
     // 20261010ajustes: ÚLTIMA CORRIDA — zona final e morte súbita há > 60 s: todos caçam o rival mais próximo (e reaparecem colados nele se não houver caminho) → a partida sempre chega ao confronto final
     if (br.suddenSince && br.clock - br.suddenSince > 60000) { let bo = null, bd = 1e9; for (const o of st.monstersAlive) { if (!o.alive || o === mon || !o.rival) continue; const d = Math.hypot(o.x - mp.x, o.y - mp.y); if (d < bd) { bd = d; bo = o; } } if (bo) return { kind: 'rival', uid: bo.uid, x: bo.x, y: bo.y }; }
@@ -117,7 +129,7 @@ export function createRivals(ctx) {
     const rivalFar = (om) => !om || Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y) > (RC().rivalPertoDist ?? 5);
     if (nm && rivalFar(rv.tgt?.kind === 'rival' ? monOf(list().find((q) => q.uid === rv.tgt.uid)) : (list().filter((o) => o !== rv && !o.out).map(monOf).filter((q) => q && q.alive).sort((x, y) => Math.hypot(x.x - mp.x, x.y - mp.y) - Math.hypot(y.x - mp.x, y.y - mp.y))[0]))) return { kind: 'monstro', uid: nm.uid, x: nm.x, y: nm.y };
     if (rv.tgt?.kind === 'rival' && rivalsCanKill()) { const om = monOf(list().find((q) => q.uid === rv.tgt.uid)); if (om && om.alive) return { kind: 'rival', uid: om.uid, x: om.x, y: om.y }; } // 20261009leve: alvo escolhido por proximidade/fraqueza/ameaça (herói = 1 alvo a mais)
-    let rb = null, rd = rivalsCanKill() ? (br.spectate || (br.rivalFinal && RC().finalLivre) ? 200 : (fastRules() ? (RC().cacaRivalDist || 16) : (RC().cacaRivalDistArena || RC().cacaRivalDist || 16))) : 0; /* 20261017hud2: mapa grande da ARENA — rivais procuram rival mais longe; na reta final vão atrás uns dos outros */ // só quando podem se eliminar (zona fechando)
+    let rb = null, rd = rivalsCanKill() ? (br.spectate || (br.rivalFinal && RC().finalLivre) ? 200 : (fastRules() ? (RC().cacaRivalDist || 16) : (RC().cacaRivalDistArena || RC().cacaRivalDist || 16))) : 0; /* 20261017riv: mapa grande da ARENA — rivais procuram rival mais longe; na reta final vão atrás uns dos outros */ // só quando podem se eliminar (zona fechando)
     for (const o of list()) { if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue; const d = Math.hypot(om.x + 0.5 - mp.x, om.y + 0.5 - mp.y); if (d < rd) { rd = d; rb = om; } }
     if (rb) return { kind: 'rival', uid: rb.uid, x: rb.x, y: rb.y };
     let best = null, bd = 13;
@@ -217,7 +229,7 @@ export function createRivals(ctx) {
    * × ameaça × fidelidade (quanto MENOR, melhor). O herói NÃO tem preferência: é só mais um alvo (jogadorMult = 1 = neutro).
    * Sem `rivais.alvo` (mapa completo) tudo segue como antes.
    */
-  /** 20261017hud2 (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
+  /** 20261017riv (zona final): quantos OUTROS rivais já miram o herói — limite `maxAlvoJogador` impede o bando inteiro de escolher o herói por proximidade/fraqueza (só ataque do herói ignora o limite) */
   function playerFull(rv) {
     const A = RC().alvo; const cap = A?.maxAlvoJogador; if (!cap) return false; let n = 0;
     for (const o of list()) { if (o === rv || o.out) continue; if (o.tgt?.kind === 'jogador') { const m = monOf(o); if (m && m.alive && ++n >= cap) return true; } }
@@ -232,8 +244,9 @@ export function createRivals(ctx) {
       const s = d * (1 - wk * (1 - Math.max(0, Math.min(1, hpFrac)))) * (threat ? th : 1) * (cur && cur.kind === kind && cur.uid === uid ? stick : 1) * (kind === 'jogador' ? (A.jogadorMult ?? 1) : 1);
       if (s < bs) { bs = s; best = { kind, uid, d }; }
     };
-    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0) && (clock < (rv.threatPlayerUntil || 0) || cur?.kind === 'jogador' || (!playerFull(rv) && (dP <= (A.jogadorPertoR ?? 4) || (pl.hpMax > 0 && pl.hp / pl.hpMax <= (A.jogadorFracoFrac ?? 0.35) && dP <= (A.jogadorFracoR ?? 6)))))) /* 20261017hud2: herói só entra na escolha se atacou, encostou (≤ 4) ou está fraco e perto — antes qualquer herói a ≤ 10 tiles podia ser escolhido */ consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
-    if (rivalsCanKill()) {
+    if (dP <= (A.jogadorAlcance ?? 18) && !(st.player.hp <= 0) && (clock < (rv.threatPlayerUntil || 0) || cur?.kind === 'jogador' || (!playerFull(rv) && (dP <= (A.jogadorPertoR ?? 4) || (pl.hpMax > 0 && pl.hp / pl.hpMax <= (A.jogadorFracoFrac ?? 0.35) && dP <= (A.jogadorFracoR ?? 6)))))) /* 20261017riv: herói só entra na escolha se atacou, encostou (≤ 4) ou está fraco e perto — antes qualquer herói a ≤ 10 tiles podia ser escolhido */ consider('jogador', 0, dP, pl.hpMax > 0 ? pl.hp / pl.hpMax : 1, clock < (rv.threatPlayerUntil || 0));
+    const hunting = isHunter(rv) && !(clock - (rv.lastAttackedAt || -1e9) < 4000); // caçador de gigante não procura duelo (só revida)
+    if (rivalsCanKill() && !hunting) {
       for (const o of list()) {
         if (o === rv || o.out) continue; const om = monOf(o); if (!om || !om.alive) continue;
         const op = pos(om); const d = Math.hypot(op.x - mp.x, op.y - mp.y); if (d > (A.rivalAlcance ?? 28)) continue;
@@ -244,7 +257,7 @@ export function createRivals(ctx) {
   }
 
   /**
-   * 20261017hud2 — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
+   * 20261017riv — ALVO FIEL: rival em duelo com OUTRO herói mantém o alvo (compromisso `compromissoMs`) e só o troca pelo herói se
    * (a) o herói o atacou (ameaça), (b) o herói chegou a ≤ `jogadorPertoR` tiles, ou (c) o herói está fraco (≤ `jogadorFracoFrac` de vida) e a ≤ `jogadorFracoR`.
    * VER o herói de longe NÃO cancela a briga. Trocas rival→rival: só com o compromisso vencido, com cooldown `trocaCooldownMs` por rival e histerese
    * (o novo alvo só entra se o alvo atual saiu da zona de combate: morreu, fugiu > `soltaDist` tiles ou deixou de ser eliminável). Sem `compromissoMs`: comportamento anterior.
@@ -307,9 +320,17 @@ export function createRivals(ctx) {
   /* ── 20261016abrigos: RIVAL × GIGANTE e VOO DO RIVAL (mesmas regras do herói: energia flightMs, recarga cooldownMs, sem voo na reta final, sopro com cadência/alcance da montaria) ── */
   const GC = () => RC().gigantes || {};
   const giantsAlive = () => (ctx.st()?.monstersAlive || []).filter((m) => m.alive && m.elemental);
+  /** LOTE-b M5 (pedido do Caio): CAÇADORES DE GIGANTE — fração `gigantes.frac` dos rivais prioriza matar um gigante p/ ganhar a sela (não aceita duelo com rival
+   *  enquanto caça, só revida quem o atacou há < 4 s). Antes: só caçava quem estava SEM alvo, e com 'lutamSempre' quase ninguém ficava sem alvo. */
+  function isHunter(rv) {
+    const G = GC(); const br = ctx.br(); if (!G.ativo || fastRules() || br.rivalFinal || rv.sela || rv.fly) return false;
+    const idx = Number.isFinite(rv.idx) ? rv.idx : rv.uid; const k = G.frac || 0.35; if (Math.floor((idx + 1) * k) === Math.floor(idx * k)) return false; // distribuição uniforme (≈ frac dos rivais)
+    const mon = monOf(rv); if (!mon || mon.hp < mon.hpMax * (G.hpMinFrac ?? 0.6)) return false;
+    const mp = pos(mon); return giantsAlive().some((g) => Math.hypot(g.x - mp.x, g.y - mp.y) < (G.dist || 45));
+  }
   function giantGoal(rv, mp) {
-    const G = GC(); const br = ctx.br(); if (!G.ativo || fastRules() || br.rivalFinal || rv.sela || rv.fly || rv.tgt || (br.clock || 0) < (rv.threatPlayerUntil || 0) + 8000) return null; // em briga/duelo não larga o oponente p/ caçar gigante
-    if ((rv.uid % 100) % Math.max(1, Math.round(1 / (G.frac || 0.35))) !== 0) return null; // só uma parte dos rivais vai atrás de gigante
+    const G = GC(); const br = ctx.br(); if (!G.ativo || fastRules() || br.rivalFinal || rv.sela || rv.fly || rv.tgt?.kind === 'jogador' || (rv.tgt && !isHunter(rv)) || (br.clock || 0) < (rv.threatPlayerUntil || 0) + 8000) return null; // em briga/duelo não larga o oponente p/ caçar gigante (caçador: só o herói/ameaça o tiram da caça)
+    if (!isHunter(rv)) return null; // só uma parte dos rivais vai atrás de gigante
     const mon = monOf(rv); if (!mon || mon.hp < mon.hpMax * (G.hpMinFrac ?? 0.6)) return null;
     let best = null, bd = G.dist || 45; for (const g of giantsAlive()) { const d = Math.hypot(g.x - mp.x, g.y - mp.y); if (d < bd) { bd = d; best = g; } }
     return best ? { kind: 'gigante', uid: best.uid, x: best.x, y: best.y } : null;
@@ -321,7 +342,7 @@ export function createRivals(ctx) {
     g.hp -= dmg; g.rivalHits = (g.rivalHits || 0) + 1; const br = ctx.br(); br.giantHitsByRivals = (br.giantHitsByRivals || 0) + 1;
     if (g.hp <= 0) { g.hp = 0; g.alive = false; resetMonsterRuntime(g); rv.kills++; gainXp(rv, st._monsters[g.id]?.xp || 200);
       rv.sela = { pal: g.dragonCor || null, nome: g.arenaLabel, at: clock }; rv.flyCdUntil = clock + 1500; rv.flights = rv.flights || 0;
-      ctx.onGiantByRival?.(g, rv); ctx.note('giant_by_rival', { name: rv.name, giant: g.arenaLabel, elemento: g.elemental }); rv.goal = null; }
+      br.giantsByRivals = (br.giantsByRivals || 0) + 1; ctx.onGiantByRival?.(g, rv); ctx.note('giant_by_rival', { name: rv.name, giant: g.arenaLabel, elemento: g.elemental }); rv.goal = null; }
   }
   function stepFly(rv, mon, mp, p, dP, clock, dtMs) {
     const M = getConfig().mount || {}; const br = ctx.br(); const dt = dtMs / 1000; const st = ctx.st(); const F = rv.fly;
@@ -359,9 +380,10 @@ export function createRivals(ctx) {
     const st = ctx.st(); const clock = br.clock; const C = c.combate || {}; const dtS = dtMs / 1000;
     const lodMed = (ctx.cfg().lodIa?.medio || 24) - 1;
     const alive = aliveRivals();
+    const gearSigNow = c.curvaAlta?.equip && !fastRules() ? gearBonus().sig : null; // trocou de equipamento no meio da corrida → rivais acompanham
     for (const rv of alive) {
       const mon = monOf(rv); const mp = pos(mon);
-      const TL = lvlFor(rv); if (rv.forPlayerL !== TL) applyLevel(rv, mon, TL, false); // mapa completo: herói subiu → rivais acompanham · FAST: nível próprio do rival
+      const TL = lvlFor(rv); if (rv.forPlayerL !== TL || (gearSigNow !== null && rv.gearSig !== gearSigNow)) applyLevel(rv, mon, TL, false); // mapa completo: herói subiu → rivais acompanham · FAST: nível próprio do rival
       const dP = Math.hypot(mp.x - p.x, mp.y - p.y);
       if (dP <= (c.visaoMinimapa || 18)) rv.seenAt = clock;
       const v = getAiView(mon); const engaged = v && ENGAGED.has(v.state) && dP < 14 && !(rv.tgt?.kind === 'rival' && clock >= (rv.threatPlayerUntil || 0) && v.state !== AI_STATES.ATTACK && v.state !== AI_STATES.ATTACK_PREPARE); // 20261010ajustes: rival com alvo RIVAL não conta como 'engajado com o herói' (antes, perto do herói só golpeava o herói)
@@ -504,10 +526,24 @@ export function createRivals(ctx) {
     ctx.note(rv.champion ? 'champion_down' : 'rival_down', { name: rv.name, level: rv.level, bonus, drops: loots.length, left: aliveRivals().length });
   }
   /** o herói acertou um rival vivo → chance de esquiva (passo + i-frames curtos) */
-  function onHit(mon, from) {
+  function onHit(mon, from, info = {}) {
     const br = ctx.br(); const rv = list().find((q) => q.uid === mon.uid); if (!rv || !br) return;
-    const E = RC().esquiva || {}; const T = RC().tatica || null; rv.lastHurtAt = br.clock; rv.threatPlayerUntil = br.clock + (RC().alvo?.ameacaMs ?? 5000); // o herói bateu: vira ameaça (alvo mais provável por um tempo)
-    const chance = T?.esquivaChance ?? E.chance ?? 0.45, cd = T?.esquivaCooldownMs ?? E.cooldownMs ?? 2600;
+    const E = RC().esquiva || {}; const T = RC().tatica || null; rv.lastHurtAt = br.clock;
+    { // LOTE-b M4 (medido no jogo do Caio, NV27 Complexo): 'provocado' era o motivo nº1 dos golpes no herói — a ÁREA/SUPREMA/mini-dragão
+      // RESVALAVAM em rivais que duelavam entre si e todos largavam a briga. Agora: resvalo (pouco dano em 4 s) num rival em DUELO não provoca;
+      // golpe de verdade (≥ provocaFrac do HP em 4 s) provoca sempre; rival sem duelo é provocado como antes (respeitando o limite de rivais no herói).
+      const A = RC().alvo || {}; const ck = br.clock; const W = A.provocaJanelaMs ?? 4000;
+      rv.heroDmg = (rv.heroDmg || []).filter((e) => ck - e.t < W); rv.heroDmg.push({ t: ck, n: +info.dmg || 0 });
+      const sum = rv.heroDmg.reduce((a, e) => a + e.n, 0); const strong = sum >= (A.provocaFrac ?? 0.12) * (info.ability ? (A.provocaHabMult ?? 2) : 1) * (mon.hpMax || 1); // poder de ÁREA/SUPREMA precisa do dobro p/ provocar (é resvalo, não escolha de alvo)
+      const om = rv.tgt?.kind === 'rival' ? monOf(list().find((q) => q.uid === rv.tgt.uid)) : null;
+      const dueling = !!(om && om.alive && Math.hypot(om.x - mon.x, om.y - mon.y) <= (A.soltaDist ?? 20));
+      const ally = !!info.source && info.source !== 'player' && info.source !== 'hero'; const direct = !info.ability && !ally; // golpe DIRETO do herói (espada/arma) = escolha de alvo → sempre provoca
+      let foeNear = dueling; if (!foeNear && rivalsCanKill()) for (const o of list()) { if (o === rv || o.out) continue; const m2 = monOf(o); if (m2 && m2.alive && Math.hypot(m2.x - mon.x, m2.y - mon.y) <= (A.provocaRivalPertoR ?? 12)) { foeNear = true; break; } }
+      const provoke = direct || (strong && !(info.ability && foeNear)) || rv.tgt?.kind === 'jogador' || (!foeNear && !ally && !playerFull(rv)); // ÁREA/SUPREMA com rival brigando com outro rival: nunca provoca (só golpe direto) // resvalo com outro rival por perto: segue na briga entre rivais
+      if (provoke) { rv.threatPlayerUntil = ck + (A.ameacaMs ?? 5000); const PW = (br.provWhy = br.provWhy || {}); const k = `${strong ? 'forte' : 'fraco'}|${info.ability ? 'hab' : ally ? (info.source || 'aliado') : 'golpe'}|${foeNear ? 'briga' : 'livre'}|${rv.tgt?.kind || '-'}`; PW[k] = (PW[k] || 0) + 1; } else { rv.grazed = (rv.grazed || 0) + 1; br.grazed = (br.grazed || 0) + 1; }
+    }
+    const CA = RC().curvaAlta || {}; const ov = T ? 0 : Math.max(0, (rv.forPlayerL || 1) - (CA.aPartirNv ?? 10));
+    const chance = T?.esquivaChance ?? Math.min(CA.esquivaMax ?? 0.62, (E.chance ?? 0.45) + (CA.esquivaPorNivel ?? 0) * ov), cd = T?.esquivaCooldownMs ?? E.cooldownMs ?? 2600; // LOTE-b M3: NV alto esquiva mais
     if (br.clock >= rv.dodgeReady && ctx.R() < chance) {
       if (rivalDodge(mon, from.x, from.y, { vel: E.vel || 7, ms: E.duracaoMs || 280 })) {
         rv.dodgeReady = br.clock + cd; rv.dodges = (rv.dodges || 0) + 1;
@@ -525,7 +561,7 @@ export function createRivals(ctx) {
   function view(p) {
     const br = ctx.br(); if (!br?.rivals) return null; const c = RC();
     return {
-      giantHitsByRivals: br.giantHitsByRivals || 0, rivalFires: br.rivalFires || 0, clock: br.clock, atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, atkWhy: { ...(br.atkWhy || {}) }, bbHits: { ...(br.bbHits || { jogador: 0, rival: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
+      giantHitsByRivals: br.giantHitsByRivals || 0, hunters: aliveRivals().filter(isHunter).length, giantsByRivals: br.giantsByRivals || 0, grazed: br.grazed || 0, provWhy: { ...(br.provWhy || {}) }, rivalFires: br.rivalFires || 0, clock: br.clock, atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, atkWhy: { ...(br.atkWhy || {}) }, bbHits: { ...(br.bbHits || { jogador: 0, rival: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
         return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, sela: rv.sela ? rv.sela.nome || true : null, fly: rv.fly ? { phase: rv.fly.phase, alt: +rv.fly.alt.toFixed(2), leftMs: Math.round(rv.fly.leftMs), fires: rv.fly.fires || 0 } : null, flights: rv.flights || 0, landings: rv.landings || 0, flyCdUntil: rv.flyCdUntil || 0, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,

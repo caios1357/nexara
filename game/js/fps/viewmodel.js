@@ -262,5 +262,7 @@ export function createViewmodel(camera) {
     });
   }
 
-  return { root, play, setMoving, setAttack, setAspect, update, dispose, getAttack: () => ({ ...atk }), weaponGroup: weapon, rightArm };
+  /** LOTE-b M6: 1ª pessoa ao vivo (FOV/HUD do celular) — braço mais alto para a arma aparecer inteira */
+  function setBase(x, y, z) { baseR.x = x; baseR.y = y; baseR.z = z; }
+  return { root, play, setMoving, setAttack, setAspect, update, dispose, setBase, getAttack: () => ({ ...atk }), weaponGroup: weapon, rightArm };
 }

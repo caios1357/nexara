@@ -590,3 +590,9 @@ html:fullscreen, html:fullscreen body { background: #000; }
 /* 20261016 (Caio): na ARENA a barra do gigante não fica sob as pílulas de região/tempo — paisagem: embaixo no centro (entre joystick e botões); retrato: abaixo das pílulas */
 @media (orientation: landscape) { #game-screen.br-mode .nx-boss-bar { top: auto; bottom: 0.4rem; width: min(400px, 44%); } }
 @media (orientation: portrait) { #game-screen.br-mode .nx-boss-bar { top: 11.5rem; width: min(380px, 92%); } }
+
+/* LOTE-b M6: botão rápido 1ª/3ª pessoa (👁) ao lado da tela inteira */
+#game-screen .hud-fp-fab { display: inline-flex; align-items: center; justify-content: center; margin-left: auto; font-size: 1.05rem; }
+#game-screen .hud-fp-fab + .hud-fs-fab { margin-left: 0; }
+#game-screen .hud-fp-fab.is-on { background: linear-gradient(180deg, rgba(57, 240, 255, 0.28), rgba(10, 40, 56, 0.92)); color: #eaffff; }
+#game-screen .hud-menu-fab { min-width: 40px; min-height: 40px; } /* LOTE-b: alvo de toque ≥ 40 px (HIG 44 pt) também no retrato */

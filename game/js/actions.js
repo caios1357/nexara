@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261017hud2';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261017hud2';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261017hud2';
-import { addReputation } from '../../rules/reputation.js?v=20261017hud2';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261017hud2';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261017hud2';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261017hud2';
-import { reveal } from './arquivo.js?v=20261017hud2';
-import { checkEventReady } from './events.js?v=20261017hud2';
-import { getConfig } from './gameplay-config.js?v=20261017hud2';
-import { getStat, STATS } from './modifiers.js?v=20261017hud2';
+import { trainSkill } from '../../rules/skills.js?v=20261017riv';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261017riv';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261017riv';
+import { addReputation } from '../../rules/reputation.js?v=20261017riv';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261017riv';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261017riv';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261017riv';
+import { reveal } from './arquivo.js?v=20261017riv';
+import { checkEventReady } from './events.js?v=20261017riv';
+import { getConfig } from './gameplay-config.js?v=20261017riv';
+import { getStat, STATS } from './modifiers.js?v=20261017riv';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -161,7 +161,7 @@ export function applyPlayerHit(state, mon, opts = {}) {
   if (def.id.includes('bot') && state.player.skills.hack_runico) {
     trainSkill(state.player.skills, 'hack_runico', state._data.skills, 1);
   }
-  const res = applyDamageToMonster(state, mon, dmg, { source: 'player', crit: dmgCtx.crit });
+  const res = applyDamageToMonster(state, mon, dmg, { source: 'player', crit: dmgCtx.crit, ability: !!opts.ability });
   if (res) res.crit = dmgCtx.crit;
   if (SW && res && res.dmgOut > 0 && SW.lifesteal && !opts.noLifesteal) {
     // roubo de vida: golpe comum / 3º golpe (pesado) / especial; teto por segundo (rolling) para não virar imortalidade
@@ -204,7 +204,7 @@ export function applyDamageToMonster(state, mon, amount, opts = {}) {
   let dmg = Math.max(1, Math.round(Number(amount) || 0));
   if (mon.rival && mon.rivalGuardUntil && performance.now() < mon.rivalGuardUntil) { dmg = Math.max(1, Math.round(dmg * (mon.rivalGuardMult ?? 0.5))); mon.rivalGuarded = (mon.rivalGuarded || 0) + 1; } // FAST: rival em guarda (bloqueio)
   mon.hp -= dmg;
-  if (mon.rival && mon.hp > 0 && rivalHitHook) { try { rivalHitHook(state, mon, opts); } catch (e) { console.warn('[rivais] hit hook', e); } }
+  if (mon.rival && mon.hp > 0 && rivalHitHook) { try { rivalHitHook(state, mon, { ...opts, dmg, source }); } catch (e) { console.warn('[rivais] hit hook', e); } }
   const who = source === 'player' ? 'Você acerta' : `${opts.label || 'Aliado'} acerta`;
   pushLog(state, `${who} ${def.name} por ${dmg}${opts.crit ? ' (CRÍTICO)' : ''}.`, '');
   const dmgOut = dmg;

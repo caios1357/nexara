@@ -10,41 +10,41 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017hud2';
-import { buildArenaDressing } from './arena-dressing.js?v=20261017hud2';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017hud2';
-import { createHeroModel } from './hero-model.js?v=20261017hud2';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017hud2';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017hud2';
-import { attachHeroGlb } from './hero-glb.js?v=20261017hud2';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017hud2';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017hud2';
-import { createActionVfx } from './action-vfx.js?v=20261017hud2';
-import { createPassiveVfx } from './passive-vfx.js?v=20261017hud2';
-import { createFpsControls } from './fps-controls.js?v=20261017hud2';
-import { createViewmodel } from './viewmodel.js?v=20261017hud2';
-import { createDragonView } from './dragon-view.js?v=20261017hud2';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017hud2';
-import { getSprite } from '../assets.js?v=20261017hud2';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017hud2';
-import { createBossDragon } from './boss-dragon-view.js?v=20261017hud2';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017hud2';
-import { mergeStaticParts } from './merge-util.js?v=20261017hud2';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017hud2';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017hud2';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017hud2';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017hud2';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017hud2';
-import { createPostFx } from './post-fx.js?v=20261017hud2';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017hud2';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017hud2';
-import { createContactShadows } from './contact-shadows.js?v=20261017hud2';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017hud2';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017hud2';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017hud2';
-import { groundAt, setGroundFn } from './ground.js?v=20261017hud2';
-import { buildBrTerrain } from './br-terrain.js?v=20261017hud2';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017hud2';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017riv';
+import { buildArenaDressing } from './arena-dressing.js?v=20261017riv';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261017riv';
+import { createHeroModel } from './hero-model.js?v=20261017riv';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017riv';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017riv';
+import { attachHeroGlb } from './hero-glb.js?v=20261017riv';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017riv';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017riv';
+import { createActionVfx } from './action-vfx.js?v=20261017riv';
+import { createPassiveVfx } from './passive-vfx.js?v=20261017riv';
+import { createFpsControls } from './fps-controls.js?v=20261017riv';
+import { createViewmodel } from './viewmodel.js?v=20261017riv';
+import { createDragonView } from './dragon-view.js?v=20261017riv';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017riv';
+import { getSprite } from '../assets.js?v=20261017riv';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017riv';
+import { createBossDragon } from './boss-dragon-view.js?v=20261017riv';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017riv';
+import { mergeStaticParts } from './merge-util.js?v=20261017riv';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017riv';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017riv';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017riv';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017riv';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017riv';
+import { createPostFx } from './post-fx.js?v=20261017riv';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017riv';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017riv';
+import { createContactShadows } from './contact-shadows.js?v=20261017riv';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017riv';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017riv';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017riv';
+import { groundAt, setGroundFn } from './ground.js?v=20261017riv';
+import { buildBrTerrain } from './br-terrain.js?v=20261017riv';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017riv';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -93,6 +93,7 @@ export function createFpsRenderer() {
   let worldRoot = null;
   let entityRoot = null;
   let viewmodel = null;
+  const FP_URL = typeof location !== 'undefined' && /[?&]fpLive=1\b/.test(location.search); let fpSwitches = 0;
   let controls = null;
   let canvas = null;
   let wrap = null;
@@ -130,7 +131,7 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  /* HERÓI 3 (20261017hud2): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  /* HERÓI 3 (20261017riv): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
   const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
   const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';
@@ -2517,6 +2518,12 @@ export function createFpsRenderer() {
       fpsCam.syncFromPlayer(state.player.x, state.player.y);
     }
     updateMountVisual(simDt);
+    { // LOTE-b M6: 1ª pessoa ao vivo (config camera.firstPerson ou ?fpLive=1) — montado/voando volta à 3ª pessoa
+      const want = VIEW_MODE === 'third' && (FP_URL || !!getConfig().camera.firstPerson) && !(mountVis.k > 0.02 || mountVis.shown);
+      if (want !== isFirstPersonLive()) { setFirstPersonLive(want); fpSwitches++; }
+      if (want && !viewmodel) { viewmodel = createViewmodel(fpsCam.camera); viewmodel.setBase?.(0.2, 0.02, -0.36); viewmodel.root.scale.setScalar(1.3); }
+      if (viewmodel && VIEW_MODE === 'third') viewmodel.root.visible = want;
+    }
     fpsCam.updateCameraTransform(simDt);
     if (hero) updateHero(dt, motion, cview);
     heroVis.x = fpsCam.state.visX;
@@ -2815,7 +2822,7 @@ export function createFpsRenderer() {
       nexa: (() => { const P = getState()?.player; return P && P.nexaMax ? P.nexa / P.nexaMax : 0.5; })()
     });
     const arm = fpsCam.getArm();
-    const vis = arm.armLen > t.heroHideDistance;
+    const vis = arm.armLen > t.heroHideDistance && !isFirstPersonLive(); // 1ª pessoa: corpo some, braço + arma ficam na tela (viewmodel)
     if (hero.root.visible !== vis) hero.setVisible(vis);
   }
 
@@ -2880,6 +2887,7 @@ export function createFpsRenderer() {
     vfx,
     controls: () => controls,
     viewmodel: () => viewmodel,
+    firstPerson: () => ({ on: isFirstPersonLive(), switches: fpSwitches, vm: !!viewmodel && !!viewmodel.root.visible, heroVisible: !!hero?.root.visible, cam: { x: fpsCam.camera.position.x, y: fpsCam.camera.position.y, z: fpsCam.camera.position.z }, hero: hero ? { x: hero.root.position.x, z: hero.root.position.z } : null, fov: fpsCam.camera.fov }),
     start,
     stop,
     /** Kick de frame fora do loop (ui.refresh) — nunca propaga erro para a UI. */

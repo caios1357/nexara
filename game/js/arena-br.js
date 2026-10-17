@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261017hud2';
-import { getConfig } from './gameplay-config.js?v=20261017hud2';
-import { pushLog } from './state.js?v=20261017hud2';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261017hud2';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261017hud2';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261017hud2';
-import { createRivals } from './arena-rivals.js?v=20261017hud2';
+import { createArenaState } from './arena.js?v=20261017riv';
+import { getConfig } from './gameplay-config.js?v=20261017riv';
+import { pushLog } from './state.js?v=20261017riv';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261017riv';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261017riv';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261017riv';
+import { createRivals } from './arena-rivals.js?v=20261017riv';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -645,13 +645,13 @@ export function createArenaBr(deps) {
   return {
     start, stop, update, isActive, onKill, spectateAdvance, isSpectating: () => !!(br && br.spectate && !br.ended),
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
-    onRivalHit(mon) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos()); },
+    onRivalHit(mon, info) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos(), info || {}); },
     giants: () => (br?.giants || []).map((g) => { const m = st.monstersAlive.find((q) => q.uid === g.uid); return { ...g, alive: !!m?.alive, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0, mx: m?.x, my: m?.y }; }),
     rivals: () => (br ? rivals.view(deps.getPos()) : null), onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     densityExhausted, walkable: (x, y) => (br ? walk(x, y) : false),
-    /** 20261017hud2: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
+    /** 20261017riv: esconderijo (cobertura) em (x,y)? → { kind, region } | null */
     coverAt: (x, y) => { try { return br ? brCoverAt(map(), cfg(), x, y) : null; } catch { return null; } }, coverList: () => (br ? brCoverList(map(), cfg()).map((c) => ({ ...c })) : []),
     getStateRef: () => st, stats: () => JSON.parse(JSON.stringify({ ...stats, alive: st ? aliveCount() : 0 })),
     /** testes: força eventos/tempo/abertura */

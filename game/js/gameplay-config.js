@@ -144,7 +144,12 @@ export const DEFAULTS = Object.freeze({
     maxDeltaPerEventPx: 90,
     /** Campo de visão (graus) e altura do olho (m). */
     fovDeg: 72,
-    eyeHeight: 1.68
+    eyeHeight: 1.68,
+    /** LOTE-b M6 (pedido do Caio): 1ª PESSOA ao vivo (CONFIGURAÇÕES → CÂMERA ou botão 👁 no topo) — mesma cena da 3ª pessoa, câmera no olho do herói,
+     *  braço + arma na tela; montado no dragão volta sozinha à 3ª pessoa. ?fp=1 continua sendo a 1ª pessoa antiga (fallback). */
+    firstPerson: false,
+    /** FOV da 1ª pessoa ao vivo (graus; retrato usa +8). */
+    firstPersonFovDeg: 74
   },
 
   /**
@@ -961,7 +966,8 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'camSmooth', label: 'Suavização da câmera', type: 'range', path: 'camera.smoothness', min: 0, max: 1, step: 0.05, fmt: '%' },
     { id: 'camH', label: 'Velocidade horizontal', type: 'range', path: 'camera.horizontalSpeed', min: 0.3, max: 2, step: 0.05, fmt: 'x' },
     { id: 'camV', label: 'Velocidade vertical', type: 'range', path: 'camera.verticalSpeed', min: 0.3, max: 2, step: 0.05, fmt: 'x' },
-    { id: 'invertY', label: 'Inverter eixo vertical', type: 'toggle', path: 'camera.invertY' }
+    { id: 'invertY', label: 'Inverter eixo vertical', type: 'toggle', path: 'camera.invertY' },
+    { id: 'firstPerson', label: 'Câmera em 1ª pessoa (botão 👁 no topo troca rápido)', type: 'toggle', path: 'camera.firstPerson' }
   ] },
   { group: 'COMBATE', items: [
     { id: 'aim', label: 'Assistência de mira', type: 'choice', path: ['combat.aimAssist', 'rightStick.aimAssist'], options: [['off', 'DESLIGADA'], ['low', 'BAIXA'], ['medium', 'MÉDIA'], ['high', 'ALTA']] },

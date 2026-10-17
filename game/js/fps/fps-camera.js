@@ -7,8 +7,8 @@
  * Todos os números vêm de gameplay-config.js.
  */
 import * as THREE from 'three';
-import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261017hud2';
-import { groundAt } from './ground.js?v=20261017hud2';
+import { getConfig, DEG, detectViewMode } from '../gameplay-config.js?v=20261017riv';
+import { groundAt } from './ground.js?v=20261017riv';
 
 export const TILE = 2; // world units per tile
 /** Altura do olho — definida em gameplay-config.camera.eyeHeight (default 1.68). */
@@ -17,8 +17,12 @@ export const EYE_HEIGHT = getConfig().camera.eyeHeight;
 /** Bloco V: 'third' (padrão, sobre o ombro) | 'first' (?fp=1). */
 export const VIEW_MODE = detectViewMode();
 
+/** LOTE-b M6: 1ª pessoa AO VIVO dentro da cena de 3ª pessoa (liga/desliga sem recarregar). */
+let fpLive = false;
+export function setFirstPersonLive(on) { fpLive = !!on && VIEW_MODE === 'third'; }
+export function isFirstPersonLive() { return fpLive; }
 function pitchLimits() {
-  const c = VIEW_MODE === 'third' ? getConfig().thirdPerson : getConfig().camera;
+  const c = VIEW_MODE === 'third' && !fpLive ? getConfig().thirdPerson : getConfig().camera;
   return [c.pitchMinDeg * DEG, c.pitchMaxDeg * DEG];
 }
 function defaultPitch() {
@@ -30,6 +34,7 @@ function baseFov() {
   const b = getConfig().arenaBoss?.camera;
   const extra = (b && bossFrame > 0 ? bossFrame * b.extraFovDeg : 0) + mountK * 5;
   if (VIEW_MODE !== 'third') return getConfig().camera.fovDeg + extra;
+  if (fpLive) return (getConfig().camera.firstPersonFovDeg ?? 74) + (isPortrait() ? 8 : 0) + extra;
   const t = getConfig().thirdPerson;
   return (isPortrait() ? t.portraitFovDeg : t.fovDeg) + extra;
 }
@@ -231,7 +236,11 @@ export function createFpsCamera() {
       sx = (Math.random() - 0.5) * a;
       sy = (Math.random() - 0.5) * a;
     }
-    if (VIEW_MODE === 'third') {
+    if (VIEW_MODE === 'third' && fpLive) {
+      thirdPersonPosition(dt); // mantém o braço/pivô atualizados (volta suave à 3ª pessoa)
+      const fx = Math.sin(state.yaw), fz = -Math.cos(state.yaw);
+      camera.position.set(state.visX + fx * 0.14 + sx, c.eyeHeight + sy + groundAt(state.visX / TILE, state.visZ / TILE) + (arm.lift || 0), state.visZ + fz * 0.14);
+    } else if (VIEW_MODE === 'third') {
       const len = thirdPersonPosition(dt);
       camera.position.set(_piv.x - _fwd.x * len + sx, _piv.y - _fwd.y * len + sy + (arm.lift || 0), _piv.z - _fwd.z * len);
       { const gMin = groundAt(camera.position.x / TILE, camera.position.z / TILE) + 0.25; if (camera.position.y < Math.max(0.25, gMin)) camera.position.y = Math.max(0.25, gMin); }
@@ -303,6 +312,7 @@ export function createFpsCamera() {
     getLastLookAt: () => lastLookAt,
     getTargetYaw: () => state.targetYaw,
     mode: VIEW_MODE,
+    isFirstPerson: () => fpLive,
     /** Braço-mola: blocked(txFloat, tyFloat) → parede? */
     setBlocker(fn) { blockedFn = fn; },
     /** e2e: estado do braço (m) + pivô. */
