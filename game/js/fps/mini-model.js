@@ -4,6 +4,8 @@
  * só a paleta (paintMini) e as habilidades mudam. (20261010ajustes)
  */
 import * as THREE from 'three';
+import { addMembrane, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261017graf3';
+import { getConfig } from '../gameplay-config.js?v=20261017graf3';
 
 const BLUE = 0x49c6ff;
 
@@ -24,7 +26,9 @@ export function glowTexture() {
 }
 
 /** Membrana de asa de morcego (plano XZ, ponta em +X). */
-export function wingGeometry() {
+const MINI_WING = [[0, 0], [0.34, -0.12], [0.62, -0.02], [0.78, 0.26], [0.6, 0.2], [0.55, 0.44], [0.38, 0.3], [0.28, 0.46], [0.16, 0.3], [0.04, 0.36]];
+export function wingGeometry(detail = false) {
+  if (detail) return fanWingGeometry(MINI_WING, [[0.78, 0.26], [0.55, 0.44], [0.28, 0.46], [0.62, -0.02]], { sub: 3, sag: 0.1, cap: 0.15 });
   const pts = [
     [0, 0], [0.34, -0.12], [0.62, -0.02], [0.78, 0.26], [0.6, 0.2], [0.55, 0.44], [0.38, 0.3], [0.28, 0.46], [0.16, 0.3], [0.04, 0.36]
   ];
@@ -100,7 +104,9 @@ export function buildMiniModel(model, o = {}) {
   // patas recolhidas
   for (const [x, z] of [[0.08, -0.12], [-0.08, -0.12], [0.08, 0.14], [-0.08, 0.14]]) add(model, box, darkMat, x, -0.13, z, 0.5, 0, 0, 0.04, 0.12, 0.05);
   // asas (pivô no ombro)
-  const wGeo = G(wingGeometry());
+  const memOn = (getConfig().graphics?.dragonDetail !== false && dragonDetailOn()) && o.detail !== false; // GRÁFICOS 3: asa com barriga + membrana translúcida/veias
+  if (memOn) addMembrane(wingMat, { glow: 0x49c6ff, span: 0.78, k: 0.8 });
+  const wGeo = G(wingGeometry(memOn));
   const wings = [];
   for (const side of [1, -1]) {
     const pivot = new THREE.Group();
@@ -156,6 +162,6 @@ export function paintMini(p, pal) {
   p.bodyMat.color.copy(c(base).lerp(c(0x000000), pal ? 0.35 : 0)); p.bodyMat.emissive.copy(c(pal ? base : 0x061a3a).multiplyScalar(pal ? 0.22 : 1));
   p.darkMat.color.copy(c(dark).lerp(c(0x000000), pal ? 0.1 : 0));
   p.accentMat.color.copy(c(glow).multiplyScalar(2.2)); p.jointMat.color.copy(c(pal ? glow : 0x5ab8ff).multiplyScalar(3));
-  p.wingMat.color.copy(c(pal ? base : 0x2466c0)); p.wingMat.emissive.copy(c(pal ? glow : 0x0e3a88).multiplyScalar(pal ? 0.35 : 1));
+  p.wingMat.color.copy(c(pal ? base : 0x2466c0)); p.wingMat.emissive.copy(c(pal ? glow : 0x0e3a88).multiplyScalar(pal ? 0.35 : 1)); p.wingMat.userData.sfxUniforms?.sfxMemGlow?.value.copy(c(pal ? glow : 0x49c6ff));
   if (p.mouthHalo?.material) p.mouthHalo.material.color.copy(c(pal ? glow : 0x7fd6ff));
 }

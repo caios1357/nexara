@@ -10,40 +10,41 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017heroi3';
-import { buildArenaDressing } from './arena-dressing.js?v=20261017heroi3';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017heroi3';
-import { createHeroModel } from './hero-model.js?v=20261017heroi3';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017heroi3';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017heroi3';
-import { attachHeroGlb } from './hero-glb.js?v=20261017heroi3';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017heroi3';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017heroi3';
-import { createActionVfx } from './action-vfx.js?v=20261017heroi3';
-import { createPassiveVfx } from './passive-vfx.js?v=20261017heroi3';
-import { createFpsControls } from './fps-controls.js?v=20261017heroi3';
-import { createViewmodel } from './viewmodel.js?v=20261017heroi3';
-import { createDragonView } from './dragon-view.js?v=20261017heroi3';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017heroi3';
-import { getSprite } from '../assets.js?v=20261017heroi3';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017heroi3';
-import { createBossDragon } from './boss-dragon-view.js?v=20261017heroi3';
-import { bossCfgFor } from '../boss-variants.js?v=20261017heroi3';
-import { mergeStaticParts } from './merge-util.js?v=20261017heroi3';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017heroi3';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017heroi3';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017heroi3';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017heroi3';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017heroi3';
-import { createPostFx } from './post-fx.js?v=20261017heroi3';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017heroi3';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017heroi3';
-import { createContactShadows } from './contact-shadows.js?v=20261017heroi3';
-import { surfaceFxStats } from './surface-fx.js?v=20261017heroi3';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017heroi3';
-import { groundAt, setGroundFn } from './ground.js?v=20261017heroi3';
-import { buildBrTerrain } from './br-terrain.js?v=20261017heroi3';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017heroi3';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017graf3';
+import { buildArenaDressing } from './arena-dressing.js?v=20261017graf3';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017graf3';
+import { createHeroModel } from './hero-model.js?v=20261017graf3';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017graf3';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017graf3';
+import { attachHeroGlb } from './hero-glb.js?v=20261017graf3';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017graf3';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017graf3';
+import { createActionVfx } from './action-vfx.js?v=20261017graf3';
+import { createPassiveVfx } from './passive-vfx.js?v=20261017graf3';
+import { createFpsControls } from './fps-controls.js?v=20261017graf3';
+import { createViewmodel } from './viewmodel.js?v=20261017graf3';
+import { createDragonView } from './dragon-view.js?v=20261017graf3';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017graf3';
+import { getSprite } from '../assets.js?v=20261017graf3';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017graf3';
+import { createBossDragon } from './boss-dragon-view.js?v=20261017graf3';
+import { bossCfgFor } from '../boss-variants.js?v=20261017graf3';
+import { mergeStaticParts } from './merge-util.js?v=20261017graf3';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017graf3';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017graf3';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017graf3';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017graf3';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017graf3';
+import { createPostFx } from './post-fx.js?v=20261017graf3';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017graf3';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017graf3';
+import { createContactShadows } from './contact-shadows.js?v=20261017graf3';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017graf3';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017graf3';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017graf3';
+import { groundAt, setGroundFn } from './ground.js?v=20261017graf3';
+import { buildBrTerrain } from './br-terrain.js?v=20261017graf3';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017graf3';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -129,7 +130,7 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  /* HERÓI 3 (20261017heroi3): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  /* HERÓI 3 (20261017graf3): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
   const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
   const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';
@@ -160,6 +161,7 @@ export function createFpsRenderer() {
   let dressing = null; // EVO: cenário procedural do Campo/Arena
   let brWorld = null; // ARENA PRINCIPAL: terreno instanciado + marcadores
   let brDir = null; let brLights = []; let brLightAt = 0;
+  let brSky = null; let brRim = null; // GRÁFICOS 3: cúpula de céu + contra-luz
   const brFogTint = { id: null, at: 0, last: 0, target: new THREE.Color() };
   const dragonFx = { pts: null, vel: null, on: false, k: 0, el: null, n: 0, last: 0 };
   const brLod = { hidden: 0, shown: 0 };
@@ -205,6 +207,8 @@ export function createFpsRenderer() {
       // GPU por software: começa na resolução mínima (a adaptativa sobe se sobrar fôlego)
       if (softwareGL && !adaptiveOff && getConfig().graphics.adaptiveResolution) perf.pr = getConfig().graphics.minPixelRatio;
       tier = getConfig().graphics.tiers[tierName];
+      if ((tier?.heightFog || 0) > 0 && !/[?&]hfog=0\b/.test(location.search)) installHeightFog({ k: tier.heightFog }); // GRÁFICOS 3: bruma rente ao chão (antes de compilar shaders)
+      setDragonDetail(tier?.dragonDetail !== false);
       setPresetDragons(tier?.dragonModels !== false);
       setPresetModels(tier?.models !== false); // M3D: preset sem GLB → procedural (FPS ≥ build evoc)
       setKitDetail(tierName === 'high' ? 1 : tierName === 'medium' ? 0.75 : 0.5);
@@ -473,7 +477,7 @@ export function createFpsRenderer() {
 
   function clearWorld() {
     if (!worldRoot) return;
-    brWorld = null; brDir = null; brLights = []; brFogTint.id = null; brFogTint.at = 0;
+    brWorld = null; brDir = null; brLights = []; brSky = null; brRim = null; brFogTint.id = null; brFogTint.at = 0;
     dragonFx.k = 0; dragonFx.last = 0; if (dragonFx.pts) dragonFx.pts.visible = false; if (dragonFx.el) { dragonFx.el.classList.remove('on'); dragonFx.on = false; }
     dressing?.dispose?.();
     dressing = null;
@@ -872,6 +876,7 @@ export function createFpsRenderer() {
     const BL = getConfig().graphics?.brLight || {};
     const horizon = BL.horizon || '#1a3866';
     scene.background = skyTex(BL.skyTop || '#03081a', BL.skyMid || '#0c1f48', horizon);
+    if (tier?.sky && !/[?&]sky=0\b/.test(location.search)) { brSky = createSkyDome({ top: BL.skyTop || '#03081a', mid: BL.skyMid || '#0c1f48', horizon }); worldRoot.add(brSky.object); }
     const fogD = (tierName === 'low' ? 0.026 : tierName === 'medium' ? 0.021 : 0.017) * (BL.fogK ?? 0.88);
     scene.fog = new THREE.FogExp2(new THREE.Color(horizon).multiplyScalar(BL.fogColorK ?? 0.95), fogD);
     renderer.toneMappingExposure = getConfig().graphics.exposure * (BL.exposureK ?? 1.28);
@@ -879,7 +884,8 @@ export function createFpsRenderer() {
     if (sceneLights.hemi) { sceneLights.hemi.intensity = BL.hemi ?? 1.6; sceneLights.hemi.color.setHex(0x86a8d4); sceneLights.hemi.groundColor.setHex(0x4a4232); }
     const cfg = getState()?._data?.arena_br || {};
     const brProps = getConfig().graphics?.brProps !== false && (typeof location === 'undefined' || new URLSearchParams(location.search).get('brProps') !== '0');
-    brWorld = buildBrTerrain(zone, cfg, { TILE, ground: groundAt, loadTex: loadHdTex, tierName, props: brProps });
+    const sfxOn = !/[?&]sfx=0\b/.test(location.search);
+    brWorld = buildBrTerrain(zone, cfg, { TILE, ground: groundAt, loadTex: loadHdTex, tierName, props: brProps, detail: !!tier?.surfaceDetail && sfxOn, extraProps: !!tier?.extraProps && brProps && sfxOn, skyColor: new THREE.Color(horizon).lerp(new THREE.Color(0x9fd8ff), 0.35).getHex() });
     worldRoot.add(brWorld.group);
     dressing = null; city = null; haze = null;
     // skyline neon da cidade em volta do mapa (mesmo módulo do Campo/mundo; densidade reduzida no mapa grande)
@@ -898,6 +904,7 @@ export function createFpsRenderer() {
     brDir.shadow.camera.near = 1; brDir.shadow.camera.far = 60;
     brDir.shadow.camera.left = -22; brDir.shadow.camera.right = 22; brDir.shadow.camera.top = 22; brDir.shadow.camera.bottom = -22;
     worldRoot.add(brDir); worldRoot.add(brDir.target);
+    if ((tier?.rimLight || 0) > 0 && !/[?&]rim=0\b/.test(location.search)) { brRim = new THREE.DirectionalLight(0x8fdcff, tier.rimLight); brRim.castShadow = false; worldRoot.add(brRim); worldRoot.add(brRim.target); }
   }
   /** M10 passo 3 — Território do Dragão: brasas subindo em volta do herói (1 Points, tier × degrau 'particles') + vinheta vermelha pulsando (CSS). */
   function updateDragonFx(inDragon, hx, hz, now) {
@@ -940,6 +947,8 @@ export function createFpsRenderer() {
     }
     brWorld.update(hx, hz, now, fpsCam.camera.position.x, fpsCam.camera.position.z);
     if (brDir) { brDir.position.set(hx + 10, 18, hz + 8); brDir.target.position.set(hx, 0, hz); }
+    if (brSky) brSky.update(fpsCam.camera, now, scene.fog?.color);
+    if (brRim) { const cp = fpsCam.camera.position; let dx = hx - cp.x, dz = hz - cp.z; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L; const gy = groundAt(hx / TILE, hz / TILE); brRim.position.set(hx + dx * 10, gy + 7, hz + dz * 10); brRim.target.position.set(hx, gy + 1, hz); }
     if (brLights.length && now - brLightAt > 400) {
       brLightAt = now;
       const pts = brWorld.lampPos.concat(brWorld.markers.map((mk) => new THREE.Vector3(mk.x * TILE, groundAt(mk.x, mk.y) + 2.6, mk.y * TILE)));
@@ -2462,6 +2471,7 @@ export function createFpsRenderer() {
     /** dt real (limitado a 0.25 s) para movimento/câmera — o player-motion aplica o próprio teto. */
     const simDt = Math.min(0.25, frameMs / 1000);
     lastT = now;
+    tickSurfaceFx(now);
     adaptResolution(frameMs, now);
 
     resize();
@@ -3035,6 +3045,7 @@ export function createFpsRenderer() {
       motes: motes ? { n: motes.count, visible: motes.object.visible } : null,
       contactShadows: contactSh ? { ...contactSh.stats(), heroWorld: hero ? [+heroVis.x.toFixed(2), +heroVis.z.toFixed(2)] : null } : null,
       surfaceFx: surfaceFxStats(),
+      sky: !!brSky, heightFog: heightFogInfo(), rimLight: brRim ? +brRim.intensity.toFixed(2) : 0,
       city: !!city,
       vignetteCss: !!vignetteEl,
       drawCalls: frameStats.calls,

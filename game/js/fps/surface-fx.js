@@ -99,3 +99,136 @@ float sfxPanelLine(vec3 p) { vec3 q = abs(fract(p * sfxPanel) - 0.5); vec3 a = a
   });
   return mat;
 }
+
+// ————————————————————————— GRÁFICOS 3 —————————————————————————
+/** relógio global (s) dos shaders animados (membrana/água/paredes) — atualizado 1× por quadro pelo renderer */
+export const sfxTime = { value: 0 };
+let dragonOn = true; /** preset: membrana/escamas novas nos dragões procedurais (LOW = desligado) */
+export function setDragonDetail(on) { dragonOn = !!on; }
+export const dragonDetailOn = () => dragonOn && !(typeof location !== 'undefined' && /[?&]dragonDetail=0\b/.test(location.search));
+export function tickSurfaceFx(nowMs) { sfxTime.value = (nowMs % 3600000) / 1000; }
+const NOISE = /* glsl */`
+float sfxHash3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float sfxN3(vec3 x) { vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(sfxHash3(i), sfxHash3(i + vec3(1,0,0)), f.x), mix(sfxHash3(i + vec3(0,1,0)), sfxHash3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(sfxHash3(i + vec3(0,0,1)), sfxHash3(i + vec3(1,0,1)), f.x), mix(sfxHash3(i + vec3(0,1,1)), sfxHash3(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float sfxHash2(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float sfxN2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(sfxHash2(i), sfxHash2(i + vec2(1, 0)), f.x), mix(sfxHash2(i + vec2(0, 1)), sfxHash2(i + vec2(1, 1)), f.x), f.y); }`;
+
+/**
+ * MEMBRANA DE ASA (dragões procedurais): translucidez de contra-luz (borda/fresnel acende na cor do elemento),
+ * VEIAS radiais a partir da raiz da asa com PULSO de energia correndo para a ponta, e borda de fuga mais clara.
+ * Não precisa de UV: usa a posição no objeto (asa em leque a partir da origem, plano XZ). o.span = comprimento da asa.
+ */
+export function addMembrane(mat, o = {}) {
+  if (!mat || mat.userData.sfxMem) return mat;
+  mat.userData.sfxMem = true; stats.membrane = (stats.membrane || 0) + 1;
+  const u = { sfxMemGlow: { value: new THREE.Color(o.glow ?? 0x5dff6a) }, sfxMemK: { value: o.k ?? 1 }, sfxMemSpan: { value: o.span ?? 4.3 }, sfxTime };
+  mat.userData.sfxUniforms = u;
+  chain(mat, 'sfxMem', (sh) => {
+    Object.assign(sh.uniforms, u);
+    injectVertex(sh);
+    sh.fragmentShader = VARY_F + sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 sfxMemGlow; uniform float sfxMemK; uniform float sfxMemSpan; uniform float sfxTime;\n' + NOISE)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+ { vec2 mp = vSfxObjPos.xz / sfxMemSpan; float r = length(mp); float ang = atan(mp.y, mp.x);
+   float nv = sfxN3(vec3(mp * 5.0, 2.0)) * 0.65 + sfxN3(vec3(mp * 11.0, 5.0)) * 0.35;
+   float vein = (1.0 - smoothstep(0.0, 0.045, abs(nv - 0.5))) * smoothstep(0.04, 0.2, r);
+   float pulse = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(r * 11.0 - sfxTime * 3.2), 3.0);
+   float ndv = abs(dot(normal, normalize(vViewPosition)));
+   float back = pow(1.0 - ndv, 1.6) * 0.55 + 0.18;            // translucidez: fina e acesa na borda da silhueta
+   float edge = smoothstep(0.7, 1.0, r) * 0.35;
+   totalEmissiveRadiance += sfxMemGlow * sfxMemK * (back * 0.55 + vein * pulse * 0.9 + edge);
+   diffuseColor.rgb *= 1.0 - vein * 0.35; }`);
+  });
+  return mat;
+}
+
+/**
+ * PAREDES da Arena (instanciadas, caixa 0..1 em Y): tijolos/painéis em espaço de MUNDO, sujeira/oclusão na base,
+ * friso claro no topo, manchas de umidade (ruído) e veios de néon raros na cor da região (instanceColor).
+ */
+export function addWallDetail(mat, o = {}) {
+  if (!mat || mat.userData.sfxWall) return mat;
+  mat.userData.sfxWall = true; stats.wall = (stats.wall || 0) + 1;
+  const u = { sfxTime, sfxWallK: { value: o.k ?? 1 } };
+  chain(mat, 'sfxWall', (sh) => {
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = 'varying vec3 vSfxW; varying float vSfxH;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vSfxH = position.y;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\n { vec4 sw = vec4(transformed, 1.0);\n #ifdef USE_INSTANCING\n sw = instanceMatrix * sw;\n #endif\n vSfxW = (modelMatrix * sw).xyz; }');
+    sh.fragmentShader = 'varying vec3 vSfxW; varying float vSfxH;\nuniform float sfxTime; uniform float sfxWallK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + NOISE + `
+float sfxBrick(vec3 w, vec3 n) { vec3 a = abs(n); vec2 p = a.x > a.z ? w.zy : w.xy; p *= vec2(1.05, 2.1); float row = floor(p.y); p.x += mod(row, 2.0) * 0.5;
+  vec2 f = abs(fract(p) - 0.5); return max(smoothstep(0.455, 0.5, f.x), smoothstep(0.42, 0.5, f.y)); }`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+ { vec3 fn = normalize(cross(dFdx(vSfxW), dFdy(vSfxW))); float br = abs(fn.y) > 0.7 ? 0.0 : sfxBrick(vSfxW, fn);
+   float stain = sfxN2(vec2(vSfxW.x + vSfxW.z, vSfxW.y * 2.5) * 0.35); float base = 1.0 - smoothstep(0.0, 0.22, vSfxH);
+   float topBand = smoothstep(0.93, 0.985, vSfxH);
+   diffuseColor.rgb *= mix(1.0, (1.0 - br * 0.38) * (0.78 + stain * 0.36) * (1.0 - base * 0.45), sfxWallK);
+   diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 1.35 + 0.05, topBand * sfxWallK); }`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+ { float crack = (vSfxH > 0.25 && vSfxH < 0.9) ? smoothstep(0.92, 0.985, sfxN2(vec2((vSfxW.x - vSfxW.z) * 1.6, vSfxW.y * 0.5))) * smoothstep(0.25, 0.5, vSfxH) * (1.0 - smoothstep(0.75, 0.9, vSfxH)) : 0.0;
+   #ifdef USE_COLOR
+   vec3 rc = vColor / max(max(vColor.r, vColor.g), max(vColor.b, 0.001)); rc = rc * rc * rc * 1.5;
+   #else
+   vec3 rc = vec3(0.3, 0.9, 1.0);
+   #endif
+   totalEmissiveRadiance += rc * crack * (0.7 + 0.3 * sin(sfxTime * 2.0 + vSfxW.x)) * 0.55 * sfxWallK; }`);
+  });
+  return mat;
+}
+
+/**
+ * CHÃO da Arena: variação em grande escala (quebra a repetição da textura), juntas de placa em grade de mundo,
+ * POÇAS molhadas (rugosidade baixa + leve reflexo do céu/néblina) e grama/musgo onde a cor do vértice é verde.
+ */
+export function addFloorDetail(mat, o = {}) {
+  if (!mat || mat.userData.sfxFloor) return mat;
+  mat.userData.sfxFloor = true; stats.floor = (stats.floor || 0) + 1;
+  const u = { sfxTime, sfxSky: { value: new THREE.Color(o.sky ?? 0x2a4a7a) }, sfxFloorK: { value: o.k ?? 1 } };
+  mat.userData.sfxUniforms = u;
+  chain(mat, 'sfxFloor', (sh) => {
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = 'varying vec3 vSfxW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vSfxW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = 'varying vec3 vSfxW;\nuniform float sfxTime; uniform vec3 sfxSky; uniform float sfxFloorK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + NOISE + '\nfloat sfxWet = 0.0;')
+      .replace('#include <color_fragment>', `#include <color_fragment>
+ { float macro = sfxN2(vSfxW.xz * 0.045) * 0.6 + sfxN2(vSfxW.xz * 0.19 + 7.3) * 0.4;
+   vec2 gq = abs(fract(vSfxW.xz / 4.0) - 0.5); float seam = max(smoothstep(0.485, 0.5, gq.x), smoothstep(0.485, 0.5, gq.y));
+   float green = clamp((diffuseColor.g - max(diffuseColor.r, diffuseColor.b)) * 6.0, 0.0, 1.0);
+   float moss = green > 0.01 ? sfxN2(vSfxW.xz * 0.9 + 3.1) : 0.5;
+   sfxWet = smoothstep(0.62, 0.72, sfxN2(vSfxW.xz * 0.11 + 19.7)) * (1.0 - green);
+   diffuseColor.rgb *= mix(1.0, (0.78 + macro * 0.44) * (1.0 - seam * 0.32 * (1.0 - green)) * mix(1.0, 0.75 + moss * 0.5, green) * (1.0 - sfxWet * 0.45), sfxFloorK); }`)
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, 0.12, sfxWet * sfxFloorK);')
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+ if (sfxWet > 0.001) { float ndv = clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0); float fr = pow(1.0 - ndv, 4.0);
+   vec2 rp = vSfxW.xz * 1.7; float rip = 0.5 + 0.5 * sin(length(fract(rp) - 0.5) * 40.0 - sfxTime * 6.0 + floor(rp.x) * 3.1 + floor(rp.y) * 1.7);
+   totalEmissiveRadiance += sfxSky * sfxWet * (fr * 0.55 + 0.025 + rip * 0.03) * sfxFloorK; }`);
+  });
+  return mat;
+}
+
+/**
+ * Asa em leque SUBDIVIDIDA com BARRIGA entre os dedos (a membrana cede entre os ossos em vez de ser um plano chapado).
+ * pts: contorno [[x,z],...] a partir da origem (pts[0] = raiz). tips: pontas dos ossos [[x,z],...]. sag = quanto cede (por unidade de distância ao osso).
+ * uvFn(x,z) opcional → atributo uv. Indexada (vértices compartilhados) → normais suaves.
+ */
+export function fanWingGeometry(pts, tips, { sub = 4, sag = 0.12, cap = 0.6, uvFn = null } = {}) {
+  const vmap = new Map(); const pos = []; const uv = []; const idx = [];
+  const len = Math.max(...pts.map(([x, z]) => Math.hypot(x, z))) || 1;
+  const segD = (px, pz, tx, tz) => { const L2 = tx * tx + tz * tz || 1; const t = Math.max(0, Math.min(1, (px * tx + pz * tz) / L2)); return Math.hypot(px - tx * t, pz - tz * t); };
+  const V = (x, z) => {
+    const k = `${Math.round(x * 1e4)}|${Math.round(z * 1e4)}`; let i = vmap.get(k); if (i !== undefined) return i;
+    let d = Infinity; for (const [tx, tz] of tips) d = Math.min(d, segD(x, z, tx, tz));
+    const r = Math.hypot(x, z) / len; const y = -sag * Math.min(d, cap) * Math.min(1, r / 0.25);
+    i = pos.length / 3; pos.push(x, y, z); if (uvFn) uv.push(...uvFn(x, z)); vmap.set(k, i); return i;
+  };
+  const [ox, oz] = pts[0];
+  for (let s = 1; s < pts.length - 1; s++) {
+    const [ax, az] = pts[s], [bx, bz] = pts[s + 1]; const g = [];
+    for (let i = 0; i <= sub; i++) { g.push([]); for (let j = 0; j <= i; j++) { const u = i / sub, v = i ? j / i : 0; const px = ox + (ax - ox) * u + (bx - ax) * u * v, pz = oz + (az - oz) * u + (bz - az) * u * v; g[i].push(V(px, pz)); } }
+    for (let i = 0; i < sub; i++) for (let j = 0; j <= i; j++) { idx.push(g[i][j], g[i + 1][j], g[i + 1][j + 1]); if (j < i) idx.push(g[i][j], g[i + 1][j + 1], g[i][j + 1]); }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  if (uvFn) geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  return geo;
+}

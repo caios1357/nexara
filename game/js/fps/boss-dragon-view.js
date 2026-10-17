@@ -13,10 +13,12 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017heroi3';
-import { TILE } from './fps-camera.js?v=20261017heroi3';
-import { mergeStaticParts } from './merge-util.js?v=20261017heroi3';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261017heroi3';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017graf3';
+import { TILE } from './fps-camera.js?v=20261017graf3';
+import { mergeStaticParts } from './merge-util.js?v=20261017graf3';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261017graf3';
+import { getConfig } from '../gameplay-config.js?v=20261017graf3';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261017graf3';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -69,6 +71,8 @@ function mats(pal) {
   };
   addRim(shared.skin, P.rimC, 0.38, 3.0);
   addRim(shared.skin2, P.rimC, 0.26, 3.0);
+  // GRÁFICOS 3: membrana translúcida com veias pulsando na cor do elemento + escamas de relevo na barriga
+  if ((getConfig().graphics?.dragonDetail !== false && dragonDetailOn())) { addMembrane(shared.membrane, { glow: P.nexa, span: 4.3, k: pal ? 0.85 : 0.7 }); addScales(shared.skin2, { freq: 3.2, bump: 0.7, crease: 0.5, rim: P.rimC, rimK: 0.0 }); }
   shared.nexa.userData.shared = false; // pisca por instância (clonado abaixo)
   shared.eye.userData.shared = true;
   shared.rim.userData.shared = true;
@@ -82,8 +86,10 @@ function mesh(geo, mat, x = 0, y = 0, z = 0) {
   return m;
 }
 
+const WING_PTS = [[0, 0], [0.9, -0.55], [2.1, -0.95], [3.4, -0.75], [4.3, -0.2], [3.6, 0.35], [3.2, 1.2], [2.5, 0.8], [2.1, 1.75], [1.5, 1.05], [1.0, 1.9], [0.55, 1.1], [0.1, 1.2]];
 /** Membrana de asa grande (plano XZ, ponta em +X) com recortes entre os "dedos". */
 function wingGeometry() {
+  if ((getConfig().graphics?.dragonDetail !== false && dragonDetailOn())) return fanWingGeometry(WING_PTS, [[4.3, -0.2], [3.4, -0.75], [3.2, 1.2], [2.1, 1.75], [1.0, 1.9]], { sub: 4, sag: 0.16, cap: 0.7, uvFn: (x, z) => [x / 4.3, (z + 0.95) / 2.85] });
   const pts = [
     [0, 0], [0.9, -0.55], [2.1, -0.95], [3.4, -0.75], [4.3, -0.2], [3.6, 0.35], [3.2, 1.2], [2.5, 0.8], [2.1, 1.75], [1.5, 1.05], [1.0, 1.9], [0.55, 1.1], [0.1, 1.2]
   ];

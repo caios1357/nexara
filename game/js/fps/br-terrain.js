@@ -8,6 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261017graf3';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
 const REGION_WALL = { periferia: 0xb08e78, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
@@ -34,7 +35,8 @@ export function buildBrTerrain(zone, cfg, o) {
   //    Normais analíticas (diferença central da MESMA função de altura) → sem costura entre blocos. ——
   const FC = 32; const floorChunks = [];
   {
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.72, metalness: 0.12, envMapIntensity: 0.7, emissive: 0x18202a, emissiveIntensity: 1 }); // M10: menos metal = chão legível sem envMap
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.72, metalness: 0.12, envMapIntensity: 0.7, emissive: 0x18202a, emissiveIntensity: 1 }); if (o.detail) addFloorDetail(mat, { sky: o.skyColor ?? 0x2a4a7a }); // GRÁFICOS 3: juntas/variação/poças com reflexo do céu
+    // M10: menos metal = chão legível sem envMap
     const nv = new THREE.Vector3();
     for (let fy0 = 0; fy0 < H; fy0 += FC) for (let fx0 = 0; fx0 < W; fx0 += FC) {
       const fx1 = Math.min(W, fx0 + FC), fy1 = Math.min(H, fy0 + FC); const cw = fx1 - fx0, chh = fy1 - fy0; const NV = (cw + 1) * (chh + 1);
@@ -79,8 +81,11 @@ export function buildBrTerrain(zone, cfg, o) {
     // M10 fase 8: identidade das regiões + sinais do dragão
     prop: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, metalness: 0.2 }),
     bone: new THREE.MeshStandardMaterial({ color: 0xd8d0bc, roughness: 0.9, metalness: 0.0, emissive: 0x1a1810, emissiveIntensity: 0.5 }),
-    decal: new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 })
+    decal: new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }),
+    // GRÁFICOS 3: canos do Complexo (os outros props novos reaproveitam tipos existentes → sem draw call extra)
+    pipe: new THREE.MeshStandardMaterial({ color: 0x9aa6b4, roughness: 0.35, metalness: 0.8 })
   };
+  if (o.detail) addWallDetail(mats.wall);
   const geos = {
     wall: new THREE.BoxGeometry(T, 1, T).translate(0, 0.5, 0),
     pillar: new THREE.BoxGeometry(T * 0.62, 1, T * 0.62).translate(0, 0.5, 0),
@@ -105,7 +110,8 @@ export function buildBrTerrain(zone, cfg, o) {
     skull: new THREE.DodecahedronGeometry(0.22, 0),
     claw: new THREE.PlaneGeometry(0.16, 1.7).rotateX(-Math.PI / 2),
     scorch: new THREE.CircleGeometry(1, 12).rotateX(-Math.PI / 2),
-    ember: new THREE.OctahedronGeometry(0.09, 0)
+    ember: new THREE.OctahedronGeometry(0.09, 0),
+    pipe: new THREE.CylinderGeometry(0.085, 0.085, T, 6).rotateZ(Math.PI / 2)
   };
 
   // —— chunks (16×16 tiles) ——
@@ -123,7 +129,8 @@ export function buildBrTerrain(zone, cfg, o) {
     bush: [geos.bush, mats.canopy, false], rubble: [geos.rubble, mats.rust, false], pole: [geos.pole, mats.metal, false], lampHead: [geos.lampHead, mats.lamp, false],
     barrel: [geos.barrel, mats.prop, true], stub: [geos.stub, mats.rock, true], fern: [geos.fern, mats.canopy, false], shroom: [geos.shroom, mats.neon, false],
     strip: [geos.strip, mats.neon, false], vent: [geos.vent, mats.metal, false], banner: [geos.banner, mats.neon, false],
-    bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false]
+    bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false],
+    pipe: [geos.pipe, mats.pipe, false]
   };
   const COLORED = new Set(['wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
@@ -186,20 +193,27 @@ export function buildBrTerrain(zone, cfg, o) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
       if (reg.id === 'periferia') {
         if (wn && q < 0.06) { tmpC.setHSL(h32(x, y, 32) < 0.5 ? 0.02 : 0.55, 0.45, 0.32); pushP('barrel', x, y, [wx + wn.dx * 0.55, gy, wz + wn.dy * 0.55], q * 40, [1, 0.85 + q * 2, 1], tmpC.getHex()); }
+        else if (o.extraProps && wn && q < 0.085) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
+        else if (o.extraProps && q > 0.982) { tmpC.setHSL(0.6, 0.15, 0.08 + h32(x, y, 83) * 0.06); pushP('rock', x, y, [wx + (h32(x, y, 84) - 0.5), gy + 0.18, wz + (h32(x, y, 85) - 0.5)], q * 30, [0.34, 0.24, 0.38], tmpC.getHex()); }
       } else if (reg.id === 'ruinas') {
         if (wn && q < 0.05) { tmpC.setHex(0xa8906c).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.5 + h32(x, y, 34) * 1.1, 1], tmpC.getHex()); }
         else if (q > 0.975) pushP('rubble', x, y, [wx, gy + 0.08, wz], q * 9, [1.4, 1, 1.2], 0xffffff);
+        else if (o.extraProps && q > 0.962) { const a = h32(x, y, 86) * Math.PI; pushP('rubble', x, y, [wx, gy + 0.3, wz], a, [5.2, 1, 0.65], 0xffffff); }
       } else if (reg.id === 'floresta') {
         if (q < 0.07) { tmpC.setHSL(0.33 + h32(x, y, 35) * 0.08, 0.55, 0.2); pushP('fern', x, y, [wx + (h32(x, y, 36) - 0.5) * 1.2, gy, wz + (h32(x, y, 37) - 0.5) * 1.2], q * 60, [1, 0.8 + q * 6, 1], tmpC.getHex()); }
+        else if (o.extraProps && q < 0.2) { tmpC.setHSL(0.3 + h32(x, y, 87) * 0.1, 0.6, 0.22 + h32(x, y, 88) * 0.1); pushP('fern', x, y, [wx + (h32(x, y, 89) - 0.5) * 1.6, gy - 0.02, wz + (h32(x, y, 91) - 0.5) * 1.6], h32(x, y, 93) * 6, [0.45, 0.45 + h32(x, y, 95) * 0.6, 0.45], tmpC.getHex()); }
         else if (q > 0.988) { pushP('shroom', x, y, [wx + (h32(x, y, 38) - 0.5), gy + 0.1, wz + (h32(x, y, 39) - 0.5)], 0, [1, 0.7, 1], h32(x, y, 40) < 0.5 ? 0x5dfff0 : 0xb36bff); }
       } else if (reg.id === 'complexo') {
         if (wn && q < 0.08) pushP('strip', x, y, [wx + wn.dx * 0.42, gy + 0.03, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], h32(x, y, 41) < 0.7 ? 0x39e8ff : 0xff4a8a);
         else if (q > 0.985) pushP('vent', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff);
+        else if (o.extraProps && wn && q < 0.2) { pushP('pipe', x, y, [wx + wn.dx * 0.42, gy + 1.05, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], 0xffffff); if (q < 0.15) pushP('pipe', x, y, [wx + wn.dx * 0.4, gy + 1.32, wz + wn.dy * 0.4], wn.ry, [1, 0.7, 0.7], 0xffffff); }
       } else if (reg.id === 'elite') {
         if (wn && q < 0.05) pushP('banner', x, y, [wx + wn.dx * 0.46, gy + 0.6, wz + wn.dy * 0.46], wn.ry + Math.PI / 2, [1, 1, 1], 0xffc830);
+        else if (o.extraProps && q > 0.986) { tmpC.setHex(0x6a5a3a); pushP('stub', x, y, [wx, gy, wz], 0, [0.55, 0.9, 0.55], tmpC.getHex()); pushP('ember', x, y, [wx, gy + 1.0, wz], q * 9, [2.4, 2.8, 2.4], 0xffa030); }
       } else if (reg.id === 'dragao') {
         if (q < 0.025) pushP('bone', x, y, [wx + (h32(x, y, 42) - 0.5), gy + 0.05, wz + (h32(x, y, 43) - 0.5)], q * 80, [0.6 + q * 20, 1, 1], 0xffffff);
         else if (q > 0.99) pushP('ember', x, y, [wx, gy + 0.12, wz], q * 7, [1, 1, 1], 0xff7a2a);
+        else if (o.extraProps && q > 0.972) { for (let k = 0; k < 3; k++) pushP('ember', x, y, [wx + (h32(x, y, 97 + k) - 0.5) * 0.9, gy + 0.3, wz + (h32(x, y, 100 + k) - 0.5) * 0.9], k * 2.1, [2.6, 5 + h32(x, y, 103 + k) * 4, 2.6], 0x3dff6a); }
       }
     }
   }

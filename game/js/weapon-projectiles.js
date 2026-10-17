@@ -7,7 +7,7 @@
  * - O dano sai pelo MESMO caminho do golpe (applyPlayerHit → applyDamageToMonster: XP/loot/quests/MCB).
  * - Arrays exportados (heroProjectiles/heroBursts) são lidos pelo fps-renderer (InstancedMesh, cor da família).
  */
-import { hasLineOfSight } from './collision.js?v=20261017heroi3';
+import { hasLineOfSight } from './collision.js?v=20261017graf3';
 
 export const heroProjectiles = [];
 export const heroBursts = [];
@@ -38,7 +38,7 @@ export function createWeaponProjectiles(deps) {
       targetUid: o.target?.uid ?? null, kind: o.kind, speed: o.speed, range: o.range, radius: o.radius ?? 0.3,
       turn: (o.turnDeg ?? 540) * Math.PI / 180, color: o.color, family: o.family || null, alive: true, born: clock,
       traveled: 0, onHit: o.onHit, splash: o.splash || null, pierce: o.pierce || 0, hitUids: new Set(),
-      air: (o.target?.rivalFly?.alt || 0) > 1 // 20261017heroi3 (alcance V4): tiro mirado num VOADOR passa por cima dos muros
+      air: (o.target?.rivalFly?.alt || 0) > 1 // 20261017graf3 (alcance V4): tiro mirado num VOADOR passa por cima dos muros
     };
     // aponta direto para o alvo travado/escolhido (mira assistida) — o giro limitado corrige o resto
     if (o.target) {
