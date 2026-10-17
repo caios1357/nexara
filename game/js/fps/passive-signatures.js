@@ -26,7 +26,7 @@
  * próprio de sprites (os mais antigos são reciclados).
  */
 import * as THREE from 'three';
-import { TILE } from './fps-camera.js?v=20261016montaria';
+import { TILE } from './fps-camera.js?v=20261016armas';
 
 export const SIG = {
   furia_cibernetica: { cor: 0xff3b3b, prio: 9, glyph: 0 },
@@ -249,7 +249,7 @@ export function createPassiveSignatures(root, opts = {}) {
         bump('reflexo_fantasma');
         const n = d.perfect ? 7 : 4;
         for (let k = 0; k < n; k++) { const a = (k / n) * Math.PI * 2 + Math.random() * 0.4; spawn('reflexo_fantasma', 6, SIG.reflexo_fantasma.cor, hx, 1.0 + Math.random() * 0.6, hz, { dur: 0.55, s0: 0.32, s1: 0.12, vx: Math.cos(a) * 2.6, vy: 0.4 + Math.random(), vz: Math.sin(a) * 2.6, rot: a, spin: 6 }); }
-        spawn('reflexo_fantasma', 8, SIG.reflexo_fantasma.cor, hx, 0.95, hz, { dur: 0.5, s0: 1.9, s1: 2.1, op: 0.55 });
+        spawnFlat('reflexo_fantasma', 6, SIG.reflexo_fantasma.cor, hx, hz, { dur: 0.5, s0: 1.0, s1: 2.0, op: 0.5 }); // 20261016trilha: sem silhueta do herói — só o brilho no chão
       }
     } else if (kind === 'special') {
       if (owned.has('sobrecarga_de_nexa')) { bump('sobrecarga_de_nexa'); spawnFlat('sobrecarga_de_nexa', 12, SIG.sobrecarga_de_nexa.cor, hx, hz, { dur: 0.7, s0: 0.8, s1: 3.6, op: 0.95 }); }
@@ -319,7 +319,7 @@ export function createPassiveSignatures(root, opts = {}) {
       if (tick('furia', 0.07)) { const a = Math.random() * 6.28; spawn('furia_cibernetica', 0, Math.random() < 0.5 ? 0xff3b3b : 0xff9a3a, hx + Math.cos(a) * 0.4, 0.3 + Math.random() * 0.8, hz + Math.sin(a) * 0.4, { dur: 0.8, s0: 0.16, s1: 0.03, vy: 1.3, vx: (Math.random() - 0.5) * 0.3, vz: (Math.random() - 0.5) * 0.3 }); }
     }
     if (!fp && on.has('impulso_neural') && tick('impulso', moved > 0.004 ? 0.08 : 0.3)) {
-      spawn('impulso_neural', 8, SIG.impulso_neural.cor, hx, 0.92, hz, { dur: 0.45, s0: 1.85, s1: 1.95, op: 0.42 });
+      stats.events.impulso_trilha = (stats.events.impulso_trilha || 0) + 1; // 20261016trilha: a silhueta-fantasma saiu; o RAIO no chão vem do passive-vfx (mesmo pool)
     }
     // escudo hexagonal / blindagem
     armorFlash = Math.max(0, armorFlash - dt);

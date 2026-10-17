@@ -18,9 +18,9 @@
  * Relógio próprio (ms) avançado por update(dt): congela no hit-stop/pausa.
  * Sem alocação por frame (objetos reutilizados).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261016montaria';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016montaria';
-import { getStat, STATS } from './modifiers.js?v=20261016montaria';
+import { getConfig, DEG } from './gameplay-config.js?v=20261016armas';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016armas';
+import { getStat, STATS } from './modifiers.js?v=20261016armas';
 
 export const ATK = Object.freeze({ IDLE: 'IDLE', STARTUP: 'STARTUP', ACTIVE: 'ACTIVE', RECOVERY: 'RECOVERY' });
 const EVENT_CAP = 120;
@@ -161,7 +161,7 @@ export function createPlayerCombat(deps) {
     if (!zone) return;
     // ARSENAL: ARCO / CAJADO → projétil real (1 disparo por golpe, no quadro do impacto); espada segue igual
     const wc = deps.weaponClass ? deps.weaponClass(state) : 'espada';
-    if (wc === 'arco' || wc === 'cajado') {
+    if (wc === 'arco' || wc === 'cajado' || wc === 'varinha') {
       if (!hitSet.has(-1)) { hitSet.add(-1); fireWeapon(state, zone, wc, cfg); }
       return;
     }

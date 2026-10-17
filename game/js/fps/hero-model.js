@@ -12,9 +12,9 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261016montaria';
-import { mergeStaticParts } from './merge-util.js?v=20261016montaria';
-import { attachHeroGlb } from './hero-glb.js?v=20261016montaria';
+import { getConfig } from '../gameplay-config.js?v=20261016armas';
+import { mergeStaticParts } from './merge-util.js?v=20261016armas';
+import { attachHeroGlb } from './hero-glb.js?v=20261016armas';
 
 const CYAN = 0x39f0ff;
 
@@ -367,7 +367,32 @@ export function createHeroModel(opts = {}) {
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
     mergeInfo = mergeStaticParts(root, keep);
   }
-  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null };
+  // ARMAS DUPLAS (20261016armas): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  const altW = {};
+  {
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });
+    const gMat = new THREE.MeshBasicMaterial({ color: 0x9fe8ff });
+    const mk = (n) => { const g = new THREE.Group(); g.name = `w_${n}`; g.visible = false; arms.R.wrist.add(g); g.position.set(0, -0.05, 0.02); altW[n] = g; return g; };
+    const bow = mk('arco');
+    const limb = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.02, 5, 18, Math.PI * 0.9), wMat); limb.rotation.set(0, Math.PI / 2, Math.PI / 2 + Math.PI * 0.05); limb.position.z = 0.08; bow.add(limb);
+    const str = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.006, 0.8), gMat); str.rotation.x = Math.PI / 2; str.position.set(0, 0, -0.04); str.name = 'bowString'; bow.add(str);
+    const staff = mk('cajado');
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.028, 1.45, 7), wMat); pole.rotation.x = Math.PI / 2; pole.position.z = 0.35; staff.add(pole);
+    const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.075, 1), gMat); orb.position.z = 1.1; orb.name = 'staffOrb'; staff.add(orb);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.008, 4, 16), gMat); halo.position.z = 1.1; staff.add(halo);
+    const wand = mk('varinha');
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.016, 0.42, 6), wMat); rod.rotation.x = Math.PI / 2; rod.position.z = 0.16; wand.add(rod);
+    const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.045, 0), gMat); star.position.z = 0.4; star.name = 'wandStar'; wand.add(star);
+    altW._g = gMat;
+  }
+  let weaponCls = 'espada';
+  function setWeaponClass(cls, glow) {
+    weaponCls = altW[cls] ? cls : 'espada';
+    blade.visible = weaponCls === 'espada';
+    for (const k of ['arco', 'cajado', 'varinha']) altW[k].visible = k === weaponCls && procBodyVisible;
+    if (glow != null) altW._g.color.setHex(glow);
+  }
+  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls };
   // ANTES do merge? não: o merge roda acima; o GLB entra depois e não é mesclado
   const glb = opts.glb === false ? null : attachHeroGlb(api, { styleId: opts.styleId, onReady: opts.onGlbReady });
   api.glb = glb;

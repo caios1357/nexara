@@ -5,7 +5,7 @@
  * 10 RIVAIS (BOT) — IA local, sem rede. Zona segura mais rápida (partida ~6–10 min).
  * A ARENA NEXARA (mapa completo) continua exatamente igual: este módulo só cria uma CÓPIA da config.
  */
-import { scaleBrConfig } from './br-map.js?v=20261016montaria';
+import { scaleBrConfig } from './br-map.js?v=20261016armas';
 
 function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -74,7 +74,7 @@ export function makeFastConfig(design, seed) {
   if (Array.isArray(F.herois) && F.herois.length) c.rivais.herois = F.herois.map((h) => ({ ...h })); // 10 nomes do FAST
   c.rivais.lutamSempre = !!F.rivaisLutamSempre;   // rivais se enfrentam a partida toda (não só com a zona fechando)
   c.rivais.nivelProprio = !!F.rivaisNivelProprio; // nível próprio: começam no NV1 e sobem com XP de monstros/rivais
-  delete c.rivais.cacaRivalDistArena; delete c.rivais.pisoVivos; // 20261016montaria: busca longa de rival é só do mapa grande da ARENA
+  delete c.rivais.cacaRivalDistArena; delete c.rivais.pisoVivos; // 20261016armas: busca longa de rival é só do mapa grande da ARENA
   c.rivais.xpMult = F.rivaisXpMult ?? 1;
   if (F.rivaisSaque) Object.assign(c.rivais.saque, F.rivaisSaque);
   // RIVAIS MAIS FORTES no FAST (HP/ataque, reação mais rápida, esquiva/bloqueio, pressão em grupo)

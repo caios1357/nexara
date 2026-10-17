@@ -3,7 +3,7 @@
  * cor do brilho (Nexa), capacete/chapéu, capa e modelo da espada. Salvo em player.heroStyle + player.heroCustom.
  * Prévia 3D ao vivo (hero-preview.js, contexto próprio só enquanto aberto).
  */
-import { HERO_STYLES, heroStyleOf } from './hero-styles.js?v=20261016montaria';
+import { HERO_STYLES, heroStyleOf } from './hero-styles.js?v=20261016armas';
 
 export const PRIMARY_SWATCHES = [0x3a4658, 0x26303c, 0x5a2a2a, 0x2a4a3a, 0x463a5c, 0x5a4a3a, 0x2a3a6a, 0x6a6a72];
 export const GLOW_SWATCHES = [0x3a9cff, 0x39f0ff, 0x46ff8a, 0xb46aff, 0xff8a2a, 0xff3a5a, 0xffd34a];
@@ -29,6 +29,7 @@ export function mountHeroStyleEditor(box, o = {}) {
       <div class="hse-row"><span>BRILHO</span><div class="hse-sw" id="hse-glow">${GLOW_SWATCHES.map((c) => `<button type="button" data-c="${c}" style="background:${hex(c)};box-shadow:0 0 8px ${hex(c)}" aria-label="brilho ${hex(c)}"></button>`).join('')}</div></div>
       <div class="hse-row"><span>PEÇAS</span><div class="hse-tg"><button type="button" id="hse-head">CAPACETE</button><button type="button" id="hse-cape">CAPA</button></div></div>
       <div class="hse-row"><span>ESPADA</span><div class="hse-tg" id="hse-weapon">${WEAPONS.map(([id, n]) => `<button type="button" data-w="${id}">${n}</button>`).join('')}</div></div>
+      ${o.onArma2 ? `<div class="hse-row hse-arma2"><span>ARMA 2</span><div class="hse-tg" id="hse-arma2">${[['arco', '🏹 ARCO'], ['cajado', '🔮 CAJADO'], ['varinha', '✨ VARINHA']].map(([id, n]) => `<button type="button" data-a2="${id}">${n}</button>`).join('')}</div></div>` : ''}
       <button type="button" class="hse-reset" id="hse-reset">Cores do estilo</button>
     </div></div>`;
   const $ = (id) => box.querySelector(`#${id}`);
@@ -54,10 +55,14 @@ export function mountHeroStyleEditor(box, o = {}) {
   box.querySelectorAll('#hse-primary button').forEach((b) => { b.onclick = () => { custom.primary = +b.dataset.c; paint(); }; });
   box.querySelectorAll('#hse-glow button').forEach((b) => { b.onclick = () => { custom.glow = +b.dataset.c; paint(); }; });
   box.querySelectorAll('#hse-weapon button').forEach((b) => { b.onclick = () => { custom.weapon = b.dataset.w; paint(); }; });
+  let arma2 = o.arma2 || 'arco';
+  const paintA2 = () => box.querySelectorAll('#hse-arma2 button').forEach((b) => b.classList.toggle('on', b.dataset.a2 === arma2));
+  box.querySelectorAll('#hse-arma2 button').forEach((b) => { b.onclick = () => { arma2 = b.dataset.a2; paintA2(); o.onArma2?.(arma2); }; });
+  paintA2();
   $('hse-head').onclick = () => { custom.head = !eff().head; paint(); };
   $('hse-cape').onclick = () => { custom.cape = !eff().cape; paint(); };
   $('hse-reset').onclick = () => { custom = {}; paint(); };
-  if (withPreview) import('./fps/hero-preview.js?v=20261016montaria').then((m) => {
+  if (withPreview) import('./fps/hero-preview.js?v=20261016armas').then((m) => {
     if (!box.isConnected) return;
     try { preview = m.createHeroPreview($('hse-canvas')); preview.set(styleId, custom, o.equip || {}); } catch (e) { console.warn('[estilo] prévia 3D indisponível', e); }
   }).catch(() => {});
@@ -67,6 +72,7 @@ export function mountHeroStyleEditor(box, o = {}) {
     /** VESTIÁRIO: equipamento mudou → prévia própria (se houver) acompanha */
     setEquip(eq) { o.equip = eq || {}; preview?.set(styleId, custom, o.equip); },
     /** aplica um estilo salvo (loadout) sem recriar o editor */
+    setArma2(c) { if (c) { arma2 = c; paintA2(); } },
     setValue(v) { if (!v) return; styleId = heroStyleOf(v.styleId || styleId).id; custom = { ...(v.custom || {}) }; paint(); },
     previewInfo: () => preview?.info() || null,
     dispose() { preview?.dispose(); preview = null; }

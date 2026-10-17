@@ -620,7 +620,7 @@ export const DEFAULTS = Object.freeze({
       dash: { dmgMult: 2.5, distance: 4.2, maxTargets: 5, stunMs: 450, hitRadius: 1.0 }
     },
     /** Premissas do DUELO PADRÃO usado pelo script de balanço (scripts/arsenal-dps.mjs): 20 s contra 1 inimigo corpo a corpo; a espada perde tempo colando/reposicionando. */
-    balance: { duelSec: 20, enemyDps: 14, enemyReach: 1.4, enemySpeed: 2.6, uptime: { espada: 0.88, arco: 0.97, cajado: 0.97 }, groupN: 3 }
+    balance: { duelSec: 20, enemyDps: 14, enemyReach: 1.4, enemySpeed: 2.6, uptime: { espada: 0.88, arco: 0.97, cajado: 0.97, varinha: 0.97 }, groupN: 3 }
   },
   /** Bloco 4 — trava de alvo (LOCK-ON). Nunca forçada. */
   lockOn: {

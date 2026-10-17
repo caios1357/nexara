@@ -7,7 +7,7 @@
  *    lidos do total em cache do estado ativo (recalculado só quando o equipamento muda).
  * Sem nada equipado do Arsenal: todos os modificadores são neutros (combate idêntico ao da build anterior).
  */
-import { addModifier, STATS } from './modifiers.js?v=20261016montaria';
+import { addModifier, STATS } from './modifiers.js?v=20261016armas';
 
 export const ARSENAL_SLOTS = Object.freeze(['helmet', 'armor', 'pants', 'weapon']);
 export const ALL_SLOTS = Object.freeze(['weapon', 'armor', 'helmet', 'pants', 'body', 'accessory']);
@@ -33,7 +33,8 @@ export function sumEquipAttrs(state) {
 /** Classe da arma principal: 'espada' (combo corpo a corpo atual) | 'arco' | 'cajado'. */
 export function weaponClassOf(state) {
   const w = state?.equipment?.weapon && state._items?.[state.equipment.weapon];
-  return w?.weaponClass || 'espada';
+  if (w?.weaponClass) return w.weaponClass;
+  const A = state?.player?.armas; return A && A.ativo === 2 ? A.s2 || 'arco' : 'espada'; // 20261016armas: slot 2 sem item = arma básica da classe escolhida
 }
 export function weaponFamilyOf(state) {
   const w = state?.equipment?.weapon && state._items?.[state.equipment.weapon];
@@ -52,7 +53,7 @@ export function getEquipTotals() { return { ...totals, weaponClass, weaponFamily
 export const currentWeaponClass = () => weaponClass;
 export const currentWeaponFamily = () => weaponFamily;
 /** Multiplicador do Poder mágico (só ataques/especiais do cajado). */
-export const magicMult = () => (weaponClass === 'cajado' ? 1 + (totals.poderMagico || 0) / 100 : 1);
+export const magicMult = () => (weaponClass === 'cajado' || weaponClass === 'varinha' ? 1 + (totals.poderMagico || 0) / 100 : 1);
 
 function ensureModifiers() {
   if (registered) return;

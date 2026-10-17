@@ -10,37 +10,37 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016montaria';
-import { buildArenaDressing } from './arena-dressing.js?v=20261016montaria';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016montaria';
-import { createHeroModel } from './hero-model.js?v=20261016montaria';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016montaria';
-import { attachHeroGlb } from './hero-glb.js?v=20261016montaria';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016montaria';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016montaria';
-import { createActionVfx } from './action-vfx.js?v=20261016montaria';
-import { createPassiveVfx } from './passive-vfx.js?v=20261016montaria';
-import { createFpsControls } from './fps-controls.js?v=20261016montaria';
-import { createViewmodel } from './viewmodel.js?v=20261016montaria';
-import { createDragonView } from './dragon-view.js?v=20261016montaria';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016montaria';
-import { getSprite } from '../assets.js?v=20261016montaria';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016montaria';
-import { createBossDragon } from './boss-dragon-view.js?v=20261016montaria';
-import { bossCfgFor } from '../boss-variants.js?v=20261016montaria';
-import { mergeStaticParts } from './merge-util.js?v=20261016montaria';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016montaria';
-import { attachDragonGlb } from './dragon-glb.js?v=20261016montaria';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016montaria';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016montaria';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016montaria';
-import { createPostFx } from './post-fx.js?v=20261016montaria';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016montaria';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016montaria';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016montaria';
-import { groundAt, setGroundFn } from './ground.js?v=20261016montaria';
-import { buildBrTerrain } from './br-terrain.js?v=20261016montaria';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016montaria';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261016armas';
+import { buildArenaDressing } from './arena-dressing.js?v=20261016armas';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261016armas';
+import { createHeroModel } from './hero-model.js?v=20261016armas';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261016armas';
+import { attachHeroGlb } from './hero-glb.js?v=20261016armas';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261016armas';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261016armas';
+import { createActionVfx } from './action-vfx.js?v=20261016armas';
+import { createPassiveVfx } from './passive-vfx.js?v=20261016armas';
+import { createFpsControls } from './fps-controls.js?v=20261016armas';
+import { createViewmodel } from './viewmodel.js?v=20261016armas';
+import { createDragonView } from './dragon-view.js?v=20261016armas';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261016armas';
+import { getSprite } from '../assets.js?v=20261016armas';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261016armas';
+import { createBossDragon } from './boss-dragon-view.js?v=20261016armas';
+import { bossCfgFor } from '../boss-variants.js?v=20261016armas';
+import { mergeStaticParts } from './merge-util.js?v=20261016armas';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261016armas';
+import { attachDragonGlb } from './dragon-glb.js?v=20261016armas';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261016armas';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261016armas';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261016armas';
+import { createPostFx } from './post-fx.js?v=20261016armas';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261016armas';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze } from './atmosphere.js?v=20261016armas';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261016armas';
+import { groundAt, setGroundFn } from './ground.js?v=20261016armas';
+import { buildBrTerrain } from './br-terrain.js?v=20261016armas';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261016armas';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -256,7 +256,7 @@ export function createFpsRenderer() {
         // M3D: modelo GLB animado (KayKit) carrega preguiçoso; até lá (ou se falhar) fica o procedural
         hero = buildHero();
         scene.add(hero.root);
-        hero.glb?.setStyle(heroStyleId, heroExtra);
+        hero.glb?.setStyle(heroStyleId, heroExtra); hero.setWeaponClass?.(heroExtra.weaponClass || "espada", heroExtra.equip?.weapon?.glow);
       } else {
         viewmodel = createViewmodel(fpsCam.camera);
       }
@@ -2852,14 +2852,14 @@ export function createFpsRenderer() {
     /** M3D: estilo do herói (cosmético) — troca o GLB sem perder o estado */
     hasPostFx: () => !!postFx,
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
-    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && !!hero.glb !== heroWantsGlb()) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); },
+    setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && !!hero.glb !== heroWantsGlb()) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
     getRivalMounts: () => ({ ...rivalMountStats }),
     mountSpecial: (el, x, y, r, cor) => mountSpecialFx(el, x, y, r, cor), getSpecialFx: () => ({ n: spFx.n, live: spFx.list.filter((f) => f.on).length }),
     getAbrigos: () => (abrigoVis ? { n: abrigoVis.n, drawn: !!abrigoVis.group, err: abrigoVis.err || null } : null),
     getMountAnim: () => ({ palKey: mountVis.palKey, parked: !!mountVis.park, anim: mountVis.view?.anim?.() || null, visible: !!mountVis.mesh?.visible, turn: +(mountVis.turn || 0).toFixed(2), roll: +(mountVis.view?.root?.children?.find?.((c) => c.type === "Group")?.rotation?.z || 0).toFixed(2) }), // 20261016voo: estado da animação de voo (testes)
     getModelInfo: () => ({ hero: hero?.glb ? { ...hero.glb.info } : null, readyAt: { ...modelReadyAt }, enemies: getEnemyGlbStats(), dragons: getDragonGlbStats(), lib: getModelStats(),
       enemyAnims: [...entityMeshes.values()].filter((e) => e.kind === 'mon' && !e.boss && e.mesh.userData.glb).map((e) => ({ uid: e.uid, status: e.mesh.userData.glb.status, model: e.mesh.userData.glb.model, anim: e.mesh.userData.glb.anim, clip: e.mesh.userData.glb.clip, changes: e.mesh.userData.glb.changes })) }),
-    getHero: () => (hero ? { ...hero.getDebug(), x: hero.root.position.x / TILE, y: hero.root.position.z / TILE } : null),
+    getHero: () => (hero ? { ...hero.getDebug(), weapon: hero.weaponClass?.() || null, x: hero.root.position.x / TILE, y: hero.root.position.z / TILE } : null),
     getCamArm: () => ({ ...fpsCam.getArm(), cam: { x: fpsCam.camera.position.x, y: fpsCam.camera.position.y, z: fpsCam.camera.position.z }, inWall: fpsCam.cameraInWall() }),
     tileToScreen(tx, ty) {
       if (!renderer || !canvas) return { x: 0, y: 0 };

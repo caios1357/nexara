@@ -6,13 +6,13 @@
 import {
   createCamera, resizeCameraCanvas, updateCamera, applyCamera,
   tileToWorld, worldToTile, canvasToWorld, tileToCanvasCss, adaptZoom, ISO
-} from './camera.js?v=20261016montaria';
+} from './camera.js?v=20261016armas';
 import {
   drawIsoTile, drawWallBlock, drawProp, drawPlayer, drawNpc, drawBot
-} from './sprites.js?v=20261016montaria';
-import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261016montaria';
-import { getTileType, monstersInZone } from './map.js?v=20261016montaria';
-import { getMonsterPos } from './enemy-ai.js?v=20261016montaria';
+} from './sprites.js?v=20261016armas';
+import { createVfx, updateVfx, drawVfx } from './vfx.js?v=20261016armas';
+import { getTileType, monstersInZone } from './map.js?v=20261016armas';
+import { getMonsterPos } from './enemy-ai.js?v=20261016armas';
 
 const TILE_FILL = {
   g6: {

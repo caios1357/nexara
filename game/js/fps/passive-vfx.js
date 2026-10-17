@@ -10,12 +10,14 @@
  * Tudo em metros (1 tile = TILE m). O estado vem de main (passive-procs.getView()).
  */
 import * as THREE from 'three';
-import { TILE } from './fps-camera.js?v=20261016montaria';
-import { createPassiveSignatures } from './passive-signatures.js?v=20261016montaria';
+import { getGroundTrail } from './ground-trail.js?v=20261016armas';
+import { TILE } from './fps-camera.js?v=20261016armas';
+import { createPassiveSignatures } from './passive-signatures.js?v=20261016armas';
 
 const COL = { furia: 0xff3b3b, impulso: 0x39a8ff, shield: 0x5ff0ff, foco: 0xffd23f, condutor: 0x4f8dff, mark: 0xff8a1f, divine: 0xffd76a };
 
 export function createPassiveVfx(scene) {
+  const gTrail = getGroundTrail(scene);
   const root = new THREE.Group();
   root.name = 'passiveVfx';
   scene.add(root);
@@ -155,7 +157,7 @@ export function createPassiveVfx(scene) {
    * @param {THREE.Object3D|null} dragonRoot
    */
   function update(dt, hero, v, markPos, dragonRoot, camPos = null, ext = null) {
-    t += dt;
+    t += dt; gTrail.update();
     sigCtx.hero.x = hero.x; sigCtx.hero.z = hero.z; sigCtx.fp = fp; sigCtx.v = v; sigCtx.markPos = markPos;
     sigCtx.dragonRoot = dragonRoot && dragonRoot.visible ? dragonRoot : null;
     if (ext) { sigCtx.owned = ext.owned || sigCtx.owned; sigCtx.aimPos = ext.aimPos || null; sigCtx.hpFrac = ext.hpFrac ?? 1; sigCtx.nexaFrac = ext.nexaFrac ?? 0; if (ext.camRight) sigCtx.camRight = ext.camRight; }
@@ -214,11 +216,7 @@ export function createPassiveVfx(scene) {
       ghostAcc += dt;
       if (ghostAcc >= 0.07 && (moved > 0.004 || ghostAcc >= 0.25)) {
         ghostAcc = 0;
-        const g = ghosts[ghostNext];
-        ghostNext = (ghostNext + 1) % ghosts.length;
-        g.m.position.set(hx, 0, hz);
-        g.life = g.dur;
-        g.m.visible = true;
+        if (!fp) gTrail.emit(hx, hz, 'impulso'); // 20261016trilha: IMPULSO deixa RAIO no chão (sem cilindro-fantasma azul)
       }
     }
     if (fp) {
@@ -291,7 +289,7 @@ export function createPassiveVfx(scene) {
   function sigEvent(kind, d) { sig.event(kind, d || {}, sigCtx); }
 
   function counts() {
-    return { ...vis, markUid: markInfo.visible ? markInfo.uid : null, ghosts: ghosts.filter((g) => g.life > 0).length, bursts: bursts.filter((b) => b.life > 0).length };
+    return { ...vis, markUid: markInfo.visible ? markInfo.uid : null, ghosts: ghosts.filter((g) => g.life > 0).length, trail: gTrail.stats().live, trailEmit: gTrail.stats().emit, bursts: bursts.filter((b) => b.life > 0).length };
   }
   return { root, update, burst, counts, sigEvent, sigCounts: () => sig.counts(), setFirstPerson: (v) => { fp = !!v; } };
 }

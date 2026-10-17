@@ -7,7 +7,7 @@
  * - O dano sai pelo MESMO caminho do golpe (applyPlayerHit → applyDamageToMonster: XP/loot/quests/MCB).
  * - Arrays exportados (heroProjectiles/heroBursts) são lidos pelo fps-renderer (InstancedMesh, cor da família).
  */
-import { hasLineOfSight } from './collision.js?v=20261016montaria';
+import { hasLineOfSight } from './collision.js?v=20261016armas';
 
 export const heroProjectiles = [];
 export const heroBursts = [];
@@ -37,7 +37,8 @@ export function createWeaponProjectiles(deps) {
       id: ++seq, x: o.x, y: o.y, sx: o.x, sy: o.y, yaw: o.yaw, vx: Math.sin(o.yaw), vy: -Math.cos(o.yaw),
       targetUid: o.target?.uid ?? null, kind: o.kind, speed: o.speed, range: o.range, radius: o.radius ?? 0.3,
       turn: (o.turnDeg ?? 540) * Math.PI / 180, color: o.color, family: o.family || null, alive: true, born: clock,
-      traveled: 0, onHit: o.onHit, splash: o.splash || null, pierce: o.pierce || 0, hitUids: new Set()
+      traveled: 0, onHit: o.onHit, splash: o.splash || null, pierce: o.pierce || 0, hitUids: new Set(),
+      air: (o.target?.rivalFly?.alt || 0) > 1 // 20261016armas (alcance V4): tiro mirado num VOADOR passa por cima dos muros
     };
     // aponta direto para o alvo travado/escolhido (mira assistida) — o giro limitado corrige o resto
     if (o.target) {
@@ -104,7 +105,7 @@ export function createWeaponProjectiles(deps) {
         const step = p.speed * h;
         const nx = p.x + p.vx * step;
         const ny = p.y + p.vy * step;
-        if (!hasLineOfSight(zone, p.x, p.y, nx, ny)) { p.alive = false; stats.walls++; burst(p.x, p.y, 0.4, p.color, 'spark', 200); break; }
+        if (!p.air && !hasLineOfSight(zone, p.x, p.y, nx, ny)) { p.alive = false; stats.walls++; burst(p.x, p.y, 0.4, p.color, 'spark', 200); break; }
         p.x = nx; p.y = ny; p.traveled += step;
         for (const m of state.monstersAlive) {
           if (!m.alive || m.zone !== state.zoneId || p.hitUids.has(m.uid)) continue;

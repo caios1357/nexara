@@ -7,8 +7,9 @@
  * Materiais/geometrias criados uma vez; tudo em coordenadas de mundo (1 tile = TILE m).
  */
 import * as THREE from 'three';
-import { TILE } from './fps-camera.js?v=20261016montaria';
-import { getConfig } from '../gameplay-config.js?v=20261016montaria';
+import { TILE } from './fps-camera.js?v=20261016armas';
+import { getConfig } from '../gameplay-config.js?v=20261016armas';
+import { getGroundTrail } from './ground-trail.js?v=20261016armas';
 
 const COLORS = {
   golpe_poderoso: 0x9ffbff,
@@ -90,7 +91,11 @@ export function createActionVfx(scene) {
   }
   let ghostNext = 0;
   const trail = { active: false, left: 0, every: 0.05, acc: 0, color: COLORS.dodge };
+  const gTrail = getGroundTrail(scene);
   function spawnGhost(x, z, color) {
+    // 20261016trilha: sem "homem fantasma" azul — marca elemental no chão (DASH = fogo, ESQUIVA = vento)
+    gTrail.emit(x, z, color === COLORS.dash ? 'dash' : 'dodge');
+    if (getConfig().graphics?.ghostTrail !== true) return;
     const g = ghosts[ghostNext];
     ghostNext = (ghostNext + 1) % ghosts.length;
     g.m.material.color.setHex(color);
@@ -191,6 +196,7 @@ export function createActionVfx(scene) {
    * @param {{x:number,z:number}|null} lockPos alvo travado (m) ou null
    */
   function update(dt, hero, lockPos) {
+    gTrail.update();
     for (const r of rings) {
       if (r.life <= 0) continue;
       r.life -= dt;
@@ -268,7 +274,7 @@ export function createActionVfx(scene) {
   function counts() {
     return {
       rings: rings.filter((r) => r.life > 0).length,
-      ghosts: ghosts.filter((g) => g.life > 0).length,
+      ghosts: ghosts.filter((g) => g.life > 0).length, trail: gTrail.stats().live, trailEmit: gTrail.stats().emit,
       spin: spin.visible, column: column.visible, columnPhase: colSt.phase, columnOpacity: +column.material.opacity.toFixed(3),
       pool: { rings: rings.length, ghosts: ghosts.length }
     };

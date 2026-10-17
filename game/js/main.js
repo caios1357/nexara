@@ -1,77 +1,78 @@
-import { loadAllData } from './data-loader.js?v=20261016montaria';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261016montaria';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261016montaria';
-import { addToInventory } from '../../rules/loot.js?v=20261016montaria';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261016montaria';
-import { rollLoot } from '../../rules/loot.js?v=20261016montaria';
-import { isWalkable } from './map.js?v=20261016montaria';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261016montaria';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261016montaria';
+import { loadAllData } from './data-loader.js?v=20261016armas';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261016armas';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261016armas';
+import { addToInventory } from '../../rules/loot.js?v=20261016armas';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel } from './state.js?v=20261016armas';
+import { rollLoot } from '../../rules/loot.js?v=20261016armas';
+import { isWalkable } from './map.js?v=20261016armas';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261016armas';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261016armas';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, swordStats, resetSwordStats
-} from './actions.js?v=20261016montaria';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261016montaria';
-import { createMcbUi } from './mcb-ui.js?v=20261016montaria';
-import { createVestiario } from './vestiario.js?v=20261016montaria';
-import { createBerco } from './dragon-berco.js?v=20261016montaria';
-import { bossCfgFor } from './boss-variants.js?v=20261016montaria';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261016montaria';
-import { createMount } from './mount.js?v=20261016montaria';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261016montaria';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261016montaria';
-import { getLocalProfile, authProviders } from './auth.js?v=20261016montaria';
-import { lastWalletCheck } from './save.js?v=20261016montaria';
-import { maybeTrigger0217 } from './events.js?v=20261016montaria';
-import { createRenderer } from './renderer.js?v=20261016montaria';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261016montaria';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261016montaria';
-import { itemRarity } from './sprites.js?v=20261016montaria';
-import { createArenaState, isArenaState } from './arena.js?v=20261016montaria';
-import { createMobileControls } from './mobile-controls.js?v=20261016montaria';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261016montaria';
+} from './actions.js?v=20261016armas';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261016armas';
+import { createMcbUi } from './mcb-ui.js?v=20261016armas';
+import { createVestiario } from './vestiario.js?v=20261016armas';
+import { createBerco } from './dragon-berco.js?v=20261016armas';
+import { bossCfgFor } from './boss-variants.js?v=20261016armas';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261016armas';
+import { createMount } from './mount.js?v=20261016armas';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261016armas';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261016armas';
+import { getLocalProfile, authProviders } from './auth.js?v=20261016armas';
+import { lastWalletCheck } from './save.js?v=20261016armas';
+import { maybeTrigger0217 } from './events.js?v=20261016armas';
+import { createRenderer } from './renderer.js?v=20261016armas';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261016armas';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261016armas';
+import { itemRarity } from './sprites.js?v=20261016armas';
+import { createArenaState, isArenaState } from './arena.js?v=20261016armas';
+import { createMobileControls } from './mobile-controls.js?v=20261016armas';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261016armas';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261016montaria';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261016montaria';
-import { createArenaRun } from './arena-run.js?v=20261016montaria';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261016montaria';
+} from './enemy-ai.js?v=20261016armas';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261016armas';
+import { createArenaRun } from './arena-run.js?v=20261016armas';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261016armas';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261016montaria';
-import { generateBrMap } from './br-map.js?v=20261016montaria';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261016montaria';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261016montaria';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261016montaria';
-import { createMusic } from './music.js?v=20261016montaria';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261016montaria';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261016montaria';
-import { createBossHud } from './boss-hud.js?v=20261016montaria';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261016montaria';
-import { createPlayerMotion } from './player-motion.js?v=20261016montaria';
-import { createPlayerCombat } from './player-combat.js?v=20261016montaria';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261016montaria';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261016armas';
+import { generateBrMap } from './br-map.js?v=20261016armas';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261016armas';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261016armas';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261016armas';
+import { createMusic } from './music.js?v=20261016armas';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261016armas';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261016armas';
+import { createBossHud } from './boss-hud.js?v=20261016armas';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261016armas';
+import { createPlayerMotion } from './player-motion.js?v=20261016armas';
+import { createPlayerCombat } from './player-combat.js?v=20261016armas';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261016armas';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261016montaria';
+} from './sfx.js?v=20261016armas';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261016montaria';
-import { createPassiveUi } from './passives-ui.js?v=20261016montaria';
-import { createSettingsMenu } from './settings-menu.js?v=20261016montaria';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261016montaria';
-import { createPassiveHud } from './passive-hud.js?v=20261016montaria';
-import { createDragon } from './companion-dragon.js?v=20261016montaria';
-import { createFullscreenUi } from './fullscreen.js?v=20261016montaria';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016montaria';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261016montaria';
+} from './passives.js?v=20261016armas';
+import { createPassiveUi } from './passives-ui.js?v=20261016armas';
+import { createSettingsMenu } from './settings-menu.js?v=20261016armas';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261016armas';
+import { createPassiveHud } from './passive-hud.js?v=20261016armas';
+import { createDragon } from './companion-dragon.js?v=20261016armas';
+import { createFullscreenUi } from './fullscreen.js?v=20261016armas';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261016armas';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261016armas';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261016armas';
 
 let DATA = null;
 let state = null;
@@ -173,13 +174,15 @@ function fireHeroShot(s, wc, target, shot, pc, range) {
   const color = familyColor(s);
   const bow = wc === 'arco';
   const p = motion.getPos();
-  heroShots.fire({
-    x: p.x + Math.sin(shot.yaw) * 0.35, y: p.y - Math.cos(shot.yaw) * 0.35, yaw: shot.yaw, target,
+  const n = Math.max(1, pc.rajada || 1); const per = pc.dmgMult ?? 1; // 20261016armas: VARINHA = rajada de 2 raios rápidos (½ dano cada)
+  const one = (k) => { const yaw = shot.yaw + (n > 1 ? (k - (n - 1) / 2) * 0.05 : 0); const pp = k ? motion.getPos() : p; heroShots.fire({
+    x: pp.x + Math.sin(yaw) * 0.35, y: pp.y - Math.cos(yaw) * 0.35, yaw, target,
     kind: bow ? 'arrow' : 'bolt', speed: pc.velocidade || (bow ? 22 : 15), range: range + 0.6, radius: pc.raio || 0.35,
     color, family: weaponFamilyOf(s),
-    onHit: (mon, pr) => combat.applyProjectileHit(s, mon, shot, pr.x, pr.y, 1),
-    splash: !bow && pc.splashRaio ? { radius: pc.splashRaio, onSplash: (mon, pr) => combat.applyProjectileHit(s, mon, shot, pr.x, pr.y, pc.splashMult ?? 0.5) } : null
-  });
+    onHit: (mon, pr) => combat.applyProjectileHit(s, mon, shot, pr.x, pr.y, per),
+    splash: !bow && pc.splashRaio ? { radius: pc.splashRaio, onSplash: (mon, pr) => combat.applyProjectileHit(s, mon, shot, pr.x, pr.y, (pc.splashMult ?? 0.5) * per) } : null
+  }); };
+  one(0); for (let k = 1; k < n; k++) setTimeout(() => { if (state === s) one(k); }, (pc.intervaloMs || 90) * k);
 }
 
 /**
@@ -413,18 +416,19 @@ function syncHeroLook(s) {
   if (!s?.player) return;
   if (s === state) maybeTestGrant();
   // ARSENAL: atributos do equipamento → modificadores reais (recalcula só quando muda/troca de estado)
-  const es = JSON.stringify(s.equipment || {});
+  const A = ensureArmas(s); // ARMAS DUPLAS: slot 1 espada / slot 2 arco|cajado|varinha (troca sem item muda só a classe → entra na assinatura)
+  const es = JSON.stringify(s.equipment || {}) + (A ? `|${A.ativo}|${A.s2}` : '');
   if (s !== equipSigState || es !== equipSig) { equipSigState = s; equipSig = es; refreshEquipment(s); applyDerivedStats(s); }
   mcbUi?.updateHud(s);
-  const sig = `${s.player.heroStyle || ''}|${JSON.stringify(s.equipment || {})}|${JSON.stringify(s.player.heroCustom || {})}`;
+  const sig = `${s.player.heroStyle || ''}|${JSON.stringify(s.equipment || {})}|${JSON.stringify(s.player.heroCustom || {})}|${A ? A.ativo + A.s2 : ''}`;
   if (sig === heroLookSig) return;
   heroLookSig = sig;
-  renderer.setHeroStyle?.(heroStyleOf(s).id, { equip: equipmentVisual(s), custom: s.player.heroCustom || {} });
+  renderer.setHeroStyle?.(heroStyleOf(s).id, { equip: equipmentVisual(s), custom: s.player.heroCustom || {}, weaponClass: weaponClassOf(s) });
 }
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261016montaria').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261016armas').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -1368,6 +1372,20 @@ const mountFireStats = { n: 0, hits: 0, lastHits: 0 };
 const dSpecialStats = { n: 0, hits: 0, heal: 0, ticks: 0, last: null };
 function specialEl() { const m = state?.br?.mount; return m?.elemento || 'natureza'; }
 function specialUi() { const E = getConfig().mount?.especiais?.[specialEl()]; const m = state?.br?.mount; if (!E || !m) return {}; const left = Math.max(0, (m.spUntil || 0) - (m.clock || 0)); return { spName: E.nome, spIco: E.ico, spColor: E.cor, spCdPct: left > 0 ? left / E.cdMs * 100 : 0 }; }
+/** ARMAS DUPLAS — TROCAR (botão de toque / tecla X): espada ⇄ arma 2, recarga curta */
+function weaponSwap() {
+  if (!state?.player) return { ok: false, why: 'off' };
+  if (mount.isActive()) return { ok: false, why: 'montado' };
+  const r = swapWeapon(state); if (!r.ok) return r;
+  syncHeroLook(state); try { safeSave(); } catch { /* arena/sem save: só a partida */ } // slot ativo vai para o save (fora da arena)
+  const inf = SLOT_INFO[r.cls] || SLOT_INFO.espada; ui?.showToast?.(`${inf.ico} ${inf.nome}`);
+  return r;
+}
+function weaponUi() {
+  if (!state?.player?.armas) return;
+  const A = state.player.armas; const cur = activeClass(state); const nxt = A.ativo === 2 ? 'espada' : A.s2;
+  mobile?.setWeaponUi?.({ active: cur, next: nxt, nextIco: SLOT_INFO[nxt]?.ico, cdPct: (swapCdLeft() / SWAP_CD_MS) * 100 });
+}
 function dragonSpecial() {
   if (!state || !mount.isActive()) return { ok: false, why: 'off' };
   const m = state.br.mount; const el = specialEl(); const E = getConfig().mount?.especiais?.[el]; if (!E) return { ok: false, why: 'sem' };
@@ -1624,7 +1642,7 @@ function pushButtonInfo(dt) {
   btnInfoAcc += dt;
   if (btnInfoAcc < 0.09 || !mobile?.updateActionButtons || !state) return;
   btnInfoAcc = 0;
-  mobile.updateActionButtons(actions.getButtonsInfo(state));
+  mobile.updateActionButtons(actions.getButtonsInfo(state)); weaponUi();
   { const mv = mount.status(); { const vb = mv.active ? mount.view() : null; mobile.setMountUi?.({ show: mv.canMount, flying: mv.active, phase: mv.phase, breathPct: vb ? vb.breath / Math.max(1, vb.cfg?.breath?.max ?? 100) * 100 : 100, ...specialUi() }); } }
   if (isGameVisible()) passiveHud.update(procs.getBuffs(), { firstPerson: renderer.mode === 'fps' && renderer.viewMode === 'first' });
 }
@@ -1654,7 +1672,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261016montaria').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261016armas').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1818,6 +1836,7 @@ async function boot() {
     onDodge: () => (mount.isActive() ? null : dodgePress()) /* 20261016: montado no toque, ESQUIVA não faz nada — DESCER é o botão próprio (segurar/toque duplo), longe do FOGO */, onDescend: () => (canCommand() && mount.isActive() ? mount.toggleDescend() : null),
     onMount: () => mountPress(),
     onDragonSpecial: () => (canCommand() ? dragonSpecial() : null),
+    onSwapWeapon: () => (canCommand() ? weaponSwap() : null),
     onDefend: (v) => defendSet(v),
     onSpecial: (id) => specialPress(id),
     // Bloco 6: sem botão ALVO — tocar no inimigo trava; nele de novo ou no vazio solta
@@ -1906,6 +1925,7 @@ async function boot() {
       config: () => DATA.arena_br
     },
     /** DRAGON BERÇO (testes/debug) */
+    armas: { swap: () => weaponSwap(), state: () => (state?.player?.armas ? { ...state.player.armas, s2Id: { ...state.player.armas.s2Id }, cls: activeClass(state), wc: weaponClassOf(state) } : null), setSlot2: (c) => { const ok = setSlot2(state, c); syncHeroLook(state); return ok; }, stats: () => ({ ...swapStats }), cdMs: SWAP_CD_MS, slots: SLOT2 },
     mount: { coverStats: () => ({ ...coverStats }), cover: (x, y) => arenaBr.coverAt(x, y), coverList: () => arenaBr.coverList(), testHit: (uid) => (navigator.webdriver ? monsterAttackPlayer(state, uid, { rangeChecked: true }) : null), fire: () => dragonFire(), fireStats: () => ({ ...mountFireStats }), special: () => dragonSpecial(), specialStats: () => ({ ...dSpecialStats, el: specialEl(), ui: specialUi() }), view: () => mount.view(), tryMount: () => mountPress(), descend: () => mount.toggleDescend(), step: (ms) => mount.step(ms), forceLand: (w) => mount.forceLand(w || 'teste'), render: () => mount.renderView(), grantForTest: (by) => mount.onGiantKilled(by || 'player'), has: () => mount.has() },
     berco: { open: (tab) => berco.open(tab), close: () => berco.close(), isOpen: () => berco.isOpen(), info: () => berco.info(), tab: (t) => berco.tab(t), select: (id) => berco.select(id), chosen: () => getChosenBB(DATA), pbb: () => ({ ...pbb, S: pbb.S && { ...pbb.S } }), palette: () => bbPalette() },
     /** VESTIÁRIO (testes/debug) */
@@ -2178,7 +2198,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261016montaria');
+      const { addXp } = await import('./state.js?v=20261016armas');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2712,7 +2732,7 @@ function onBrEvent(kind, info) {
   }
   else if (kind === 'spectate_end') specFeed.push(info.winner ? `Último herói: ${info.winner} (BOT).` : 'Todos os rivais caíram.');
   else if (kind === 'saddle_player') { big('<b>SELA DO GIGANTE CONQUISTADA!</b>Toque em MONTAR (ou tecla M) para voar. ATAQUE = fogo · ESQUIVA = DESCER.', 3600); }
-  else if (kind === 'mount_up') { big(`<b>DRAGÃO MONTADO</b>${info.mode === 'chamado' ? 'Chamado do Gigante' : 'Sela do Gigante'} · ${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'} · toque DESCER para pousar.`, 2400); }
+  else if (kind === 'mount_up') { big(`<b class="gb-mount">🐉 DRAGÃO MONTADO</b>${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'}`, 1600); } // 20261016armas: compacto e no alto — não cobre DESCER
   else if (kind === 'mount_forced' && info?.why === 'abrigo') { ui.showToast('ABRIGO: o dragão pousou na borda — siga a pé.'); }
   else if (kind === 'mount_hit_down') { big('<b>DRAGÃO ABATIDO!</b>Você está caindo…', 1600); brSfx('warn'); }
   else if (kind === 'mount_shot_down') { big(`<b>VOCÊ CAIU${info?.fall ? ' (−' + info.fall + ' HP)' : ''}</b>O dragão renasce no covil em ${Math.round((info?.respawnMs || 90000) / 1000)} s.`, 2600); }
@@ -3087,6 +3107,7 @@ function wireGameControls() {
     if (!isInputBlocked() && !e.repeat) {
       if (k === 'm') { mountPress(); return; }
       if (k === 'r' && mount.isActive()) { dragonSpecial(); return; }
+      if (k === 'x') { weaponSwap(); return; }
       if (k === 'q') { defendSet(true); return; }
       if (k === 'e') { attackPress(); return; }
       if (k === '1') { specialPress('golpe_poderoso'); return; }

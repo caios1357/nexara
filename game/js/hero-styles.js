@@ -39,5 +39,8 @@ export function equipmentVisual(state) {
   const eq = state?.equipment || {};
   const it = (id) => (id && state?._items?.[id]) || null;
   const v = (slot) => it(eq[slot])?.visual || null;
-  return { weapon: v('weapon'), armor: v('armor'), body: v('body'), accessory: v('accessory'), helmet: v('helmet'), pants: v('pants'), ids: { ...eq } };
+  // ARMAS DUPLAS: slot 2 sem item → modelo básico da classe escolhida (arco/cajado/varinha)
+  const A = state?.player?.armas; const BASE = { arco: '1H_Crossbow', cajado: '2H_Staff', varinha: '1H_Wand' };
+  const wv = v('weapon') || (A && A.ativo === 2 && BASE[A.s2] ? { model: BASE[A.s2], color: 0x2a2f3a, glow: 0x7fd8ff, family: 'basico' } : null);
+  return { weapon: wv, armor: v('armor'), body: v('body'), accessory: v('accessory'), helmet: v('helmet'), pants: v('pants'), ids: { ...eq } };
 }

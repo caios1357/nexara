@@ -1404,6 +1404,108 @@
         "color": 1713206,
         "model": "1H_Wand"
       }
+    },
+    {
+      "id": "eq_infernal_varinha",
+      "name": "Varinha Infernal",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Varinha da família Infernal. Metal escuro do Circuito Rubro; a ponta solta faíscas de brasa.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 7,
+        "ranged": true
+      },
+      "category": "varinha",
+      "rarity": "raro",
+      "family": "infernal",
+      "weaponClass": "varinha",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 7,
+        "poderMagico": 12,
+        "critico": 3
+      },
+      "visual": {
+        "family": "infernal",
+        "glow": 16726558,
+        "color": 2757652,
+        "model": "1H_Wand"
+      }
+    },
+    {
+      "id": "eq_draconico_varinha",
+      "name": "Varinha Dracônica",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 400,
+      "description": "Varinha da família Dracônica. Osso de dragão polido com uma escama viva na ponta.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 6,
+        "defesa": 3,
+        "ranged": true
+      },
+      "category": "varinha",
+      "rarity": "epico",
+      "family": "draconico",
+      "weaponClass": "varinha",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "avancado",
+      "attrs": {
+        "dano": 6,
+        "poderMagico": 10,
+        "defesa": 3,
+        "resistencia": 4
+      },
+      "visual": {
+        "family": "draconico",
+        "glow": 2949064,
+        "color": 1456690,
+        "model": "1H_Wand"
+      }
+    },
+    {
+      "id": "eq_cibernetico_varinha",
+      "name": "Varinha Cibernética",
+      "type": "equipment",
+      "stackable": false,
+      "max_stack": 1,
+      "value": 150,
+      "description": "Varinha da família Cibernética. Bastão de fibra de luz; dispara raios em sequência.",
+      "equip_slot": "weapon",
+      "stats": {
+        "skill": "distancia",
+        "ataque": 5,
+        "ranged": true
+      },
+      "category": "varinha",
+      "rarity": "raro",
+      "family": "cibernetico",
+      "weaponClass": "varinha",
+      "arsenal": true,
+      "discardable": false,
+      "priceTier": "intermediario",
+      "attrs": {
+        "dano": 5,
+        "poderMagico": 9,
+        "velocidade": 4,
+        "recarga": 8
+      },
+      "visual": {
+        "family": "cibernetico",
+        "glow": 3844351,
+        "color": 1713206,
+        "model": "1H_Wand"
+      }
     }
   ]
 }

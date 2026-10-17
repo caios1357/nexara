@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261016montaria';
-import { pushLog } from './state.js?v=20261016montaria';
-import { isArenaState } from './arena.js?v=20261016montaria';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261016montaria';
-import { ICONS } from './icons.js?v=20261016montaria';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261016armas';
+import { pushLog } from './state.js?v=20261016armas';
+import { isArenaState } from './arena.js?v=20261016armas';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261016armas';
+import { ICONS } from './icons.js?v=20261016armas';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -165,6 +165,10 @@ export function createMobileControls(hooks) {
       <button type="button" class="mc-btn mc-dspecial" data-power="dspecial" title="Poder especial do dragão (R)" aria-label="Poder especial do dragão">
         <span class="mc-ico">✦</span>
         <span class="mc-lbl">PODER</span>
+      </button>
+      <button type="button" class="mc-btn mc-trocar" data-power="trocar" title="Trocar arma (X)" aria-label="Trocar arma">
+        <span class="mc-ico">🏹</span>
+        <span class="mc-lbl">TROCAR</span>
       </button>
     `;
     const wrap = document.getElementById('canvas-wrap') || document.getElementById('game-screen');
@@ -652,8 +656,18 @@ export function createMobileControls(hooks) {
     d?.classList.toggle('mc-descend', false);
     const at = root.querySelector('.mc-attack'); const al = at?.querySelector('.mc-lbl'); // montado: ATAQUE vira FOGO (anel de Fôlego)
     if (al) al.textContent = u.flying ? 'FOGO' : 'ATAQUE';
-    { const sp = root.querySelector('.mc-dspecial'); if (sp) { const sl = sp.querySelector('.mc-lbl'), si = sp.querySelector('.mc-ico'); if (sl) sl.textContent = u.spName || 'PODER'; if (si) si.textContent = u.spIco || '✦'; sp.style.setProperty('--spc', u.spColor || '#9fffb0'); sp.classList.toggle('mc-cd', (u.spCdPct ?? 0) > 0); sp.style.setProperty('--cd', `${Math.round(u.spCdPct ?? 0)}%`); } }
+    { const sp = root.querySelector('.mc-dspecial'); if (sp) { const sl = sp.querySelector('.mc-lbl'), si = sp.querySelector('.mc-ico'); if (sl) sl.textContent = u.spName || 'PODER'; if (si) si.textContent = u.spIco || '✦'; sp.style.setProperty('--spc', u.spColor || '#9fffb0'); sp.classList.toggle('mc-spcd', (u.spCdPct ?? 0) > 0); sp.style.setProperty('--cd', `${Math.round(u.spCdPct ?? 0)}%`); } }
     at?.classList.toggle('mc-fogo', !!u.flying); at?.style.setProperty('--fogo', `${bp}%`);
+  }
+
+  /** ARMAS DUPLAS: ícone mostra a arma que ENTRA ao tocar; varredura = recarga curta da troca */
+  let weapKey = '';
+  function setWeaponUi(u) {
+    const cd = u.cdPct ?? 0; const key = `${u.next || ''}|${u.active || ''}|${cd > 0 ? 1 + Math.round(cd / 20) : 0}`; if (key === weapKey) return; weapKey = key;
+    const b = root.querySelector('.mc-trocar'); if (!b) return;
+    const i = b.querySelector('.mc-ico'); if (i) i.textContent = u.nextIco || '⇄';
+    b.dataset.next = u.next || ''; b.dataset.active = u.active || '';
+    b.style.setProperty('--cd', `${Math.round(u.cdPct ?? 0)}%`); b.classList.toggle("mc-swcd", (u.cdPct ?? 0) > 0);
   }
 
   /** Bloco 4: recarga (varredura radial + segundos) / Nexa insuficiente / ativo. */
@@ -735,6 +749,7 @@ export function createMobileControls(hooks) {
 
     if (id === 'mount') { hooks.onMount?.(); return; }
     if (id === 'dspecial') { hooks.onDragonSpecial?.(); return; }
+    if (id === 'trocar') { hooks.onSwapWeapon?.(); return; }
     if (id === 'dodge') { hooks.onDodge?.(); return; }
     if (SPECIAL_BTN.has(id)) { hooks.onSpecial?.(id); return; }
   }
@@ -792,7 +807,7 @@ export function createMobileControls(hooks) {
     isVisible: () => visible,
     releaseAll,
     updateActionButtons,
-    setMountUi,
+    setMountUi, setWeaponUi,
     descendStats: () => ({ ...descendStats }),
     flashButton,
     setLockActive,

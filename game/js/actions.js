@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261016montaria';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261016montaria';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261016montaria';
-import { addReputation } from '../../rules/reputation.js?v=20261016montaria';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261016montaria';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261016montaria';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261016montaria';
-import { reveal } from './arquivo.js?v=20261016montaria';
-import { checkEventReady } from './events.js?v=20261016montaria';
-import { getConfig } from './gameplay-config.js?v=20261016montaria';
-import { getStat, STATS } from './modifiers.js?v=20261016montaria';
+import { trainSkill } from '../../rules/skills.js?v=20261016armas';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261016armas';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261016armas';
+import { addReputation } from '../../rules/reputation.js?v=20261016armas';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261016armas';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261016armas';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261016armas';
+import { reveal } from './arquivo.js?v=20261016armas';
+import { checkEventReady } from './events.js?v=20261016armas';
+import { getConfig } from './gameplay-config.js?v=20261016armas';
+import { getStat, STATS } from './modifiers.js?v=20261016armas';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -150,7 +150,7 @@ export function applyPlayerHit(state, mon, opts = {}) {
     dmg *= getStat(STATS.CRIT_MULT, ccfg.critMult, dmgCtx);
   }
   // MCB/ARSENAL: CAJADO — Poder mágico multiplica o dano de todos os golpes/especiais com ele
-  if (currentWeaponClass() === 'cajado') dmg *= magicMult();
+  if (currentWeaponClass() === 'cajado' || currentWeaponClass() === 'varinha') dmg *= magicMult();
   const SW = currentWeaponClass() === 'espada' ? getConfig().sword : null; // 20261009espada
   if (SW) dmg *= (SW.dmgMult ?? 1) * (SW.familyMult?.[currentWeaponFamily()] ?? 1);
   dmg = Math.max(1, Math.round(dmg));
