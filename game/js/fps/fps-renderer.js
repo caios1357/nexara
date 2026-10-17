@@ -10,41 +10,41 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017graf3';
-import { buildArenaDressing } from './arena-dressing.js?v=20261017graf3';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017graf3';
-import { createHeroModel } from './hero-model.js?v=20261017graf3';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017graf3';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017graf3';
-import { attachHeroGlb } from './hero-glb.js?v=20261017graf3';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017graf3';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017graf3';
-import { createActionVfx } from './action-vfx.js?v=20261017graf3';
-import { createPassiveVfx } from './passive-vfx.js?v=20261017graf3';
-import { createFpsControls } from './fps-controls.js?v=20261017graf3';
-import { createViewmodel } from './viewmodel.js?v=20261017graf3';
-import { createDragonView } from './dragon-view.js?v=20261017graf3';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017graf3';
-import { getSprite } from '../assets.js?v=20261017graf3';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017graf3';
-import { createBossDragon } from './boss-dragon-view.js?v=20261017graf3';
-import { bossCfgFor } from '../boss-variants.js?v=20261017graf3';
-import { mergeStaticParts } from './merge-util.js?v=20261017graf3';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017graf3';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017graf3';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017graf3';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017graf3';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017graf3';
-import { createPostFx } from './post-fx.js?v=20261017graf3';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017graf3';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017graf3';
-import { createContactShadows } from './contact-shadows.js?v=20261017graf3';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017graf3';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017graf3';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017graf3';
-import { groundAt, setGroundFn } from './ground.js?v=20261017graf3';
-import { buildBrTerrain } from './br-terrain.js?v=20261017graf3';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017graf3';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017drag';
+import { buildArenaDressing } from './arena-dressing.js?v=20261017drag';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017drag';
+import { createHeroModel } from './hero-model.js?v=20261017drag';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017drag';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017drag';
+import { attachHeroGlb } from './hero-glb.js?v=20261017drag';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017drag';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017drag';
+import { createActionVfx } from './action-vfx.js?v=20261017drag';
+import { createPassiveVfx } from './passive-vfx.js?v=20261017drag';
+import { createFpsControls } from './fps-controls.js?v=20261017drag';
+import { createViewmodel } from './viewmodel.js?v=20261017drag';
+import { createDragonView } from './dragon-view.js?v=20261017drag';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017drag';
+import { getSprite } from '../assets.js?v=20261017drag';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017drag';
+import { createBossDragon } from './boss-dragon-view.js?v=20261017drag';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017drag';
+import { mergeStaticParts } from './merge-util.js?v=20261017drag';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017drag';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017drag';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017drag';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017drag';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017drag';
+import { createPostFx } from './post-fx.js?v=20261017drag';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017drag';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017drag';
+import { createContactShadows } from './contact-shadows.js?v=20261017drag';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017drag';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017drag';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017drag';
+import { groundAt, setGroundFn } from './ground.js?v=20261017drag';
+import { buildBrTerrain } from './br-terrain.js?v=20261017drag';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017drag';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -130,7 +130,7 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  /* HERÓI 3 (20261017graf3): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  /* HERÓI 3 (20261017drag): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
   const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
   const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';
@@ -1837,7 +1837,7 @@ export function createFpsRenderer() {
   function rivalLift(entry, m, fx, fy, dt) {
     const F = m.rivalFly; const vm = getConfig().mount?.visualAltMult ?? 2;
     if (!F) { if (entry.rdv) entry.rdv.root.visible = false; return 0; }
-    if (!entry.rdv && rivalMountStats.views < 3) { try { const bc = bossCfgFor({}, getConfig().arenaBoss); const sc = getConfig().mount?.scale ?? 0.4; const view = createBossDragon({ height: (bc.visualHeight || 6.4) * sc, palette: F.pal || null }); entry.mesh.add(view.root); view.root.rotation.y = Math.PI; entry.rdv = view; entry.rdvBc = bc; entry.rdvSc = sc; rivalMountStats.views++; } catch (e) { entry.rdvErr = String(e?.message || e); } }
+    if (!entry.rdv && rivalMountStats.views < 3) { try { const bc = bossCfgFor({}, getConfig().arenaBoss); const sc = getConfig().mount?.scale ?? 0.4; const view = createBossDragon({ height: (bc.visualHeight || 6.4) * sc, palette: F.pal || null }); entry.mesh.add(view.root); view.root.rotation.y = Math.PI; entry.rdv = view; entry.rdvBc = bc; entry.rdvSc = sc; entry.rdvH = +((bc.visualHeight || 6.4) * sc).toFixed(2); rivalMountStats.views++; } catch (e) { entry.rdvErr = String(e?.message || e); } }
     const lift = F.alt * vm + (entry.rdv ? 1.1 * (entry.rdvSc / 0.4) : 0);
     if (entry.rdv) { const r = entry.rdv.root; r.visible = true; r.position.set(0, -1.1 * (entry.rdvSc / 0.4), 0); rivalMountStats.shown++;
       try { entry.rdv.update({ state: 'CHASE', progress: 0, speed: 0, attack: null, facing: 0, fx, fy, fly: { phase: F.phase, turn: 0 } }, { dt: dt || 0.016, now: performance.now(), cfg: entry.rdvBc, flashing: false }); r.rotation.y = Math.PI; } catch (e) { entry.rdvErr = String(e?.message || e); } }
@@ -1944,17 +1944,17 @@ export function createFpsRenderer() {
       if (m.boss) {
         if (!entry) {
           const bc = bossCfgFor(m, getConfig().arenaBoss);
-          const view = createBossDragon({ height: bc.visualHeight * (m.visualScale || 1), palette: m.dragonCor || null });
+          const dU = uniformDragonScale(); const view = createBossDragon({ height: bc.visualHeight * (dU ? 1 : (m.visualScale || 1)), palette: m.dragonCor || null }); // 20261017b: tamanho único (bc já vem na escala do montado)
           entityRoot.add(view.root);
           if (m.elemental && m.dragonCor?.brilho) { /* 20261016: gigante elemental — runa no chão na cor do elemento (1 malha, sem luz extra: ok no LOW) */
             const rr = new THREE.Mesh(new THREE.RingGeometry(3.4, 4.0, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(m.dragonCor.brilho), transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }));
-            rr.rotation.x = -Math.PI / 2; rr.position.y = 0.06; rr.scale.setScalar(m.visualScale || 1); rr.name = 'runaElemental'; view.root.add(rr);
+            rr.rotation.x = -Math.PI / 2; rr.position.y = 0.06; rr.scale.setScalar(dU || m.visualScale || 1); rr.name = 'runaElemental'; view.root.add(rr);
             /* aura do elemento: 10 fragmentos que orbitam (fogo=brasas sobem, gelo=cristais, raio=faíscas rápidas, veneno=bolhas lentas) — 1 geometria/1 material compartilhados */
-            const E = m.elemental, sc = m.visualScale || 1; const geo = E === 'gelo' ? new THREE.OctahedronGeometry(0.28, 0) : E === 'raio' ? new THREE.TetrahedronGeometry(0.24, 0) : new THREE.IcosahedronGeometry(E === 'veneno' ? 0.26 : 0.2, 0);
+            const E = m.elemental, sc = dU || m.visualScale || 1; const geo = E === 'gelo' ? new THREE.OctahedronGeometry(0.28, 0) : E === 'raio' ? new THREE.TetrahedronGeometry(0.24, 0) : new THREE.IcosahedronGeometry(E === 'veneno' ? 0.26 : 0.2, 0);
             const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(m.dragonCor.brilho), transparent: true, opacity: 0.85, depthWrite: false }); const aura = new THREE.Group(); aura.name = 'auraElemental';
             for (let i = 0; i < 10; i++) { const q = new THREE.Mesh(geo, mat); q.userData = { a: i / 10 * Math.PI * 2, r: (2.6 + (i % 3) * 0.7) * sc, h: (0.8 + (i % 4) * 1.1) * sc, ph: i * 0.7 }; aura.add(q); }
             view.root.add(aura); view.auraEl = { aura, E, sc }; }
-          entry = { mesh: view.root, kind: 'mon', uid: m.uid, boss: true, view, lastNow: now, look: '' };
+          entry = { mesh: view.root, kind: 'mon', uid: m.uid, boss: true, view, lastNow: now, look: '', bodyR: bc.bodyRadius, visH: bc.visualHeight };
           entityMeshes.set(key, entry);
         }
         updateBossEntity(entry, m, now);
@@ -2539,7 +2539,7 @@ export function createFpsRenderer() {
       const luid = hooks.getLockOnUid?.();
       const le = luid != null ? entityMeshes.get(entKey('mon', luid)) : null;
       let lp = null;
-      if (le) { lockPosV.x = le.mesh.position.x; lockPosV.z = le.mesh.position.z; lockPosV.s = le.boss ? getConfig().arenaBoss.bodyRadius * 1.15 : 1; lp = lockPosV; }
+      if (le) { lockPosV.x = le.mesh.position.x; lockPosV.z = le.mesh.position.z; lockPosV.s = le.boss ? (le.bodyR || getConfig().arenaBoss.bodyRadius) * 1.15 : 1; lp = lockPosV; }
       actionVfx.update(dt * (hooks.getVfxTimeScale?.() ?? 1), heroVis, lp);
     }
     if (passiveVfx) {
@@ -2751,7 +2751,7 @@ export function createFpsRenderer() {
       try {
         const bc = bossCfgFor({}, getConfig().arenaBoss);
         const view = createBossDragon({ height: (bc.visualHeight || 6.4) * mv.scale, palette: mv.pal || null });
-        entityRoot.add(view.root); mountVis.view = view; mountVis.mesh = view.root; mountVis.bc = bc;
+        entityRoot.add(view.root); mountVis.view = view; mountVis.mesh = view.root; mountVis.bc = bc; mountVis.visH = +((bc.visualHeight || 6.4) * mv.scale).toFixed(2);
       } catch (e) { console.warn('[montaria] visual', e); }
     }
     const m = mountVis.mesh; if (!m) return;
@@ -2906,6 +2906,11 @@ export function createFpsRenderer() {
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
     setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; if (hero && (!!hero.glb !== heroWantsGlb() || (!heroWantsGlb() && kitSig(heroKitNow()) !== heroKitSig))) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
     getRivalMounts: () => ({ ...rivalMountStats }),
+    /** 20261017b: altura real (caixa) de cada dragão desenhado — gigantes/Covil, montaria do herói e montarias dos rivais */
+    getDragonSizes: () => { const box = new THREE.Box3(); const sz = new THREE.Vector3();       const out = { bosses: [], mount: null, rivalMounts: [] };
+      for (const e of entityMeshes.values()) { if (e.boss && e.view) { box.setFromObject(e.view.root); box.getSize(sz); out.bosses.push({ uid: e.uid, h: e.visH, mh: +sz.y.toFixed(2), k: +(e.view.root.children[0]?.scale.x || 0).toFixed(3), bodyR: e.bodyR }); } if (e.rival && e.rdv?.root?.visible) out.rivalMounts.push({ h: e.rdvH || null }); }
+      if (mountVis.view && mountVis.mesh?.visible) { box.setFromObject(mountVis.view.root); box.getSize(sz); out.mount = { h: mountVis.visH || null, mh: +sz.y.toFixed(2), k: +(mountVis.view.root.children[0]?.scale.x || 0).toFixed(3) }; }
+      return out; },
     mountSpecial: (el, x, y, r, cor) => mountSpecialFx(el, x, y, r, cor), getSpecialFx: () => ({ n: spFx.n, live: spFx.list.filter((f) => f.on).length }),
     getAbrigos: () => (abrigoVis ? { n: abrigoVis.n, drawn: !!abrigoVis.group, err: abrigoVis.err || null } : null),
     getMountAnim: () => ({ palKey: mountVis.palKey, parked: !!mountVis.park, anim: mountVis.view?.anim?.() || null, visible: !!mountVis.mesh?.visible, turn: +(mountVis.turn || 0).toFixed(2), roll: +(mountVis.view?.root?.children?.find?.((c) => c.type === "Group")?.rotation?.z || 0).toFixed(2) }), // 20261016voo: estado da animação de voo (testes)

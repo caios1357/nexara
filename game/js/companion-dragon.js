@@ -12,10 +12,11 @@
  * Dano sempre por deps.damage (main.damageMonsterFrom → applyDamageToMonster),
  * então XP/loot/quests contam como os do herói.
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261017graf3';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017graf3';
-import { isWalkable } from './map.js?v=20261017graf3';
-import { getStat, STATS } from './modifiers.js?v=20261017graf3';
+import { bossCfgFor } from './boss-variants.js?v=20261017drag';
+import { getConfig, DEG } from './gameplay-config.js?v=20261017drag';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017drag';
+import { isWalkable } from './map.js?v=20261017drag';
+import { getStat, STATS } from './modifiers.js?v=20261017drag';
 
 export const DRAGON_STATES = Object.freeze({
   FOLLOW: 'FOLLOW', IDLE: 'IDLE', SEARCH_TARGET: 'SEARCH_TARGET', COMBAT: 'COMBAT', ATTACK: 'ATTACK', RETURN: 'RETURN'
@@ -412,7 +413,7 @@ export function createDragon(deps) {
           const m = arr[j];
           if (!m.alive || m.zone !== stateRef.zoneId) continue;
           monXY(m, tmp);
-          const mr = m.boss ? getConfig().arenaBoss.bodyRadius : bodyR; // Bloco 7: chefe colossal
+          const mr = m.boss ? bossCfgFor(m, getConfig().arenaBoss).bodyRadius : bodyR; // Bloco 7: chefe colossal
           if (Math.hypot(tmp.x - p.x, tmp.y - p.y) <= mr + p.radius) {
             p.active = false;
             const amount = effectiveDamage(p, m);

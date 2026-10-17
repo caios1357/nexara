@@ -9,12 +9,27 @@
  *   (ataques[x][campo] = MULTIPLICADOR do campo numérico; definir[x][campo] = valor absoluto)
  * O dano segue a regra da Arena: atkScale do chefe (= 2,5× o dano BASE) × atkMult do ataque — o telegraph/tempo de aviso NUNCA é encurtado abaixo do piso.
  */
+import { getConfig } from './gameplay-config.js?v=20261017drag';
 export const TELEGRAPH_MIN_MS = 700; // piso de aviso: o herói sempre pode reagir (esquiva dura ~0,3 s)
 
 const cache = new Map();
 
 /** config final do chefe para este monstro (base = gameplay-config.arenaBoss); sem variante → a própria base (nada muda para o GIGANTE VERDE) */
+/** 20261017b: escala única dos dragões (= montado). 0 = desligado (comportamento antigo por gigante). */
+export function uniformDragonScale() {
+  const m = getConfig().mount || {}; if (m.tamanhoUnico === false) return 0;
+  if (typeof location !== 'undefined' && /[?&]dragaoUnico=0\b/.test(location.search)) return 0;
+  return m.scale > 0 ? m.scale : 0.4;
+}
 export function bossCfgFor(mon, base) {
+  const U = mon?.boss ? uniformDragonScale() : 0;
+  if (U && base) {
+    const P = mon.dragonPoder; const key = 'U|' + (mon.dragonId || 'x') + '|' + U; const hit = cache.get(key);
+    if (hit && hit.base === base) return hit.cfg;
+    const cfg = P ? deriveBossCfg(base, P) : JSON.parse(JSON.stringify(base));
+    cfg.visualHeight = +(base.visualHeight * U).toFixed(3); cfg.bodyRadius = +(base.bodyRadius * U).toFixed(3); // corpo na MESMA proporção do desenho (= montado)
+    cache.set(key, { base, cfg }); return cfg;
+  }
   const P = mon && mon.dragonPoder; const vs = mon?.visualScale > 0 ? mon.visualScale : 1;
   if ((!P && vs === 1) || !base) return base;
   const key = (mon.dragonId || 'x') + '|' + vs; const hit = cache.get(key);

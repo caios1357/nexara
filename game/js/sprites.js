@@ -3,8 +3,8 @@
  * Own IP: no copying reference characters / names / logos.
  * Pass GRAFICO+: denser props, race armor plates, Mk.I bots with red core.
  */
-import { ISO } from './camera.js?v=20261017graf3';
-import { getSprite } from './assets.js?v=20261017graf3';
+import { ISO } from './camera.js?v=20261017drag';
+import { getSprite } from './assets.js?v=20261017drag';
 
 /** Draw sprite image foot-anchored (bottom-center ≈ foot on tile).
  *  AI painted sprites: height-driven + aspect lock so characters sit ~48–72px tall.

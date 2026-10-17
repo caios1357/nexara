@@ -51,6 +51,8 @@ export const DEFAULTS = Object.freeze({
     speed: 6.5, // tiles/s (corrida a pé ≈ 3,4)
     visualAltMult: 2, // voofix: altura desenhada = alt × 2 (cruzeiro 3,2 m → ~6,4 m na tela); alcance/combate usam a alt real
     scale: 0.4, // dragão montado ≈ 0,4 do Gigante (só visual)
+    /** 20261017b (Caio): TODOS os dragões com o MESMO tamanho do voo montado (gigantes do mapa, Covil, montarias dos rivais); acerto/corpo acompanha */
+    tamanhoUnico: true,
     hpFracOfHero: 0.6, // reserva de vida da montaria (absorve antes do herói)
     fall: { pctPerMeter: 0.05, maxFrac: 0.25, nonLethal: true, graceMs: 2000 },
     descendSpeed: 2.2, // m/s
@@ -381,9 +383,9 @@ export const DEFAULTS = Object.freeze({
     followForwardPortrait: 0.5,
     /** Covil: chefe vivo a ≤ N tiles → voa atrás do ombro (fora da silhueta do chefe na câmera). */
     bossFollowRange: 14,
-    followForwardBoss: -0.3,
-    followSideBoss: 0.95,
-    followSideBossPortrait: 0.55,
+    followForwardBoss: -0.5,
+    followSideBoss: 1.3,
+    followSideBossPortrait: 0.75,
     /** Distância aceitável ao ponto de voo (1.2–1.8 tiles do herói na prática). */
     followArriveDist: 0.18,
     hoverHeight: 2.25,
