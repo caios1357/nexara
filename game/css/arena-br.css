@@ -127,5 +127,36 @@
 @media (max-height: 520px) { .br-distrito { top: calc(max(8px, env(safe-area-inset-top)) + 108px); } }
 .br-distrito.hidden { display: none; }
 
-/* 20261017drag: XP da partida → herói permanente */
+/* 20261017hud: XP da partida → herói permanente */
 .br-summary .br-sum-xp { margin: 0.25rem 0; color: #ffe08a; font-size: 0.78rem; font-weight: 700; text-shadow: 0 0 8px rgba(255,200,80,0.45); }
+
+/* ===== LOTE-b M2 (pedido do Caio): HUD COMPACTO (padrão) e HUD MÍNIMO — CONFIGURAÇÕES → TELA → HUD ===== */
+/* COMPACTO: some o log de combate na partida, as bolinhas de risco, a 2ª faixa (evento vai junto da ZONA), o chip de MCB da corrida,
+   os rótulos dos botões (fica o ícone + custo) e as legendas CÂMERA + ATAQUE / MOVER; minimapa menor. */
+body.hud-compacto #game-screen.br-mode #log-overlay { display: none !important; }
+body.hud-compacto .br-risk, body.hud-compacto #br-event, body.hud-compacto #br-mcb { display: none !important; }
+body.hud-compacto .br-top { gap: 3px; }
+body.hud-compacto .br-zone { font-size: 0.68rem; padding: 1px 8px; }
+body.hud-compacto .br-minimap { width: 96px; height: 96px; opacity: 0.92; }
+@media (max-height: 520px) { body.hud-compacto .br-minimap { width: 84px; height: 84px; } }
+body.hud-compacto .mc-btn.mc-act .mc-lbl,
+body.hud-compacto .mc-btn.mc-trocar .mc-lbl,
+body.hud-compacto .mc-btn.mc-attack:not(.mc-fogo) .mc-lbl,
+body.hud-compacto .mc-btn.mc-mount:not(.mc-descer) .mc-lbl,
+body.hud-compacto .mc-look-label, body.hud-compacto .mc-joy-label { display: none !important; }
+body.hud-compacto .mc-btn .mc-ico { transform: scale(1.08); }
+/* MÍNIMO: além do compacto — sem números de Nexa/XP, sem MCB do topo, sem tempo/bolsa nos chips, minimapa pequeno e translúcido. */
+body.hud-minimo #game-screen.br-mode #hud-xp-text, body.hud-minimo #game-screen.br-mode #hud-nexa-text { display: none !important; }
+body.hud-minimo #game-screen.br-mode #hud-mcb { display: none !important; }
+body.hud-minimo #br-time, body.hud-minimo #br-reg { display: none !important; }
+body.hud-minimo .br-region { display: none !important; }
+body.hud-minimo .br-minimap { width: 76px; height: 76px; opacity: 0.8; }
+body.hud-minimo .br-chip { font-size: 0.66rem; padding: 1px 6px; }
+body.hud-compacto .br-zone { white-space: nowrap; }
+@media (orientation: portrait) {
+  /* retrato: a faixa do topo encosta à esquerda e deixa a coluna do minimapa livre */
+  body.hud-compacto .br-top { left: max(8px, env(safe-area-inset-left)); transform: none; align-items: flex-start; max-width: calc(100vw - 124px); }
+  body.hud-compacto .br-chips { justify-content: flex-start; }
+  body.hud-compacto .br-zone { font-size: 0.62rem; }
+}
+body.hud-compacto #game-screen #hud-skills { display: none !important; }

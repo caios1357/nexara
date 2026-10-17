@@ -10,41 +10,41 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017drag';
-import { buildArenaDressing } from './arena-dressing.js?v=20261017drag';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017drag';
-import { createHeroModel } from './hero-model.js?v=20261017drag';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017drag';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017drag';
-import { attachHeroGlb } from './hero-glb.js?v=20261017drag';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017drag';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017drag';
-import { createActionVfx } from './action-vfx.js?v=20261017drag';
-import { createPassiveVfx } from './passive-vfx.js?v=20261017drag';
-import { createFpsControls } from './fps-controls.js?v=20261017drag';
-import { createViewmodel } from './viewmodel.js?v=20261017drag';
-import { createDragonView } from './dragon-view.js?v=20261017drag';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017drag';
-import { getSprite } from '../assets.js?v=20261017drag';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017drag';
-import { createBossDragon } from './boss-dragon-view.js?v=20261017drag';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017drag';
-import { mergeStaticParts } from './merge-util.js?v=20261017drag';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017drag';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017drag';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017drag';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017drag';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017drag';
-import { createPostFx } from './post-fx.js?v=20261017drag';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017drag';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017drag';
-import { createContactShadows } from './contact-shadows.js?v=20261017drag';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017drag';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017drag';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017drag';
-import { groundAt, setGroundFn } from './ground.js?v=20261017drag';
-import { buildBrTerrain } from './br-terrain.js?v=20261017drag';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017drag';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017hud';
+import { buildArenaDressing } from './arena-dressing.js?v=20261017hud';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming } from './fps-camera.js?v=20261017hud';
+import { createHeroModel } from './hero-model.js?v=20261017hud';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017hud';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017hud';
+import { attachHeroGlb } from './hero-glb.js?v=20261017hud';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017hud';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017hud';
+import { createActionVfx } from './action-vfx.js?v=20261017hud';
+import { createPassiveVfx } from './passive-vfx.js?v=20261017hud';
+import { createFpsControls } from './fps-controls.js?v=20261017hud';
+import { createViewmodel } from './viewmodel.js?v=20261017hud';
+import { createDragonView } from './dragon-view.js?v=20261017hud';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017hud';
+import { getSprite } from '../assets.js?v=20261017hud';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017hud';
+import { createBossDragon } from './boss-dragon-view.js?v=20261017hud';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017hud';
+import { mergeStaticParts } from './merge-util.js?v=20261017hud';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017hud';
+import { attachDragonGlb } from './dragon-glb.js?v=20261017hud';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017hud';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017hud';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017hud';
+import { createPostFx } from './post-fx.js?v=20261017hud';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017hud';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017hud';
+import { createContactShadows } from './contact-shadows.js?v=20261017hud';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017hud';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017hud';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017hud';
+import { groundAt, setGroundFn } from './ground.js?v=20261017hud';
+import { buildBrTerrain } from './br-terrain.js?v=20261017hud';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017hud';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -130,7 +130,7 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  /* HERÓI 3 (20261017drag): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  /* HERÓI 3 (20261017hud): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
   const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
   const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';

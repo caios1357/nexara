@@ -7,7 +7,7 @@
  *    lidos do total em cache do estado ativo (recalculado só quando o equipamento muda).
  * Sem nada equipado do Arsenal: todos os modificadores são neutros (combate idêntico ao da build anterior).
  */
-import { addModifier, STATS } from './modifiers.js?v=20261017drag';
+import { addModifier, STATS } from './modifiers.js?v=20261017hud';
 
 export const ARSENAL_SLOTS = Object.freeze(['helmet', 'armor', 'pants', 'weapon']);
 export const ALL_SLOTS = Object.freeze(['weapon', 'armor', 'helmet', 'pants', 'body', 'accessory']);
@@ -34,7 +34,7 @@ export function sumEquipAttrs(state) {
 export function weaponClassOf(state) {
   const w = state?.equipment?.weapon && state._items?.[state.equipment.weapon];
   if (w?.weaponClass) return w.weaponClass;
-  const A = state?.player?.armas; return A && A.ativo === 2 ? A.s2 || 'arco' : 'espada'; // 20261017drag: slot 2 sem item = arma básica da classe escolhida
+  const A = state?.player?.armas; return A && A.ativo === 2 ? A.s2 || 'arco' : 'espada'; // 20261017hud: slot 2 sem item = arma básica da classe escolhida
 }
 export function weaponFamilyOf(state) {
   const w = state?.equipment?.weapon && state._items?.[state.equipment.weapon];

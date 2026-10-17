@@ -920,6 +920,9 @@ export const DEFAULTS = Object.freeze({
     /** Duração da dica do iPhone (ms). */
     tipMs: 6000
   },
+  /** LOTE-b M2 (pedido do Caio): densidade do HUD. 'normal' = tudo (antigo) · 'compacto' (padrão) = sem log de combate na partida,
+   *  sem bolinhas de risco, faixa ZONA+EVENTO numa linha só, minimapa menor, botões sem rótulo · 'minimo' = só o essencial. */
+  hud: { modo: 'compacto' },
   layoutEditor: {
     minScale: 0.6,
     maxScale: 1.6,
@@ -967,6 +970,7 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'showDefend', label: 'Mostrar botão DEFESA', type: 'toggle', path: 'buttons.showDefend' }
   ] },
   { group: 'TELA', items: [
+    { id: 'hudModo', label: 'HUD (densidade da tela)', type: 'choice', path: 'hud.modo', options: [['normal', 'COMPLETO'], ['compacto', 'COMPACTO'], ['minimo', 'HUD MÍNIMO']] },
     { id: 'fsAuto', label: 'Tela inteira automática', type: 'toggle', path: 'fullscreen.auto' },
     { id: 'fpsHud', label: 'Mostrar FPS / qualidade', type: 'toggle', path: 'graphics.showFpsHud' },
     { id: 'adaptOn', label: 'Qualidade adaptativa (reduz detalhes se o FPS cair)', type: 'toggle', path: 'graphics.adaptiveResolution' }
@@ -1094,7 +1098,8 @@ const ENUMS = {
   'rightStick.aimAssist': ['off', 'low', 'medium', 'high'],
   'graphics.quality': ['auto', 'low', 'medium', 'high'],
   'graphics.heroLook': ['classico', 'glb'],
-  'lockOn.mode': ['manual', 'automatico']
+  'lockOn.mode': ['manual', 'automatico'],
+  'hud.modo': ['normal', 'compacto', 'minimo']
 };
 
 function isObj(v) {

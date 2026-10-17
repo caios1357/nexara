@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261017drag';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261017hud';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -92,7 +92,10 @@ export function createArenaBrUi(deps) {
     root.querySelector('#br-bag').classList.toggle('full', n >= cap);
     const z = v.zone;
     const zt = z.phase === 'wait' ? `ZONA SEGURA fecha em ${mmss(z.msLeft + 30000)}` : z.phase === 'warn' ? `⚠ ZONA FECHA EM ${mmss(z.msLeft)} (${z.stage}/${z.stages})` : z.phase === 'shrink' ? `ZONA FECHANDO · ${mmss(z.msLeft)}` : 'ZONA FINAL';
-    setText('#br-zone', zt);
+    // LOTE-b M2: HUD compacto/mínimo → ZONA + EVENTO numa faixa só (o #br-event segue atualizado, só fica oculto por CSS)
+    const merge = document.body.classList.contains('hud-compacto') && v.event;
+    const zShort = z.phase === 'wait' ? `ZONA ${mmss(z.msLeft + 30000)}` : z.phase === 'warn' ? `⚠ ZONA ${mmss(z.msLeft)}` : z.phase === 'shrink' ? `ZONA FECHANDO ${mmss(z.msLeft)}` : 'ZONA FINAL';
+    setText('#br-zone', merge ? `${zShort} · ${v.event.kind === 'cacada' ? '🎯' : '📦'} ${v.event.nome}${v.event.done ? ' ✓' : ''} ${mmss(v.event.msLeft)}` : zt);
     root.querySelector('#br-zone').classList.toggle('warn', z.phase === 'warn' || z.phase === 'shrink');
     root.querySelector('#br-outside').classList.toggle('hidden', !(z.outside && z.phase !== 'wait'));
     const ev = root.querySelector('#br-event');

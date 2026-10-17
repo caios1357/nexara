@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261017drag';
-import { mergeStaticParts } from './merge-util.js?v=20261017drag';
-import { attachHeroGlb } from './hero-glb.js?v=20261017drag';
-import { addArmorDetail } from './surface-fx.js?v=20261017drag';
+import { getConfig } from '../gameplay-config.js?v=20261017hud';
+import { mergeStaticParts } from './merge-util.js?v=20261017hud';
+import { attachHeroGlb } from './hero-glb.js?v=20261017hud';
+import { addArmorDetail } from './surface-fx.js?v=20261017hud';
 
 const CYAN = 0x39f0ff;
 
@@ -466,7 +466,7 @@ export function createHeroModel(opts = {}) {
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
     mergeInfo = mergeStaticParts(root, keep);
   }
-  // ARMAS DUPLAS (20261017drag): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  // ARMAS DUPLAS (20261017hud): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
   const altW = {};
   {
     const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });

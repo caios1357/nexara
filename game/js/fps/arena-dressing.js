@@ -7,7 +7,7 @@
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { lathe, tube, decalTex, circuitTex, panelTex } from './creature-kit.js?v=20261017drag';
+import { lathe, tube, decalTex, circuitTex, panelTex } from './creature-kit.js?v=20261017hud';
 
 const H = (x, y) => (((x * 73856093) ^ (y * 19349663)) >>> 0);
 

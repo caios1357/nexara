@@ -19,12 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261017drag';
-import { getConfig, DEG } from './gameplay-config.js?v=20261017drag';
-import { isWalkable, getTileType } from './map.js?v=20261017drag';
-import { monsterAttackPlayer } from './actions.js?v=20261017drag';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017drag';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261017drag';
+import { bossCfgFor } from './boss-variants.js?v=20261017hud';
+import { getConfig, DEG } from './gameplay-config.js?v=20261017hud';
+import { isWalkable, getTileType } from './map.js?v=20261017hud';
+import { monsterAttackPlayer } from './actions.js?v=20261017hud';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261017hud';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261017hud';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -1155,7 +1155,7 @@ export function onMonsterHit(mon, info) {
   } else if (!info.fromRival && (r.state === S.IDLE || r.state === S.PATROL || r.state === S.DETECT ||
              r.state === S.ALERT || r.state === S.RETURN)) {
     // Foi atacado: entra em combate direto (sem tempo de reação)
-    // 20261017drag: golpe vindo de OUTRO RIVAL (info.fromRival) não põe o alvo em CHASE — a perseguição nativa vai SEMPRE para o herói e arrastava o duelo até ele
+    // 20261017hud: golpe vindo de OUTRO RIVAL (info.fromRival) não põe o alvo em CHASE — a perseguição nativa vai SEMPRE para o herói e arrastava o duelo até ele
     setState(mon, r, S.CHASE);
   }
   if (r.state === S.CHASE && !info.fromRival && !r.isBoss && !(mon.rival && clock < (r.rivalArmorUntil || 0))) r.hitReactUntil = clock + ecfg.hitReactMs;
