@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023conc5';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc5';
-import { attachHeroGlb } from './hero-glb.js?v=20261023conc5';
-import { addArmorDetail } from './surface-fx.js?v=20261023conc5';
+import { getConfig } from '../gameplay-config.js?v=20261023conc6';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc6';
+import { attachHeroGlb } from './hero-glb.js?v=20261023conc6';
+import { addArmorDetail } from './surface-fx.js?v=20261023conc6';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -55,6 +55,11 @@ export function createHeroModel(opts = {}) {
   const matArmor2 = new THREE.MeshStandardMaterial({ color: 0x3d4a5a, roughness: 0.28, metalness: 0.75 });
   const matCloth = new THREE.MeshStandardMaterial({ color: 0x1c222c, roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide });
   const matUnder = new THREE.MeshStandardMaterial({ color: 0x151a22, roughness: 0.6, metalness: 0.4 });
+  // CONCEITO: LUZ DE CONTORNO (rim/fresnel) na cor do brilho do kit → herói legível de costas e no escuro. Só shader, 0 luzes, 0 draw calls.
+  const rimCol = { value: new THREE.Color(0x3ad8ff) }; const rimOn = !/[?&]rim=0\b/.test(typeof location !== 'undefined' ? location.search : '');
+  const addRim = (m, k) => { if (!rimOn) return; m.onBeforeCompile = (sh) => { sh.uniforms.uRimCol = rimCol; sh.fragmentShader = 'uniform vec3 uRimCol;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+  { float fr = 1.0 - abs(dot(normalize(normal), normalize(vViewPosition))); totalEmissiveRadiance += uRimCol * pow(fr, 2.6) * ${k.toFixed(2)}; }`); }; m.customProgramCacheKey = () => 'nxrim' + k; };
+  addRim(matArmor, 0.9); addRim(matArmor2, 0.8); addRim(matCloth, 0.7); addRim(matUnder, 0.6);
   const matGlow = new THREE.MeshStandardMaterial({ color: CYAN, emissive: CYAN, emissiveIntensity: 1.25, roughness: 0.3, metalness: 0.1 });
   const matBlade = new THREE.MeshStandardMaterial({ color: 0xa8dcff, emissive: 0x3a9cff, emissiveIntensity: 2.4, roughness: 0.15, metalness: 0.6 });
   const matCore = new THREE.MeshBasicMaterial({ color: 0xbfe6ff });
@@ -70,7 +75,7 @@ export function createHeroModel(opts = {}) {
     matArmor.color.setHex(K.armor); matArmor.emissive.copy(new THREE.Color(K.armor).multiplyScalar(0.18));
     matArmor2.color.copy(new THREE.Color(K.armor).lerp(new THREE.Color(0x8a96a6), 0.2));
     matCloth.color.setHex(K.cloth); matUnder.color.copy(new THREE.Color(K.armor).multiplyScalar(0.62));
-    if (K.glow != null) { const G = new THREE.Color(K.glow); matGlow.color.copy(G); matGlow.emissive.copy(G); matCore.color.copy(G.clone().lerp(WHITE, 0.7)); matHalo.color.copy(G); }
+    if (K.glow != null) { const G = new THREE.Color(K.glow); rimCol.value.copy(G); matGlow.color.copy(G); matGlow.emissive.copy(G); matCore.color.copy(G.clone().lerp(WHITE, 0.7)); matHalo.color.copy(G); }
     const bg = K.bladeGlow ?? K.glow;
     if (bg != null) { const B = new THREE.Color(bg); matBlade.emissive.copy(B); matBlade.color.copy(B.clone().lerp(WHITE, 0.6)); matBladeAura.color.copy(B); matEdge.color.copy(B.clone().lerp(WHITE, 0.6)); }
   }
@@ -178,6 +183,7 @@ export function createHeroModel(opts = {}) {
     capeParent.add(seg);
     for (const sd of [-1, 1]) { const ang = Math.PI + sd * CL / 2; const rm = (rt + rb) / 2; const ed = glowLine(capeParent, 0.012, 0.34, 0.012, Math.sin(ang) * rm, -0.17, (rt + rb) / 2 + Math.cos(ang) * rm); ed.rotation.z = -sd * Math.atan2(rb - rt, 0.34) * 0; }
     if (i === 2) { const hem = new THREE.Mesh(new THREE.CylinderGeometry(rb + 0.004, rb + 0.004, 0.018, 9, 1, true, Math.PI - CL / 2, CL), matGlow); hem.position.set(0, -0.335, (rt + rb) / 2); capeParent.add(hem); }
+    if (i === 1) { const zc = (rt + rb) / 2 - (rt + rb) / 2 - 0.012; for (const sd of [-1, 1]) { const cv = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.028, 0.012), matGlow); cv.position.set(sd * 0.06, -0.1, zc); cv.rotation.z = sd * 0.6; capeParent.add(cv); } const dm = new THREE.Mesh(new THREE.OctahedronGeometry(0.035, 0), matGlow); dm.position.set(0, -0.2, zc); dm.scale.set(1, 1.5, 0.3); capeParent.add(dm); } // CONCEITO: brasão aceso nas costas da capa
     if (i === 2) for (let k = 0; k < 5; k++) { // CONCEITO/folhas: barra recortada (pontas em zigue-zague acesas) + barras verticais brilhantes
       const ang = Math.PI - CL / 2 + CL * (k + 0.5) / 5; const tip = new THREE.Mesh(new THREE.ConeGeometry(0.035, k % 2 ? 0.1 : 0.16, 3), matGlow); tip.rotation.x = Math.PI; tip.position.set(Math.sin(ang) * rb, -0.37 - (k % 2 ? 0.03 : 0.06), (rt + rb) / 2 + Math.cos(ang) * rb); capeParent.add(tip);
       if (k % 2 === 0) { const bar = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.22, 0.012), matGlow); bar.position.set(Math.sin(ang) * (rb + 0.006), -0.2, (rt + rb) / 2 + Math.cos(ang) * (rb + 0.006)); capeParent.add(bar); }
@@ -287,7 +293,7 @@ export function createHeroModel(opts = {}) {
     }
     if (K.chibi && K.head === 'capuz') { // capuz das folhas: abertura frontal, rosto na sombra, olhos acesos em V, borda acesa
       rm(hood); rm(visor);
-      const hm = matCloth.clone(); hm.side = THREE.DoubleSide; flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
+      const hm = matCloth.clone(); hm.side = THREE.DoubleSide; addRim(hm, 0.8); flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
       const OP = 1.7; const hd = add(new THREE.SphereGeometry(0.185, 20, 12, Math.PI / 2 + OP / 2, Math.PI * 2 - OP, 0, Math.PI * 0.72), hm, 0, 0.02, -0.01); hd.scale.set(1.05, 1.15, 1.1);
       add(new THREE.SphereGeometry(0.15, 14, 10), new THREE.MeshBasicMaterial({ color: 0x05070a }), 0, 0.0, -0.01);
       const pk = add(new THREE.ConeGeometry(0.1, 0.2, 10), hm, 0, 0.25, -0.05); pk.rotation.x = -0.35;
@@ -297,7 +303,7 @@ export function createHeroModel(opts = {}) {
     }
     if (K.head === 'guerreiro') { // capacete redondo azul-marinho + crista de cristal + viseira em V acesa + orelheiras com linha ciano
       const hm = new THREE.MeshStandardMaterial({ color: K.helmColor ?? K.armor, metalness: 0.7, roughness: 0.3, emissive: new THREE.Color(K.armor).multiplyScalar(0.15) });
-      flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
+      addRim(hm, 0.9); flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
       const shell = add(new THREE.SphereGeometry(0.16, 18, 14), hm, 0, 0.02, -0.005); shell.scale.set(1.05, 1.02, 1.08);
       // (faixa escura do rosto removida: a viseira acesa já marca o rosto)
       for (const sd of [-1, 1]) { const v = add(new THREE.BoxGeometry(0.085, 0.026, 0.03), matGlow, sd * 0.055, 0.0, 0.19); v.rotation.z = sd * 0.32; v.rotation.y = sd * 0.25; }

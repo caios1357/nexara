@@ -12,11 +12,11 @@
  * Dano sempre por deps.damage (main.damageMonsterFrom → applyDamageToMonster),
  * então XP/loot/quests contam como os do herói.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261023conc5';
-import { getConfig, DEG } from './gameplay-config.js?v=20261023conc5';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261023conc5';
-import { isWalkable } from './map.js?v=20261023conc5';
-import { getStat, STATS } from './modifiers.js?v=20261023conc5';
+import { bossCfgFor } from './boss-variants.js?v=20261023conc6';
+import { getConfig, DEG } from './gameplay-config.js?v=20261023conc6';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261023conc6';
+import { isWalkable } from './map.js?v=20261023conc6';
+import { getStat, STATS } from './modifiers.js?v=20261023conc6';
 
 export const DRAGON_STATES = Object.freeze({
   FOLLOW: 'FOLLOW', IDLE: 'IDLE', SEARCH_TARGET: 'SEARCH_TARGET', COMBAT: 'COMBAT', ATTACK: 'ATTACK', RETURN: 'RETURN'

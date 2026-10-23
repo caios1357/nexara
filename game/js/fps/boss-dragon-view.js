@@ -13,13 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023conc5';
-import { TILE } from './fps-camera.js?v=20261023conc5';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc5';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc5';
-import { getConfig } from '../gameplay-config.js?v=20261023conc5';
-import { artPalette } from './dragon-art.js?v=20261023conc5';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc5';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023conc6';
+import { TILE } from './fps-camera.js?v=20261023conc6';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc6';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc6';
+import { getConfig } from '../gameplay-config.js?v=20261023conc6';
+import { artPalette } from './dragon-art.js?v=20261023conc6';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc6';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;

@@ -7,7 +7,7 @@
  * - O dano sai pelo MESMO caminho do golpe (applyPlayerHit → applyDamageToMonster: XP/loot/quests/MCB).
  * - Arrays exportados (heroProjectiles/heroBursts) são lidos pelo fps-renderer (InstancedMesh, cor da família).
  */
-import { hasLineOfSight } from './collision.js?v=20261023conc5';
+import { hasLineOfSight } from './collision.js?v=20261023conc6';
 
 export const heroProjectiles = [];
 export const heroBursts = [];
