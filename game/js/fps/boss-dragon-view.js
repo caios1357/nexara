@@ -13,13 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023conc4';
-import { TILE } from './fps-camera.js?v=20261023conc4';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc4';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc4';
-import { getConfig } from '../gameplay-config.js?v=20261023conc4';
-import { artPalette } from './dragon-art.js?v=20261023conc4';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc4';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023conc5';
+import { TILE } from './fps-camera.js?v=20261023conc5';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc5';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc5';
+import { getConfig } from '../gameplay-config.js?v=20261023conc5';
+import { artPalette } from './dragon-art.js?v=20261023conc5';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc5';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -171,8 +171,8 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     torso.add(sp);
     spikes.push(sp);
     for (const sx of [-1, 1]) { // CONCEITO: cristais facetados saindo das costas (2 por placa, inclinados para fora)
-      const cr = mesh(new THREE.OctahedronGeometry(0.22, 0), M.crystal, sx * (0.42 + (i % 2) * 0.12), 1.1 - Math.abs(z) * 0.08, z + 0.1);
-      cr.scale.set(0.55, 1.6 - Math.abs(i - 2.5) * 0.15, 0.55); cr.rotation.set(-0.4, 0, -sx * 0.55); torso.add(cr);
+      const cr = mesh(new THREE.OctahedronGeometry(0.22, 0), M.crystal, sx * (0.55 + (i % 2) * 0.15), 1.35 - Math.abs(z) * 0.08, z + 0.1);
+      cr.scale.set(0.9, 2.6 - Math.abs(i - 2.5) * 0.25, 0.9); cr.rotation.set(-0.35, 0, -sx * 0.5); torso.add(cr);
     }
   }
   // placas laterais (escamas blindadas)

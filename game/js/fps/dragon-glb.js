@@ -4,8 +4,8 @@
  * Mini-dragão companheiro: azul. Falha de carregamento → procedural continua.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261023conc4';
-import { addScales } from './surface-fx.js?v=20261023conc4';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261023conc5';
+import { addScales } from './surface-fx.js?v=20261023conc5';
 
 export const DRAGON_PRESETS = {
   boss: {
@@ -85,6 +85,15 @@ export function attachDragonGlb(parent, procBody, kind, opts = {}) {
       core.position.set(0, P.core.y / ws, P.core.z / ws);
       core.name = 'dragonCore';
       bone.add(core);
+    }
+    if (bone && !/[?&]cristais=0\b/.test(location.search)) { // CONCEITO: cristais facetados nas costas (todos os modelos de dragão GLB)
+      const ws = bone.getWorldScale(new THREE.Vector3()).x || 1; const u = (opts.height || P.height) / 6.2;
+      const cm = new THREE.MeshStandardMaterial({ color: new THREE.Color(P.base).lerp(new THREE.Color(P.glow), 0.5), emissive: new THREE.Color(P.glow), emissiveIntensity: 0.9, metalness: 0.5, roughness: 0.15, flatShading: true });
+      const cg = new THREE.OctahedronGeometry(0.16, 0); const cr = new THREE.Group(); cr.name = 'dragonCrystals';
+      for (let i = 0; i < 5; i++) for (const sx of [-1, 1]) { const c = new THREE.Mesh(cg, cm); const k = 1 - Math.abs(i - 2) * 0.18; c.scale.set(0.8 * k, 2.4 * k, 0.8 * k); c.position.set(sx * 0.2, 0.42 + k * 0.1, -0.7 + i * 0.32); c.rotation.set(-0.5, 0, -sx * 0.45); cr.add(c); }
+      holder.updateMatrixWorld(true); const wp = bone.getWorldPosition(new THREE.Vector3()); const wq = bone.getWorldQuaternion(new THREE.Quaternion()); const hq = holder.getWorldQuaternion(new THREE.Quaternion());
+      const H = opts.height || P.height; const top = wp.clone().add(new THREE.Vector3(0, H * 0.16, 0).applyQuaternion(hq)); // acima do dorso, no espaço do dragão
+      bone.add(cr); cr.position.copy(bone.worldToLocal(top)); cr.quaternion.copy(wq.invert().multiply(hq)); cr.scale.setScalar(2.1 * u / ws); ctl.crystals = 10;
     }
     // 20261009berco — UPGRADE VISUAL do gigante: veias/olhos mais brilhantes na cor do elemento, AURA no chão (disco + anel aditivos) e BRASAS subindo (Points, 36 partículas)
     if (opts.aura) {

@@ -16,5 +16,5 @@ const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 200);
 const vs = []; const lb = document.getElementById('lb');
 keys.forEach((k, i) => { const pal = { base: DRAGON_ART[k].base, escuro: DRAGON_ART[k].escuro, brilho: DRAGON_ART[k].brilho }; const v = createBossDragon({ height: 5.2, palette: k === 'verde' ? null : pal }); v.root.position.set(-W / 2 + i * sp, 0, 0); v.root.rotation.y = yaw; scene.add(v.root); vs.push(v); const s = document.createElement('span'); s.textContent = k.toUpperCase(); lb.appendChild(s); });
 let last = performance.now(); function f(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; for (const v of vs) v.glb?.update?.(dt, { state: 'IDLE', progress: 0, speed: 0, attack: null }); r.render(scene, cam); requestAnimationFrame(f); }
-requestAnimationFrame(f); setTimeout(() => { window.__ready = true; }, 4000);
+requestAnimationFrame(f); window.__scene = scene; setTimeout(() => { window.__ready = true; }, 4000);
 </script></body></html>

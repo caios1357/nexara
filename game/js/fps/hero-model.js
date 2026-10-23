@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023conc4';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc4';
-import { attachHeroGlb } from './hero-glb.js?v=20261023conc4';
-import { addArmorDetail } from './surface-fx.js?v=20261023conc4';
+import { getConfig } from '../gameplay-config.js?v=20261023conc5';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc5';
+import { attachHeroGlb } from './hero-glb.js?v=20261023conc5';
+import { addArmorDetail } from './surface-fx.js?v=20261023conc5';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -277,6 +277,13 @@ export function createHeroModel(opts = {}) {
       for (const sd of ['L', 'R']) { arms[sd].wrist.scale.setScalar(1.45); for (const ch of arms[sd].shoulder.children) if (ch.isMesh && !pads.includes(ch)) ch.scale.set(1.3, 1, 1.3); for (const ch of arms[sd].elbow.children) if (ch.isMesh) ch.scale.set(1.25, 1, 1.25); }
       chest.scale.set(1.12, 1, 1.12);
       for (const sd of ['L', 'R']) { glowLine(arms[sd].elbow, 0.15, 0.02, 0.15, 0, -0.2, 0); glowLine(arms[sd].elbow, 0.02, 0.18, 0.02, 0, -0.12, 0.075); glowLine(legs[sd].thigh, 0.02, 0.22, 0.02, 0, -0.18, 0.11); glowLine(legs[sd].knee, 0.17, 0.02, 0.06, 0, -0.05, 0.08); } // CONCEITO: frisos acesos na armadura (braçadeiras, coxas, joelhos)
+      { // CONCEITO: ENTALHE da armadura — sulcos escuros + placas sobrepostas + rebites (peito, abdômen, canelas)
+        const gv = (par, w, h, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.012), matUnder); m.position.set(x, y, z); par.add(m); return m; };
+        gv(chest, 0.3, 0.012, 0, 0.09, 0.168); gv(chest, 0.012, 0.16, -0.1, 0.2, 0.168); gv(chest, 0.012, 0.16, 0.1, 0.2, 0.168);
+        for (const sd of [-1, 1]) { const pl = new THREE.Mesh(roundedBoxGeo(0.13, 0.1, 0.03, 0.012), matArmor2); pl.position.set(sd * 0.13, 0.28, 0.15); pl.rotation.z = sd * 0.25; chest.add(pl); }
+        for (let k = 0; k < 3; k++) gv(spine, 0.26, 0.01, 0, 0.04 + k * 0.05, 0.105);
+        for (const sd of ['L', 'R']) { gv(legs[sd].knee, 0.12, 0.01, 0, -0.14, 0.104); gv(legs[sd].knee, 0.12, 0.01, 0, -0.26, 0.104); for (const rx of [-0.05, 0.05]) { const rv = new THREE.Mesh(new THREE.SphereGeometry(0.012, 5, 4), matGlow); rv.position.set(rx, -0.08, 0.105); legs[sd].knee.add(rv); } }
+      }
     }
     if (K.chibi && K.head === 'capuz') { // capuz das folhas: abertura frontal, rosto na sombra, olhos acesos em V, borda acesa
       rm(hood); rm(visor);

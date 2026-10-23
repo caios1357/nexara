@@ -11,12 +11,12 @@
  *  - Carga: brilho da boca (rajada) / orbe crescendo com partículas sugadas (chama).
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023conc4';
-import { artPalette } from './dragon-art.js?v=20261023conc4';
-import { TILE } from './fps-camera.js?v=20261023conc4';
-import { getConfig } from '../gameplay-config.js?v=20261023conc4';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc4';
-import { buildMiniModel, animateMini, paintMini } from './mini-model.js?v=20261023conc4';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023conc5';
+import { artPalette } from './dragon-art.js?v=20261023conc5';
+import { TILE } from './fps-camera.js?v=20261023conc5';
+import { getConfig } from '../gameplay-config.js?v=20261023conc5';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc5';
+import { buildMiniModel, animateMini, paintMini } from './mini-model.js?v=20261023conc5';
 
 const BLUE = 0x49c6ff;
 const DEEP = 0x2f6bff;

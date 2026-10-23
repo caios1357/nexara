@@ -1,6 +1,6 @@
-import { reveal } from './arquivo.js?v=20261023conc4';
-import { pushLog } from './state.js?v=20261023conc4';
-import { addToInventory } from '../../rules/loot.js?v=20261023conc4';
+import { reveal } from './arquivo.js?v=20261023conc5';
+import { pushLog } from './state.js?v=20261023conc5';
+import { addToInventory } from '../../rules/loot.js?v=20261023conc5';
 
 /** Event 02:17 — 17s blackout then messages + Mara vision */
 export async function maybeTrigger0217(state, ui) {
