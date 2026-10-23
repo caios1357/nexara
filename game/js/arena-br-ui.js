@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261017ctrl';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261023tuto';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -241,7 +241,7 @@ export function createArenaBrUi(deps) {
     drawLayer(g, s, v, 0, 0, sc, cv.width, cv.height, true);
   }
   function toggleBigMap(on = !bigOpen) {
-    if (!big) return; bigOpen = !!on; big.classList.toggle('hidden', !bigOpen);
+    if (!big) return; bigOpen = !!on; big.classList.toggle('hidden', !bigOpen); if (bigOpen) deps.onBigMap?.();
     if (bigOpen) {
       const s = deps.getState(); const v = deps.getView();
       big.querySelector('.br-legend').innerHTML = (s?._data?.arena_br?.rotas || []).map((r) => `<span>${esc(r.nome)}</span>`).join('') + `<span>◇ ponto de interesse${s?._data?.arena_br?.extracao?.desativada ? '' : ' · ○ extração'} · círculo azul = zona segura (tracejado = próximo)</span>`;
@@ -354,9 +354,24 @@ export function createArenaBrUi(deps) {
   const openBag = () => openPanel('bag');
   const openMarket = () => openPanel('market');
 
+  /* META-69: bloco DESEMPENHO + RECORDES no resumo do fim da partida */
+  function perfHtml(p, sum) {
+    const tag = (r) => (r?.novo && !r.primeira ? ' <em class="br-rec-novo">🏆 NOVO RECORDE</em>' : '');
+    const best = (r, f = (x) => x) => (r && !r.primeira && !r.novo ? ` <small>(recorde ${f(r.best)})</small>` : '');
+    const novos = Object.values(p.rec || {}).filter((r) => r.novo && !r.primeira).length;
+    return `<div class="br-sum-perf" data-k="perf"><h3>DESEMPENHO${novos ? ` <em class="br-rec-novo">🏆 ${novos} NOVO${novos > 1 ? 'S' : ''} RECORDE${novos > 1 ? 'S' : ''}</em>` : ''}</h3>
+      <div class="br-perf-grid">
+        <div><b data-k="dmg">${p.dmg}</b><span>dano causado${tag(p.rec?.dmg)}${best(p.rec?.dmg)}</span></div>
+        <div><b data-k="taken">${p.taken}</b><span>dano recebido</span></div>
+        <div><b data-k="acc">${p.acc == null ? '—' : p.acc + '%'}</b><span>acertos (${p.hits}/${p.attacks} ataques)</span></div>
+        <div><b data-k="streak">${p.bestStreak}</b><span>abates em sequência${tag(p.rec?.streak)}${best(p.rec?.streak)}</span></div>
+        <div><b data-k="rtime">${mmss(sum.timeMs)}</b><span>tempo${tag(p.rec?.time)}${best(p.rec?.time, mmss)}</span></div>
+        <div><b data-k="rkills">${sum.kills}</b><span>abates${tag(p.rec?.kills)}${best(p.rec?.kills)}</span></div>
+      </div><p class="br-perf-n">Partida nº ${p.partidas} neste modo</p></div>`;
+  }
   /* ── resumo DERROTADO / EXTRAÇÃO ── */
   function closeSummary() { summaryEl?.remove(); summaryEl = null; }
-  function showSummary(sum, { onAgain, onMenu, zero = false, fast = null, onRanking = null, xp = null }) {
+  function showSummary(sum, { onAgain, onMenu, zero = false, fast = null, onRanking = null, xp = null, perf = null }) {
     closeSummary(); toggleBigMap(false);
     const win = sum.kind === 'vitoria'; // RIVAIS: CAMPEÃO RIVAL e todos os rivais derrotados
     const ok = sum.kind === 'extraido' || win;
@@ -378,6 +393,7 @@ export function createArenaBrUi(deps) {
         <dt>Melhor equipamento</dt><dd data-k="best">${best}</dd>
         <dt>Regiões visitadas</dt><dd data-k="regions">${sum.regions.length} / 6</dd>
       </dl>
+      ${perf ? perfHtml(perf, sum) : ''}
       ${sum.boss ? '<p class="br-sum-boss">🐉 GIGANTE VERDE derrotado nesta corrida!</p>' : ''}
       <div class="br-sum-actions"><button type="button" class="primary" data-a="again">JOGAR DE NOVO</button>${onRanking ? '<button type="button" data-a="ranking">RANKING</button>' : ''}<button type="button" data-a="menu">MENU</button></div></div>`;
     if (onRanking) summaryEl.querySelector('[data-a="ranking"]').onclick = () => onRanking();

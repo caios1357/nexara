@@ -10,41 +10,41 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261017ctrl';
-import { buildArenaDressing } from './arena-dressing.js?v=20261017ctrl';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261017ctrl';
-import { createHeroModel } from './hero-model.js?v=20261017ctrl';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261017ctrl';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261017ctrl';
-import { attachHeroGlb } from './hero-glb.js?v=20261017ctrl';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261017ctrl';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261017ctrl';
-import { createActionVfx } from './action-vfx.js?v=20261017ctrl';
-import { createPassiveVfx } from './passive-vfx.js?v=20261017ctrl';
-import { createFpsControls } from './fps-controls.js?v=20261017ctrl';
-import { createViewmodel } from './viewmodel.js?v=20261017ctrl';
-import { createDragonView } from './dragon-view.js?v=20261017ctrl';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261017ctrl';
-import { getSprite } from '../assets.js?v=20261017ctrl';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261017ctrl';
-import { createBossDragon } from './boss-dragon-view.js?v=20261017ctrl';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261017ctrl';
-import { mergeStaticParts } from './merge-util.js?v=20261017ctrl';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261017ctrl';
-import { attachDragonGlb } from './dragon-glb.js?v=20261017ctrl';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261017ctrl';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261017ctrl';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261017ctrl';
-import { createPostFx } from './post-fx.js?v=20261017ctrl';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261017ctrl';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261017ctrl';
-import { createContactShadows } from './contact-shadows.js?v=20261017ctrl';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261017ctrl';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261017ctrl';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261017ctrl';
-import { groundAt, setGroundFn } from './ground.js?v=20261017ctrl';
-import { buildBrTerrain } from './br-terrain.js?v=20261017ctrl';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261017ctrl';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261023tuto';
+import { buildArenaDressing } from './arena-dressing.js?v=20261023tuto';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261023tuto';
+import { createHeroModel } from './hero-model.js?v=20261023tuto';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261023tuto';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261023tuto';
+import { attachHeroGlb } from './hero-glb.js?v=20261023tuto';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261023tuto';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261023tuto';
+import { createActionVfx } from './action-vfx.js?v=20261023tuto';
+import { createPassiveVfx } from './passive-vfx.js?v=20261023tuto';
+import { createFpsControls } from './fps-controls.js?v=20261023tuto';
+import { createViewmodel } from './viewmodel.js?v=20261023tuto';
+import { createDragonView } from './dragon-view.js?v=20261023tuto';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261023tuto';
+import { getSprite } from '../assets.js?v=20261023tuto';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261023tuto';
+import { createBossDragon } from './boss-dragon-view.js?v=20261023tuto';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261023tuto';
+import { mergeStaticParts } from './merge-util.js?v=20261023tuto';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261023tuto';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023tuto';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261023tuto';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261023tuto';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261023tuto';
+import { createPostFx } from './post-fx.js?v=20261023tuto';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261023tuto';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261023tuto';
+import { createContactShadows } from './contact-shadows.js?v=20261023tuto';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261023tuto';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261023tuto';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261023tuto';
+import { groundAt, setGroundFn } from './ground.js?v=20261023tuto';
+import { buildBrTerrain } from './br-terrain.js?v=20261023tuto';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261023tuto';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -131,7 +131,7 @@ export function createFpsRenderer() {
   /* 20261016visual: visual CLÁSSICO do herói (pedido do Caio) — CAVALEIRO NEXA = o herói escuro com espada de luz (procedural, leve no celular).
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
-  /* HERÓI 3 (20261017ctrl): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
+  /* HERÓI 3 (20261017perf): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
   const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
   const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';
@@ -393,7 +393,8 @@ export function createFpsRenderer() {
 
   /** EVO: degraus de qualidade adaptativa (efeitos antes da resolução). */
   // M10 fase 9 — escada: inimigos distantes → partículas → efeitos → detalhe de cenário → frequência da IA longe
-  const dropped = { enemyLod: false, particles: false, bloom: false, envMap: false, pointLights: false, city: false, rain: false, brDecor: false, aiFar: false };
+  let postFxBypass = false; // META-69: degrau 'composer' da qualidade adaptativa → render direto (−1 alvo fora da tela + passadas de tela cheia)
+  const dropped = { composer: false, enemyLod: false, particles: false, bloom: false, envMap: false, pointLights: false, city: false, rain: false, brDecor: false, aiFar: false };
   let isTouchDev = false;
   let effectGate = null; let aiFarHook = null; let brLodK = 1; let particleK = 1;
   function dropNextEffect(g) {
@@ -411,6 +412,9 @@ export function createFpsRenderer() {
       } else if (step === 'bloom') {
         if (!postFx?.bloom || !postFx.bloom.enabled) { dropped.bloom = true; continue; }
         postFx.bloom.enabled = false;
+      } else if (step === 'composer') {
+        if (!postFx || postFxBypass) { dropped.composer = true; continue; }
+        postFxBypass = true; ensureVignette(); // tom ACES + sRGB seguem no render direto (renderer.toneMapping); a vinheta vira CSS
       } else if (step === 'envMap') {
         if (!scene?.environment) { dropped.envMap = true; continue; }
         scene.environment = null;
@@ -1831,7 +1835,7 @@ export function createFpsRenderer() {
     const bbm = R0.bb ? makeBBMesh(R0.bb.cor) : null; if (bbm) { root.add(bbm.g); own.push(...bbm.mats, ...bbm.geos); }
     return { bb: bbm, mesh: root, body, kind: 'mon', uid: m.uid, rival: true, glb, tag, tagLvl: R0.level || 1, ring, ringMat: rgMat, fb, own, lastNow: 0, animAcc: 0, champ: false, fx: null, fy: null };
   }
-  const rivalRank = []; const rivalFull = new Set();
+  const rivalRank = []; const rivalFull = new Set(); const rivalBBOn = new Set(); const bbLod = { on: 0, off: 0 };
   /** rival fora do grupo próximo: só posição + etiqueta/anel (sem animação/corpo) */
   /* 20261016abrigos: rival montado/voando — dragão sob o rival (até 3 modelos; mesma pose de voo da montaria do herói) */
   const rivalMountStats = { views: 0, shown: 0 };
@@ -1857,7 +1861,8 @@ export function createFpsRenderer() {
     root.position.set(fx * TILE, groundAt(fx, fy) + rivalLift(entry, m, fx, fy, dt), fy * TILE);
     if (synced) root.rotation.y = Math.PI - v.facing;
     const sm = m.sizeMult || 1; entry.body.scale.setScalar(sm);
-    if (entry.bb) { // BB voa no ombro (mesma regra do companheiro do herói: ao lado/à frente, a altura de pairar) com bater de asas e boca acesa no aviso da habilidade
+    if (entry.bb && !rivalBBOn.has(m.uid)) { if (entry.bb.g.visible) entry.bb.g.visible = false; bbLod.off++; }
+    else if (entry.bb) { bbLod.on++; // BB voa no ombro (mesma regra do companheiro do herói: ao lado/à frente, a altura de pairar) com bater de asas e boca acesa no aviso da habilidade
       const B = entry.bb; const wind = !!m.rival.bb?.wind; const dtb = Math.min(0.1, Math.max(0, (now - (B.lastNow || now)) / 1000)); B.lastNow = now; B.t = (B.t || 0) + dtb;
       const dc = getConfig().dragon; const bob = Math.sin(now * 0.004 + m.uid) * (dc.hoverBobAmp ?? 0.08);
       B.g.visible = true; B.g.position.set((dc.followSide ?? 0.8) * TILE, ((dc.hoverHeight ?? 2.25) * 0.8 + bob) * sm, -(dc.followForward ?? 0.35) * TILE);
@@ -1914,6 +1919,8 @@ export function createFpsRenderer() {
     if (zone.br) { const cx = fpsCam.state.visX / TILE, cy = fpsCam.state.visZ / TILE; for (let i = 0; i < mons.length; i++) { const q = mons[i]; if (q.alive && q.rival) rivalRank.push({ uid: q.uid, d: Math.hypot(q.x + 0.5 - cx, q.y + 0.5 - cy) }); } rivalRank.sort((a, b) => a.d - b.d); }
     const rivalCap = (tier?.rivalModels ?? 8) - (brLodK < 1 ? 1 : 0);
     rivalFull.clear(); for (let i = 0; i < rivalRank.length; i++) if (i < rivalCap || rivalRank[i].d <= 10) rivalFull.add(rivalRank[i].uid);
+    // META-69: o filhote (BB) do rival custa ~29 chamadas de desenho — só nos N rivais mais próximos e a ≤ rivalBBDist tiles (MEDIUM 2, HIGH 4, LOW 1)
+    rivalBBOn.clear(); { const nBB = tier?.rivalBB ?? 2, dBB = getConfig().graphics?.rivalBBDist ?? 14; for (let i = 0; i < rivalRank.length && rivalBBOn.size < nBB; i++) if (rivalRank[i].d <= dBB && rivalFull.has(rivalRank[i].uid)) rivalBBOn.add(rivalRank[i].uid); }
     for (let i = 0; i < mons.length; i++) {
       const m = mons[i];
       if (!m.alive || m.zone !== zone.id) continue;
@@ -2587,7 +2594,7 @@ export function createFpsRenderer() {
     city?.update(dt);
     dressing?.update?.(dt, fpsCam.camera.position);
     renderer.info.reset();
-    if (postFx) postFx.render(dt);
+    if (postFx && !postFxBypass) postFx.render(dt);
     else renderer.render(scene, fpsCam.camera);
     frameStats.calls = renderer.info.render.calls;
     frameStats.tris = renderer.info.render.triangles;
@@ -2629,7 +2636,7 @@ export function createFpsRenderer() {
     // → nenhum programa novo é compilado (antes: alvo sRGB + sem névoa recompilava a cena inteira = engasgo de ~1 s).
     // Sem pós-processo (preset baixo) a variante seria outra → fica o retrato 2D (sprite).
     if (/[?&]portrait=0\b/.test(location.search)) return;
-    if (!postFx) {
+    if (!postFx || postFxBypass) {
       // sem pós-processo: foto pronta do contexto temporário (hero-preview) — zero compilação aqui
       const k = portraitKey(heroStyleId, heroExtra?.custom);
       const snap = getPortraitSnapshot(k);
@@ -3044,12 +3051,30 @@ export function createFpsRenderer() {
     debugThree: () => ({ scene, renderer, camera: fpsCam.camera }),
     getPerf: () => ({ pixelRatio: perf.pr, fps: +(1000 / perf.emaMs).toFixed(1) }),
     /** Bloco V: qualidade/pós/atmosfera (e2e). */
+    /** META-69: raio-x de desempenho — malhas visíveis por grupo (≈ chamadas de desenho), luzes, materiais, instâncias. */
+    perfBreakdown: () => {
+      if (!scene) return null;
+      const by = {}; const tb = {}; let meshes = 0, inst = 0, lights = 0, shadowLights = 0; const mats = new Set();
+      const keyOf = (o) => { let q = o, path = []; while (q && q !== scene) { if (q.name) path.unshift(q.name); q = q.parent; } return path.slice(0, 2).join('/') || (o.parent === scene ? '(raiz)' : o.parent?.type || '?'); };
+      const cam = fpsCam.camera; cam.updateMatrixWorld(); const fr = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse));
+      scene.traverseVisible((o) => {
+        if ((o.isMesh || o.isPoints || o.isLine || o.isSprite) && o.frustumCulled && !o.isInstancedMesh && o.geometry && !fr.intersectsObject(o)) return;
+        if (o.isLight) { if (o.intensity > 0) { lights++; if (o.castShadow) shadowLights++; } return; }
+        if (!(o.isMesh || o.isPoints || o.isLine || o.isSprite)) return;
+        meshes++; if (o.isInstancedMesh) inst++;
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m && mats.add(m.uuid));
+        const k = keyOf(o); by[k] = (by[k] || 0) + 1;
+        const g = o.geometry; if (g) { const n = (g.index ? g.index.count : g.attributes.position?.count || 0) / 3 * (o.isInstancedMesh ? o.count : 1); tb[k] = (tb[k] || 0) + Math.round(n); }
+      });
+      const top = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => [k, v, tb[k] || 0]);
+      return { meshes, instanced: inst, lights, shadowLights, materials: mats.size, programs: renderer?.info?.programs?.length || 0, geometries: renderer?.info?.memory?.geometries || 0, textures: renderer?.info?.memory?.textures || 0, calls: frameStats.calls, tris: frameStats.tris, top };
+    },
     getGraphics: () => ({
       mount: { rest: !!(restVis.mesh && restVis.mesh.visible), restErr: restVis.err, k: +mountVis.k.toFixed(2), alt: +mountVis.alt.toFixed(2), hasMesh: !!mountVis.mesh, visible: !!mountVis.mesh?.visible, err: mountVis.err || null, heroLift: +mountVis.heroLift.toFixed(2), h: mountVis.view?.height ?? null, y: mountVis.mesh ? +mountVis.mesh.position.y.toFixed(2) : null, gy: +(mountVis.gy ?? 0).toFixed(2), vAlt: +(mountVis.vAlt ?? 0).toFixed(2), parked: !!mountVis.park, parks: mountVis.parks || 0 },
       tier: tierName,
       tierIfHardware: tierAuto,
       softwareGL,
-      composer: postFx ? postFx.getDebug() : { active: false, pending: postFxPending, error: postFxError },
+      composer: postFx ? { ...postFx.getDebug(), bypass: postFxBypass } : { active: false, pending: postFxPending, error: postFxError },
       shadows: !!renderer?.shadowMap.enabled,
       envMap: !!scene?.environment,
       toneMapping: renderer?.toneMapping === THREE.ACESFilmicToneMapping ? 'ACESFilmic' : String(renderer?.toneMapping),
@@ -3078,6 +3103,7 @@ export function createFpsRenderer() {
       enemyProjectiles: enemyFx ? enemyFx.proj.count : 0,
       enemyHazards: enemyFx ? enemyFx.haz.count : 0,
       precompile: { ...precompileInfo },
+      bbLod: { ...bbLod, shown: rivalBBOn.size },
       rivals: { ...rivalStats, modelsOn: modelsEnabled(), live: [...entityMeshes.values()].filter((e) => e.rival).map((e) => ({ uid: e.uid, visible: e.mesh.visible, glb: e.glb.info.status, style: e.glb.info.style, kit: e.glb.info.kit || null, bb: e.bb ? e.bb.g.visible : null, bbInfo: e.bb ? { scale: e.bb.model.scale.x, meshes: countMeshes(e.bb.model), glb: e.bb.glb.status, pal: e.bb.palKey || null } : null })) },
       dragon: dragonView?.info?.() || null,
       botPool: Object.fromEntries(Object.entries(botPool).map(([k, v]) => [k, v.length])),

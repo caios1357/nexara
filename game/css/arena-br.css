@@ -69,6 +69,20 @@
 .br-sum-box dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; text-align: left; font-size: 0.86rem; margin: 0; }
 .br-sum-box dt { color: #9fb8c0; } .br-sum-box dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .br-sum-boss { color: #5dff6a; margin: 10px 0 0; }
+/* META-69: DESEMPENHO + RECORDES; caixa rolável e, em paisagem baixa, 2 colunas (estatísticas | desempenho) com os botões sempre à vista */
+.br-sum-box { max-height: 94vh; overflow-y: auto; overscroll-behavior: contain; }
+.br-sum-perf { margin-top: 10px; text-align: left; } .br-sum-perf h3 { margin: 0 0 6px; font-size: 0.78rem; letter-spacing: 0.14em; color: #7fe7ff; }
+.br-perf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.br-perf-grid > div { background: rgba(20, 40, 52, 0.75); border: 1px solid rgba(127, 231, 255, 0.25); border-radius: 8px; padding: 5px 6px; display: flex; flex-direction: column; }
+.br-perf-grid b { font-size: 1.05rem; color: #fff; font-variant-numeric: tabular-nums; } .br-perf-grid span { font-size: 0.66rem; color: #9fb8c0; line-height: 1.2; } .br-perf-grid small { color: #7f97a0; }
+.br-rec-novo { font-style: normal; color: #ffd76a; font-weight: 800; animation: brRec 1.2s ease-in-out infinite alternate; } @keyframes brRec { from { text-shadow: 0 0 0 #ffd76a; } to { text-shadow: 0 0 8px #ffb700; } }
+.br-perf-n { margin: 6px 0 0; font-size: 0.68rem; color: #7f97a0; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .br-sum-box { width: min(780px, 96vw); display: grid; grid-template-columns: 1fr 1.15fr; gap: 0 16px; align-items: start; padding: 10px 14px; }
+  .br-sum-box > * { grid-column: 1 / -1; } .br-sum-box > dl { grid-column: 1; } .br-sum-box > .br-sum-perf { grid-column: 2; margin-top: 0; }
+  .br-sum-box h2 { font-size: 1.2rem; } .br-sum-sub, .br-sum-fast, .br-sum-xp, .br-sum-zero { margin: 0 0 6px; font-size: 0.74rem; }
+  .br-sum-actions { margin-top: 8px; } .br-sum-actions button { padding: 8px; }
+}
 .br-sum-actions { display: flex; gap: 8px; margin-top: 14px; } .br-sum-actions button { flex: 1; padding: 10px; border-radius: 7px; border: 1px solid rgba(143, 216, 200, 0.45); background: rgba(20, 40, 48, 0.9); color: #fff; cursor: pointer; letter-spacing: 0.08em; }
 .br-sum-actions button.primary { background: rgba(62, 207, 191, 0.28); border-color: #3ecfbf; }
 
@@ -127,7 +141,7 @@
 @media (max-height: 520px) { .br-distrito { top: calc(max(8px, env(safe-area-inset-top)) + 108px); } }
 .br-distrito.hidden { display: none; }
 
-/* 20261017ctrl: XP da partida → herói permanente */
+/* 20261017perf: XP da partida → herói permanente */
 .br-summary .br-sum-xp { margin: 0.25rem 0; color: #ffe08a; font-size: 0.78rem; font-weight: 700; text-shadow: 0 0 8px rgba(255,200,80,0.45); }
 
 /* ===== LOTE-b M2 (pedido do Caio): HUD COMPACTO (padrão) e HUD MÍNIMO — CONFIGURAÇÕES → TELA → HUD ===== */

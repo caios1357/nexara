@@ -5,7 +5,7 @@
  * (fallback idêntico ao nível 'low'). Bloom em meia resolução no nível 'medium'.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261017ctrl';
+import { getConfig } from '../gameplay-config.js?v=20261023tuto';
 
 const GradeShader = {
   uniforms: {
@@ -13,7 +13,9 @@ const GradeShader = {
     amount: { value: 0.5 },
     vignette: { value: 0.45 },
     texel: { value: new THREE.Vector2(1 / 1024, 1 / 512) },
-    fxaa: { value: 0 }
+    fxaa: { value: 0 },
+    finalOut: { value: 0 },
+    exposure: { value: 1 }
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;
@@ -24,7 +26,16 @@ const GradeShader = {
     uniform float vignette;
     uniform vec2 texel;
     uniform float fxaa;
+    uniform float finalOut;
+    uniform float exposure;
     varying vec2 vUv;
+    // META-69: ACES Filmic + sRGB DENTRO desta passada (igual ao OutputPass do three r170) → 1 passada de tela cheia a menos
+    vec3 nxRRT(vec3 v) { vec3 a = v * (v + 0.0245786) - 0.000090537; vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081; return a / b; }
+    vec3 nxACES(vec3 color) {
+      const mat3 inM = mat3(vec3(0.59719, 0.07600, 0.02840), vec3(0.35458, 0.90834, 0.13383), vec3(0.04823, 0.01566, 0.83777));
+      const mat3 outM = mat3(vec3(1.60475, -0.10208, -0.00327), vec3(-0.53108, 1.10813, -0.07276), vec3(-0.07367, -0.00605, 1.07602));
+      color *= exposure / 0.6; color = inM * color; color = nxRRT(color); color = outM * color; return clamp(color, 0.0, 1.0); }
+    vec3 nxSRGB(vec3 v) { return mix(pow(v, vec3(0.41666)) * 1.055 - vec3(0.055), v * 12.92, vec3(lessThanEqual(v, vec3(0.0031308)))); }
     // GRÁFICOS 2: FXAA (luma em espaço comprimido p/ HDR) dentro da MESMA passada da cor — sem render target extra
     float lumaC(vec3 c) { float l = dot(c, vec3(0.299, 0.587, 0.114)); return l / (1.0 + l); }
     vec3 fxaaSample(vec2 uv) {
@@ -63,6 +74,7 @@ const GradeShader = {
       vec2 d = vUv - 0.5;
       float v = smoothstep(0.85, 0.25, length(d * vec2(1.0, 1.15)));
       c *= mix(1.0, v, vignette);
+      if (finalOut > 0.5) c = nxSRGB(nxACES(c));
       gl_FragColor = vec4(c, tex.a);
     }`
 };
@@ -84,7 +96,8 @@ export async function createPostFx(renderer, scene, camera, tier) {
   ]);
   const g = getConfig().graphics;
   const size = renderer.getSize(new THREE.Vector2());
-  const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples: 0 });
+  const rtQ = new URLSearchParams(location.search).get('rtType'); const rt8 = rtQ ? rtQ === '8' : g.postRt8 === true;
+  const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: rt8 ? THREE.UnsignedByteType : THREE.HalfFloatType, samples: 0 });
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
   let bloom = null;
@@ -97,7 +110,9 @@ export async function createPostFx(renderer, scene, camera, tier) {
   }
   const grade = new ShaderPass(GradeShader);
   composer.addPass(grade);
-  composer.addPass(new OutputPass());
+  // META-69: com ACES + sRGB a mescla dispensa o OutputPass (só quando o renderer usa ACES Filmic + sRGB; ?postMerge=0 volta ao OutputPass)
+  const merged = g.postMergedOutput !== false && !/[?&]postMerge=0\b/.test(location.search) && renderer.toneMapping === THREE.ACESFilmicToneMapping && renderer.outputColorSpace === THREE.SRGBColorSpace;
+  if (merged) grade.uniforms.finalOut.value = 1; else composer.addPass(new OutputPass());
   const st = { frames: 0, bloomScale: tier.bloomScale, w: 0, h: 0, pr: 0, fxaa: !!tier.fxaa };
   const fxaaOff = /[?&]fxaa=0\b/.test(location.search); const fxaaOn = /[?&]fxaa=1\b/.test(location.search);
 
@@ -107,6 +122,7 @@ export async function createPostFx(renderer, scene, camera, tier) {
     grade.uniforms.vignette.value = c.vignette;
     st.fxaa = !fxaaOff && (fxaaOn || (!!tier.fxaa && c.fxaa !== false));
     grade.uniforms.fxaa.value = st.fxaa ? 1 : 0;
+    grade.uniforms.exposure.value = renderer.toneMappingExposure;
     if (bloom) { bloom.strength = c.bloomStrength; bloom.radius = c.bloomRadius; bloom.threshold = c.bloomThreshold; }
   }
   return {
@@ -124,7 +140,7 @@ export async function createPostFx(renderer, scene, camera, tier) {
       composer.render(dt);
       st.frames++;
     },
-    getDebug: () => ({ active: true, bloom: !!bloom, bloomScale: st.bloomScale, frames: st.frames, passes: composer.passes.length, fxaa: st.fxaa }),
+    getDebug: () => ({ active: true, bloom: !!bloom, bloomScale: st.bloomScale, frames: st.frames, passes: composer.passes.length, fxaa: st.fxaa, mergedOutput: merged }),
     dispose() { composer.dispose?.(); rt.dispose(); }
   };
 }

@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261017ctrl';
-import { pushLog } from './state.js?v=20261017ctrl';
-import { isArenaState } from './arena.js?v=20261017ctrl';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261017ctrl';
-import { ICONS } from './icons.js?v=20261017ctrl';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261023tuto';
+import { pushLog } from './state.js?v=20261023tuto';
+import { isArenaState } from './arena.js?v=20261023tuto';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261023tuto';
+import { ICONS } from './icons.js?v=20261023tuto';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -165,6 +165,10 @@ export function createMobileControls(hooks) {
       <button type="button" class="mc-btn mc-dspecial" data-power="dspecial" title="Poder especial do dragão (R)" aria-label="Poder especial do dragão">
         <span class="mc-ico">✦</span>
         <span class="mc-lbl">PODER</span>
+      </button>
+      <button type="button" class="mc-btn mc-dalvo" data-power="dalvo" title="Trocar o alvo do sopro (T)" aria-label="Trocar alvo do sopro">
+        <span class="mc-ico">🎯</span>
+        <span class="mc-lbl">ALVO</span>
       </button>
       <button type="button" class="mc-btn mc-trocar" data-power="trocar" title="Trocar arma (X)" aria-label="Trocar arma">
         <span class="mc-ico">🏹</span>
@@ -646,11 +650,12 @@ export function createMobileControls(hooks) {
   let mountKey = '';
   function setMountUi(u) {
     if (!root) return;
-    const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}|${u.spName || ''}|${Math.round((u.spCdPct ?? 0) / 10)}`;
+    const bp = Math.round((u.breathPct ?? 100) / 10) * 10; const key = `${u.show ? 1 : 0}|${u.flying ? 1 : 0}|${u.phase || ''}|${bp}|${u.spName || ''}|${Math.round((u.spCdPct ?? 0) / 10)}|${u.dlock ? 1 : 0}${u.dlockHas ? 1 : 0}`;
     if (key === mountKey) return; mountKey = key;
     { const me = root.querySelector('.mc-mount'); me?.classList.toggle('mc-mount-off', !u.show && !u.flying); me?.classList.toggle('mc-descer', !!u.flying); const ml = me?.querySelector('.mc-lbl'); const mi = me?.querySelector('.mc-ico');
       if (ml) ml.textContent = u.flying ? (u.phase === 'landing' ? 'SUBIR' : 'DESCER') : 'MONTAR'; if (mi) mi.textContent = u.flying ? (u.phase === 'landing' ? '⏫' : '⏬') : '🐉'; if (me) me.title = u.flying ? 'Segure 0,4 s ou toque 2× para pousar' : 'Montar no Gigante (M)'; }
     root.classList.toggle('mc-mounted', !!u.flying);
+    root.classList.toggle('mc-dlock-on', !!u.flying && !!u.dlock); root.querySelector('.mc-dalvo')?.classList.toggle('mc-dalvo-has', !!u.dlockHas);
     const d = root.querySelector('.mc-act-dodge'); const lbl = d?.querySelector('.mc-lbl');
     if (lbl) lbl.textContent = 'ESQUIVA';
     d?.classList.toggle('mc-descend', false);
@@ -749,6 +754,7 @@ export function createMobileControls(hooks) {
 
     if (id === 'mount') { hooks.onMount?.(); return; }
     if (id === 'dspecial') { hooks.onDragonSpecial?.(); return; }
+    if (id === 'dalvo') { hooks.onDragonLockCycle?.(); return; }
     if (id === 'trocar') { hooks.onSwapWeapon?.(); return; }
     if (id === 'dodge') { hooks.onDodge?.(); return; }
     if (SPECIAL_BTN.has(id)) { hooks.onSpecial?.(id); return; }

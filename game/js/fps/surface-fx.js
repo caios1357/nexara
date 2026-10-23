@@ -115,6 +115,29 @@ float sfxN3(vec3 x) { vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2
 float sfxHash2(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float sfxN2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(sfxHash2(i), sfxHash2(i + vec2(1, 0)), f.x), mix(sfxHash2(i + vec2(0, 1)), sfxHash2(i + vec2(1, 1)), f.x), f.y); }`;
 
+/** META-69 (desempenho): ruído de valor PRÉ-CALCULADO numa textura 256² repetível (32 células, 8 texels/célula, mesmo
+ *  ruído suave do sfxN2) — chão e paredes leem 1 texel em vez de 4 hashes por chamada (o chão é a maior área da tela).
+ *  ?noiseTex=0 volta ao ruído calculado no shader. */
+let noiseTexObj = null;
+export function noiseTexOn() { return !(typeof location !== 'undefined' && /[?&]noiseTex=0\b/.test(location.search)); }
+function noiseTex() {
+  if (noiseTexObj) return noiseTexObj;
+  const N = 256, C = 32, S = N / C; const lat = new Float32Array(C * C);
+  let seed = 1234567; const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let i = 0; i < C * C; i++) lat[i] = rnd();
+  const L = (x, y) => lat[((y % C + C) % C) * C + ((x % C + C) % C)];
+  const data = new Uint8Array(N * N * 4);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const fx = (x + 0.5) / S, fy = (y + 0.5) / S; const ix = Math.floor(fx), iy = Math.floor(fy); let tx = fx - ix, ty = fy - iy; tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+    const v = (L(ix, iy) * (1 - tx) + L(ix + 1, iy) * tx) * (1 - ty) + (L(ix, iy + 1) * (1 - tx) + L(ix + 1, iy + 1) * tx) * ty;
+    const k = (y * N + x) * 4; data[k] = data[k + 1] = data[k + 2] = Math.round(v * 255); data[k + 3] = 255;
+  }
+  const t = new THREE.DataTexture(data, N, N, THREE.RGBAFormat); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true;
+  noiseTexObj = t; return t;
+}
+const NOISE_TEX = `uniform sampler2D sfxNz;
+float sfxN2(vec2 p) { return texture2D(sfxNz, p * 0.03125).r; }`;
+
 /**
  * MEMBRANA DE ASA (dragões procedurais): translucidez de contra-luz (borda/fresnel acende na cor do elemento),
  * VEIAS radiais a partir da raiz da asa com PULSO de energia correndo para a ponta, e borda de fuga mais clara.
@@ -151,11 +174,12 @@ export function addWallDetail(mat, o = {}) {
   if (!mat || mat.userData.sfxWall) return mat;
   mat.userData.sfxWall = true; stats.wall = (stats.wall || 0) + 1;
   const u = { sfxTime, sfxWallK: { value: o.k ?? 1 } };
+  const useTex = noiseTexOn(); if (useTex) u.sfxNz = { value: noiseTex() };
   chain(mat, 'sfxWall', (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = 'varying vec3 vSfxW; varying float vSfxH;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vSfxH = position.y;')
       .replace('#include <project_vertex>', '#include <project_vertex>\n { vec4 sw = vec4(transformed, 1.0);\n #ifdef USE_INSTANCING\n sw = instanceMatrix * sw;\n #endif\n vSfxW = (modelMatrix * sw).xyz; }');
-    sh.fragmentShader = 'varying vec3 vSfxW; varying float vSfxH;\nuniform float sfxTime; uniform float sfxWallK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + NOISE + `
+    sh.fragmentShader = 'varying vec3 vSfxW; varying float vSfxH;\nuniform float sfxTime; uniform float sfxWallK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + (useTex ? NOISE_TEX : NOISE) + `
 float sfxBrick(vec3 w, vec3 n) { vec3 a = abs(n); vec2 p = a.x > a.z ? w.zy : w.xy; p *= vec2(1.05, 2.1); float row = floor(p.y); p.x += mod(row, 2.0) * 0.5;
   vec2 f = abs(fract(p) - 0.5); return max(smoothstep(0.455, 0.5, f.x), smoothstep(0.42, 0.5, f.y)); }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
@@ -184,11 +208,12 @@ export function addFloorDetail(mat, o = {}) {
   if (!mat || mat.userData.sfxFloor) return mat;
   mat.userData.sfxFloor = true; stats.floor = (stats.floor || 0) + 1;
   const u = { sfxTime, sfxSky: { value: new THREE.Color(o.sky ?? 0x2a4a7a) }, sfxFloorK: { value: o.k ?? 1 } };
+  const useTex = noiseTexOn(); if (useTex) u.sfxNz = { value: noiseTex() };
   mat.userData.sfxUniforms = u;
   chain(mat, 'sfxFloor', (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = 'varying vec3 vSfxW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vSfxW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-    sh.fragmentShader = 'varying vec3 vSfxW;\nuniform float sfxTime; uniform vec3 sfxSky; uniform float sfxFloorK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + NOISE + '\nfloat sfxWet = 0.0;')
+    sh.fragmentShader = 'varying vec3 vSfxW;\nuniform float sfxTime; uniform vec3 sfxSky; uniform float sfxFloorK;\n' + sh.fragmentShader.replace('#include <common>', '#include <common>\n' + (useTex ? NOISE_TEX : NOISE) + '\nfloat sfxWet = 0.0;')
       .replace('#include <color_fragment>', `#include <color_fragment>
  { float macro = sfxN2(vSfxW.xz * 0.045) * 0.6 + sfxN2(vSfxW.xz * 0.19 + 7.3) * 0.4;
    vec2 gq = abs(fract(vSfxW.xz / 4.0) - 0.5); float seam = max(smoothstep(0.485, 0.5, gq.x), smoothstep(0.485, 0.5, gq.y));

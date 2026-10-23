@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261017ctrl';
-import { mergeStaticParts } from './merge-util.js?v=20261017ctrl';
-import { attachHeroGlb } from './hero-glb.js?v=20261017ctrl';
-import { addArmorDetail } from './surface-fx.js?v=20261017ctrl';
+import { getConfig } from '../gameplay-config.js?v=20261023tuto';
+import { mergeStaticParts } from './merge-util.js?v=20261023tuto';
+import { attachHeroGlb } from './hero-glb.js?v=20261023tuto';
+import { addArmorDetail } from './surface-fx.js?v=20261023tuto';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -495,9 +495,12 @@ export function createHeroModel(opts = {}) {
   if (getConfig().graphics?.mergeCharacterParts !== false) {
     const keep = [slash, bladeGlow];
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
-    mergeInfo = mergeStaticParts(root, keep);
+    const cm = getConfig().graphics?.mergeByColor !== false && !/[?&]mergeCor=0\b/.test(location.search);
+    mergeInfo = mergeStaticParts(root, keep, { colorMerge: cm, exclude: [matBlade, arcMat, chargeMat, shieldMat, shieldEdgeMat] });
+    // META-69: o pisco de dano continua valendo nos materiais mesclados (cor por vértice) — mesmo emissivo base
+    if (mergeInfo.matMap?.size) for (let i = 0; i < flashMats.length; i++) { const nm = mergeInfo.matMap.get(flashMats[i]); if (nm && !flashMats.includes(nm)) { flashMats.push(nm); baseEmissive.push(nm.emissive.getHex()); } }
   }
-  // ARMAS DUPLAS (20261017ctrl): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
+  // ARMAS DUPLAS (20261017perf): arco / cajado / varinha procedurais na mão direita (fora do merge → alternam por visibilidade)
   const altW = {};
   {
     const wMat = new THREE.MeshStandardMaterial({ color: 0x2b2420, roughness: 0.55, metalness: 0.35 });

@@ -600,7 +600,7 @@
    "maxAlvoJogador": 2,
    "emCombateR": 2.6,
    "emCombateJogadorR": 2.5,
-   "_doc": "20261017ctrl: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo).",
+   "_doc": "20261017perf: ALVO FIEL (compromisso 7 s, cooldown de retarget 3,5 s, solta se alvo > 20 tiles; herói só vira alvo se atacar, chegar a ≤ 4 tiles ou estiver fraco e perto). 20261010ajustes: ARENA (mapa completo) também escolhe alvo entre TODOS os heróis (herói = só mais um, levemente menos atrativo); só persegue o herói quem o escolheu ou foi atacado por ele. Mesmos campos do FAST (fast.rivaisAlvo).",
    "provocaFrac": 0.12,
    "provocaJanelaMs": 4000,
    "_docProvoca": "LOTE-b M4: resvalo de ÁREA/SUPREMA/mini-dragão (< 12% do HP do rival em 4 s) num rival em duelo NÃO o faz largar a briga; golpe de verdade provoca.",
@@ -854,17 +854,17 @@
    "vooDistMin": 14,
    "_docLote": "LOTE-b M5: metade dos rivais são CAÇADORES DE GIGANTE (não aceitam duelo enquanto caçam; só revidam), procuram gigante a até 70 tiles e com ≥ 45% de HP."
   },
-  "_docLutam": "20261017ctrl: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
-  "_docFinal": "20261017ctrl: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói).",
+  "_docLutam": "20261017perf: na ARENA os rivais brigam entre si desde o início (antes só com a zona fechando → sobrava o herói como alvo)",
+  "_docFinal": "20261017perf: finalLivre — na reta final (estágio 3) só o CAMPEÃO RIVAL caça o herói; os outros rivais continuam brigando entre si (antes TODOS iam no herói).",
   "nMax": 30,
-  "_doc20": "20261017ctrl: ARENA PRINCIPAL com 20 heróis rivais (BOT) variados — 4 estilos × cores próprias; FAST continua com os seus 10.",
+  "_doc20": "20261017perf: ARENA PRINCIPAL com 20 heróis rivais (BOT) variados — 4 estilos × cores próprias; FAST continua com os seus 10.",
   "pisoVivos": [
    21,
    14,
    8,
    3
   ],
-  "_docPiso": "20261017ctrl: com 30 rivais, eliminações vão por etapas — enquanto a zona espera mínimo 21 vivos; estágio 0: 14; 1: 8; 2: 3; depois livre (reta final).",
+  "_docPiso": "20261017perf: com 30 rivais, eliminações vão por etapas — enquanto a zona espera mínimo 21 vivos; estágio 0: 14; 1: 8; 2: 3; depois livre (reta final).",
   "curvaAlta": {
    "_doc": "LOTE-b M3 (20261017): rivais acompanham o herói acima do NV10 (medido: NV27 rival tirava 30% do HP parado e caía em 12 s; NV10 64%/15 s). Por nível acima de aPartirNv: +HP, +dano, menos espera entre golpes, mais esquiva. equip: ataque do equipamento do herói → +HP do rival, defesa → +dano (máx +max).",
    "aPartirNv": 10,
@@ -1104,7 +1104,7 @@
   "_doc": "20261016: 4 gigantes elementais na ARENA PRINCIPAL (fogo=Forja Rubra nas Ruínas, gelo=Gélido no Complexo, raio=Trovão de Neon na Periferia, veneno=Espinho de Musgo na Floresta), cada um no centro da sua região; o Território do Dragão não muda. Quem mata qualquer um ganha a sela do dragão (montaria com a cor dele)."
  },
  "nivelPartida": {
-  "_doc": "20261017ctrl (Caio): NÍVEL DA PARTIDA no FAST do zero — XP rápido (xpMult) sobe níveis da partida; cada nível abre a escolha por toque com ≥1 carta de ATRIBUTO (só vale na partida). No fim, o XP da partida soma ao herói permanente (sem resetar nada).",
+  "_doc": "20261017perf (Caio): NÍVEL DA PARTIDA no FAST do zero — XP rápido (xpMult) sobe níveis da partida; cada nível abre a escolha por toque com ≥1 carta de ATRIBUTO (só vale na partida). No fim, o XP da partida soma ao herói permanente (sem resetar nada).",
   "xpMult": 2.0,
   "atributosNaOferta": 1,
   "somaNoPermanente": true

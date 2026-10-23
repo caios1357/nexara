@@ -4,12 +4,14 @@
  * (primeiro gesto do usuário); buffer de ruído criado uma vez; nós de cada
  * som são descartáveis (padrão WebAudio) e só nascem quando o som toca.
  */
-import { getConfig } from './gameplay-config.js?v=20261017ctrl';
+import { getConfig } from './gameplay-config.js?v=20261023tuto';
 
 let ctx = null;
 let master = null;
 let noiseBuf = null;
 let unlocked = false;
+let bus = null, verb = null, verbSend = null;
+const SFX_URL_OFF = typeof location !== 'undefined' && /[?&]sfx=0\b/.test(location.search); // ?sfx=0 = sem som (testes/diagnóstico)
 
 function ensure() {
   if (ctx) return ctx;
@@ -18,7 +20,15 @@ function ensure() {
   try {
     ctx = new AC();
     master = ctx.createGain();
-    master.connect(ctx.destination);
+    // META-69 (som melhor): barramento com COMPRESSOR suave (volume mais uniforme no celular, sem estourar) e envio de REVERB curto
+    // (resposta ao impulso gerada aqui — sem arquivo) para os sons grandes (rugido, sopro, chefe)
+    try {
+      bus = ctx.createDynamicsCompressor(); bus.threshold.value = -16; bus.knee.value = 12; bus.ratio.value = 3.5; bus.attack.value = 0.004; bus.release.value = 0.18;
+      master.connect(bus); bus.connect(ctx.destination);
+      const n = Math.floor(ctx.sampleRate * 1.1); const ir = ctx.createBuffer(2, n, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6) * 0.6; }
+      verb = ctx.createConvolver(); verb.buffer = ir; verbSend = ctx.createGain(); verbSend.gain.value = 0.32; verbSend.connect(verb); verb.connect(master);
+    } catch { bus = null; master.connect(ctx.destination); }
     const len = Math.floor(ctx.sampleRate * 0.25);
     noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
@@ -110,7 +120,7 @@ let curName = '';
 function ready(name = '', durS = 0.25) {
   const cfg = getConfig().combat;
   curName = name;
-  if (!cfg.sfxEnabled || cfg.sfxVolume <= 0) { stats.muted++; return null; }
+  if (SFX_URL_OFF || !cfg.sfxEnabled || cfg.sfxVolume <= 0) { stats.muted++; return null; }
   const c = ensure();
   if (!c || c.state !== 'running') return null;
   const cap = cfg.sfxMaxVoices || 10;
@@ -125,7 +135,7 @@ function ready(name = '', durS = 0.25) {
 }
 /** e2e: sons tocados por nome, descartados pelo teto, pico de vozes, estado do contexto. */
 export function getSfxStats() {
-  return { ...stats, played: { ...stats.played }, voices, state: ctx ? ctx.state : 'none', unlocked, bank: getSampleBankStats() };
+  return { ...stats, bus: !!bus, reverb: !!verb, urlOff: SFX_URL_OFF, dragon: { ...dragonStats }, played: { ...stats.played }, voices, state: ctx ? ctx.state : 'none', unlocked, bank: getSampleBankStats() };
 }
 
 function noiseBurst(c, t, dur, freq, q, gain, type = 'bandpass') {
@@ -445,4 +455,50 @@ export function sfxBossAttack(kind = '') {
   if (kind === 'aneis' || kind === 'pocas') { tone(c, t, 0.45, 260, 90, 0.4, 'triangle'); noiseBurst(c, t, 0.3, 600, 0.7, 0.3, 'lowpass'); return; }
   tone(c, t, 0.35, 110, 36, 0.8, 'sine');
   noiseBurst(c, t, 0.25, 500, 0.6, 0.55, 'lowpass');
+}
+
+// ——— META-69: SONS DO DRAGÃO (síntese WebAudio, sem arquivo; respeitam ?sfx=0, liga/desliga e volume dos EFEITOS) ———
+const dragonStats = { roar: 0, flap: 0, breath: 0, lastRoar: null };
+function noiseLoop(c, t, dur) { const src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true; src.start(t); src.stop(t + dur + 0.05); return src; }
+function toVerb(node, k = 1) { if (verbSend) { const g = ctx.createGain(); g.gain.value = k; node.connect(g).connect(verbSend); } }
+/** RUGIDO: grave rasgado (serra + modulação de amplitude ~28 Hz = aspereza da garganta), formante de ruído descendo e sub-grave.
+ *  size: 'gigante' (mais longo/grave) | 'montaria' | 'mini' (agudo e curto). */
+export function sfxDragonRoar(size = 'montaria') {
+  const big = size === 'gigante', mini = size === 'mini';
+  const dur = big ? 1.6 : mini ? 0.55 : 1.15;
+  const c = ready('dragon_roar' + (big ? '' : '_' + size), dur);
+  if (!c) return; dragonStats.roar++; dragonStats.lastRoar = size;
+  const t = c.currentTime; const f0 = big ? 105 : mini ? 330 : 150;
+  const out = c.createGain(); out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(mini ? 0.45 : 0.85, t + 0.09); out.gain.setValueAtTime(mini ? 0.4 : 0.8, t + dur * 0.55); out.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+  out.connect(master); toVerb(out, big ? 1 : 0.7);
+  const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * 1.25, t); o.frequency.exponentialRampToValueAtTime(f0, t + 0.18); o.frequency.exponentialRampToValueAtTime(f0 * 0.55, t + dur);
+  const o2 = c.createOscillator(); o2.type = 'square'; o2.frequency.setValueAtTime(f0 * 1.51, t); o2.frequency.exponentialRampToValueAtTime(f0 * 0.8, t + dur);
+  const am = c.createGain(); am.gain.value = 0.55; const lfo = c.createOscillator(); lfo.frequency.value = big ? 24 : 31; const lg = c.createGain(); lg.gain.value = 0.45; lfo.connect(lg).connect(am.gain);
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(mini ? 2600 : 1500, t); lp.frequency.exponentialRampToValueAtTime(mini ? 900 : 380, t + dur); lp.Q.value = 2.2;
+  const g2 = c.createGain(); g2.gain.value = 0.35; o.connect(am); o2.connect(g2).connect(am); am.connect(lp).connect(out);
+  const n = noiseLoop(c, t, dur); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6; bp.frequency.setValueAtTime(mini ? 2400 : 1100, t); bp.frequency.exponentialRampToValueAtTime(mini ? 900 : 260, t + dur); const ng = c.createGain(); ng.gain.value = mini ? 0.35 : 0.6; n.connect(bp).connect(ng).connect(out);
+  if (!mini) { const sub = c.createOscillator(); sub.type = 'sine'; sub.frequency.setValueAtTime(f0 * 0.5, t); sub.frequency.exponentialRampToValueAtTime(f0 * 0.3, t + dur); const sg = c.createGain(); sg.gain.value = 0.5; sub.connect(sg).connect(out); sub.start(t); sub.stop(t + dur + 0.05); }
+  for (const x of [o, o2, lfo]) { x.start(t); x.stop(t + dur + 0.05); }
+}
+/** BATER DE ASAS: baque abafado (ruído grave com ataque rápido) + "fwoosh" de ar; k = força (decolagem > cruzeiro). */
+export function sfxDragonFlap(k = 1) {
+  const c = ready('dragon_flap', 0.3);
+  if (!c) return; dragonStats.flap++;
+  const t = c.currentTime; const out = c.createGain(); out.connect(master);
+  out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(0.5 * k, t + 0.035); out.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+  const n = noiseLoop(c, t, 0.28); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(420, t); lp.frequency.exponentialRampToValueAtTime(110, t + 0.24); lp.Q.value = 0.9; n.connect(lp).connect(out);
+  const n2 = noiseLoop(c, t, 0.22); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(650, t); bp.frequency.exponentialRampToValueAtTime(1500, t + 0.18); bp.Q.value = 0.7; const g2 = c.createGain(); g2.gain.value = 0.22; n2.connect(bp).connect(g2).connect(out);
+}
+/** SOPRO / FOGO: rugido de chama (ruído com estalos — ganho modulado por ruído lento), grave de combustão e chiado agudo. ~0,6 s */
+export function sfxDragonBreath(el = 'fogo') {
+  const dur = 0.62; const c = ready('dragon_breath', dur);
+  if (!c) return; dragonStats.breath++;
+  const t = c.currentTime; const out = c.createGain(); out.connect(master); toVerb(out, 0.5);
+  out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(0.75, t + 0.05); out.gain.setValueAtTime(0.7, t + dur * 0.6); out.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  const ice = el === 'gelo', zap = el === 'raio';
+  const n = noiseLoop(c, t, dur); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; bp.frequency.setValueAtTime(ice ? 2600 : zap ? 3200 : 900, t); bp.frequency.exponentialRampToValueAtTime(ice ? 1600 : zap ? 1800 : 1400, t + dur);
+  const crk = c.createGain(); crk.gain.value = 0.6; const cn = noiseLoop(c, t, dur); const clp = c.createBiquadFilter(); clp.type = 'lowpass'; clp.frequency.value = ice ? 6 : 18; const cg = c.createGain(); cg.gain.value = 2.2; cn.connect(clp).connect(cg).connect(crk.gain);
+  n.connect(bp).connect(crk).connect(out);
+  const r = c.createOscillator(); r.type = zap ? 'square' : 'sawtooth'; r.frequency.setValueAtTime(zap ? 120 : 72, t); r.frequency.exponentialRampToValueAtTime(zap ? 60 : 48, t + dur); const rl = c.createBiquadFilter(); rl.type = 'lowpass'; rl.frequency.value = 260; const rg = c.createGain(); rg.gain.value = 0.45; r.connect(rl).connect(rg).connect(out); r.start(t); r.stop(t + dur + 0.05);
+  const h = noiseLoop(c, t, dur * 0.7); const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4500; const hg = c.createGain(); hg.gain.value = 0.12; h.connect(hp).connect(hg).connect(out);
 }

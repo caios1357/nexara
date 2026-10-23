@@ -56,6 +56,9 @@ export const DEFAULTS = Object.freeze({
     hpFracOfHero: 0.6, // reserva de vida da montaria (absorve antes do herói)
     fall: { pctPerMeter: 0.05, maxFrac: 0.25, nonLethal: true, graceMs: 2000 },
     descendSpeed: 2.2, // m/s
+    /** META-69 (pedido do Caio): TRAVA DE ALVO DO SOPRO — montado, trava sozinha o inimigo mais perto À FRENTE (alcance do sopro × alcanceMult, cone ±anguloDeg),
+     *  marcador visível, toque em 🎯 ALVO troca, o sopro mira no travado; solta além de quebraMult × alcance da trava. CONFIGURAÇÕES → COMBATE desliga. */
+    travaSopro: { on: true, alcanceMult: 1.5, anguloDeg: 70, quebraMult: 1.25, tiroMult: 1.35 },
     breath: { max: 100, burst: 12, regenPerSec: 8, cadenceMs: 450, range: 7, halfAngleDeg: 28, dmgMult: 0.8, maxTargets: 3, rasanteAlt: 2.0 }, // sopro: cone à frente; dano = golpe básico do herói × dmgMult por alvo (até maxTargets); o dragão desce a rasanteAlt ao cuspir
     vertical: { bowStaff: 8, swordPlain: 3.4, swordHeavy: 4.2 }
   },
@@ -221,11 +224,11 @@ export const DEFAULTS = Object.freeze({
        *  high   = DESKTOP: bloom cheio + 1 sombra, env map, 24 luzes.
        * caps = limites por preset (inimigos ativos, partículas, projéteis/zonas de perigo, números de dano).
        */
-      low: { label: 'MOBILE LOW', dragonDetail: false, sky: false, heightFog: 0, rimLight: 0, surfaceDetail: false, extraProps: false, motes: 0, fxaa: false, models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 90, haze: 2, envMap: false, cityDensity: 0.35, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 3,
+      low: { label: 'MOBILE LOW', dragonDetail: false, sky: false, heightFog: 0, rimLight: 0, surfaceDetail: false, extraProps: false, motes: 0, fxaa: false, models: false /* M3D: GLB custa ~6–10% no low (medido) → procedural */, composer: false, bloom: false, bloomScale: 0, shadows: false, rain: 90, haze: 2, envMap: false, cityDensity: 0.35, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 3, rivalBB: 1,
         caps: { activeEnemies: 10, particles: 45, projectiles: 10, hazards: 4, damageNumbers: 8 } },
-      medium: { label: 'MOBILE MEDIUM', sky: true, heightFog: 0.3, rimLight: 0 /* contra-luz direcional custa ~10% no celular (medido) → só no DESKTOP; o recorte vem do fresnel dos materiais */, surfaceDetail: true, extraProps: true /* GRÁFICOS 3: céu em shader, névoa de altura, detalhe de parede/chão (poças), props por distrito */, motes: 54, fxaa: true, dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.34 /* GRÁFICOS 3: −15% de pixels no bloom + chuva/partículas um pouco menores pagam o céu/névoa/detalhe */, shadows: false, rain: 120, haze: 3, envMap: false, cityDensity: 0.55, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 4 /* 20261009leve: só os N rivais mais próximos com modelo completo; os demais (a partir de ~10 tiles) = etiqueta+anel */,
+      medium: { label: 'MOBILE MEDIUM', sky: true, heightFog: 0.3, rimLight: 0 /* contra-luz direcional custa ~10% no celular (medido) → só no DESKTOP; o recorte vem do fresnel dos materiais */, surfaceDetail: true, extraProps: true /* GRÁFICOS 3: céu em shader, névoa de altura, detalhe de parede/chão (poças), props por distrito */, motes: 54, fxaa: true, dragonModels: false, enemyModels: true /* VIL: vilões novos (Quaternius) = ~4 draw calls cada (KayKit ~20) → medido: FPS igual ao procedural (11,5–11,8 vs 10,1–12,1, CPU) e −25% draw calls → GLB também no medium */, composer: true, bloom: true, bloomScale: 0.34 /* GRÁFICOS 3: −15% de pixels no bloom + chuva/partículas um pouco menores pagam o céu/névoa/detalhe */, shadows: false, rain: 120, haze: 3, envMap: false, cityDensity: 0.55, maxPixelRatio: 1.0, pointLights: 3, antialias: false, rivalModels: 4, rivalBB: 2 /* 20261009leve: só os N rivais mais próximos com modelo completo; os demais (a partir de ~10 tiles) = etiqueta+anel */,
         caps: { activeEnemies: 12, particles: 60, projectiles: 12, hazards: 5, damageNumbers: 10 } },
-      high: { label: 'DESKTOP', sky: true, heightFog: 0.28, rimLight: 0.8, surfaceDetail: true, extraProps: true, motes: 160, fxaa: true, composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true, rivalModels: 8,
+      high: { label: 'DESKTOP', rivalBB: 4, sky: true, heightFog: 0.28, rimLight: 0.8, surfaceDetail: true, extraProps: true, motes: 160, fxaa: true, composer: true, bloom: true, bloomScale: 1, shadows: true, rain: 900, haze: 8, envMap: true, cityDensity: 1, maxPixelRatio: 1.75, pointLights: 24, antialias: true, rivalModels: 8,
         caps: { activeEnemies: 18, particles: 160, projectiles: 24, hazards: 8, damageNumbers: 14 } }
     },
     /**
@@ -236,7 +239,7 @@ export const DEFAULTS = Object.freeze({
     // M10 fase 9: + chuva e decoração das regiões (Arena). Na Arena tudo isto só começa depois da DENSIDADE (arena-br densCut)
     // M10 fase 9 (final): inimigos distantes (LOD visual) → partículas (chuva + faíscas ×0,5) → efeitos (bloom/env/luzes)
     //   → detalhe de cenário (decoração/cidade) → frequência da IA longe. Na Arena, a densidade (arena-br) vem antes de tudo.
-    adaptiveLadder: ['enemyLod', 'particles', 'aiFar', 'bloom', 'pointLights', 'envMap', 'brDecor', 'city'], // 20261009leve: a IA longe (CPU) e o bloom (GPU) entram antes
+    adaptiveLadder: ['enemyLod', 'particles', 'aiFar', 'bloom', 'composer' /* META-69: pós inteiro fora = +25% fps medido no MEDIUM travado em GPU */, 'pointLights', 'envMap', 'brDecor', 'city'], // 20261009leve: a IA longe (CPU) e o bloom (GPU) entram antes
     adaptiveEnemyLodK: 0.75, adaptiveParticleK: 0.5, adaptiveAiLodK: 0.7,
     /** indicador de FPS/qualidade (CONFIGURAÇÕES → TELA) — números medidos de verdade */
     showFpsHud: false,
@@ -245,6 +248,8 @@ export const DEFAULTS = Object.freeze({
     precompileShaders: true,
     /** Mescla partes estáticas dos personagens (menos draw calls). */
     mergeCharacterParts: true,
+    /** META-69: na mescla, materiais que só diferem na COR viram 1 material com cor por vértice (herói e rivais: ~50 → ~25 chamadas). ?mergeCor=0 desliga. */
+    mergeByColor: true,
     /** Bloom (UnrealBloomPass): força, raio, limiar (HDR linear). */
     bloomStrength: 0.7,
     bloomRadius: 0.55,
@@ -976,7 +981,8 @@ export const SETTINGS_UI = Object.freeze([
     { id: 'ctrlModo', label: 'Modo de controle (SIMPLES: ataca sozinho com inimigo à frente + mira assistida)', type: 'choice', path: 'controles.modo', options: [['simples', 'SIMPLES'], ['avancado', 'AVANÇADO']] },
     { id: 'aim', label: 'Assistência de mira', type: 'choice', path: ['combat.aimAssist', 'rightStick.aimAssist'], options: [['off', 'DESLIGADA'], ['low', 'BAIXA'], ['medium', 'MÉDIA'], ['high', 'ALTA']] },
     { id: 'lock', label: 'Trava de alvo', type: 'choice', path: 'lockOn.mode', options: [['manual', 'MANUAL'], ['automatico', 'AUTOMÁTICA']] },
-    { id: 'auto', label: 'Ataque automático (segurar ATAQUE)', type: 'toggle', path: 'combat.autoAttack' }
+    { id: 'auto', label: 'Ataque automático (segurar ATAQUE)', type: 'toggle', path: 'combat.autoAttack' },
+    { id: 'dlock', label: 'Trava de alvo do SOPRO do dragão (montado; 🎯 troca o alvo)', type: 'toggle', path: 'mount.travaSopro.on' }
   ] },
   { group: 'BOTÕES', items: [
     { id: 'btnSize', label: 'Tamanho dos botões', type: 'range', path: 'buttons.sizeScale', min: 0.75, max: 1.35, step: 0.05, fmt: '%' },

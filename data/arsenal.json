@@ -223,7 +223,7 @@
       }
     },
     "varinha": {
-      "_doc": "20261017ctrl: VARINHA = irmã leve do cajado — raios mágicos RÁPIDOS e baratos (2 por golpe, metade do dano cada; especiais custam −25% e batem −25%) → DPS igual ao das outras armas.",
+      "_doc": "20261017perf: VARINHA = irmã leve do cajado — raios mágicos RÁPIDOS e baratos (2 por golpe, metade do dano cada; especiais custam −25% e batem −25%) → DPS igual ao das outras armas.",
       "projetil": {
         "velocidade": 30,
         "raio": 0.3,

@@ -1,78 +1,79 @@
-import { loadAllData } from './data-loader.js?v=20261017ctrl';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261017ctrl';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261017ctrl';
-import { addToInventory } from '../../rules/loot.js?v=20261017ctrl';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261017ctrl';
-import { rollLoot } from '../../rules/loot.js?v=20261017ctrl';
-import { isWalkable } from './map.js?v=20261017ctrl';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261017ctrl';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261017ctrl';
+import { loadAllData } from './data-loader.js?v=20261023tuto';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261023tuto';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261023tuto';
+import { addToInventory } from '../../rules/loot.js?v=20261023tuto';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261023tuto';
+import { rollLoot } from '../../rules/loot.js?v=20261023tuto';
+import { isWalkable } from './map.js?v=20261023tuto';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261023tuto';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261023tuto';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, swordStats, resetSwordStats
-} from './actions.js?v=20261017ctrl';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261017ctrl';
-import { createMcbUi } from './mcb-ui.js?v=20261017ctrl';
-import { createVestiario } from './vestiario.js?v=20261017ctrl';
-import { createBerco } from './dragon-berco.js?v=20261017ctrl';
-import { bossCfgFor } from './boss-variants.js?v=20261017ctrl';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261017ctrl';
-import { createMount } from './mount.js?v=20261017ctrl';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261017ctrl';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261017ctrl';
-import { getLocalProfile, authProviders } from './auth.js?v=20261017ctrl';
-import { lastWalletCheck } from './save.js?v=20261017ctrl';
-import { maybeTrigger0217 } from './events.js?v=20261017ctrl';
-import { createRenderer } from './renderer.js?v=20261017ctrl';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261017ctrl';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261017ctrl';
-import { itemRarity } from './sprites.js?v=20261017ctrl';
-import { createArenaState, isArenaState } from './arena.js?v=20261017ctrl';
-import { createMobileControls } from './mobile-controls.js?v=20261017ctrl';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261017ctrl';
+} from './actions.js?v=20261023tuto';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261023tuto';
+import { createMcbUi } from './mcb-ui.js?v=20261023tuto';
+import { createVestiario } from './vestiario.js?v=20261023tuto';
+import { createBerco } from './dragon-berco.js?v=20261023tuto';
+import { bossCfgFor } from './boss-variants.js?v=20261023tuto';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261023tuto';
+import { createMount } from './mount.js?v=20261023tuto';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261023tuto';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261023tuto';
+import { getLocalProfile, authProviders } from './auth.js?v=20261023tuto';
+import { lastWalletCheck } from './save.js?v=20261023tuto';
+import { maybeTrigger0217 } from './events.js?v=20261023tuto';
+import { createRenderer } from './renderer.js?v=20261023tuto';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261023tuto';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261023tuto';
+import { itemRarity } from './sprites.js?v=20261023tuto';
+import { createArenaState, isArenaState } from './arena.js?v=20261023tuto';
+import { createMobileControls } from './mobile-controls.js?v=20261023tuto';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261023tuto';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261017ctrl';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261017ctrl';
-import { createArenaRun } from './arena-run.js?v=20261017ctrl';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261017ctrl';
+} from './enemy-ai.js?v=20261023tuto';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261023tuto';
+import { createArenaRun } from './arena-run.js?v=20261023tuto';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261023tuto';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261017ctrl';
-import { generateBrMap } from './br-map.js?v=20261017ctrl';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261017ctrl';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261017ctrl';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261017ctrl';
-import { createMusic } from './music.js?v=20261017ctrl';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261017ctrl';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261017ctrl';
-import { createBossHud } from './boss-hud.js?v=20261017ctrl';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261017ctrl';
-import { createPlayerMotion } from './player-motion.js?v=20261017ctrl';
-import { createPlayerCombat } from './player-combat.js?v=20261017ctrl';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261017ctrl';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261023tuto';
+import { generateBrMap } from './br-map.js?v=20261023tuto';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261023tuto';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261023tuto';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261023tuto';
+import { createMusic } from './music.js?v=20261023tuto';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261023tuto';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261023tuto';
+import { createBossHud } from './boss-hud.js?v=20261023tuto';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261023tuto';
+import { createPlayerMotion } from './player-motion.js?v=20261023tuto';
+import { createPlayerCombat } from './player-combat.js?v=20261023tuto';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261023tuto';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
-  sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats
-} from './sfx.js?v=20261017ctrl';
+  sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats, sfxDragonRoar, sfxDragonFlap, sfxDragonBreath
+} from './sfx.js?v=20261023tuto';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261017ctrl';
-import { createPassiveUi } from './passives-ui.js?v=20261017ctrl';
-import { createSettingsMenu } from './settings-menu.js?v=20261017ctrl';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261017ctrl';
-import { createPassiveHud } from './passive-hud.js?v=20261017ctrl';
-import { createDragon } from './companion-dragon.js?v=20261017ctrl';
-import { createFullscreenUi } from './fullscreen.js?v=20261017ctrl';
-import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261017ctrl';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261017ctrl';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261017ctrl';
+} from './passives.js?v=20261023tuto';
+import { createPassiveUi } from './passives-ui.js?v=20261023tuto';
+import { createSettingsMenu } from './settings-menu.js?v=20261023tuto';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261023tuto';
+import { createPassiveHud } from './passive-hud.js?v=20261023tuto';
+import { createDragon } from './companion-dragon.js?v=20261023tuto';
+import { createFullscreenUi } from './fullscreen.js?v=20261023tuto';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261023tuto';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261023tuto';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261023tuto';
+import { createTutorial } from './tutorial.js?v=20261023tuto';
 
 let DATA = null;
 let state = null;
@@ -174,7 +175,7 @@ function fireHeroShot(s, wc, target, shot, pc, range) {
   const color = familyColor(s);
   const bow = wc === 'arco';
   const p = motion.getPos();
-  const n = Math.max(1, pc.rajada || 1); const per = pc.dmgMult ?? 1; // 20261017ctrl: VARINHA = rajada de 2 raios rápidos (½ dano cada)
+  const n = Math.max(1, pc.rajada || 1); const per = pc.dmgMult ?? 1; // 20261017perf: VARINHA = rajada de 2 raios rápidos (½ dano cada)
   const one = (k) => { const yaw = shot.yaw + (n > 1 ? (k - (n - 1) / 2) * 0.05 : 0); const pp = k ? motion.getPos() : p; heroShots.fire({
     x: pp.x + Math.sin(yaw) * 0.35, y: pp.y - Math.cos(yaw) * 0.35, yaw, target,
     kind: bow ? 'arrow' : 'bolt', speed: pc.velocidade || (bow ? 22 : 15), range: range + 0.6, radius: pc.raio || 0.35,
@@ -428,7 +429,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261017ctrl').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261023tuto').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -527,6 +528,21 @@ const brRun = createArenaRun({
   onEnd: () => {}
 });
 let brSummaryShown = false;
+/** META-69: DESEMPENHO da partida (resumo do fim) + RECORDES pessoais (localStorage à parte do save) */
+const matchPerf = { dmg: 0, hits: 0, kills: 0, taken: 0, attacks: 0, streak: 0, bestStreak: 0, lastKillAt: -1e9 };
+const RECORDES_KEY = 'nexara.recordes.v1';
+function resetMatchPerf() { Object.assign(matchPerf, { dmg: 0, hits: 0, kills: 0, taken: 0, attacks: 0, streak: 0, bestStreak: 0, lastKillAt: -1e9 }); }
+function matchPerfReport(sum, mode) {
+  let all = {}; try { all = JSON.parse(localStorage.getItem(RECORDES_KEY) || '{}'); } catch { all = {}; }
+  const key = mode || 'full'; const prev = all[key] || {}; const cur = { time: Math.round(sum?.timeMs || 0), kills: sum?.kills || 0, dmg: Math.round(matchPerf.dmg), streak: matchPerf.bestStreak, rivals: sum?.rivalsDown || 0 };
+  const rec = {}; const next = { ...prev };
+  for (const k of Object.keys(cur)) { const had = Number.isFinite(prev[k]); rec[k] = { v: cur[k], best: had ? Math.max(prev[k], cur[k]) : cur[k], novo: had ? cur[k] > prev[k] : cur[k] > 0, primeira: !had }; next[k] = rec[k].best; }
+  next.partidas = (prev.partidas || 0) + 1; all[key] = next;
+  try { localStorage.setItem(RECORDES_KEY, JSON.stringify(all)); } catch { /* sem storage */ }
+  const acc = matchPerf.attacks > 0 ? Math.min(100, Math.round(100 * matchPerf.hits / matchPerf.attacks)) : null;
+  return { dmg: Math.round(matchPerf.dmg), taken: Math.round(matchPerf.taken), hits: matchPerf.hits, attacks: matchPerf.attacks, acc, bestStreak: matchPerf.bestStreak, partidas: next.partidas, rec };
+}
+let tutorial = null;
 // 20261010 — MONTARIA (V1: só a posse da sela; voo vem depois). Estado vive em state.br.mount; desbloqueio permanente em 'nexara.montaria.v1'.
 const coverStats = { blocked: 0 };
 const mount = createMount({ cfg: () => getConfig(), br: () => state?.br || null, note: (k, i) => onBrEvent(k, i),
@@ -845,7 +861,7 @@ setBossKillHook((s, mon, def) => {
   if (s?.brMode) { arenaBr.onBossKilled(mon); try { if (mon?.dragonId || def?.boss) mount.onGiantKilled('player', { pal: mon.dragonCor || null, elemento: mon.elemental || null, x: mon.homeX ?? mon.x, y: mon.homeY ?? mon.y }); } catch (e) { console.warn('[montaria]', e); } return brRun.onBossKilled(s, mon, def); }
   if (s?.campoMode) { campo.onBossVictory(); return campoRun.onBossKilled(s, mon, def); }
   const out = arenaRun.onBossKilled(s, mon, def);
-  if (s?.brMode && s.fastZero && def?.xp > 0) addXpState(s, def.xp); // 20261017ctrl: no FAST do zero o gigante dá XP ao NÍVEL DA PARTIDA (o permanente recebe no fim)
+  if (s?.brMode && s.fastZero && def?.xp > 0) addXpState(s, def.xp); // 20261017perf: no FAST do zero o gigante dá XP ao NÍVEL DA PARTIDA (o permanente recebe no fim)
   return out;
 });
 
@@ -924,7 +940,7 @@ function simulate(s, dt, yaw) {
   simMotionOpts.speedMult = mo.speedMult * getPlayerSlow();
   simMotionOpts.noRun = mo.noRun;
   if (s.brMode && s.br && arenaBr.getStateRef() === s) { // 20261010 MONTARIA: voo (só com mount.flyEnabled + sela); sem montaria nada muda
-    if (!blocked) { mount.step(dt * 1000); if (mountFireHeld && mount.isActive()) dragonFire(); else if (!mount.isActive()) mountFireHeld = false; }
+    if (!blocked) { mount.step(dt * 1000); if (mountFireHeld && mount.isActive()) dragonFire(); else if (!mount.isActive()) mountFireHeld = false; dragonFlightTick(dt * 1000); }
     simMotionOpts.fly = mount.isActive(); /* 20261016voo: voando passa por cima de paredes/distritos (borda do mapa e portões fechados seguram) */ if (simMotionOpts.fly) flewOver = true; else if (flewOver) { flewOver = false; if (state?.brMode) motion.ensureWalkable(state); } if (mount.isActive()) { const mv = getConfig().movement; simMotionOpts.speedMult = mount.speed() / Math.max(0.1, mv.walkSpeed * mv.speedScale); simMotionOpts.noRun = true; simMotionOpts.dash = null; }
   }
   motion.update(s, dt, yaw, simMotionOpts);
@@ -1170,6 +1186,7 @@ function haptic(kind) {
 }
 function onPlayerHit(result, mon, info) {
   const cfg = getConfig().combat;
+  if (state?.brMode) { matchPerf.hits++; matchPerf.dmg += Math.max(0, result?.dmgOut || 0); if (!mon.alive) { const t = performance.now(); matchPerf.kills++; matchPerf.streak = t - matchPerf.lastKillAt < (getConfig().feel?.streakMs ?? 4500) ? matchPerf.streak + 1 : 1; matchPerf.lastKillAt = t; matchPerf.bestStreak = Math.max(matchPerf.bestStreak, matchPerf.streak); } }
   haptic('acerto');
   playerTarget.uid = mon.uid;
   playerTarget.at = getAiClock();
@@ -1353,6 +1370,7 @@ function attackPress() {
   if (mount.isActive()) { mountFireHeld = true; unlockAudio(); return dragonFire()?.ok ? 'fire' : null; } // montado: ATAQUE = SOPRO DE FOGO (o herói só DESCE e cospe)
   unlockAudio();
   const r = actions.pressAttack();
+  if (r === 'started' || r === 'buffered') { if (state?.brMode) matchPerf.attacks++; tutorial?.note('attack'); }
   if (r === 'started' || r === 'buffered') combat.setHeld(true);
   return r;
 }
@@ -1370,7 +1388,11 @@ const fireHit = { fromX: 0, fromY: 0, heavy: false, x: 0, y: 0, knockbackScale: 
 function dragonFire() {
   if (!state || !mount.isActive()) return { ok: false, why: 'off' };
   const f = mount.fire(); if (!f.ok) return f;
-  const p = motion.getPos(); const yaw = actionCtx.yaw; const dx = Math.sin(yaw), dy = -Math.cos(yaw); const cand = [];
+  const p = motion.getPos(); let yaw = actionCtx.yaw; const cand = [];
+  // META-69: com a TRAVA DO SOPRO, o cone mira no alvo travado (e alcança até tiroMult × alcance) — fica fácil acertar voando
+  { const lm = dragonLockTarget(); if (lm) { const mp = getMonsterPos(lm); const d = Math.hypot(mp.x - p.x, mp.y - p.y); const T = dLockCfg(); if (d <= f.range * (T.tiroMult ?? 1.35)) { yaw = Math.atan2(mp.x - p.x, -(mp.y - p.y)); f.range = Math.max(f.range, d + 0.6); dLockSt.aimed++; } } }
+  sfxDragonBreath(state.br?.mount?.elemento || 'fogo');
+  const dx = Math.sin(yaw), dy = -Math.cos(yaw);
   for (const m of state.monstersAlive) {
     if (!m.alive || m.zone !== state.zoneId || (m.boss && !m.rival && false)) continue;
     const mp = getMonsterPos(m); const vx = mp.x - p.x, vy = mp.y - p.y; const d = Math.hypot(vx, vy); if (d > f.range || d < 0.2) continue;
@@ -1383,6 +1405,53 @@ function dragonFire() {
   return { ok: true, hits };
 }
 const mountFireStats = { n: 0, hits: 0, lastHits: 0 };
+// ——— META-69: TRAVA DE ALVO DO SOPRO (montado) ———
+const dLockSt = { uid: null, picks: 0, switches: 0, aimed: 0, releases: 0 };
+function dLockCfg() { return getConfig().mount?.travaSopro || {}; }
+function dragonLockOn() { return !!mount.isActive() && dLockCfg().on !== false; }
+function dragonLockCands() {
+  if (!state) return [];
+  const B = getConfig().mount?.breath || {}; const T = dLockCfg(); const R = (B.range ?? 7) * (T.alcanceMult ?? 1.5);
+  const p = motion.getPos(); const yaw = renderer.getYaw?.() ?? actionCtx.yaw; const out = [];
+  for (const m of state.monstersAlive) {
+    if (!m.alive || m.zone !== state.zoneId) continue;
+    const mp = getMonsterPos(m); const d = Math.hypot(mp.x - p.x, mp.y - p.y); if (d > R || d < 0.3) continue;
+    const diff = wrapAngle(Math.atan2(mp.x - p.x, -(mp.y - p.y)) - yaw); if (Math.abs(diff) > (T.anguloDeg ?? 70) * DEG) continue;
+    out.push({ uid: m.uid, d, diff, score: Math.abs(diff) * 1.2 + d / R });
+  }
+  return out.sort((a, b) => a.score - b.score);
+}
+function dragonLockTarget() {
+  if (!dragonLockOn() || dLockSt.uid == null || !state) return null;
+  const m = state.monstersAlive.find((x) => x.uid === dLockSt.uid); return m && m.alive && m.zone === state.zoneId ? m : null;
+}
+function dragonLockTick() {
+  if (!state) return;
+  if (!dragonLockOn()) { if (dLockSt.uid != null) { if (lockOnTarget === dLockSt.uid && /^dragao/.test(lockSt.reason)) releaseLock('dragao_off'); dLockSt.uid = null; } return; }
+  if (lockOnTarget != null && lockOnTarget !== dLockSt.uid && !/^dragao/.test(lockSt.reason)) dLockSt.uid = lockOnTarget; // o jogador travou outro (toque/deslize): o sopro segue a escolha dele
+  const B = getConfig().mount?.breath || {}; const T = dLockCfg(); const R = (B.range ?? 7) * (T.alcanceMult ?? 1.5);
+  let m = dragonLockTarget();
+  if (m) { const p = motion.getPos(), mp = getMonsterPos(m); if (Math.hypot(mp.x - p.x, mp.y - p.y) > R * (T.quebraMult ?? 1.25)) { m = null; dLockSt.releases++; } }
+  if (!m) {
+    const c = dragonLockCands(); dLockSt.uid = c.length ? c[0].uid : null;
+    if (dLockSt.uid != null) { dLockSt.picks++; setLock(dLockSt.uid, 'dragao'); } else if (lockOnTarget != null && /^dragao/.test(lockSt.reason)) releaseLock('dragao_sem_alvo');
+  } else if (lockOnTarget !== dLockSt.uid) setLock(dLockSt.uid, 'dragao');
+}
+/** 🎯 ALVO (botão montado / tecla T): próximo alvo à frente (o mais perto entre os outros). */
+function dragonLockCycle() {
+  if (!dragonLockOn()) return null;
+  const c = dragonLockCands().filter((x) => x.uid !== dLockSt.uid);
+  if (!c.length) { ui?.showToast?.('Nenhum outro alvo à frente'); return dLockSt.uid; }
+  const pick = c.sort((a, b) => a.d - b.d)[0]; dLockSt.uid = pick.uid; dLockSt.switches++; setLock(pick.uid, 'dragao_troca'); return pick.uid;
+}
+// sons do voo: bater de asas no ritmo da fase (decolagem mais forte) + trava do sopro (a cada 150 ms)
+let flapAcc = 0, dLockAcc = 0;
+function dragonFlightTick(dtMs) {
+  dLockAcc += dtMs; if (dLockAcc >= 150) { dLockAcc = 0; try { dragonLockTick(); } catch (e) { console.error('DLOCK', e); } }
+  if (!mount.isActive()) { flapAcc = 0; return; }
+  const ph = state?.br?.mount?.phase; const iv = ph === 'takeoff' ? 360 : ph === 'landing' ? 460 : 640;
+  flapAcc += dtMs; if (flapAcc >= iv) { flapAcc = 0; sfxDragonFlap(ph === 'takeoff' ? 1.15 : 0.75); }
+}
 /* 20261016 (Caio): PODER ESPECIAL do dragão por elemento (botão próprio, recarga) — fogo: chão em brasa · gelo: cone que congela · raio: corrente · veneno: nuvem tóxica · verde (covil): explosão da natureza que cura */
 const dSpecialStats = { n: 0, hits: 0, heal: 0, ticks: 0, last: null };
 function specialEl() { const m = state?.br?.mount; return m?.elemento || 'natureza'; }
@@ -1444,7 +1513,9 @@ function defendSet(v) {
 function specialPress(id) {
   if (!canCommand() || mount.isActive()) return null;
   unlockAudio();
-  return actions.pressSpecial(id);
+  const r = actions.pressSpecial(id);
+  if (r === 'started') tutorial?.note('skill');
+  return r;
 }
 
 function isGameVisible() {
@@ -1658,7 +1729,7 @@ function pushButtonInfo(dt) {
   if (btnInfoAcc < 0.09 || !mobile?.updateActionButtons || !state) return;
   btnInfoAcc = 0;
   mobile.updateActionButtons(actions.getButtonsInfo(state)); weaponUi();
-  { const mv = mount.status(); { const vb = mv.active ? mount.view() : null; mobile.setMountUi?.({ show: mv.canMount, flying: mv.active, phase: mv.phase, breathPct: vb ? vb.breath / Math.max(1, vb.cfg?.breath?.max ?? 100) * 100 : 100, ...specialUi() }); } }
+  { const mv = mount.status(); { const vb = mv.active ? mount.view() : null; mobile.setMountUi?.({ show: mv.canMount, flying: mv.active, phase: mv.phase, breathPct: vb ? vb.breath / Math.max(1, vb.cfg?.breath?.max ?? 100) * 100 : 100, dlock: mv.active && dragonLockOn(), dlockHas: dLockSt.uid != null, ...specialUi() }); } }
   if (isGameVisible()) passiveHud.update(procs.getBuffs(), { firstPerson: renderer.mode === 'fps' && renderer.viewMode === 'first' });
 }
 
@@ -1680,14 +1751,24 @@ function preloadModelList() {
   return list;
 }
 
+/** META-69: service worker → o jogo abre sem rede depois de uma visita com rede (o save continua no localStorage; o SW não toca nele).
+ *  Registrado 3 s depois do boot (não disputa a rede da 1ª carga). Automação (navigator.webdriver) só com ?sw=1; ?sw=0 desregistra. */
+const swStats = { supported: typeof navigator !== 'undefined' && 'serviceWorker' in navigator, registered: false, err: null };
+function setupServiceWorker() {
+  if (!swStats.supported || !/^https?:$/.test(location.protocol)) return;
+  if (/[?&]sw=0\b/.test(location.search)) { navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {}); return; }
+  if (navigator.webdriver && !/[?&]sw=1\b/.test(location.search)) return;
+  setTimeout(() => { navigator.serviceWorker.register('./sw.js', { scope: './' }).then(() => { swStats.registered = true; }).catch((e) => { swStats.err = String(e?.message || e); }); }, 3000);
+}
 async function boot() {
+  setupServiceWorker();
   preloadAssets({ timeoutMs: 6000, only: useIso ? null : (id) => id.startsWith('player-') });
   try {
     DATA = await loadAllData();
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261017ctrl').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261023tuto').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -1767,6 +1848,7 @@ async function boot() {
   });
   // ARENA PRINCIPAL: HUD/minimapa/bolsa/mercado negro/resumo
   brUi = createArenaBrUi({
+    onBigMap: () => tutorial?.note('map'),
     getState: () => (state?.brMode ? state : brTargetState()),
     getView: () => arenaBr.view(),
     getYaw: () => renderer.getYaw?.() ?? 0,
@@ -1800,11 +1882,13 @@ async function boot() {
     const fpSync = () => { if (!fpBtn) return; const on = !!getConfig().camera.firstPerson; fpBtn.classList.toggle('is-on', on); fpBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); fpBtn.style.display = renderer.viewMode === 'third' ? '' : 'none'; };
     fpBtn?.addEventListener('click', (e) => { e.preventDefault(); fpToggle(); });
     window.addEventListener('keydown', (e) => { if ((e.key === 'v' || e.key === 'V') && !e.repeat && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') && isGameVisible()) fpToggle(); });
+    window.addEventListener('keydown', (e) => { if ((e.key === 't' || e.key === 'T') && !e.repeat && mount.isActive() && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') && isGameVisible()) dragonLockCycle(); }); // META-69: T = trocar alvo do sopro
     fpSync(); setInterval(fpSync, 600);
     window.__nxFpToggle = fpToggle;
   }
   // LOTE-b: vibração ao levar dano (queda de HP do herói)
-  { let lastHp = null; setInterval(() => { const hp = state?.player?.hp; if (hp == null) { lastHp = null; return; } if (lastHp != null && hp < lastHp - 0.5 && isGameVisible()) haptic('dano'); lastHp = hp; }, 100); }
+  setInterval(() => tutorial?.tick(), 200);
+  { let lastHp = null; setInterval(() => { const hp = state?.player?.hp; if (hp == null) { lastHp = null; return; } if (lastHp != null && hp < lastHp - 0.5 && isGameVisible()) { haptic('dano'); if (state?.brMode) matchPerf.taken += lastHp - hp; } lastHp = hp; }, 100); }
   // LOTE-b M2: densidade do HUD (CONFIGURAÇÕES → TELA → HUD) → classe no <body>; ?hud=normal|compacto|minimo sobrepõe (testes/prints)
   {
     const qh = (location.search.match(/[?&]hud=(normal|compacto|minimo)\b/) || [])[1];
@@ -1870,6 +1954,7 @@ async function boot() {
     onDodge: () => (mount.isActive() ? null : dodgePress()) /* 20261016: montado no toque, ESQUIVA não faz nada — DESCER é o botão próprio (segurar/toque duplo), longe do FOGO */, onDescend: () => (canCommand() && mount.isActive() ? mount.toggleDescend() : null),
     onMount: () => mountPress(),
     onDragonSpecial: () => (canCommand() ? dragonSpecial() : null),
+    onDragonLockCycle: () => (canCommand() ? dragonLockCycle() : null),
     onSwapWeapon: () => (canCommand() ? weaponSwap() : null),
     onDefend: (v) => defendSet(v),
     onSpecial: (id) => specialPress(id),
@@ -1934,7 +2019,7 @@ async function boot() {
       openBag: () => brUi.openBag(),
       openMarket: () => brUi.openMarket(),
       closePanel: () => brUi.closePanel(),
-      bigMap: (on) => brUi.toggleBigMap(on),
+      bigMap: (on) => { if (on !== false) tutorial?.note('map'); return brUi.toggleBigMap(on); },
       debug: navigator.webdriver ? arenaBr.debug : null,
       finish: (kind) => (navigator.webdriver ? arenaBr.finish(kind || 'extraido', {}) : null),
       walkable: (x, y) => !!arenaBr.walkable?.(x, y),
@@ -2026,7 +2111,14 @@ async function boot() {
     firstPerson: () => renderer.firstPerson?.() || null,
     toggleFirstPerson: () => window.__nxFpToggle?.(),
     haptics: () => ({ ...hapticStats }),
+    sw: () => ({ ...swStats, controlled: !!navigator.serviceWorker?.controller }),
+    dragonLock: () => ({ ...dLockSt, on: dragonLockOn(), lockOn: validLockOn(), reason: lockSt.reason, cands: dragonLockCands().map((c) => ({ uid: c.uid, d: +c.d.toFixed(1) })), fire: { ...mountFireStats }, marker: !!renderer.getBossInfo?.()?.lockMarker }),
+    dragonLockCycle: () => dragonLockCycle(),
+    sfx: () => getSfxStats(),
     combatStats: () => combat.getDebug?.(),
+    tutorial: { stats: () => tutorial?.stats() || null, start: () => { tutorial ||= createTutorial({ getState: () => state }); return tutorial.start(true); }, reset: () => { tutorial ||= createTutorial({ getState: () => state }); return tutorial.reset(); }, skip: () => tutorial?.skip() },
+    matchPerf: () => ({ ...matchPerf }),
+    recordes: () => { try { return JSON.parse(localStorage.getItem('nexara.recordes.v1') || '{}'); } catch { return {}; } },
     hero: () => renderer.getHero?.() ?? null,
     models: () => renderer.getModelInfo?.() ?? null,
     mountAnim: () => renderer.getMountAnim?.() ?? null,
@@ -2239,7 +2331,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261017ctrl');
+      const { addXp } = await import('./state.js?v=20261023tuto');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2625,6 +2717,8 @@ function enterArenaBr(mode = 'full') {
   brRun.startAttempt(state, 'enter');
   arenaBr.start(state);
   brSummaryShown = false;
+  resetMatchPerf();
+  try { tutorial ||= createTutorial({ getState: () => state }); setTimeout(() => { if (state?.brMode && !brSummaryShown) tutorial.start(); }, 1600); } catch (e) { console.warn('[tutorial]', e); }
   brUi.show();
   ui.refresh();
   if (built.source === 'testador' && !state.fastZero) syncCampoProgress(state, 'enter');
@@ -2636,7 +2730,7 @@ function enterArenaBr(mode = 'full') {
   mobile?.updateVisibility();
   return true;
 }
-/** 20261017ctrl: fim da partida do zero → o XP ganho na partida SOMA ao herói permanente (nível sobe; nada mais muda no save). */
+/** 20261017perf: fim da partida do zero → o XP ganho na partida SOMA ao herói permanente (nível sobe; nada mais muda no save). */
 const matchXpStats = { n: 0, last: null };
 function transferMatchXp(s) {
   const xp = Math.max(0, Math.round(s?.br?.matchXp || 0)); const np = DATA?.arena_br?.nivelPartida || {};
@@ -2666,7 +2760,7 @@ function checkBrEnd(s) {
   if (brModeCur === 'fast') try { recordFastMatch(s, v.ended); } catch (e) { console.warn('[fast] ranking', e); }
   const run = mcbRunLog[mcbRunLog.length - 1]; if (run && run.br && !run.end) run.end = Date.now();
   combat.cancel(); motion.stopNow();
-  const again = brModeCur; brUi.showSummary(arenaBr.summary(), { onAgain: () => enterArenaBr(again), onMenu: () => exitArenaToMenu(), zero: !!s.fastZero, xp: xpRes, fast: again === 'fast' ? fastRanked : null, onRanking: again === 'fast' ? () => showRanking() : null });
+  const again = brModeCur; const sumNow = arenaBr.summary(); let perfRep = null; try { perfRep = matchPerfReport(sumNow, again); } catch (e) { console.warn('[resumo]', e); } tutorial?.skip(); brUi.showSummary(sumNow, { perf: perfRep, onAgain: () => enterArenaBr(again), onMenu: () => exitArenaToMenu(), zero: !!s.fastZero, xp: xpRes, fast: again === 'fast' ? fastRanked : null, onRanking: again === 'fast' ? () => showRanking() : null });
 }
 /** Crédito de MCB da corrida (bônus de caçada / extração) — vale na hora, salvo pela sincronização. */
 function brCredit(n, why) {
@@ -2797,7 +2891,7 @@ function onBrEvent(kind, info) {
   }
   else if (kind === 'spectate_end') specFeed.push(info.winner ? `Último herói: ${info.winner} (BOT).` : 'Todos os rivais caíram.');
   else if (kind === 'saddle_player') { big('<b>SELA DO GIGANTE CONQUISTADA!</b>Toque em MONTAR (ou tecla M) para voar. ATAQUE = fogo · ESQUIVA = DESCER.', 3600); }
-  else if (kind === 'mount_up') { big(`<b class="gb-mount">🐉 DRAGÃO MONTADO</b>${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'}`, 1600); } // 20261017ctrl: compacto e no alto — não cobre DESCER
+  else if (kind === 'mount_up') { sfxDragonRoar('montaria'); big(`<b class="gb-mount">🐉 DRAGÃO MONTADO</b>${info.mode === 'sela' && getConfig().mount?.semLimite ? 'voo livre' : Math.round((info.ms || 0) / 1000) + ' s de voo'}`, 1600); } // 20261017perf: compacto e no alto — não cobre DESCER
   else if (kind === 'mount_forced' && info?.why === 'abrigo') { ui.showToast('ABRIGO: o dragão pousou na borda — siga a pé.'); }
   else if (kind === 'mount_hit_down') { big('<b>DRAGÃO ABATIDO!</b>Você está caindo…', 1600); brSfx('warn'); }
   else if (kind === 'mount_shot_down') { big(`<b>VOCÊ CAIU${info?.fall ? ' (−' + info.fall + ' HP)' : ''}</b>O dragão renasce no covil em ${Math.round((info?.respawnMs || 90000) / 1000)} s.`, 2600); }
@@ -2831,7 +2925,7 @@ function brSfx(kind, extra) {
     else if (kind === 'cue') sfxCue(extra);
     else if (kind === 'warn') sfxWarn();
     else if (kind === 'event') sfxEliteSpawn();
-    else if (kind === 'dragon') sfxBossRoar();
+    else if (kind === 'dragon') sfxDragonRoar('gigante'); // META-69: rugido de dragão sintetizado (grave, áspero, com reverb)
     else if (kind === 'chest') sfxLoot();
     else if (kind === 'sell') sfxLoot();
   } catch { /* som opcional */ }
