@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc1';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc2';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
 const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
@@ -49,7 +49,7 @@ export function buildBrTerrain(zone, cfg, o) {
     const matOf = (rid) => {
       if (!ARTE || !ARTE[rid]) return mat; if (regMats[rid]) return regMats[rid];
       const m2 = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex(`../distritos/${ARTE[rid]}.webp`, 1, 1), roughness: 0.78, metalness: 0.08, envMapIntensity: 0.6, emissive: 0x10161e, emissiveIntensity: 1 });
-      m2.color.setScalar(2.1); if (o.detail) addFloorDetail(m2, { sky: o.skyColor ?? 0x2a4a7a }); regMats[rid] = m2; stats.distritoArte[rid] = ARTE[rid]; return m2;
+      m2.color.setScalar(2.1); if (rid === 'periferia') { m2.roughness = 0.42; m2.metalness = 0.18; m2.envMapIntensity = 1.1; } /* CONCEITO: paralelepípedo molhado refletindo néon */ if (o.detail) addFloorDetail(m2, { sky: o.skyColor ?? 0x2a4a7a }); regMats[rid] = m2; stats.distritoArte[rid] = ARTE[rid]; return m2;
     };
     const nv = new THREE.Vector3();
     for (let fy0 = 0; fy0 < H; fy0 += FC) for (let fx0 = 0; fx0 < W; fx0 += FC) {
@@ -223,6 +223,7 @@ export function buildBrTerrain(zone, cfg, o) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
       if (reg.id === 'periferia') {
         if (wn && q < 0.06) { tmpC.setHSL(h32(x, y, 32) < 0.5 ? 0.02 : 0.55, 0.45, 0.32); pushP('barrel', x, y, [wx + wn.dx * 0.55, gy, wz + wn.dy * 0.55], q * 40, [1, 0.85 + q * 2, 1], tmpC.getHex()); }
+        else if (!wn && q > 0.965) { const a = h32(x, y, 130) * 6; tmpC.setHex(0x1e50b8); pushP('barrel', x, y, [wx - 0.35, gy, wz], a, [1, 1, 1], tmpC.getHex()); pushP('crate', x, y, [wx + 0.45, gy, wz + 0.2], a, [0.6, 0.6, 0.6], 0xffffff); }
         else if (wn && q < 0.1) pushP('crate', x, y, [wx + wn.dx * 0.4, gy, wz + wn.dy * 0.4], q * 20, [0.62, 0.62, 0.62], 0xffffff);
         else if (o.extraProps && wn && q < 0.12) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
         else if (o.extraProps && q > 0.982) { tmpC.setHSL(0.6, 0.15, 0.08 + h32(x, y, 83) * 0.06); pushP('rock', x, y, [wx + (h32(x, y, 84) - 0.5), gy + 0.18, wz + (h32(x, y, 85) - 0.5)], q * 30, [0.34, 0.24, 0.38], tmpC.getHex()); }
