@@ -11,11 +11,12 @@
  *  - Carga: brilho da boca (rajada) / orbe crescendo com partículas sugadas (chama).
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023pers';
-import { TILE } from './fps-camera.js?v=20261023pers';
-import { getConfig } from '../gameplay-config.js?v=20261023pers';
-import { mergeStaticParts } from './merge-util.js?v=20261023pers';
-import { buildMiniModel, animateMini, paintMini } from './mini-model.js?v=20261023pers';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023drag';
+import { artPalette } from './dragon-art.js?v=20261023drag';
+import { TILE } from './fps-camera.js?v=20261023drag';
+import { getConfig } from '../gameplay-config.js?v=20261023drag';
+import { mergeStaticParts } from './merge-util.js?v=20261023drag';
+import { buildMiniModel, animateMini, paintMini } from './mini-model.js?v=20261023drag';
 
 const BLUE = 0x49c6ff;
 const DEEP = 0x2f6bff;
@@ -282,7 +283,7 @@ export function createDragonView(scene, { pointLight = true } = {}) {
     update,
     getCounts: () => ({ ...counts, trail: trail.alive + trailBig.alive }),
     info: () => { let n = 0; model.traverse((c) => { if (c.isMesh) n++; }); return { scale: model.scale.x, meshes: n, glb: glb.status, kind: 'mini-model', pal: curPal }; },
-    glb, setPalette: (pal) => { curPal = pal?.brilho || null; paintMini(MM, pal || null); glb.setPalette?.(pal || null); },
+    glb, setPalette: (pal) => { pal = pal ? artPalette(pal) : pal; curPal = pal?.brilho || null; paintMini(MM, pal || null); glb.setPalette?.(pal || null); },
     mergeInfo,
     dispose() {
       scene.remove(root, trail.pts, trailBig.pts); if (light) scene.remove(light);

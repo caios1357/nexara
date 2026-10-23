@@ -10,41 +10,42 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261023pers';
-import { buildArenaDressing } from './arena-dressing.js?v=20261023pers';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261023pers';
-import { createHeroModel } from './hero-model.js?v=20261023pers';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261023pers';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261023pers';
-import { attachHeroGlb } from './hero-glb.js?v=20261023pers';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261023pers';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261023pers';
-import { createActionVfx } from './action-vfx.js?v=20261023pers';
-import { createPassiveVfx } from './passive-vfx.js?v=20261023pers';
-import { createFpsControls } from './fps-controls.js?v=20261023pers';
-import { createViewmodel } from './viewmodel.js?v=20261023pers';
-import { createDragonView } from './dragon-view.js?v=20261023pers';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261023pers';
-import { getSprite } from '../assets.js?v=20261023pers';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261023pers';
-import { createBossDragon } from './boss-dragon-view.js?v=20261023pers';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261023pers';
-import { mergeStaticParts } from './merge-util.js?v=20261023pers';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261023pers';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023pers';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261023pers';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261023pers';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261023pers';
-import { createPostFx } from './post-fx.js?v=20261023pers';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261023pers';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261023pers';
-import { createContactShadows } from './contact-shadows.js?v=20261023pers';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261023pers';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261023pers';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261023pers';
-import { groundAt, setGroundFn } from './ground.js?v=20261023pers';
-import { buildBrTerrain } from './br-terrain.js?v=20261023pers';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261023pers';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261023drag';
+import { buildArenaDressing } from './arena-dressing.js?v=20261023drag';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261023drag';
+import { createHeroModel } from './hero-model.js?v=20261023drag';
+import { artPalette } from './dragon-art.js?v=20261023drag';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261023drag';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261023drag';
+import { attachHeroGlb } from './hero-glb.js?v=20261023drag';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261023drag';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261023drag';
+import { createActionVfx } from './action-vfx.js?v=20261023drag';
+import { createPassiveVfx } from './passive-vfx.js?v=20261023drag';
+import { createFpsControls } from './fps-controls.js?v=20261023drag';
+import { createViewmodel } from './viewmodel.js?v=20261023drag';
+import { createDragonView } from './dragon-view.js?v=20261023drag';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261023drag';
+import { getSprite } from '../assets.js?v=20261023drag';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261023drag';
+import { createBossDragon } from './boss-dragon-view.js?v=20261023drag';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261023drag';
+import { mergeStaticParts } from './merge-util.js?v=20261023drag';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261023drag';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023drag';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261023drag';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261023drag';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261023drag';
+import { createPostFx } from './post-fx.js?v=20261023drag';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261023drag';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261023drag';
+import { createContactShadows } from './contact-shadows.js?v=20261023drag';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261023drag';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261023drag';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261023drag';
+import { groundAt, setGroundFn } from './ground.js?v=20261023drag';
+import { buildBrTerrain } from './br-terrain.js?v=20261023drag';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261023drag';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -1799,6 +1800,7 @@ export function createFpsRenderer() {
   const countMeshes = (o) => { let n = 0; o.traverse((c) => { if (c.isMesh) n++; }); return n; };
   let bbGlow = null;
   function makeBBMesh(cor) {
+    cor = cor ? artPalette(cor) : cor; // 20261023: paleta da folha do Caio
     if (!bbGlow) bbGlow = glowTexture(); // textura compartilhada (halo da boca)
     const g = new THREE.Group(); g.name = 'rivalBB';
     const model = new THREE.Group(); model.scale.setScalar(1.12); g.add(model);

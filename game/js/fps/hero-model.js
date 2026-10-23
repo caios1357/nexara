@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023pers';
-import { mergeStaticParts } from './merge-util.js?v=20261023pers';
-import { attachHeroGlb } from './hero-glb.js?v=20261023pers';
-import { addArmorDetail } from './surface-fx.js?v=20261023pers';
+import { getConfig } from '../gameplay-config.js?v=20261023drag';
+import { mergeStaticParts } from './merge-util.js?v=20261023drag';
+import { attachHeroGlb } from './hero-glb.js?v=20261023drag';
+import { addArmorDetail } from './surface-fx.js?v=20261023drag';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */

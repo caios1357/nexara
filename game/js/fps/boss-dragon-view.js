@@ -13,12 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023pers';
-import { TILE } from './fps-camera.js?v=20261023pers';
-import { mergeStaticParts } from './merge-util.js?v=20261023pers';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023pers';
-import { getConfig } from '../gameplay-config.js?v=20261023pers';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023pers';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023drag';
+import { TILE } from './fps-camera.js?v=20261023drag';
+import { mergeStaticParts } from './merge-util.js?v=20261023drag';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023drag';
+import { getConfig } from '../gameplay-config.js?v=20261023drag';
+import { artPalette } from './dragon-art.js?v=20261023drag';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023drag';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -34,7 +35,7 @@ function mats(pal) {
   const key = pal ? `${pal.base}|${pal.escuro}|${pal.brilho}` : 'verde';
   if (sharedByPal.has(key)) return sharedByPal.get(key);
   const hx = (h) => hexNum(h); const mix = (a, b, k) => new THREE.Color(a).lerp(new THREE.Color(b), k).getHex(); const css = (n) => `#${new THREE.Color(n).getHexString()}`;
-  const P = pal ? { dark: mix(hx(pal.base), 0x000000, 0.25), mid: hx(pal.base), plate: hx(pal.escuro), nexa: hx(pal.brilho), rimC: mix(hx(pal.brilho), 0xffffff, 0.35), eye: mix(hx(pal.brilho), 0xffffff, 0.6), mem: mix(hx(pal.base), hx(pal.escuro), 0.3), memE: mix(hx(pal.escuro), hx(pal.brilho), 0.12), v1: css(mix(hx(pal.escuro), 0x000000, 0.6)), v2: css(hx(pal.brilho)), v3: css(mix(hx(pal.escuro), 0x000000, 0.4)), v4: css(mix(hx(pal.brilho), 0xffffff, 0.3)), ring: mix(hx(pal.brilho), 0xffffff, 0.5) }
+  const P = pal ? { dark: mix(hx(pal.base), 0x000000, 0.25), mid: hx(pal.base), plate: hx(pal.escuro), nexa: hx(pal.brilho), rimC: mix(hx(pal.brilho), 0xffffff, 0.35), eye: mix(hx(pal.brilho), 0xffffff, 0.6), mem: pal.asa ? mix(hx(pal.asa), hx(pal.escuro), 0.25) : mix(hx(pal.base), hx(pal.escuro), 0.3), memE: mix(hx(pal.escuro), hx(pal.brilho), 0.12), v1: css(mix(hx(pal.escuro), 0x000000, 0.6)), v2: css(hx(pal.brilho)), v3: css(mix(hx(pal.escuro), 0x000000, 0.4)), v4: css(mix(hx(pal.brilho), 0xffffff, 0.3)), ring: mix(hx(pal.brilho), 0xffffff, 0.5) }
     : { dark: GREEN_DARK, mid: GREEN_MID, plate: BLACK_PLATE, nexa: NEXA, rimC: 0x8affa0, eye: 0xaaffb0, mem: 0x2a5a2e, memE: 0x0e3313, v1: '#020803', v2: '#7dff7a', v3: '#040c05', v4: '#a0ff8a', ring: 0xd8ff5a };
   let shared = null;
   const std = (color, o = {}) => {
@@ -115,6 +116,7 @@ function hornGeo(len, r) {
  * @returns {{ root: THREE.Group, update: Function, parts: object }}
  */
 export function createBossDragon({ height = 6.4, palette = null } = {}) {
+  palette = artPalette(palette); // 20261023: família de dragões da arte do Caio (verde/fogo/raio/veneno/gelo/sombrio)
   const M = mats(palette);
   const nexaMat = M.nexa.clone();
   const root = new THREE.Group();

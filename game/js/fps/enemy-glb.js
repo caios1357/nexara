@@ -6,7 +6,8 @@
  * reaproveita o programa (sem recompilar) — e os bots continuam no pool do renderer.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, createAnimator, findNode } from './model-lib.js?v=20261023pers';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, createAnimator, findNode } from './model-lib.js?v=20261023drag';
 
 export const ARCH_MODEL = { A: 'vilao-warrior', A2: 'vilao-warrior', B: 'vilao-rogue', B2: 'vilao-rogue', C: 'vilao-mage', C2: 'vilao-mage', D: 'vilao-warrior', E: 'vilao-mage', F: 'vilao-warrior', G: 'vilao-warrior', patrol: 'vilao-minion', base: 'vilao-minion' };
 const CLIPS = {
@@ -79,6 +80,62 @@ export function getEnemyGlbStats() { return JSON.parse(JSON.stringify(stats)); }
  * @param {THREE.Group} g bot procedural
  * @param {{ key: string, look: { body:number, armor:number, eye:number, glow:number } | null, height?: number, bodyMeshes: THREE.Object3D[] }} o
  */
+/**
+ * 20261023 — DEMÔNIO VERMELHO da arte do Caio (arte-caio/demonio-vermelho-folha.png): corpo carmim, placas pretas com veios vermelhos,
+ * olhos rosa-vermelho, CHIFRES grandes curvos pretos com anel aceso, ASAS de morcego vermelhas e CAUDA com ponta de flecha.
+ * Só visual (hitbox/IA iguais). Peças presas nos ossos (Head/Torso/Hips) com escala compensada → seguem a animação.
+ */
+const _demon = {};
+function demonMats() {
+  if (_demon.ready) return _demon;
+  _demon.horn = new THREE.MeshStandardMaterial({ color: 0x141016, roughness: 0.45, metalness: 0.4, emissive: 0x2a0408, emissiveIntensity: 1 });
+  _demon.glow = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
+  _demon.wing = new THREE.MeshStandardMaterial({ color: 0x9a1a24, roughness: 0.7, metalness: 0.05, side: THREE.DoubleSide, emissive: 0x3a0408, emissiveIntensity: 1 });
+  _demon.tail = new THREE.MeshStandardMaterial({ color: 0x7a1420, roughness: 0.6, metalness: 0.1 });
+  for (const m of [_demon.horn, _demon.glow, _demon.wing, _demon.tail]) m.userData.shared = true;
+  _demon.ready = true; return _demon;
+}
+/** junta as peças de um grupo por material (1 draw call por material) — celular */
+function mergeByMat(g) {
+  g.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(); const by = new Map();
+  g.traverse((o) => { if (!o.isMesh) return; const geo = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); for (const k of Object.keys(geo.attributes)) if (k !== 'position' && k !== 'normal') geo.deleteAttribute(k); geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld)); (by.get(o.material) || by.set(o.material, []).get(o.material)).push(geo); });
+  for (const c of [...g.children]) g.remove(c);
+  for (const [mat, list] of by) { const m = new THREE.Mesh(mergeGeometries(list, false), mat); m.castShadow = true; g.add(m); }
+}
+function demonArt(model, mats, eyeMats) {
+  const D = demonMats();
+  for (const m of mats) { const nm = m.name || ''; if (/Black/i.test(nm)) { m.color.set(0x1a1218); m.emissive.set(0xff1a2a); m.emissiveIntensity = 0.12; } else { if (m.map) m.color.set(0xd04a58); else m.color.set(0x8e1a2a); m.emissive.set(0x3a0610); m.emissiveIntensity = 0.35; } m.needsUpdate = true; }
+  for (const m of eyeMats) { m.color.set(0xff3a6a); m.emissive.set(0xff2a5a); }
+  model.updateMatrixWorld(true);
+  const bone = (n) => { let b = null; model.traverse((q) => { if (!b && q.isBone && q.name === n) b = q; }); return b; };
+  const pin = (b, grp) => { const ws = b.getWorldScale(new THREE.Vector3()); grp.scale.setScalar(1 / (ws.x || 1)); b.add(grp); return grp; };
+  const head = bone('Head'); const torso = bone('Torso'); const hips = bone('Hips');
+  if (head) { // chifres GRANDES curvos pretos (3 gomos de cone, abrindo para fora e para cima) + anel aceso na base
+    const g = pin(head, new THREE.Group()); g.name = 'demonHorns';
+    for (const sd of [-1, 1]) {
+      const base = new THREE.Group(); base.position.set(sd * 0.12, 0.12, 0.0); base.rotation.z = -sd * 1.0; g.add(base);
+      let par = base; const segs = [[0.075, 0.16], [0.06, 0.15], [0.045, 0.15]];
+      segs.forEach(([r, l], i) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.8, r, l, 7), D.horn); c.position.y = l / 2; par.add(c); const nx = new THREE.Group(); nx.position.y = l; nx.rotation.z = sd * 0.55; par.add(nx); par = nx; if (i === 0) { const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.95, 0.011, 4, 12), D.glow); ring.rotation.x = Math.PI / 2; ring.position.y = l * 0.65; c.parent.add(ring); } });
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.16, 7), D.horn); tip.position.y = 0.08; par.add(tip);
+    }
+  }
+  if (torso) { // asas de morcego (membrana em leque com dedos)
+    const g = pin(torso, new THREE.Group()); g.name = 'demonWings'; g.scale.multiplyScalar(1.5);
+    for (const sd of [-1, 1]) {
+      const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(0.55, 0.32); sh.lineTo(0.62, -0.02); sh.lineTo(0.48, -0.12); sh.lineTo(0.38, -0.02); sh.lineTo(0.26, -0.14); sh.lineTo(0.16, -0.04); sh.lineTo(0.05, -0.12); sh.lineTo(0, 0);
+      const w = new THREE.Mesh(new THREE.ShapeGeometry(sh), D.wing); w.scale.set(sd, 1, 1); w.position.set(sd * 0.08, 0.18, -0.16); w.rotation.y = sd * -0.5; g.add(w);
+      const bone2 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.018, 0.64, 5), D.wing); bone2.position.set(sd * 0.34, 0.33, -0.2); bone2.rotation.z = -sd * 1.03; bone2.rotation.y = sd * -0.5; g.add(bone2);
+    }
+  }
+  if (hips) { // cauda segmentada com ponta de flecha
+    const g = pin(hips, new THREE.Group()); g.name = 'demonTail';
+    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, -0.12), new THREE.Vector3(0, -0.12, -0.4), new THREE.Vector3(0, -0.05, -0.7), new THREE.Vector3(0, 0.15, -0.9)]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.035, 5, false), D.tail));
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 4), D.tail); tip.position.set(0, 0.22, -0.95); tip.rotation.x = -0.6; tip.scale.set(1, 1, 0.35); g.add(tip);
+  }
+  for (const n of ['demonHorns', 'demonWings', 'demonTail']) { const gg = model.getObjectByName(n); if (gg) mergeByMat(gg); }
+}
+
 export function attachEnemyGlb(g, o) {
   const mon = villainModelsOn() ? MON[o.key] || null : null;
   const modelName = mon ? mon.model : ARCH_MODEL[o.key] || 'vilao-minion';
@@ -142,6 +199,7 @@ export function attachEnemyGlb(g, o) {
       m.material = mat;
       m.castShadow = true;
     });
+    if (mon && o.key === 'A2' && !/[?&]demonioArte=0\b/.test(location.search)) { try { demonArt(model, mats, eyeMats); ctl.demonArt = true; } catch (e) { console.warn('[demônio] arte', e); } }
     animator = createAnimator(model, mon ? body.animations : anim.animations, mon ? mon.clips : CLIPS);
     const pr = mon ? null : getLoaded('hero-props');
     if (mon) { /* armas/garras já vêm no modelo */ } else
