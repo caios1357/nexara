@@ -3,7 +3,37 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261023tuto';
+import { attachHeroGlb } from './hero-glb.js?v=20261023pers';
+import { createHeroModel } from './hero-model.js?v=20261023pers';
+import { kitFor } from './hero-kit.js?v=20261023pers';
+import { heroStyleOf } from '../hero-styles.js?v=20261023pers';
+import { getConfig } from '../gameplay-config.js?v=20261023pers';
+/** 9 PERSONAGENS: a prévia/retrato mostram o MESMO herói procedural do jogo (kit + skin) — o GLB só com graphics.heroLook='glb' */
+const wantsGlb = () => { try { return (new URLSearchParams(location.search).get('herolook') || getConfig().graphics.heroLook) === 'glb'; } catch { return false; } };
+function attachProcHero(fake, o = {}) {
+  let hm = null; let sig = '';
+  const info = { status: 'ready', kind: 'procedural', style: null, kit: null };
+  const api = {
+    info,
+    setStyle(styleId, extra = {}) {
+      const kit = kitFor({ styleId, custom: extra.custom, equip: extra.equip }); const k2 = JSON.stringify(kit);
+      const S0 = heroStyleOf(styleId); const cu = extra.custom || {};
+      info.model = S0.model; info.glow = kit.glow ?? S0.glow; info.capeOn = kit.cape !== false; info.weapon = cu.weapon || S0.weapon; info.skin = kit.skin || null;
+      const eq = extra.equip || {}; info.helmet = !!eq.helmet; info.helmetKind = eq.helmet ? (eq.helmet.crest === 'demon' ? 'demon' : eq.helmet.crest === 'horns' ? 'horns' : 'crest') : null; info.weaponFamily = eq.weapon?.family || null; if (eq.weapon?.model) info.weapon = eq.weapon.model; info.armorPads = !!eq.armor?.plates; info.greaves = !!eq.pants?.greaves;
+      info.style = styleId;
+      if (k2 === sig && hm) return; sig = k2;
+      if (hm) { fake.root.remove(hm.root); hm.root.traverse((q) => { if (q.geometry && !q.geometry.userData?.shared) q.geometry.dispose(); }); }
+      hm = createHeroModel({ styleId, kit, glb: false }); hm.root.rotation.y = 0; fake.root.add(hm.root);
+      info.kit = { style: kit.style, head: kit.head, weapon: kit.weapon, skin: kit.skin || null, shield: !!hm.kitInfo?.shield, parts: hm.kitInfo?.parts || 0 };
+    },
+    update(dt, i) { hm?.update(dt, { x: 0, z: 0, yaw: Math.PI, speed: 0, walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); },
+    getRig: () => ({ model: hm?.root }),
+    dispose() { if (hm) fake.root.remove(hm.root); hm = null; }
+  };
+  api.setStyle(o.styleId || 'cavaleiro', { custom: o.custom });
+  return api;
+}
+const attachLook = (fake, o) => (wantsGlb() ? attachHeroGlb(fake, o) : attachProcHero(fake, o));
 
 export function createHeroPreview(canvas, opts = {}) {
   // opts.interactive (VESTIÁRIO): arrastar = girar · pinça/roda = zoom · começa de FRENTE · luz de estúdio
@@ -33,7 +63,7 @@ export function createHeroPreview(canvas, opts = {}) {
   placeCam();
   const root = new THREE.Group(); scene.add(root);
   const fake = { root, setProceduralBodyVisible() {} };
-  const glb = attachHeroGlb(fake, { styleId: 'cavaleiro', force: true });
+  const glb = attachLook(fake, { styleId: 'cavaleiro', force: true });
   let raf = 0; let last = performance.now(); let t = 0; let alive = true;
   let spin = interactive ? 0 : 0.5;
   let touched = false; // usuário girou: para o balanço automático
@@ -116,7 +146,7 @@ export function makePortraitSnapshot(styleId, custom = {}, S = 96) {
       const keyL = new THREE.DirectionalLight(0xffffff, 2.4); keyL.position.set(1.5, 3, 4); scene.add(keyL);
       const rim = new THREE.DirectionalLight(0x39f0ff, 1.4); rim.position.set(-3, 2, -3); scene.add(rim);
       const root = new THREE.Group(); scene.add(root);
-      const glb = attachHeroGlb({ root, setProceduralBodyVisible() {} }, { styleId, custom, force: true });
+      const glb = attachLook({ root, setProceduralBodyVisible() {} }, { styleId, custom, force: true });
       const t0 = performance.now();
       while (glb.info.status !== 'ready' && performance.now() - t0 < 4000) await new Promise((r) => setTimeout(r, 60));
       if (glb.info.status !== 'ready') return null;

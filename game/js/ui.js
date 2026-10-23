@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261023tuto';
-import { drawMinimap } from './map.js?v=20261023tuto';
+import { label, CATEGORIES } from './arquivo.js?v=20261023pers';
+import { drawMinimap } from './map.js?v=20261023pers';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261023tuto';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261023tuto';
-import { getEquippedStats } from './state.js?v=20261023tuto';
-import { countItem } from '../../rules/loot.js?v=20261023tuto';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261023tuto';
-import { isArenaState } from './arena.js?v=20261023tuto';
-import { spriteCount } from './assets.js?v=20261023tuto';
-import { attrLines } from './equipment.js?v=20261023tuto';
+} from './actions.js?v=20261023pers';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261023pers';
+import { getEquippedStats } from './state.js?v=20261023pers';
+import { countItem } from '../../rules/loot.js?v=20261023pers';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261023pers';
+import { isArenaState } from './arena.js?v=20261023pers';
+import { spriteCount } from './assets.js?v=20261023pers';
+import { attrLines } from './equipment.js?v=20261023pers';
 
 let rendererRef = null;
 

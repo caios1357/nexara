@@ -26,3 +26,9 @@
   .hse-side { display: flex; flex-direction: column; gap: 8px; }
 }
 @media (orientation: portrait) { .hse-side { display: flex; flex-direction: column; gap: 8px; } }
+/* 9 PERSONAGENS: grade compacta (13 estilos) + skins elementais */
+.hse-styles { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.hse-style { min-height: 40px; padding: 5px 6px; }
+.hse-style small { display: block; font-size: 9.5px; line-height: 1.15; max-height: 2.3em; overflow: hidden; }
+.hse-skins button { border-color: color-mix(in srgb, var(--sc, #3a9cff) 45%, #22384a); font-weight: 700; }
+.hse-skins button.on { box-shadow: 0 0 10px var(--sc, #3a9cff); border-color: var(--sc, #3a9cff); }
