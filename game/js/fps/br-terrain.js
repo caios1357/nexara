@@ -8,10 +8,10 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023chibi';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc1';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
-const REGION_WALL = { periferia: 0xb08e78, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
+const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
 const TILE_FLOOR = { street: 0x3a4250, grass: 0x34583e, tech: 0x50627a, rubble: 0x6e5a44, bush: 0x34583e };
 const RARITY_GLOW = { basico: 0xc8d4d0, medio: 0x4aa0ff, avancado: 0xffc24a, alto: 0xb36bff, lendario: 0xffd34a };
 
@@ -22,6 +22,12 @@ function h32(x, y, s = 0) { let h = (x * 374761393 + y * 668265263 + s * 974711)
  * @param {object} cfg data.arena_br
  * @param {object} o { TILE, ground(fx,fy), loadTex(name,rx,ry), tierName, accent }
  */
+function winTex() { // janela com moldura e cruz de madeira, vidro aceso em gradiente (1 canvas, 1 vez)
+  if (winTex.t) return winTex.t; const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#2a1a10'; g.fillRect(0, 0, 64, 64); const gr = g.createRadialGradient(32, 36, 4, 32, 32, 34); gr.addColorStop(0, '#fff6d8'); gr.addColorStop(1, '#c8782a');
+  g.fillStyle = gr; g.fillRect(6, 6, 52, 52); g.fillStyle = '#2a1a10'; g.fillRect(30, 6, 4, 52); g.fillRect(6, 30, 52, 4);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; winTex.t = t; return t;
+}
 export function buildBrTerrain(zone, cfg, o) {
   const m = zone.brMap; const W = m.W, H = m.H; const T = o.TILE; const G = o.ground;
   const group = new THREE.Group(); group.name = 'br-terrain';
@@ -120,7 +126,10 @@ export function buildBrTerrain(zone, cfg, o) {
     claw: new THREE.PlaneGeometry(0.16, 1.7).rotateX(-Math.PI / 2),
     scorch: new THREE.CircleGeometry(1, 12).rotateX(-Math.PI / 2),
     ember: new THREE.OctahedronGeometry(0.09, 0),
-    pipe: new THREE.CylinderGeometry(0.085, 0.085, T, 6).rotateZ(Math.PI / 2)
+    pipe: new THREE.CylinderGeometry(0.085, 0.085, T, 6).rotateZ(Math.PI / 2),
+    win: new THREE.PlaneGeometry(0.7, 0.8),
+    tank: new THREE.CylinderGeometry(0.55, 0.55, 0.9, 10).translate(0, 0.45, 0),
+    roof: new THREE.BoxGeometry(T * 1.12, 0.08, T * 1.12)
   };
 
   // —— chunks (16×16 tiles) ——
@@ -139,9 +148,10 @@ export function buildBrTerrain(zone, cfg, o) {
     barrel: [geos.barrel, mats.prop, true], stub: [geos.stub, mats.rock, true], fern: [geos.fern, mats.canopy, false], shroom: [geos.shroom, mats.neon, false],
     strip: [geos.strip, mats.neon, false], vent: [geos.vent, mats.metal, false], banner: [geos.banner, mats.neon, false],
     bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false],
-    pipe: [geos.pipe, mats.pipe, false]
+    pipe: [geos.pipe, mats.pipe, false],
+    win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, mats.rust, false]
   };
-  const COLORED = new Set(['wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
+  const COLORED = new Set(['win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
   const wallNear = (x, y) => { for (const [dx, dy, ry] of [[1, 0, Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, 0], [0, -1, 0]]) if (tileAt(x + dx, y + dy) === 'wall') return { dx, dy, ry }; return null; };
   const isLootTile = new Set([...(m.chests || []), ...(m.crates || [])].map((c) => c.x + c.y * W));
@@ -158,6 +168,17 @@ export function buildBrTerrain(zone, cfg, o) {
       const wc = REGION_WALL[(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)) || {}).id] ?? 0x6a7080;
       tmpC.setHex(wc).multiplyScalar(0.85 + hs * 0.3);
       push('wall', x, y, [wx, gy - 0.3, wz], 0, [1, h + 0.3, 1], tmpC.getHex());
+      // CONCEITO (Periferia à noite): casas de tijolo com janelas acesas, caixas d'água azuis e telhado de zinco
+      if (reg?.id === 'periferia' && !border && o.props !== false) {
+        const wq = h32(x, y, 120);
+        if (wq < 0.55 && h > 2.2) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) {
+          if (tileAt(x + dx, y + dy) === 'wall') continue;
+          const warm = h32(x, y, 121) < 0.9; tmpC.setHex(warm ? 0xffb860 : 0xff6ad8).multiplyScalar(0.7 + h32(x, y, 122) * 0.45);
+          pushP('win', x, y, [wx + dx * T * 0.505, gy + h * 0.62, wz + dy * T * 0.505], ry, [1, 1, 1], tmpC.getHex()); break;
+        }
+        if (wq > 0.88) { tmpC.setHex(0x1e4fb8).multiplyScalar(0.8 + h32(x, y, 123) * 0.4); pushP('tank', x, y, [wx, gy + h, wz], wq * 9, [1, 1, 1], tmpC.getHex()); }
+        else if (wq > 0.5) pushP('roof', x, y, [wx, gy + h + 0.04, wz], (wq - 0.7) * 0.2, [1, 1, 1], 0xffffff);
+      }
       if ((Math.floor(hs * 1000) % 4) === 0 && h > 2.2) {
         // néon na face voltada para um tile andável
         for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, 0], [1, 0, Math.PI / 2], [-1, 0, Math.PI / 2]]) {
@@ -202,7 +223,8 @@ export function buildBrTerrain(zone, cfg, o) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
       if (reg.id === 'periferia') {
         if (wn && q < 0.06) { tmpC.setHSL(h32(x, y, 32) < 0.5 ? 0.02 : 0.55, 0.45, 0.32); pushP('barrel', x, y, [wx + wn.dx * 0.55, gy, wz + wn.dy * 0.55], q * 40, [1, 0.85 + q * 2, 1], tmpC.getHex()); }
-        else if (o.extraProps && wn && q < 0.085) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
+        else if (wn && q < 0.1) pushP('crate', x, y, [wx + wn.dx * 0.4, gy, wz + wn.dy * 0.4], q * 20, [0.62, 0.62, 0.62], 0xffffff);
+        else if (o.extraProps && wn && q < 0.12) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
         else if (o.extraProps && q > 0.982) { tmpC.setHSL(0.6, 0.15, 0.08 + h32(x, y, 83) * 0.06); pushP('rock', x, y, [wx + (h32(x, y, 84) - 0.5), gy + 0.18, wz + (h32(x, y, 85) - 0.5)], q * 30, [0.34, 0.24, 0.38], tmpC.getHex()); }
       } else if (reg.id === 'ruinas') {
         if (wn && q < 0.05) { tmpC.setHex(0xa8906c).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.5 + h32(x, y, 34) * 1.1, 1], tmpC.getHex()); }

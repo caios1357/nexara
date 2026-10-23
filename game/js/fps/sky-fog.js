@@ -55,7 +55,8 @@ void main(){
   float band = e - (0.36 + 0.07 * sin(az * 3.0 + uTime * 0.05) + 0.03 * sin(az * 7.0 - uTime * 0.09));
   float aur = exp(-band * band * 260.0) * (0.45 + 0.55 * n21(vec2(az * 14.0 + uTime * 0.12, 3.0))) * smoothstep(0.12, 0.3, e);
   float rays = exp(min(band, 0.0) * 9.0) * step(band, 0.0) * smoothstep(0.12, 0.32, e) * (0.5 + 0.5 * sin(az * 40.0 + uTime * 0.4)) * 0.25;
-  col += mix(uAur, uAur2, 0.5 + 0.5 * sin(az * 2.0 + uTime * 0.03)) * (aur + rays * (0.4 + aur)) * 0.32 * uAurK;
+  vec3 aurC = mix(vec3(0.15, 1.0, 0.5), vec3(0.55, 0.3, 1.0), 0.5 + 0.5 * sin(az * 2.0 + uTime * 0.03)) * (aur + rays * (0.4 + aur));
+  col += aurC * 0.32 * uAurK;
   // lua + halo
   float md = dot(d, uMoon); float moon = smoothstep(0.99935, 0.9996, md); float halo = pow(max(md, 0.0), 220.0) * 0.5 + pow(max(md, 0.0), 18.0) * 0.12;
   float crater = n21(d.xy * 900.0) * 0.25;
@@ -65,6 +66,7 @@ void main(){
     vec3 ta = texture2D(uTexA, vec2(u, v)).rgb; vec3 tb = texture2D(uTexB, vec2(u, v)).rgb;
     vec3 tc = mix(ta, tb, uNight); tc = pow(tc, vec3(2.2)); // sRGB → linear (o colorspace_fragment volta)
     col = mix(col, tc * mix(1.0, 0.75, smoothstep(0.0, -0.2, e)), uTexK);
+    col += aurC * uTexK * (0.25 + 0.75 * uNight) * 0.9; // CONCEITO: aurora verde/roxa por cima do céu pintado
   }
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -84,7 +86,7 @@ void main(){
     update(cam, nowMs, fogColor) {
       mesh.position.copy(cam.position); u.uTime.value = (nowMs % 3600000) / 1000;
       if (fogColor) u.uHor.value.copy(fogColor).multiplyScalar(1.05);
-      art.night = art.force ?? Math.min(1, Math.max(0, (performance.now() - art.t0) / art.dur)); u.uNight.value = art.night; // ENTARDECER → NOITE ao longo da partida
+      art.night = art.force ?? Math.min(1, Math.max(0, 0.55 + 0.45 * (performance.now() - art.t0) / art.dur)); u.uNight.value = art.night; // ENTARDECER → NOITE ao longo da partida
     },
     info: () => ({ tex: art.tex, night: +art.night.toFixed(3) }),
     dispose() { mesh.geometry.dispose(); mat.dispose(); u.uTexA.value?.dispose?.(); u.uTexB.value?.dispose?.(); }

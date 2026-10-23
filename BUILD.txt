@@ -1,3 +1,3 @@
-build=20261023chibi
-publicado=2026-10-23 16:55 -04
+build=20261023conc1
+publicado=2026-10-23 17:06 -04
 origem=/workspace/nexara

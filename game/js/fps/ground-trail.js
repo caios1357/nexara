@@ -9,7 +9,7 @@ import * as THREE from 'three';
 const EL = {
   raio: { cor: 0x8fd8ff, nucleo: '#ffffff', borda: 'rgba(110,190,255,', len: 1.5, w: 0.68, dur: 0.6 },
   vento: { cor: 0xc8fff4, nucleo: '#f2fffb', borda: 'rgba(160,255,230,', len: 1.6, w: 0.8, dur: 0.6 },
-  fogo: { cor: 0xff7a2a, nucleo: '#fff1a8', borda: 'rgba(255,110,30,', len: 1.45, w: 0.72, dur: 0.7 },
+  fogo: { cor: 0xffa040, nucleo: '#fff1a8', borda: 'rgba(255,120,30,', len: 1.9, w: 0.95, dur: 0.9 }, // CONCEITO: rastro de fogo mais forte
   // 20261023: SKINS ELEMENTAIS (efeitos-folha do Caio) — o rastro segue o elemento da skin do personagem
   veneno: { cor: 0x8aff3a, nucleo: '#eaffb0', borda: 'rgba(120,255,60,', len: 1.4, w: 0.8, dur: 0.8 },
   terra: { cor: 0xd8a040, nucleo: '#fff0c0', borda: 'rgba(200,140,60,', len: 1.4, w: 0.75, dur: 0.75 },

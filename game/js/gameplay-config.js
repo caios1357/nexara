@@ -251,9 +251,9 @@ export const DEFAULTS = Object.freeze({
     /** META-69: na mescla, materiais que só diferem na COR viram 1 material com cor por vértice (herói e rivais: ~50 → ~25 chamadas). ?mergeCor=0 desliga. */
     mergeByColor: true,
     /** Bloom (UnrealBloomPass): força, raio, limiar (HDR linear). */
-    bloomStrength: 0.7,
+    bloomStrength: 0.9,
     bloomRadius: 0.55,
-    bloomThreshold: 0.8,
+    bloomThreshold: 0.72,
     /** Exposição do tone mapping ACES Filmic. */
     exposure: 1.1,
     /** MASTER 10: luz da ARENA PRINCIPAL (mais clara para celular; noite neon mantida). exposureK multiplica `exposure`. */

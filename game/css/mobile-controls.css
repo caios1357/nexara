@@ -441,3 +441,14 @@ body.has-mobile-controls #game-screen {
 .mobile-controls.mc-mounted .mc-btn.mc-dalvo .mc-lbl { font-size: 0.5rem; }
 @media (orientation: landscape) { .mobile-controls.mc-mounted .mc-btn.mc-dalvo { right: calc(env(safe-area-inset-right, 0px) + 210px); bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); } }
 @media (orientation: portrait) { .mobile-controls.mc-mounted .mc-btn.mc-dalvo { right: calc(env(safe-area-inset-right, 0px) + 150px); bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); } }
+
+/* CONCEITO do Caio: botões redondos de CRISTAL (borda ciano, facetas, brilho interno). Só visual: tamanho/posição intactos. */
+.mobile-controls .mc-btn.mc-act, .mobile-controls .mc-btn.mc-attack, .mobile-controls .mc-btn.mc-dspecial, .mobile-controls .mc-btn.mc-mount {
+  background:
+    conic-gradient(from 20deg, rgba(255,255,255,.16) 0 12%, transparent 12% 30%, rgba(140,220,255,.14) 30% 44%, transparent 44% 62%, rgba(255,255,255,.1) 62% 74%, transparent 74%),
+    radial-gradient(circle at 50% 38%, rgba(120,210,255,.55), rgba(20,70,150,.78) 48%, rgba(6,16,44,.92) 78%) !important;
+  border: 2px solid rgba(150,230,255,.95) !important;
+  box-shadow: 0 0 0 2px rgba(10,30,70,.85), 0 0 14px rgba(70,190,255,.75), inset 0 0 12px rgba(160,235,255,.55), inset 0 -6px 12px rgba(0,10,40,.6) !important;
+}
+.mobile-controls .mc-btn.mc-act .mc-ico, .mobile-controls .mc-btn.mc-attack .mc-ico { filter: drop-shadow(0 0 5px rgba(170,240,255,.95)); }
+.mobile-controls .mc-joy-base { border-color: rgba(150,230,255,.85) !important; box-shadow: 0 0 14px rgba(70,190,255,.55), inset 0 0 16px rgba(120,210,255,.35) !important; }
