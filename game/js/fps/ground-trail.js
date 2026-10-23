@@ -9,10 +9,18 @@ import * as THREE from 'three';
 const EL = {
   raio: { cor: 0x8fd8ff, nucleo: '#ffffff', borda: 'rgba(110,190,255,', len: 1.5, w: 0.68, dur: 0.6 },
   vento: { cor: 0xc8fff4, nucleo: '#f2fffb', borda: 'rgba(160,255,230,', len: 1.6, w: 0.8, dur: 0.6 },
-  fogo: { cor: 0xff7a2a, nucleo: '#fff1a8', borda: 'rgba(255,110,30,', len: 1.45, w: 0.72, dur: 0.7 }
+  fogo: { cor: 0xff7a2a, nucleo: '#fff1a8', borda: 'rgba(255,110,30,', len: 1.45, w: 0.72, dur: 0.7 },
+  // 20261023: SKINS ELEMENTAIS (efeitos-folha do Caio) — o rastro segue o elemento da skin do personagem
+  veneno: { cor: 0x8aff3a, nucleo: '#eaffb0', borda: 'rgba(120,255,60,', len: 1.4, w: 0.8, dur: 0.8 },
+  terra: { cor: 0xd8a040, nucleo: '#fff0c0', borda: 'rgba(200,140,60,', len: 1.4, w: 0.75, dur: 0.75 },
+  gelo: { cor: 0x8ad8ff, nucleo: '#ffffff', borda: 'rgba(140,220,255,', len: 1.5, w: 0.7, dur: 0.7 }
 };
+const SKIN_EL = { azul: 'gelo', fogo: 'fogo', raio: 'raio', veneno: 'veneno', terra: 'terra', vento: 'vento' };
+let skinEl = null;
+/** skin do herói (player.heroCustom.skin) → todo rastro de chão do herói vira o elemento da skin */
+export function setTrailSkin(skin) { skinEl = SKIN_EL[skin] || null; stats.skin = skinEl; }
 export const KIND_EL = { impulso: 'raio', dodge: 'vento', dash: 'fogo' };
-const stats = { emit: { raio: 0, vento: 0, fogo: 0 }, live: 0 };
+const stats = { emit: { raio: 0, vento: 0, fogo: 0, veneno: 0, terra: 0, gelo: 0 }, live: 0, skin: null };
 if (typeof window !== 'undefined') window.__nxTrail = stats;
 
 function tex(el) {
@@ -22,6 +30,9 @@ function tex(el) {
   g.strokeStyle = E.nucleo; g.lineCap = 'round';
   if (el === 'raio') { g.lineWidth = 3.2; g.beginPath(); let y = 32; g.moveTo(6, y); for (let x = 14; x <= 122; x += 10) { y = 32 + (Math.random() * 2 - 1) * 13; g.lineTo(x, y); } g.stroke(); g.lineWidth = 1.4; g.beginPath(); g.moveTo(40, 30); g.lineTo(52, 14); g.lineTo(60, 20); g.stroke(); }
   else if (el === 'vento') { g.lineWidth = 2.4; for (let k = 0; k < 3; k++) { g.beginPath(); const y0 = 18 + k * 14; g.moveTo(8, y0); g.bezierCurveTo(40, y0 - 10, 80, y0 + 10, 120, y0 - 2); g.stroke(); } g.beginPath(); g.arc(96, 30, 9, 0, Math.PI * 1.5); g.stroke(); }
+  else if (el === 'veneno') { for (let k = 0; k < 11; k++) { g.fillStyle = k % 2 ? 'rgba(170,255,80,0.85)' : 'rgba(90,200,40,0.7)'; g.beginPath(); g.arc(10 + k * 10.5, 32 + (Math.random() * 2 - 1) * 12, 3 + Math.random() * 4, 0, Math.PI * 2); g.fill(); } }
+  else if (el === 'terra') { g.lineWidth = 2.2; for (let k = 0; k < 4; k++) { g.beginPath(); let y = 20 + k * 8; g.moveTo(6, y); for (let x = 18; x <= 122; x += 14) { y += (Math.random() * 2 - 1) * 6; g.lineTo(x, y); } g.stroke(); } g.fillStyle = 'rgba(120,80,40,0.8)'; for (let k = 0; k < 8; k++) g.fillRect(10 + k * 14, 26 + Math.random() * 12, 5, 4); }
+  else if (el === 'gelo') { g.lineWidth = 2; for (let k = 0; k < 7; k++) { const x = 12 + k * 16, h = 8 + Math.random() * 14; g.beginPath(); g.moveTo(x - 5, 32 + h); g.lineTo(x, 32 - h); g.lineTo(x + 5, 32 + h); g.stroke(); } }
   else { for (let k = 0; k < 9; k++) { const x = 12 + k * 12, h = 10 + Math.random() * 16; const gr = g.createLinearGradient(0, 32 + h, 0, 32 - h); gr.addColorStop(0, 'rgba(255,90,20,0)'); gr.addColorStop(0.5, 'rgba(255,150,40,0.9)'); gr.addColorStop(1, E.nucleo); g.fillStyle = gr; g.beginPath(); g.moveTo(x - 6, 32 + 8); g.quadraticCurveTo(x, 32 - h * 1.4, x + 6, 32 + 8); g.fill(); } }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
@@ -37,7 +48,7 @@ export function getGroundTrail(scene) {
   for (const p of pool) p.m.material.map = mats.raio.map;
   let next = 0, last = performance.now(), lastX = null, lastZ = null, yaw = 0;
   function emit(x, z, kind = 'impulso', ownYaw = null) {
-    const el = EL[kind] ? kind : KIND_EL[kind] || 'raio'; const E = EL[el];
+    const el = skinEl && !EL[kind] ? skinEl : (EL[kind] ? kind : KIND_EL[kind] || 'raio'); const E = EL[el];
     if (ownYaw != null) yaw = ownYaw; else if (lastX != null && Math.hypot(x - lastX, z - lastZ) > 0.02) yaw = Math.atan2(x - lastX, z - lastZ);
     lastX = x; lastZ = z;
     const p = pool[next]; next = (next + 1) % pool.length;
@@ -52,6 +63,6 @@ export function getGroundTrail(scene) {
     stats.live = live;
   }
   function hideAll() { for (const p of pool) { p.life = 0; p.m.visible = false; } }
-  const api = { emit, update, hideAll, stats: () => ({ emit: { ...stats.emit }, live: pool.filter((p) => p.life > 0).length }), root };
+  const api = { emit, update, hideAll, stats: () => ({ skin: stats.skin, emit: { ...stats.emit }, live: pool.filter((p) => p.life > 0).length }), root };
   byScene.set(scene, api); return api;
 }

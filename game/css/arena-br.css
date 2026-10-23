@@ -175,3 +175,25 @@ body.hud-compacto .br-zone { white-space: nowrap; }
 }
 body.hud-compacto #game-screen #hud-skills { display: none !important; }
 @media (orientation: portrait) { body.hud-compacto #game-screen #hud-mcb { display: none !important; } } /* LOTE-b M6: retrato com o 👁 — o MCB (fica no menu/mercado) encostava na barra de Nexa */
+/* ── 20261023: TELA DE CARREGAMENTO (arte do Caio) ── */
+#nx-boot{position:fixed;inset:0;z-index:9999;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9vh;background:#05080d url(../assets/ui/carregamento-paisagem.webp) center/cover no-repeat;transition:opacity .45s}
+@media (orientation: portrait){#nx-boot{background-image:url(../assets/ui/carregamento-retrato.webp)}}
+#nx-boot::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,13,.15) 40%,rgba(5,8,13,.85))}
+#nx-boot>*{position:relative}
+#nx-boot .nx-boot-logo{font:900 clamp(38px,9vmin,84px)/1 system-ui,sans-serif;letter-spacing:.18em;color:#e8fbff;text-shadow:0 0 18px #3ab8ff,0 0 42px #7a3aff,0 3px 0 #0a1a2a}
+#nx-boot .nx-boot-sub{font:700 12px system-ui;letter-spacing:.5em;color:#9fdcff;margin:6px 0 16px}
+#nx-boot .nx-boot-bar{width:min(520px,72vw);height:10px;border-radius:6px;background:rgba(10,20,34,.8);border:1px solid rgba(90,200,255,.6);overflow:hidden;box-shadow:0 0 14px rgba(60,180,255,.35)}
+#nx-boot .nx-boot-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ab8ff,#b46aff,#ff6a1a);transition:width .12s linear}
+#nx-boot .nx-boot-tip{font:600 12px system-ui;color:#cfe9ff;margin-top:8px;letter-spacing:.08em}
+#nx-boot.nx-boot-out{opacity:0}#nx-boot.nx-boot-gone{display:none}
+/* ── 20261023: MENU no estilo do conceito do Caio (cartões neon com subtítulo) ── */
+#title-screen{background:#05080d url(../assets/ui/carregamento-retrato.webp) center/cover no-repeat}
+@media (orientation: landscape){#title-screen{background-image:url(../assets/ui/carregamento-paisagem.webp)}}
+#title-screen::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(5,8,13,.55),rgba(5,8,13,.9));pointer-events:none;z-index:0}
+#title-screen>*{position:relative;z-index:1}
+.nx-main-menu{background:rgba(6,12,22,.55)!important;backdrop-filter:blur(2px)}
+.nx-main-menu button[data-sub]{position:relative;text-align:left;padding:.7rem 2.2rem .7rem 1rem;border-radius:12px;border:2px solid var(--nxc,#3ab8ff);background:linear-gradient(100deg,color-mix(in srgb,var(--nxc,#3ab8ff) 30%,#0a1220),rgba(8,14,26,.9) 70%);box-shadow:0 0 14px color-mix(in srgb,var(--nxc,#3ab8ff) 45%,transparent),inset 0 0 12px color-mix(in srgb,var(--nxc,#3ab8ff) 20%,transparent);color:#fff;font-weight:800;letter-spacing:.08em}
+.nx-main-menu button[data-sub]::after{content:attr(data-sub);display:block;font:600 .68rem/1.2 system-ui,sans-serif;letter-spacing:.06em;color:color-mix(in srgb,var(--nxc,#3ab8ff) 45%,#fff);margin-top:3px;text-transform:uppercase}
+.nx-main-menu button[data-sub]::before{content:'›';position:absolute;right:.8rem;top:50%;transform:translateY(-50%);font-size:1.6rem;color:color-mix(in srgb,var(--nxc,#3ab8ff) 60%,#fff)}
+#btn-main-arena{--nxc:#ff3a3a}#btn-br-entrar{--nxc:#a05aff}#btn-fast-entrar{--nxc:#ffb020}#btn-fast-ranking{--nxc:#3ab8ff}#btn-outros-modos{--nxc:#5a7aff}
+#btn-main-mercado{--nxc:#9a4aff}#btn-menu-vestiario{--nxc:#3a9cff}#btn-menu-berco{--nxc:#3aff6a}#btn-menu-cfg{--nxc:#8aa0b4}

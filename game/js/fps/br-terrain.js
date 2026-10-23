@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023drag';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023arte';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
 const REGION_WALL = { periferia: 0xb08e78, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
@@ -37,6 +37,14 @@ export function buildBrTerrain(zone, cfg, o) {
   {
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.72, metalness: 0.12, envMapIntensity: 0.7, emissive: 0x18202a, emissiveIntensity: 1 }); if (o.detail) addFloorDetail(mat, { sky: o.skyColor ?? 0x2a4a7a }); // GRÁFICOS 3: juntas/variação/poças com reflexo do céu
     // M10: menos metal = chão legível sem envMap
+    // 20261023: TEXTURAS DOS DISTRITOS (folhas do Caio: periferia, caverna, complexo=laboratório, fábrica, elite) — 1 material por região, mesmo programa
+    const ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: 'periferia-0', ruinas: 'fabrica-0', floresta: 'caverna-1', complexo: 'complexo-1', elite: 'elite-0', dragao: 'caverna-0' };
+    const regMats = {}; stats.distritoArte = {};
+    const matOf = (rid) => {
+      if (!ARTE || !ARTE[rid]) return mat; if (regMats[rid]) return regMats[rid];
+      const m2 = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex(`../distritos/${ARTE[rid]}.webp`, 1, 1), roughness: 0.78, metalness: 0.08, envMapIntensity: 0.6, emissive: 0x10161e, emissiveIntensity: 1 });
+      m2.color.setScalar(2.1); if (o.detail) addFloorDetail(m2, { sky: o.skyColor ?? 0x2a4a7a }); regMats[rid] = m2; stats.distritoArte[rid] = ARTE[rid]; return m2;
+    };
     const nv = new THREE.Vector3();
     for (let fy0 = 0; fy0 < H; fy0 += FC) for (let fx0 = 0; fx0 < W; fx0 += FC) {
       const fx1 = Math.min(W, fx0 + FC), fy1 = Math.min(H, fy0 + FC); const cw = fx1 - fx0, chh = fy1 - fy0; const NV = (cw + 1) * (chh + 1);
@@ -61,7 +69,8 @@ export function buildBrTerrain(zone, cfg, o) {
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
       geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeBoundingSphere();
-      const floor = new THREE.Mesh(geo, mat); floor.receiveShadow = true; floor.name = 'br-floor';
+      const cReg = regAt(Math.min(W - 1, fx0 + (cw >> 1)), Math.min(H - 1, fy0 + (chh >> 1)));
+      const floor = new THREE.Mesh(geo, matOf(cReg?.id)); floor.receiveShadow = true; floor.name = 'br-floor';
       floor.userData.cx = (fx0 + cw / 2) * T; floor.userData.cz = (fy0 + chh / 2) * T; floor.userData.rad = Math.hypot(cw, chh) * T * 0.5;
       floorChunks.push(floor); group.add(floor); stats.meshes++;
     }

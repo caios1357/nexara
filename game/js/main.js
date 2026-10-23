@@ -1,79 +1,79 @@
-import { loadAllData } from './data-loader.js?v=20261023drag';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261023drag';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261023drag';
-import { addToInventory } from '../../rules/loot.js?v=20261023drag';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261023drag';
-import { rollLoot } from '../../rules/loot.js?v=20261023drag';
-import { isWalkable } from './map.js?v=20261023drag';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261023drag';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261023drag';
+import { loadAllData } from './data-loader.js?v=20261023arte';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261023arte';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261023arte';
+import { addToInventory } from '../../rules/loot.js?v=20261023arte';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261023arte';
+import { rollLoot } from '../../rules/loot.js?v=20261023arte';
+import { isWalkable } from './map.js?v=20261023arte';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261023arte';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261023arte';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, swordStats, resetSwordStats
-} from './actions.js?v=20261023drag';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261023drag';
-import { createMcbUi } from './mcb-ui.js?v=20261023drag';
-import { createVestiario } from './vestiario.js?v=20261023drag';
-import { createBerco } from './dragon-berco.js?v=20261023drag';
-import { bossCfgFor } from './boss-variants.js?v=20261023drag';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261023drag';
-import { createMount } from './mount.js?v=20261023drag';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261023drag';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261023drag';
-import { getLocalProfile, authProviders } from './auth.js?v=20261023drag';
-import { lastWalletCheck } from './save.js?v=20261023drag';
-import { maybeTrigger0217 } from './events.js?v=20261023drag';
-import { createRenderer } from './renderer.js?v=20261023drag';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261023drag';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261023drag';
-import { itemRarity } from './sprites.js?v=20261023drag';
-import { createArenaState, isArenaState } from './arena.js?v=20261023drag';
-import { createMobileControls } from './mobile-controls.js?v=20261023drag';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261023drag';
+} from './actions.js?v=20261023arte';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261023arte';
+import { createMcbUi } from './mcb-ui.js?v=20261023arte';
+import { createVestiario } from './vestiario.js?v=20261023arte';
+import { createBerco } from './dragon-berco.js?v=20261023arte';
+import { bossCfgFor } from './boss-variants.js?v=20261023arte';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261023arte';
+import { createMount } from './mount.js?v=20261023arte';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261023arte';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261023arte';
+import { getLocalProfile, authProviders } from './auth.js?v=20261023arte';
+import { lastWalletCheck } from './save.js?v=20261023arte';
+import { maybeTrigger0217 } from './events.js?v=20261023arte';
+import { createRenderer } from './renderer.js?v=20261023arte';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261023arte';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261023arte';
+import { itemRarity } from './sprites.js?v=20261023arte';
+import { createArenaState, isArenaState } from './arena.js?v=20261023arte';
+import { createMobileControls } from './mobile-controls.js?v=20261023arte';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261023arte';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261023drag';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261023drag';
-import { createArenaRun } from './arena-run.js?v=20261023drag';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261023drag';
+} from './enemy-ai.js?v=20261023arte';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261023arte';
+import { createArenaRun } from './arena-run.js?v=20261023arte';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261023arte';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261023drag';
-import { generateBrMap } from './br-map.js?v=20261023drag';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261023drag';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261023drag';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261023drag';
-import { createMusic } from './music.js?v=20261023drag';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261023drag';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261023drag';
-import { createBossHud } from './boss-hud.js?v=20261023drag';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261023drag';
-import { createPlayerMotion } from './player-motion.js?v=20261023drag';
-import { createPlayerCombat } from './player-combat.js?v=20261023drag';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261023drag';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261023arte';
+import { generateBrMap } from './br-map.js?v=20261023arte';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261023arte';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261023arte';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261023arte';
+import { createMusic } from './music.js?v=20261023arte';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261023arte';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261023arte';
+import { createBossHud } from './boss-hud.js?v=20261023arte';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261023arte';
+import { createPlayerMotion } from './player-motion.js?v=20261023arte';
+import { createPlayerCombat } from './player-combat.js?v=20261023arte';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261023arte';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats, sfxDragonRoar, sfxDragonFlap, sfxDragonBreath
-} from './sfx.js?v=20261023drag';
+} from './sfx.js?v=20261023arte';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261023drag';
-import { createPassiveUi } from './passives-ui.js?v=20261023drag';
-import { createSettingsMenu } from './settings-menu.js?v=20261023drag';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261023drag';
-import { createPassiveHud } from './passive-hud.js?v=20261023drag';
-import { createDragon } from './companion-dragon.js?v=20261023drag';
-import { createFullscreenUi } from './fullscreen.js?v=20261023drag';
-import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261023drag';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261023drag';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261023drag';
-import { createTutorial } from './tutorial.js?v=20261023drag';
+} from './passives.js?v=20261023arte';
+import { createPassiveUi } from './passives-ui.js?v=20261023arte';
+import { createSettingsMenu } from './settings-menu.js?v=20261023arte';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261023arte';
+import { createPassiveHud } from './passive-hud.js?v=20261023arte';
+import { createDragon } from './companion-dragon.js?v=20261023arte';
+import { createFullscreenUi } from './fullscreen.js?v=20261023arte';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261023arte';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261023arte';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261023arte';
+import { createTutorial } from './tutorial.js?v=20261023arte';
 
 let DATA = null;
 let state = null;
@@ -429,7 +429,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261023drag').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261023arte').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -1768,7 +1768,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261023drag').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261023arte').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -2331,7 +2331,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261023drag');
+      const { addXp } = await import('./state.js?v=20261023arte');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2707,6 +2707,7 @@ function setBrMode(mode) {
 }
 function enterArenaBr(mode = 'full') {
   if (!brEnabled(DATA)) { ui.showToast('ARENA PRINCIPAL — EM DESENVOLVIMENTO (arena_br.enabled = false).'); return false; }
+  try { window.__nxLoading?.flash(mode === 'fast' ? 'NEXARA FAST ⚡ — entrando no distrito…' : 'ARENA NEXARA — 30 rivais (bots)…', 1100); } catch { /* sem tela */ }
   setBrMode(mode);
   if (state && !isArenaState(state)) worldBackup = state;
   exitAllRuns();

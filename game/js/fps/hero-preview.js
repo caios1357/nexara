@@ -3,11 +3,11 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261023drag';
-import { createHeroModel } from './hero-model.js?v=20261023drag';
-import { kitFor } from './hero-kit.js?v=20261023drag';
-import { heroStyleOf } from '../hero-styles.js?v=20261023drag';
-import { getConfig } from '../gameplay-config.js?v=20261023drag';
+import { attachHeroGlb } from './hero-glb.js?v=20261023arte';
+import { createHeroModel } from './hero-model.js?v=20261023arte';
+import { kitFor } from './hero-kit.js?v=20261023arte';
+import { heroStyleOf } from '../hero-styles.js?v=20261023arte';
+import { getConfig } from '../gameplay-config.js?v=20261023arte';
 /** 9 PERSONAGENS: a prévia/retrato mostram o MESMO herói procedural do jogo (kit + skin) — o GLB só com graphics.heroLook='glb' */
 const wantsGlb = () => { try { return (new URLSearchParams(location.search).get('herolook') || getConfig().graphics.heroLook) === 'glb'; } catch { return false; } };
 function attachProcHero(fake, o = {}) {

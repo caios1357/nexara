@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261023drag';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261023drag';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261023drag';
-import { addReputation } from '../../rules/reputation.js?v=20261023drag';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261023drag';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261023drag';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261023drag';
-import { reveal } from './arquivo.js?v=20261023drag';
-import { checkEventReady } from './events.js?v=20261023drag';
-import { getConfig } from './gameplay-config.js?v=20261023drag';
-import { getStat, STATS } from './modifiers.js?v=20261023drag';
+import { trainSkill } from '../../rules/skills.js?v=20261023arte';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261023arte';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261023arte';
+import { addReputation } from '../../rules/reputation.js?v=20261023arte';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261023arte';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261023arte';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261023arte';
+import { reveal } from './arquivo.js?v=20261023arte';
+import { checkEventReady } from './events.js?v=20261023arte';
+import { getConfig } from './gameplay-config.js?v=20261023arte';
+import { getStat, STATS } from './modifiers.js?v=20261023arte';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
