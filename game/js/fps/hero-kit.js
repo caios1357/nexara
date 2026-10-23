@@ -4,18 +4,18 @@
  * Também gera kits VARIADOS (determinísticos pelo nome) para os rivais. Puramente visual.
  */
 export const KIT_STYLES = {
-  cavaleiro: { head: 'capuz', face: 'visor', armor: 0x26303c, cloth: 0x1c222c, glow: null, cape: true, weapon: 'espada', pad: 1 },
+  cavaleiro: { head: 'guerreiro', face: 'visor', armor: 0x16264a, cloth: 0x101c38, helmColor: 0x14234a, glow: 0x0aa8ff, cape: true, weapon: 'espada', pad: 1, chibi: true, bigPads: true, emblem: true, bigBoots: true, backSword: true, tabardFront: true }, // GUERREIRO (heroi-guerreiro-folha)
   runico: { head: 'chapeu', face: 'olhos', armor: 0x2b2538, cloth: 0x281c3b, glow: 0xb46aff, cape: true, weapon: 'montante', pad: 1.1, rune: true },
   cacador: { head: 'capuz', face: 'mascara', armor: 0x212922, cloth: 0x1b281e, glow: 0x46ff8a, cape: false, weapon: 'adagas', pad: 0.85, scarf: true },
   // ── 9 PERSONAGENS (folhas do Caio) — cores/formas tiradas das referências ──
-  arqueiro: { head: 'capuz', face: 'visor', armor: 0x1a2848, cloth: 0x14203c, glow: 0x3ab8ff, cape: true, weapon: 'arco', pad: 1.05, tabard: true, quiver: true, spikes: 0x3ab8ff },
-  mago: { head: 'capuz', face: 'visor', armor: 0x1a2442, cloth: 0x152040, glow: 0x5ad0ff, cape: true, weapon: 'cajado', pad: 1.1, robe: true, crystals: true, rune: true },
-  ninja: { head: 'capuz', face: 'mascara', armor: 0x15161a, cloth: 0x2a0c10, glow: 0xff2a3a, cape: false, weapon: 'adagas', pad: 0.8, scarf: true, bulk: 0.94, tabard: true },
-  paladino: { head: 'elmo', crest: 'crista', helmColor: 0xe8e4d8, helmGlow: 0xffc23a, face: 'visor', armor: 0xd8d6cc, cloth: 0x8a7a50, glow: 0xffc23a, cape: false, weapon: 'espada', shield: true, pad: 1.35, bulk: 1.08, plates: { color: 0xc8a040, glow: 0xffc23a } },
-  cacadora: { head: 'cabelo', hair: 0xff7a1a, face: 'mascara', armor: 0x2a2018, cloth: 0x3a2414, glow: 0xff8a1a, cape: false, weapon: 'lanca', pad: 0.9, tabard: true, bulk: 0.95 },
-  bruxo: { head: 'capuz', horns: true, face: 'visor', armor: 0x2a1f3a, cloth: 0x221832, glow: 0x7dff3a, cape: true, weapon: 'cajado', pad: 1.15, robe: true, rune: true, handFire: true },
-  samurai: { head: 'elmo', crest: 'samurai', helmColor: 0x1e2a60, helmGlow: 0xff3ad8, face: 'visor', armor: 0x1a2350, cloth: 0x141a3a, glow: 0xff3ad8, cape: false, weapon: 'katana', pad: 1.3, tabard: true },
-  berserker: { head: 'elmo', crest: 'demonio', helmColor: 0x3a3a40, helmGlow: 0xff4a1a, face: 'visor', armor: 0x2a1a18, cloth: 0x4a3426, glow: 0xff4a1a, cape: false, weapon: 'machados', pad: 1.5, bulk: 1.16, fur: true, plates: { color: 0x3a3438, glow: 0xff4a1a } },
+  arqueiro: { head: 'capuz', face: 'visor', armor: 0x1a2848, cloth: 0x14203c, glow: 0x3ab8ff, cape: true, weapon: 'arco', pad: 1.05, tabard: true, quiver: true, spikes: 0x3ab8ff, chibi: true, bigBoots: true },
+  mago: { head: 'capuz', face: 'visor', armor: 0x1a2442, cloth: 0x152040, glow: 0x5ad0ff, cape: true, weapon: 'cajado', pad: 1.1, robe: true, crystals: true, rune: true, chibi: true, bigBoots: true },
+  ninja: { head: 'capuz', face: 'mascara', armor: 0x15161a, cloth: 0x2a0c10, glow: 0xff2a3a, cape: false, weapon: 'adagas', pad: 0.8, scarf: true, bulk: 0.94, tabard: true, chibi: true, bigBoots: true },
+  paladino: { head: 'elmo', crest: 'crista', helmColor: 0xe8e4d8, helmGlow: 0xffc23a, face: 'visor', armor: 0xd8d6cc, cloth: 0x8a7a50, glow: 0xffc23a, cape: false, weapon: 'espada', shield: true, pad: 1.35, bulk: 1.08, plates: { color: 0xc8a040, glow: 0xffc23a }, chibi: true, bigBoots: true },
+  cacadora: { head: 'cabelo', hair: 0xff7a1a, face: 'mascara', armor: 0x2a2018, cloth: 0x3a2414, glow: 0xff8a1a, cape: false, weapon: 'lanca', pad: 0.9, tabard: true, bulk: 0.95, chibi: true, bigBoots: true },
+  bruxo: { head: 'capuz', horns: true, face: 'visor', armor: 0x2a1f3a, cloth: 0x221832, glow: 0x7dff3a, cape: true, weapon: 'cajado', pad: 1.15, robe: true, rune: true, handFire: true, chibi: true, bigBoots: true },
+  samurai: { head: 'elmo', crest: 'samurai', helmColor: 0x1e2a60, helmGlow: 0xff3ad8, face: 'visor', armor: 0x1a2350, cloth: 0x141a3a, glow: 0xff3ad8, cape: false, weapon: 'katana', pad: 1.3, tabard: true, chibi: true, bigBoots: true },
+  berserker: { head: 'elmo', crest: 'demonio', helmColor: 0x3a3a40, helmGlow: 0xff4a1a, face: 'visor', armor: 0x2a1a18, cloth: 0x4a3426, glow: 0xff4a1a, cape: false, weapon: 'machados', pad: 1.5, bulk: 1.16, fur: true, plates: { color: 0x3a3438, glow: 0xff4a1a }, chibi: true, bigBoots: true },
   ciborgue: { head: 'careca', face: 'ciber', armor: 0x392f28, cloth: 0x2a2018, glow: 0xff8a2a, cape: false, weapon: 'montante', pad: 1.35, cyberArm: true }
 };
 const CREST = (c) => (c === 'horns' ? 'chifres' : c === 'demon' ? 'demonio' : 'crista');
@@ -26,7 +26,7 @@ const mixHex = (a, b, k) => {
 };
 const num = (v) => (v == null ? null : typeof v === 'number' ? v : parseInt(String(v).replace('#', ''), 16));
 
-import { SKINS } from '../personagens.js?v=20261023arte';
+import { SKINS } from '../personagens.js?v=20261023chibi';
 /** SKIN ELEMENTAL: brilho do elemento + armadura tingida (mantém a forma do personagem) */
 export function applySkin(k, skinId) {
   const S = SKINS[skinId]; if (!S) return k;

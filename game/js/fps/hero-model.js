@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023arte';
-import { mergeStaticParts } from './merge-util.js?v=20261023arte';
-import { attachHeroGlb } from './hero-glb.js?v=20261023arte';
-import { addArmorDetail } from './surface-fx.js?v=20261023arte';
+import { getConfig } from '../gameplay-config.js?v=20261023chibi';
+import { mergeStaticParts } from './merge-util.js?v=20261023chibi';
+import { attachHeroGlb } from './hero-glb.js?v=20261023chibi';
+import { addArmorDetail } from './surface-fx.js?v=20261023chibi';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -84,6 +84,7 @@ export function createHeroModel(opts = {}) {
   const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); // peças finas (linhas de brilho, lâmina, guarda)
   /** volume arredondado (raio ~35% da menor medida, máx. 6 cm) */
   let roundN = 0;
+  let HIPY = 0.94; // CHIBI (folhas do Caio): pernas curtas → quadril mais baixo
   const rbox = (w, h, d, mat, k = 0.36) => (SQUARE ? box(w, h, d, mat) : (roundN++, new THREE.Mesh(roundedBoxGeo(w, h, d, Math.min(0.06, Math.min(w, h, d) * k)), mat)));
   /** membro (coxa/canela/braço/antebraço) em cápsula */
   const limb = (w, h, d, mat) => (SQUARE ? box(w, h, d, mat) : (roundN++, new THREE.Mesh(limbGeo(w, h, d), mat)));
@@ -263,8 +264,54 @@ export function createHeroModel(opts = {}) {
       const a2 = box(0.08, 0.03, 0.4, matBladeAura); a2.position.z = 0.24; off.add(a2);
       off.rotation.x = 1.25; kitInfo.parts += 3;
     }
-    // ── 9 PERSONAGENS (folhas do Caio): peças extras procedurais (leves, entram no merge estático) ──
     const RB = (w, h, d) => (SQUARE ? new THREE.BoxGeometry(w, h, d) : roundedBoxGeo(w, h, d, Math.min(0.03, Math.min(w, h, d) * 0.4)));
+    // ── CHIBI das folhas do Caio: cabeça/capacete grande, pernas curtas, botas e luvas grandes, ombreiras angulosas ──
+    if (K.chibi) {
+      const LK = 0.8; for (const sd of ['L', 'R']) { legs[sd].thigh.scale.set(1.15, LK, 1.15); }
+      HIPY = 0.94 * (0.12 + 0.88 * LK) - 0.02; hips.position.y = HIPY;
+      head.scale.setScalar(1.5); neck.position.y += 0.02;
+      for (const sd of ['L', 'R']) { arms[sd].wrist.scale.setScalar(1.45); for (const ch of arms[sd].shoulder.children) if (ch.isMesh && !pads.includes(ch)) ch.scale.set(1.3, 1, 1.3); for (const ch of arms[sd].elbow.children) if (ch.isMesh) ch.scale.set(1.25, 1, 1.25); }
+      chest.scale.set(1.12, 1, 1.12);
+    }
+    if (K.chibi && K.head === 'capuz') { // capuz das folhas: abertura frontal, rosto na sombra, olhos acesos em V, borda acesa
+      rm(hood); rm(visor);
+      const hm = matCloth.clone(); hm.side = THREE.DoubleSide; flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
+      const OP = 1.7; const hd = add(new THREE.SphereGeometry(0.185, 20, 12, Math.PI / 2 + OP / 2, Math.PI * 2 - OP, 0, Math.PI * 0.72), hm, 0, 0.02, -0.01); hd.scale.set(1.05, 1.15, 1.1);
+      add(new THREE.SphereGeometry(0.15, 14, 10), new THREE.MeshBasicMaterial({ color: 0x05070a }), 0, 0.0, -0.01);
+      const pk = add(new THREE.ConeGeometry(0.1, 0.2, 10), hm, 0, 0.25, -0.05); pk.rotation.x = -0.35;
+      for (const sd of [-1, 1]) { const e = add(new THREE.BoxGeometry(0.06, 0.022, 0.02), matGlow, sd * 0.05, 0.0, 0.14); e.rotation.z = sd * 0.35; }
+      for (const sd of [-1, 1]) { const ed = add(new THREE.BoxGeometry(0.012, 0.2, 0.012), matGlow, sd * 0.1, 0.07, 0.15); ed.rotation.z = -sd * 0.42; ed.rotation.x = -0.25; }
+      if (hoodPeak) { hoodPeak.scale.set(1.0, 1.25, 1.0); }
+    }
+    if (K.head === 'guerreiro') { // capacete redondo azul-marinho + crista de cristal + viseira em V acesa + orelheiras com linha ciano
+      const hm = new THREE.MeshStandardMaterial({ color: K.helmColor ?? K.armor, metalness: 0.7, roughness: 0.3, emissive: new THREE.Color(K.armor).multiplyScalar(0.15) });
+      flashMats.push(hm); baseEmissive.push(hm.emissive.getHex());
+      const shell = add(new THREE.SphereGeometry(0.16, 18, 14), hm, 0, 0.02, -0.005); shell.scale.set(1.05, 1.02, 1.08);
+      // (faixa escura do rosto removida: a viseira acesa já marca o rosto)
+      for (const sd of [-1, 1]) { const v = add(new THREE.BoxGeometry(0.085, 0.026, 0.03), matGlow, sd * 0.055, 0.0, 0.19); v.rotation.z = sd * 0.32; v.rotation.y = sd * 0.25; }
+      add(new THREE.BoxGeometry(0.012, 0.05, 0.02), matGlow, 0, -0.055, 0.185);
+      const crest = add(new THREE.ConeGeometry(0.035, 0.16, 5), matGlow, 0, 0.21, -0.01); crest.scale.set(0.6, 1, 1.4);
+      add(new THREE.BoxGeometry(0.02, 0.05, 0.2), hm, 0, 0.16, -0.03);
+      for (const sd of [-1, 1]) { const ear = add(new THREE.CylinderGeometry(0.06, 0.06, 0.04, 12), hm, sd * 0.16, 0.0, -0.005); ear.rotation.z = Math.PI / 2; const er = add(new THREE.TorusGeometry(0.045, 0.008, 4, 14), matGlow, sd * 0.182, 0.0, -0.005); er.rotation.y = Math.PI / 2; }
+      rm(visor);
+    }
+    if (K.bigPads || K.chibi) for (const pd of pads) { // ombreira angulosa em camadas com topo aceso
+      const sd = Math.sign(pd.position.x) || 1; pd.scale.set(1.1, 1.25, 1.1);
+      const top = add(new THREE.BoxGeometry(0.2, 0.025, 0.2), matGlow, sd * 0.04, 0.1, 0, pd.parent); top.rotation.z = -sd * 0.3;
+      const lay = add(RB(0.14, 0.06, 0.22), matArmor2, sd * 0.07, 0.0, 0, pd.parent); lay.rotation.z = -sd * 0.45;
+    }
+    if (K.emblem || K.chibi) { // escudo aceso no peito (folha: emblema ciano em forma de escudo)
+      const sh = new THREE.Shape(); sh.moveTo(-0.08, 0.07); sh.lineTo(0.08, 0.07); sh.lineTo(0.07, -0.03); sh.lineTo(0, -0.1); sh.lineTo(-0.07, -0.03); sh.lineTo(-0.08, 0.07);
+      const em = add(new THREE.ExtrudeGeometry(sh, { depth: 0.02, bevelEnabled: false }), matGlow, 0, 0.2, 0.235, chest); em.scale.setScalar(1.3); rm(core); rm(coreHalo);
+    }
+    if (K.bigBoots) for (const sd of ['L', 'R']) { const kn = legs[sd].knee; const b = add(RB(0.2, 0.16, 0.32), matArmor, 0, -0.42, 0.04, kn); add(new THREE.BoxGeometry(0.205, 0.022, 0.1), matGlow, 0, -0.37, 0.15, kn); add(new THREE.BoxGeometry(0.17, 0.02, 0.02), matGlow, 0, -0.47, 0.205, kn); void b; }
+    if (K.backSword) { // montante nas costas, na diagonal (folha de costas)
+      const g = joint('backSword', 0, 0.16, -0.21, chest); g.rotation.z = 0.75;
+      add(RB(0.13, 0.9, 0.03), matArmor2, 0, -0.1, 0, g); add(new THREE.BoxGeometry(0.035, 0.84, 0.04), matGlow, 0, -0.1, -0.005, g);
+      add(new THREE.BoxGeometry(0.26, 0.045, 0.06), matGlow, 0, 0.36, 0, g); add(new THREE.CylinderGeometry(0.016, 0.016, 0.16, 6), matUnder, 0, 0.46, 0, g); add(new THREE.OctahedronGeometry(0.03, 0), matGlow, 0, 0.56, 0, g);
+    }
+    if (K.tabardFront || (K.chibi && !K.robe && !K.tabard && !K.fur)) { const len = 0.44; const pnl = add(RB(0.26, len, 0.03), matCloth, 0, -0.04 - len / 2, 0.14, hips); pnl.rotation.x = -0.08; const tip = add(new THREE.ConeGeometry(0.13, 0.12, 4), matCloth, 0, -0.06 - len, 0.14, hips); tip.rotation.set(Math.PI, Math.PI / 4, 0); tip.scale.set(1, 1, 0.12); }
+    // ── 9 PERSONAGENS (folhas do Caio): peças extras procedurais (leves, entram no merge estático) ──
     if (K.weapon === 'katana') { blade.scale.set(0.8, 1, 1.12); add(new THREE.CylinderGeometry(0.05, 0.05, 0.012, 10), matArmor2, 0, 0, 0.09, blade).rotation.x = Math.PI / 2; }
     else if (K.weapon === 'machados') { // dois machados de lava (cabo curto + lâmina larga) — mão direita e esquerda
       blade.scale.set(1.3, 1.3, 0.5);
@@ -396,7 +443,7 @@ export function createHeroModel(opts = {}) {
     legs.L.knee.rotation.x = Math.max(0, c) * 0.9 * moveK + 0.05;
     legs.R.knee.rotation.x = Math.max(0, -c) * 0.9 * moveK + 0.05;
     const breathe = Math.sin(st.animTime * 2.1) * 0.012;
-    hips.position.y = 0.94 - Math.abs(c) * 0.05 * moveK + breathe * 0.5 - (attacking ? 0.04 : 0);
+    hips.position.y = HIPY - Math.abs(c) * 0.05 * moveK + breathe * 0.5 - (attacking ? 0.04 : 0);
     spine.rotation.x = 0.06 * moveK + runK * 0.12;
     chest.rotation.y = 0;
     chest.rotation.x = breathe;
