@@ -12,10 +12,10 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023conc2';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc2';
-import { attachHeroGlb } from './hero-glb.js?v=20261023conc2';
-import { addArmorDetail } from './surface-fx.js?v=20261023conc2';
+import { getConfig } from '../gameplay-config.js?v=20261023conc3';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc3';
+import { attachHeroGlb } from './hero-glb.js?v=20261023conc3';
+import { addArmorDetail } from './surface-fx.js?v=20261023conc3';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -178,6 +178,10 @@ export function createHeroModel(opts = {}) {
     capeParent.add(seg);
     for (const sd of [-1, 1]) { const ang = Math.PI + sd * CL / 2; const rm = (rt + rb) / 2; const ed = glowLine(capeParent, 0.012, 0.34, 0.012, Math.sin(ang) * rm, -0.17, (rt + rb) / 2 + Math.cos(ang) * rm); ed.rotation.z = -sd * Math.atan2(rb - rt, 0.34) * 0; }
     if (i === 2) { const hem = new THREE.Mesh(new THREE.CylinderGeometry(rb + 0.004, rb + 0.004, 0.018, 9, 1, true, Math.PI - CL / 2, CL), matGlow); hem.position.set(0, -0.335, (rt + rb) / 2); capeParent.add(hem); }
+    if (i === 2) for (let k = 0; k < 5; k++) { // CONCEITO/folhas: barra recortada (pontas em zigue-zague acesas) + barras verticais brilhantes
+      const ang = Math.PI - CL / 2 + CL * (k + 0.5) / 5; const tip = new THREE.Mesh(new THREE.ConeGeometry(0.035, k % 2 ? 0.1 : 0.16, 3), matGlow); tip.rotation.x = Math.PI; tip.position.set(Math.sin(ang) * rb, -0.37 - (k % 2 ? 0.03 : 0.06), (rt + rb) / 2 + Math.cos(ang) * rb); capeParent.add(tip);
+      if (k % 2 === 0) { const bar = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.22, 0.012), matGlow); bar.position.set(Math.sin(ang) * (rb + 0.006), -0.2, (rt + rb) / 2 + Math.cos(ang) * (rb + 0.006)); capeParent.add(bar); }
+    }
     cape.push(capeParent);
     if (i < 2) capeParent = joint(`cape${i + 1}`, 0, -0.34, 0, capeParent);
   }
@@ -272,6 +276,7 @@ export function createHeroModel(opts = {}) {
       head.scale.setScalar(1.5); neck.position.y += 0.02;
       for (const sd of ['L', 'R']) { arms[sd].wrist.scale.setScalar(1.45); for (const ch of arms[sd].shoulder.children) if (ch.isMesh && !pads.includes(ch)) ch.scale.set(1.3, 1, 1.3); for (const ch of arms[sd].elbow.children) if (ch.isMesh) ch.scale.set(1.25, 1, 1.25); }
       chest.scale.set(1.12, 1, 1.12);
+      for (const sd of ['L', 'R']) { glowLine(arms[sd].elbow, 0.15, 0.02, 0.15, 0, -0.2, 0); glowLine(arms[sd].elbow, 0.02, 0.18, 0.02, 0, -0.12, 0.075); glowLine(legs[sd].thigh, 0.02, 0.22, 0.02, 0, -0.18, 0.11); glowLine(legs[sd].knee, 0.17, 0.02, 0.06, 0, -0.05, 0.08); } // CONCEITO: frisos acesos na armadura (braçadeiras, coxas, joelhos)
     }
     if (K.chibi && K.head === 'capuz') { // capuz das folhas: abertura frontal, rosto na sombra, olhos acesos em V, borda acesa
       rm(hood); rm(visor);

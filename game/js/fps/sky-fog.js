@@ -68,6 +68,15 @@ void main(){
     col = mix(col, tc * mix(1.0, 0.75, smoothstep(0.0, -0.2, e)), uTexK);
     col += aurC * uTexK * (0.25 + 0.75 * uNight) * 0.9; // CONCEITO: aurora verde/roxa por cima do céu pintado
   }
+  { // CONCEITO: skyline da cidade no horizonte (prédios em silhueta, janelas acesas, torres néon roxas) — procedural
+    float ax = az * 26.0; float bi = floor(ax); float bh = 0.018 + h21(vec2(bi, 7.0)) * 0.07 + step(0.93, h21(vec2(bi, 3.0))) * 0.09;
+    float spire = step(0.9, h21(vec2(bi, 5.0))) * smoothstep(0.08, 0.0, abs(fract(ax) - 0.5)) * 0.06;
+    float top = bh + spire; float inB = step(e, top) * step(-0.02, e);
+    float wl = step(0.35, fract(ax * 6.0)) * step(fract(ax * 6.0), 0.75) * step(0.3, fract(e * 140.0)) * step(fract(e * 140.0), 0.7) * step(0.55, h21(floor(vec2(ax * 6.0, e * 140.0))));
+    vec3 bcol = vec3(0.025, 0.02, 0.06) + vec3(1.0, 0.62, 0.3) * wl * 0.55 + vec3(0.7, 0.2, 1.0) * step(0.001, spire) * step(top - 0.006, e) * 3.0;
+    col = mix(col, bcol, inB * (0.6 + 0.4 * uNight));
+    col += vec3(0.55, 0.2, 0.9) * exp(-max(e, 0.0) * 40.0) * 0.12 * step(-0.02, e);
+  }
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
 }`

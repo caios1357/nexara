@@ -162,13 +162,13 @@ export const DEFAULTS = Object.freeze({
    */
   thirdPerson: {
     /** Comprimento do braço (pivô no ombro → câmera). */
-    distance: 3.2,
+    distance: 3.8, // CONCEITO: mais profundidade de rua (herói chibi)
     /** Altura do pivô (ombro/nuca do herói) acima do chão. Câmera ≈ pivotHeight + sen(-pitch)·distance ≈ 1,9 m. */
     pivotHeight: 1.5,
     /** Deslocamento lateral do pivô para a DIREITA (herói fica um pouco à esquerda do centro). */
     shoulderOffset: 0.6,
     /** Pitch inicial (negativo = olhando um pouco para baixo) e limites em 3ª pessoa. */
-    defaultPitchDeg: -8,
+    defaultPitchDeg: -13,
     pitchMinDeg: -50,
     pitchMaxDeg: 28,
     fovDeg: 66,

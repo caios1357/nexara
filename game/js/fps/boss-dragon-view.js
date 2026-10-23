@@ -13,13 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023conc2';
-import { TILE } from './fps-camera.js?v=20261023conc2';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc2';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc2';
-import { getConfig } from '../gameplay-config.js?v=20261023conc2';
-import { artPalette } from './dragon-art.js?v=20261023conc2';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc2';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023conc3';
+import { TILE } from './fps-camera.js?v=20261023conc3';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc3';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc3';
+import { getConfig } from '../gameplay-config.js?v=20261023conc3';
+import { artPalette } from './dragon-art.js?v=20261023conc3';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc3';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -51,8 +51,8 @@ function mats(pal) {
   shared = {
     // EVO gráficos: pele LISA (sem flat) com ESCAMAS procedurais (map) e VEIAS DE NEXA no emissivo
     // (textura emissiva com base verde-escura → continua legível na arena escura, sem luz extra)
-    skin: std(P.dark, { flatShading: false, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v1, P.v2, 77), emissiveIntensity: 0.8, roughness: 0.55 }),
-    skin2: std(P.mid, { flatShading: false, roughness: 0.7, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v3, P.v4, 91), emissiveIntensity: 0.6 }),
+    skin: std(P.dark, { flatShading: true, metalness: 0.45, /* CONCEITO: cristal facetado */ map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v1, P.v2, 77), emissiveIntensity: 0.8, roughness: 0.3 }),
+    skin2: std(P.mid, { flatShading: true, metalness: 0.4, roughness: 0.32, map: scaleTex(), emissive: 0xffffff, emissiveMap: veinEmissiveTex(P.v3, P.v4, 91), emissiveIntensity: 0.6 }),
     plate: std(P.plate, { roughness: 0.3, metalness: 0.75, emissive: 0x040a05, emissiveIntensity: 1 }),
     horn: std(pal ? mix(hx(pal.escuro), 0x1a1712, 0.4) : 0x1a1712, { roughness: 0.4, metalness: 0.5, emissive: pal ? mix(P.nexa, 0x000000, 0.72) : 0x0b0a07, emissiveIntensity: 1 }), /* 20261016: chifres com brilho do elemento */
     claw: std(0x0a0a0a, { roughness: 0.3, metalness: 0.6 }),
