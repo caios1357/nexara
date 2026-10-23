@@ -13,13 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261023conc3';
-import { TILE } from './fps-camera.js?v=20261023conc3';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc3';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc3';
-import { getConfig } from '../gameplay-config.js?v=20261023conc3';
-import { artPalette } from './dragon-art.js?v=20261023conc3';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc3';
+import { attachDragonGlb } from './dragon-glb.js?v=20261023conc4';
+import { TILE } from './fps-camera.js?v=20261023conc4';
+import { mergeStaticParts } from './merge-util.js?v=20261023conc4';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261023conc4';
+import { getConfig } from '../gameplay-config.js?v=20261023conc4';
+import { artPalette } from './dragon-art.js?v=20261023conc4';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261023conc4';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -58,6 +58,7 @@ function mats(pal) {
     claw: std(0x0a0a0a, { roughness: 0.3, metalness: 0.6 }),
     membrane: std(P.mem, { flatShading: false, map: membraneTex(), roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide, transparent: true, opacity: 0.93, emissive: P.memE, emissiveIntensity: pal ? 1.5 : 1 }), /* membrana translúcida acende um pouco mais na cor do elemento */
     rim: new THREE.MeshBasicMaterial({ color: P.nexa }),
+    crystal: std(P.mid, { flatShading: true, metalness: 0.55, roughness: 0.18, emissive: P.memE, emissiveIntensity: 0.9 }),
     nexa: new THREE.MeshStandardMaterial({ color: P.nexa, emissive: P.nexa, emissiveIntensity: 2.2, roughness: 0.2, metalness: 0.1, flatShading: true }),
     eye: new THREE.MeshBasicMaterial({ color: P.eye }),
     glow: basic(P.nexa, { opacity: 0.4, blending: THREE.AdditiveBlending }),
@@ -169,6 +170,10 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     sp.rotation.x = -0.45;
     torso.add(sp);
     spikes.push(sp);
+    for (const sx of [-1, 1]) { // CONCEITO: cristais facetados saindo das costas (2 por placa, inclinados para fora)
+      const cr = mesh(new THREE.OctahedronGeometry(0.22, 0), M.crystal, sx * (0.42 + (i % 2) * 0.12), 1.1 - Math.abs(z) * 0.08, z + 0.1);
+      cr.scale.set(0.55, 1.6 - Math.abs(i - 2.5) * 0.15, 0.55); cr.rotation.set(-0.4, 0, -sx * 0.55); torso.add(cr);
+    }
   }
   // placas laterais (escamas blindadas)
   for (const sx of [-1, 1]) {

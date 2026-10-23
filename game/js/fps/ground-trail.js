@@ -10,6 +10,7 @@ const EL = {
   raio: { cor: 0x8fd8ff, nucleo: '#ffffff', borda: 'rgba(110,190,255,', len: 1.5, w: 0.68, dur: 0.6 },
   vento: { cor: 0xc8fff4, nucleo: '#f2fffb', borda: 'rgba(160,255,230,', len: 1.6, w: 0.8, dur: 0.6 },
   fogo: { cor: 0xffa040, nucleo: '#fff1a8', borda: 'rgba(255,120,30,', len: 1.9, w: 0.95, dur: 0.9 }, // CONCEITO: rastro de fogo mais forte
+  brasa: { cor: 0xff8a30, nucleo: '#ffe0a0', borda: 'rgba(255,120,40,', len: 1.1, w: 0.55, dur: 0.55 }, // CONCEITO: brasa suave sempre atrás ao correr
   // 20261023: SKINS ELEMENTAIS (efeitos-folha do Caio) — o rastro segue o elemento da skin do personagem
   veneno: { cor: 0x8aff3a, nucleo: '#eaffb0', borda: 'rgba(120,255,60,', len: 1.4, w: 0.8, dur: 0.8 },
   terra: { cor: 0xd8a040, nucleo: '#fff0c0', borda: 'rgba(200,140,60,', len: 1.4, w: 0.75, dur: 0.75 },
@@ -19,8 +20,8 @@ const SKIN_EL = { azul: 'gelo', fogo: 'fogo', raio: 'raio', veneno: 'veneno', te
 let skinEl = null;
 /** skin do herói (player.heroCustom.skin) → todo rastro de chão do herói vira o elemento da skin */
 export function setTrailSkin(skin) { skinEl = SKIN_EL[skin] || null; stats.skin = skinEl; }
-export const KIND_EL = { impulso: 'raio', dodge: 'vento', dash: 'fogo' };
-const stats = { emit: { raio: 0, vento: 0, fogo: 0, veneno: 0, terra: 0, gelo: 0 }, live: 0, skin: null };
+export const KIND_EL = { impulso: 'raio', dodge: 'vento', dash: 'fogo', corrida: 'brasa' };
+const stats = { emit: { brasa: 0, raio: 0, vento: 0, fogo: 0, veneno: 0, terra: 0, gelo: 0 }, live: 0, skin: null };
 if (typeof window !== 'undefined') window.__nxTrail = stats;
 
 function tex(el) {
@@ -59,7 +60,7 @@ export function getGroundTrail(scene) {
   function update() {
     const now = performance.now(); const dt = Math.min(0.1, (now - last) / 1000); if (dt < 0.001) return; last = now; let live = 0;
     for (const p of pool) { if (p.life <= 0) continue; p.life -= dt; if (p.life <= 0) { p.m.visible = false; continue; } live++;
-      const k = p.life / p.dur; p.m.material.opacity = (p.el === 'fogo' ? 0.95 : 0.85) * Math.min(1, k * 1.6); p.m.scale.z = EL[p.el].w * p.s * (1 + (1 - k) * (p.el === 'vento' ? 0.9 : 0.35)); }
+      const k = p.life / p.dur; p.m.material.opacity = (p.el === 'fogo' ? 0.95 : p.el === 'brasa' ? 0.5 : 0.85) * Math.min(1, k * 1.6); p.m.scale.z = EL[p.el].w * p.s * (1 + (1 - k) * (p.el === 'vento' ? 0.9 : 0.35)); }
     stats.live = live;
   }
   function hideAll() { for (const p of pool) { p.life = 0; p.m.visible = false; } }

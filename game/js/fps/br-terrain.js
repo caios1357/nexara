@@ -8,7 +8,8 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc3';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc4';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
 const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
@@ -27,6 +28,12 @@ function doorTex() { // porta de garagem/aço ondulado com luz por baixo
   g.fillStyle = '#3a3e46'; g.fillRect(0, 0, 64, 128); for (let y = 6; y < 120; y += 7) { g.fillStyle = '#4c525c'; g.fillRect(4, y, 56, 3); g.fillStyle = '#23262c'; g.fillRect(4, y + 3, 56, 1); }
   g.strokeStyle = '#1a1c20'; g.lineWidth = 6; g.strokeRect(0, 0, 64, 128); g.fillStyle = '#ffb050'; g.fillRect(4, 122, 56, 3);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; doorTex.t = t; return t;
+}
+function crateTex() {
+  if (crateTex.t) return crateTex.t; const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#a86a36'; g.fillRect(0, 0, 64, 64); for (let y = 0; y < 64; y += 13) { g.fillStyle = '#5a3416'; g.fillRect(0, y, 64, 2); }
+  g.strokeStyle = '#6a3e1a'; g.lineWidth = 7; g.strokeRect(3, 3, 58, 58); g.beginPath(); g.moveTo(6, 6); g.lineTo(58, 58); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; crateTex.t = t; return t;
 }
 function winTex() { // janela com moldura e cruz de madeira, vidro aceso em gradiente (1 canvas, 1 vez)
   if (winTex.t) return winTex.t; const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
@@ -92,7 +99,7 @@ export function buildBrTerrain(zone, cfg, o) {
   const mats = {
     wall: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('wall-rust.png', 1, 1.3), roughness: 0.75, metalness: 0.14 }),
     metal: new THREE.MeshStandardMaterial({ color: 0x8a96a4, map: o.loadTex('metal-plate.png', 1, 1), roughness: 0.45, metalness: 0.65 }),
-    crate: new THREE.MeshStandardMaterial({ color: 0x6a5038, map: o.loadTex('metal-plate.png', 1, 1), roughness: 0.7, metalness: 0.15 }),
+    crate: new THREE.MeshStandardMaterial({ color: 0xffffff, map: crateTex(), roughness: 0.8, metalness: 0.0 }), // CONCEITO: caixote de madeira
     rust: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('rust-detail.png', 1, 1), roughness: 0.85, metalness: 0.2 }),
     rock: new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('rust-detail.png', 1, 1), roughness: 0.95, metalness: 0.05, flatShading: true }),
     trunk: new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: 0.9, metalness: 0.05 }),
@@ -136,7 +143,12 @@ export function buildBrTerrain(zone, cfg, o) {
     win: new THREE.PlaneGeometry(0.7, 0.8),
     tank: new THREE.CylinderGeometry(0.55, 0.55, 0.9, 10).translate(0, 0.45, 0),
     roof: (() => { const sh = new THREE.Shape(); sh.moveTo(-T * 0.6, 0); sh.lineTo(T * 0.6, 0); sh.lineTo(0, T * 0.55); sh.lineTo(-T * 0.6, 0); return new THREE.ExtrudeGeometry(sh, { depth: T * 1.1, bevelEnabled: false }).translate(0, 0, -T * 0.55); })(),
-    door: new THREE.PlaneGeometry(0.9, 1.7).translate(0, 0.85, 0)
+    door: new THREE.PlaneGeometry(0.9, 1.7).translate(0, 0.85, 0),
+    balc: (() => { const b = [new THREE.BoxGeometry(1.3, 0.08, 0.55).translate(0, 0, 0.27), new THREE.BoxGeometry(1.3, 0.05, 0.04).translate(0, 0.42, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(-0.63, 0.21, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(0.63, 0.21, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(0, 0.21, 0.53)]; return mergeGeometries(b); })(),
+    upole: new THREE.CylinderGeometry(0.07, 0.1, 5.2, 6).translate(0, 2.6, 0),
+    wire: new THREE.BoxGeometry(1, 0.025, 0.025).translate(0.5, 0, 0),
+    pot: new THREE.CylinderGeometry(0.22, 0.17, 0.32, 7).translate(0, 0.16, 0),
+    leaf: new THREE.IcosahedronGeometry(0.34, 0).translate(0, 0.55, 0)
   };
 
   // —— chunks (16×16 tiles) ——
@@ -156,9 +168,9 @@ export function buildBrTerrain(zone, cfg, o) {
     strip: [geos.strip, mats.neon, false], vent: [geos.vent, mats.metal, false], banner: [geos.banner, mats.neon, false],
     bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false],
     pipe: [geos.pipe, mats.pipe, false],
-    win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.5, flatShading: true }), true], door: [geos.door, new THREE.MeshStandardMaterial({ map: doorTex(), roughness: 0.7, side: THREE.DoubleSide }), false]
+    win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.5, flatShading: true }), true], balc: [geos.balc, mats.metal, true], upole: [geos.upole, mats.trunk, true], wire: [geos.wire, new THREE.MeshBasicMaterial({ color: 0x0a0a10 }), false], pot: [geos.pot, mats.rust, false], leaf: [geos.leaf, mats.canopy, false], door: [geos.door, new THREE.MeshStandardMaterial({ map: doorTex(), roughness: 0.7, side: THREE.DoubleSide }), false]
   };
-  const COLORED = new Set(['roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
+  const COLORED = new Set(['leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
   const wallNear = (x, y) => { for (const [dx, dy, ry] of [[1, 0, Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, 0], [0, -1, 0]]) if (tileAt(x + dx, y + dy) === 'wall') return { dx, dy, ry }; return null; };
   const isLootTile = new Set([...(m.chests || []), ...(m.crates || [])].map((c) => c.x + c.y * W));
@@ -185,6 +197,7 @@ export function buildBrTerrain(zone, cfg, o) {
         }
         if (wq > 0.88) { tmpC.setHex(0x1e4fb8).multiplyScalar(0.8 + h32(x, y, 123) * 0.4); pushP('tank', x, y, [wx, gy + h, wz], wq * 9, [1, 1, 1], tmpC.getHex()); }
         else if (wq > 0.45) { tmpC.setHex(h32(x, y, 124) < 0.5 ? 0x7a3a28 : 0x5a6470).multiplyScalar(0.8 + h32(x, y, 125) * 0.4); pushP('roof', x, y, [wx, gy + h - 0.02, wz], (h32(x, y, 126) < 0.5 ? 0 : Math.PI / 2), [1, 0.55, 1], tmpC.getHex()); }
+        if (h > 2.2 && wq >= 0.55 && wq < 0.68) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; pushP('balc', x, y, [wx + dx * T * 0.5, gy + h * 0.55, wz + dy * T * 0.5], ry, [1, 1, 1], 0xffffff); break; } // varanda
         if (h32(x, y, 140) < 0.16) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; pushP('door', x, y, [wx + dx * T * 0.506, gy, wz + dy * T * 0.506], ry, [1, 1, 1], 0xffffff); break; }
       }
       if ((Math.floor(hs * 1000) % 4) === 0 && h > 2.2) {
@@ -230,6 +243,8 @@ export function buildBrTerrain(zone, cfg, o) {
     if (o.props !== false && reg && (t === 'floor' || t === 'street' || t === 'grass' || t === 'tech' || t === 'rubble') && !isLootTile.has(x + y * W)) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
       if (reg.id === 'periferia') {
+        if (t === 'street' && x % 7 === 0 && y % 5 === 0 && !wn) { pushP('upole', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff); pushP('wire', x, y, [wx, gy + 4.9, wz], 0, [T * 7, 1, 1], 0x000000); } // poste com fios (CONCEITO)
+        if (wn && q > 0.9 && q < 0.93) { pushP('pot', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], 0, [1, 1, 1], 0xffffff); tmpC.setHSL(0.3 + q * 0.1, 0.55, 0.22); pushP('leaf', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], q * 9, [1, 1.2, 1], tmpC.getHex()); } // plantas
         if (wn && q < 0.06) { tmpC.setHSL(h32(x, y, 32) < 0.5 ? 0.02 : 0.55, 0.45, 0.32); pushP('barrel', x, y, [wx + wn.dx * 0.55, gy, wz + wn.dy * 0.55], q * 40, [1, 0.85 + q * 2, 1], tmpC.getHex()); }
         else if (!wn && q > 0.965) { const a = h32(x, y, 130) * 6; tmpC.setHex(0x1e50b8); pushP('barrel', x, y, [wx - 0.35, gy, wz], a, [1, 1, 1], tmpC.getHex()); pushP('crate', x, y, [wx + 0.45, gy, wz + 0.2], a, [0.6, 0.6, 0.6], 0xffffff); }
         else if (wn && q < 0.1) pushP('crate', x, y, [wx + wn.dx * 0.4, gy, wz + wn.dy * 0.4], q * 20, [0.62, 0.62, 0.62], 0xffffff);
