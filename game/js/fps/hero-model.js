@@ -12,11 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023glb2';
-import { mergeStaticParts } from './merge-util.js?v=20261023glb2';
-import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261023glb2';
-import { attachHeroGlb } from './hero-glb.js?v=20261023glb2';
-import { addArmorDetail } from './surface-fx.js?v=20261023glb2';
+import { getConfig } from '../gameplay-config.js?v=20261024glb3';
+import { mergeStaticParts } from './merge-util.js?v=20261024glb3';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261024glb3';
+import { attachHeroGlb } from './hero-glb.js?v=20261024glb3';
+import { addArmorDetail } from './surface-fx.js?v=20261024glb3';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -663,7 +663,7 @@ export function createHeroModel(opts = {}) {
     const geo = src.geometry.clone(); if (!geo.attributes.normal) geo.computeVertexNormals(); autoWeights(geo, L);
     const mat = src.material.clone(); mat.envMapIntensity = 0.35; mat.roughness = 0.7;
     // cores do MODELO DO CAIO: só a SKIN ELEMENTAL recolore (cor do editor/equipamento NÃO tinge — o guerreiro fica azul como na folha)
-    const skinOn = !!(K.skin && K.skin !== 'azul'); const tint = { value: skinOn ? 1 : 0 }; const glbCol = { value: new THREE.Color(skinOn ? K.glow : 0x2ad8ff) }; mat.color.multiplyScalar(0.8); kitInfo.caioTint = tint.value;
+    const skinOn = !!(K.skin && K.skin !== 'azul'); const legTint = false /* glb3: estilo clássico usa o guerreiro AZUL original (o tom violeta saturava a armadura inteira) */; const tint = { value: skinOn || legTint ? 1 : 0 }; const glbCol = { value: new THREE.Color(skinOn ? K.glow : legTint ? K.glbGlow : 0x2ad8ff) }; mat.color.multiplyScalar(0.8); kitInfo.caioTint = tint.value;
     mat.onBeforeCompile = (sh) => {
       sh.uniforms.uRimCol = glbCol; sh.uniforms.uTint = tint;
       sh.fragmentShader = 'uniform vec3 uRimCol; uniform float uTint;\n' + sh.fragmentShader
