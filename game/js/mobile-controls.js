@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261024apex';
-import { pushLog } from './state.js?v=20261024apex';
-import { isArenaState } from './arena.js?v=20261024apex';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261024apex';
-import { ICONS } from './icons.js?v=20261024apex';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261024poder';
+import { pushLog } from './state.js?v=20261024poder';
+import { isArenaState } from './arena.js?v=20261024poder';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261024poder';
+import { ICONS } from './icons.js?v=20261024poder';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -35,6 +35,7 @@ function actionButtonDefs() {
   ];
 }
 const SPECIAL_BTN = new Set(['golpe_poderoso', 'ataque_area', 'suprema']);
+const SLOTS_K = ['golpe_poderoso', 'ataque_area', 'suprema'];
 
 export function createMobileControls(hooks) {
   const ACTION_BUTTONS = actionButtonDefs();
@@ -698,6 +699,20 @@ export function createMobileControls(hooks) {
       if (sEl) sEl.textContent = secs > 0 && SPECIAL_BTN.has(b.id) ? String(secs) : '';
     }
   }
+  /** 20261024poder: os 3 botões de especial mostram o ícone/nome dos PODERES do herói escolhido (null = volta ao padrão). Mesmo id/posição/editor. */
+  let kitSig = '';
+  function setSpecialKit(map) {
+    if (!root) return; const sig = map ? SLOTS_K.map((id) => map[id]?.icon || '').join('|') : '';
+    if (sig === kitSig) return; kitSig = sig;
+    for (const b of ACTION_BUTTONS) {
+      if (!SPECIAL_BTN.has(b.id)) continue; const el = root.querySelector(`.mc-act-${b.id}`); if (!el) continue;
+      const m = map?.[b.id]; const ico = el.querySelector('.mc-ico'), lbl = el.querySelector('.mc-lbl');
+      if (ico) ico.innerHTML = (m && ICONS[m.icon]) || ICONS[b.icon];
+      if (lbl) lbl.textContent = m ? m.label : b.label;
+      el.title = m ? `${m.nome} — ${m.desc || ''}` : b.title; el.dataset.poder = m ? m.id : '';
+      el.classList.toggle('mc-kit', !!m);
+    }
+  }
   function flashButton(id, kind) {
     const el = root?.querySelector(`.mc-act-${id}`);
     if (!el) return;
@@ -815,7 +830,7 @@ export function createMobileControls(hooks) {
     updateActionButtons,
     setMountUi, setWeaponUi,
     descendStats: () => ({ ...descendStats }),
-    flashButton,
+    flashButton, setSpecialKit,
     setLockActive,
     buttonRects,
     getJoystickVector() {

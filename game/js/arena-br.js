@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261024apex';
-import { getConfig } from './gameplay-config.js?v=20261024apex';
-import { pushLog } from './state.js?v=20261024apex';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024apex';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024apex';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261024apex';
-import { createRivals } from './arena-rivals.js?v=20261024apex';
+import { createArenaState } from './arena.js?v=20261024poder';
+import { getConfig } from './gameplay-config.js?v=20261024poder';
+import { pushLog } from './state.js?v=20261024poder';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024poder';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024poder';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261024poder';
+import { createRivals } from './arena-rivals.js?v=20261024poder';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -88,6 +88,7 @@ export function createArenaBr(deps) {
   const inCovil = (x, y, regionId) => { const c = cfg(); if (c.dragao?.desativado) return false; if (c.fastRun) return c.regioes[0]?.id === 'dragao' && Math.hypot(x - c.dragao.x, y - c.dragao.y) < 16; return regionId === 'dragao'; };
   const rivals = createRivals({
     inCovil: (x, y, r) => inCovil(x, y, r), damageHero: (n, why) => deps.damageHero?.(n, why),
+    getPos: () => deps.getPos(), heroHidden: () => !!deps.heroHidden?.(), powerHitHero: (n, mon, kind, o) => deps.powerHitHero?.(n, mon, kind, o) || 0, heroStatus: (x) => deps.heroStatus?.(x), rivalPowerFx: (rv, mon, kit, slot, to) => deps.rivalPowerFx?.(rv, mon, kit, slot, to), // 20261024poder
     st: () => st, br: () => br, cfg, map: () => map(), R: () => R(), walk: (x, y) => walk(x, y), nearestFree: (x, y) => nearestFree(x, y),
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
     rollLootFor, credit: (n, why) => deps.credit?.(n, why), onGiantByRival: (g, rv) => { const q = br?.giants?.find((x) => x.uid === g.uid); if (q) { q.killedAt = Date.now(); q.by = rv.name; } }, regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
@@ -657,6 +658,8 @@ export function createArenaBr(deps) {
   return {
     start, stop, update, isActive, onKill, spectateAdvance, isSpectating: () => !!(br && br.spectate && !br.ended),
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
+    rivalTgtKind: (uid) => rivals.byUid(uid)?.tgt?.kind || null,
+    rivalMitigate(mon, dmg, opts) { return isActive() && mon?.rival ? rivals.mitigateFromHero(mon, dmg, opts) : dmg; }, rivalPowers: () => (br ? rivals.powersView() : null),
     onRivalHit(mon, info) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos(), info || {}); },
     giants: () => (br?.giants || []).map((g) => { const m = st.monstersAlive.find((q) => q.uid === g.uid); return { ...g, alive: !!m?.alive, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0, mx: m?.x, my: m?.y }; }),
     rivals: () => (br ? rivals.view(deps.getPos()) : null), heroSpawn: () => br?.heroSpawn || null, rivalSpawns: () => br?.rivalSpawns || null, onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
@@ -672,6 +675,8 @@ export function createArenaBr(deps) {
       rivals: () => (br ? rivals.view(deps.getPos()) : null),
       /** testes: morte do herói pela MESMA rota da morte real (regra do último herói / espectador) */
       placeRival(uid, x, y) { return br ? rivals.debugPlace(uid, x, y) : false; },
+      /** 20261024poder (testes): rivais sem esquiva/guarda e/ou sem poderes — mede dano/efeito de um poder sem sorte */
+      calm(o) { if (br) br.testCalm = o ? { ...o } : null; return br?.testCalm || null; },
       killHero() { return st ? onPlayerDeath(st) : false; },
       spectate(ms, skip) { return spectateAdvance(ms || 0, !!skip); },
       spawnRivals() { if (br && !br.rivals) rivals.spawn(deps.getPos()); return br?.rivals?.length || 0; },

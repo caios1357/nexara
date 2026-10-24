@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261024apex';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261024apex';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261024apex';
-import { addReputation } from '../../rules/reputation.js?v=20261024apex';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261024apex';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261024apex';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261024apex';
-import { reveal } from './arquivo.js?v=20261024apex';
-import { checkEventReady } from './events.js?v=20261024apex';
-import { getConfig } from './gameplay-config.js?v=20261024apex';
-import { getStat, STATS } from './modifiers.js?v=20261024apex';
+import { trainSkill } from '../../rules/skills.js?v=20261024poder';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261024poder';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261024poder';
+import { addReputation } from '../../rules/reputation.js?v=20261024poder';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261024poder';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261024poder';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261024poder';
+import { reveal } from './arquivo.js?v=20261024poder';
+import { checkEventReady } from './events.js?v=20261024poder';
+import { getConfig } from './gameplay-config.js?v=20261024poder';
+import { getStat, STATS } from './modifiers.js?v=20261024poder';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;
@@ -130,7 +130,9 @@ export function applyPlayerHit(state, mon, opts = {}) {
   const eq = getEquippedStats(state);
   const skillId = eq.skill;
   const skLevel = state.player.skills[skillId]?.level || 10;
-  const base = calcDamage(state.player, def, skLevel, {
+  // 20261024poder: PODER DO HERÓI (partida justa) = dano fixo do kit (balanceado vs rival NV1) → modificadores/crítico; sem combo/arma/roubo de vida
+  const flat = Number.isFinite(opts.flatDano) && opts.flatDano > 0;
+  const base = flat ? opts.flatDano : calcDamage(state.player, def, skLevel, {
     weaponAtk: eq.weaponAtk,
     armorDef: 0
   });
@@ -150,8 +152,8 @@ export function applyPlayerHit(state, mon, opts = {}) {
     dmg *= getStat(STATS.CRIT_MULT, ccfg.critMult, dmgCtx);
   }
   // MCB/ARSENAL: CAJADO — Poder mágico multiplica o dano de todos os golpes/especiais com ele
-  if (currentWeaponClass() === 'cajado' || currentWeaponClass() === 'varinha') dmg *= magicMult();
-  const SW = currentWeaponClass() === 'espada' ? getConfig().sword : null; // 20261009espada
+  if (!flat && (currentWeaponClass() === 'cajado' || currentWeaponClass() === 'varinha')) dmg *= magicMult();
+  const SW = !flat && currentWeaponClass() === 'espada' ? getConfig().sword : null; // 20261009espada
   if (SW) dmg *= (SW.dmgMult ?? 1) * (SW.familyMult?.[currentWeaponFamily()] ?? 1);
   dmg = Math.max(1, Math.round(dmg));
   const tr = trainSkill(state.player.skills, skillId, state._data.skills, 1);
@@ -161,7 +163,7 @@ export function applyPlayerHit(state, mon, opts = {}) {
   if (def.id.includes('bot') && state.player.skills.hack_runico) {
     trainSkill(state.player.skills, 'hack_runico', state._data.skills, 1);
   }
-  const res = applyDamageToMonster(state, mon, dmg, { source: 'player', crit: dmgCtx.crit, ability: !!opts.ability });
+  const res = applyDamageToMonster(state, mon, dmg, { source: 'player', crit: dmgCtx.crit, ability: !!opts.ability, kind: opts.kind || (currentWeaponClass() === 'espada' || !currentWeaponClass() ? 'melee' : 'proj') });
   if (res) res.crit = dmgCtx.crit;
   if (SW && res && res.dmgOut > 0 && SW.lifesteal && !opts.noLifesteal) {
     // roubo de vida: golpe comum / 3º golpe (pesado) / especial; teto por segundo (rolling) para não virar imortalidade
@@ -190,6 +192,9 @@ export const resetSwordStats = () => { swordStats.healed = 0; swordStats.heals =
  */
 let rivalHitHook = null;
 /** RIVAIS: chamado quando um herói rival (BOT) leva dano e sobrevive (esquiva/reação). */
+let rivalMitigateHook = null;
+/** 20261024poder: poderes do rival (muralha/postura/terra…) reduzem o dano que ele leva — devolve o dano final */
+export function setRivalMitigateHook(fn) { rivalMitigateHook = typeof fn === 'function' ? fn : null; }
 export function setRivalHitHook(fn) { rivalHitHook = typeof fn === 'function' ? fn : null; }
 export function applyDamageToMonster(state, mon, amount, opts = {}) {
   if (!mon || !mon.alive || mon.zone !== state.zoneId) return null;
@@ -203,6 +208,7 @@ export function applyDamageToMonster(state, mon, amount, opts = {}) {
   }
   let dmg = Math.max(1, Math.round(Number(amount) || 0));
   if (mon.rival && mon.rivalGuardUntil && performance.now() < mon.rivalGuardUntil) { dmg = Math.max(1, Math.round(dmg * (mon.rivalGuardMult ?? 0.5))); mon.rivalGuarded = (mon.rivalGuarded || 0) + 1; } // FAST: rival em guarda (bloqueio)
+  if (mon.rival && rivalMitigateHook) { try { dmg = rivalMitigateHook(state, mon, dmg, opts); } catch (e) { console.warn('[poder] mitigate', e); } if (!(dmg > 0)) return { killed: false, dmgOut: 0, dmgIn: 0, mon, drops: [], source, blocked: true }; }
   mon.hp -= dmg;
   if (mon.rival && mon.hp > 0 && rivalHitHook) { try { rivalHitHook(state, mon, { ...opts, dmg, source }); } catch (e) { console.warn('[rivais] hit hook', e); } }
   const who = source === 'player' ? 'Você acerta' : `${opts.label || 'Aliado'} acerta`;
@@ -269,7 +275,7 @@ export function monsterAttackPlayer(state, monUid, opts = {}) {
 
   // Bloco 7: ataques do chefe escalam o ATAQUE do monstro (opts.atkMult, do config/data)
   // RIVAIS: ataque escala com o nível do herói (mon.atkScale; demais monstros = 1)
-  const am = (Number.isFinite(opts.atkMult) ? opts.atkMult : 1) * (Number.isFinite(mon.atkScale) ? mon.atkScale : 1);
+  const am = (Number.isFinite(opts.atkMult) ? opts.atkMult : 1) * (Number.isFinite(mon.atkScale) ? mon.atkScale : 1) * (mon.rivalOutMult > 0 ? mon.rivalOutMult : 1); // 20261024poder: buffs/passivas do rival
   const attacker = am !== 1 ? { ...def, ataque: Math.round((def.ataque || 0) * am) } : def;
   let dmgIn = calcDamage(attacker, state.player, 10, { armorDef: eq.armorDef });
   // Bloco 7: dano recebido passa pelos modificadores (poder temporário BLINDAGEM NEXA)

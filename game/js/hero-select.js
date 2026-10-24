@@ -5,8 +5,10 @@
  *  · LOBBY: você + 49 rivais (BOT offline) com personagem, skin, nível — exatamente os que vão cair no mapa; queda em 5 s.
  * Toque, retrato e paisagem (CSS). Persistência: quem chama grava player.heroStyle (+ skin) e a "última escolha".
  */
-import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261024apex';
-import { heroStyleOf } from './hero-styles.js?v=20261024apex';
+import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261024poder';
+import { heroStyleOf } from './hero-styles.js?v=20261024poder';
+import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261024poder';
+import { ICONS } from './icons.js?v=20261024poder';
 
 export const LAST_PICK_KEY = 'nexara.ultimaEscolha';
 export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PERSONAGENS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
@@ -24,7 +26,7 @@ const INFO = {
   samurai: { papel: 'DUELISTA', passiva: 'Duelista: +dano em duelo entre heróis' },
   berserker: { papel: 'BRUTAMONTES', passiva: 'Agressivo: pressão constante' }
 };
-const ESPECIAIS = ['Golpe Poderoso', 'Ataque em Área', 'Suprema'];
+
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /**
@@ -47,12 +49,15 @@ export function openHeroSelect(o) {
           <div class="hsel-name" id="hsel-name"></div>
           <div class="hsel-role" id="hsel-role"></div>
           <p class="hsel-lore" id="hsel-lore"></p>
+          <div class="hsel-row hsel-skins"><span id="hsel-sklab">ELEMENTO</span><div id="hsel-skin"><button type="button" data-sk="">PADRÃO</button>${Object.entries(SKINS).map(([id, k]) => `<button type="button" data-sk="${id}" style="--sc:${k.css}">${k.name}</button>`).join('')}</div></div>
+          <div class="hsel-vdesc" id="hsel-vdesc"></div>
+          <div class="hsel-row hsel-stats"><span>ATRIBUTOS</span><b id="hsel-stats"></b></div>
           <div class="hsel-row hsel-skins hsel-armas"><span>ARMA (PARTIDA)</span><div id="hsel-arma"><button type="button" data-arma="espada">⚔ ESPADA BÁSICA</button><button type="button" data-arma="cajado">🔮 CAJADO BÁSICO</button></div></div>
           <div class="hsel-row hsel-fair"><span>PARTIDA JUSTA</span><b>Todos começam no NV1 · só espada/cajado básicos · loot e níveis dentro da partida</b></div>
           <div class="hsel-row"><span>VISUAL</span><b id="hsel-weapon"></b></div>
-          <div class="hsel-row"><span>HABILIDADES</span><b id="hsel-abil"></b></div>
+          <div class="hsel-row"><span>PASSIVA</span><b id="hsel-passiva"></b></div>
+          <div class="hsel-pw" id="hsel-pw" aria-label="Poderes"></div>
           <div class="hsel-row"><span>PERSONALIDADE</span><b id="hsel-pass"></b></div>
-          <div class="hsel-row hsel-skins"><span>ELEMENTO</span><div id="hsel-skin"><button type="button" data-sk="">PADRÃO</button>${Object.entries(SKINS).map(([id, k]) => `<button type="button" data-sk="${id}" style="--sc:${k.css}">${k.name}</button>`).join('')}</div></div>
         </div>
       </div>
     </div>
@@ -69,7 +74,16 @@ export function openHeroSelect(o) {
     $('hsel-role').textContent = `${I.papel || ''} · ${s.tag}`;
     $('hsel-lore').textContent = s.lore || '';
     $('hsel-weapon').textContent = `${s.weaponLabel || ''} (cosmético)`;
-    $('hsel-abil').textContent = ESPECIAIS.join(' · ');
+    { // 20261024poder: atributos + passiva + 3 poderes do kit (o Guerreiro muda com a VARIANTE elemental)
+      const k = kitFor(p.id, skin); const vv = temVariantes(p.id);
+      $('hsel-stats').textContent = statLine(k);
+      $('hsel-passiva').textContent = `${k.passiva.nome} — ${k.passiva.desc}`;
+      const LB = { golpe_poderoso: 'GOLPE', ataque_area: 'ÁREA', suprema: 'SUPREMA' };
+      $('hsel-pw').innerHTML = SLOTS.map((sl) => { const q = k.poderes[sl]; return `<div class="hsel-pwc" data-slot="${sl}" data-poder="${q.id}"><i>${ICONS[q.icon] || ''}</i><span><b>${esc(q.nome)}</b><small>${LB[sl]} · ${Math.round(q.cd / 1000)} s</small><em>${esc(q.desc)}</em></span></div>`; }).join('');
+      $('hsel-sklab').textContent = vv ? 'VARIANTE (muda atributos)' : 'ELEMENTO (visual)';
+      el.classList.toggle('hsel-var', vv);
+      const V = vv ? VARIANTES[k.variante] : null; $('hsel-vdesc').innerHTML = V ? `<b>${esc(V.nome)}</b> ${esc(V.desc)}` : '';
+    }
     $('hsel-pass').textContent = `${PERSONALIDADES[p.perso]?.label || ''} — ${I.passiva || ''}`;
     el.style.setProperty('--hc', col);
     try { preview?.set(p.id, skin ? { skin } : {}, {}); } catch { /* prévia opcional */ }
@@ -82,7 +96,7 @@ export function openHeroSelect(o) {
   $('hsel-back').onclick = () => { if (done) return; done = true; closeHeroSelect(); o.onCancel?.(); };
   const tm = setInterval(() => { if (done || !el.isConnected) { clearInterval(tm); return; } left--; const lb = $('hsel-left'); if (lb) lb.textContent = String(Math.max(0, left)); el.classList.toggle('hsel-urgent', left <= 5); if (left <= 0) { clearInterval(tm); finish(true); } }, 1000);
   el._timer = tm;
-  import('./fps/hero-preview.js?v=20261024apex').then((m) => {
+  import('./fps/hero-preview.js?v=20261024poder').then((m) => {
     if (!el.isConnected) return;
     try { preview = m.createHeroPreview($('hsel-canvas'), { interactive: true, autoSpin: 0.6 }); el._preview = preview; paint(); } catch (e) { console.warn('[seleção] prévia 3D indisponível', e); }
   }).catch(() => {});

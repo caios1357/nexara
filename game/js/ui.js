@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261024apex';
-import { drawMinimap } from './map.js?v=20261024apex';
+import { label, CATEGORIES } from './arquivo.js?v=20261024poder';
+import { drawMinimap } from './map.js?v=20261024poder';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261024apex';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261024apex';
-import { getEquippedStats } from './state.js?v=20261024apex';
-import { countItem } from '../../rules/loot.js?v=20261024apex';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261024apex';
-import { isArenaState } from './arena.js?v=20261024apex';
-import { spriteCount } from './assets.js?v=20261024apex';
-import { attrLines } from './equipment.js?v=20261024apex';
+} from './actions.js?v=20261024poder';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261024poder';
+import { getEquippedStats } from './state.js?v=20261024poder';
+import { countItem } from '../../rules/loot.js?v=20261024poder';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261024poder';
+import { isArenaState } from './arena.js?v=20261024poder';
+import { spriteCount } from './assets.js?v=20261024poder';
+import { attrLines } from './equipment.js?v=20261024poder';
 
 let rendererRef = null;
 

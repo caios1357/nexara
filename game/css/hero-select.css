@@ -63,3 +63,23 @@
 .hlob-p small { font-size: 8px; color: #8fb4d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (orientation: landscape) { .hlob-list { grid-template-columns: repeat(5, 1fr); } }
 @media (min-width: 900px) and (orientation: portrait) { .hlob-list { grid-template-columns: repeat(3, 1fr); } }
+/* 20261024poder: atributos + 3 poderes do kit + variantes do Guerreiro */
+.hsel-stats b { color: #8affe8; }
+.hsel-pw { display: grid; grid-template-columns: 1fr; gap: 4px; margin: 4px 0; }
+.hsel-pwc { display: flex; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 10px; background: rgba(255,255,255,.06); border-left: 3px solid var(--hc, #3ad0ff); }
+.hsel-pwc i { flex: 0 0 34px; height: 34px; color: var(--hc, #8affe8); display: grid; place-items: center; }
+.hsel-pwc i svg { width: 30px; height: 30px; }
+.hsel-pwc span { display: flex; flex-direction: column; min-width: 0; }
+.hsel-pwc b { font-size: 12px; letter-spacing: .06em; }
+.hsel-pwc small { font-size: 9px; color: #8fb4d8; font-weight: 800; }
+.hsel-pwc em { font-style: normal; font-size: 10px; color: #d6e6ff; line-height: 1.25; }
+.hsel-vdesc { font-size: 11px; color: #d6e6ff; min-height: 0; padding: 2px 4px; }
+.hsel-vdesc b { color: var(--hc, #8affe8); margin-right: 4px; }
+.hsel-var #hsel-skin button { font-weight: 900; }
+body.nx-fumaca::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse at center, rgba(160,160,180,0) 45%, rgba(120,120,140,.45) 100%); }
+.mc-kit .mc-ico svg { filter: drop-shadow(0 0 4px currentColor); }
+@media (orientation: landscape) { .hsel-pw { grid-template-columns: repeat(3, 1fr); } .hsel-pwc { flex-direction: column; align-items: flex-start; } }
+.hsel-detail { min-height: 0; }
+.hsel-info { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+@media (orientation: portrait) { .hsel-lore { display: none; } .hsel-prev { max-height: 120px; } .hsel-pwc { padding: 3px 6px; } .hsel-pwc i { flex-basis: 28px; height: 28px; } .hsel-pwc i svg { width: 24px; height: 24px; } }
+.hsel-vdesc { margin: 2px 0 6px; display: block; }

@@ -1,3 +1,3 @@
-build=20261024apex
-publicado=2026-10-24 11:37 -04
+build=20261024poder
+publicado=2026-10-24 14:15 -04
 origem=/workspace/nexara

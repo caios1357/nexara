@@ -19,12 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261024apex';
-import { getConfig, DEG } from './gameplay-config.js?v=20261024apex';
-import { isWalkable, getTileType } from './map.js?v=20261024apex';
-import { monsterAttackPlayer } from './actions.js?v=20261024apex';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024apex';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261024apex';
+import { bossCfgFor } from './boss-variants.js?v=20261024poder';
+import { getConfig, DEG } from './gameplay-config.js?v=20261024poder';
+import { isWalkable, getTileType } from './map.js?v=20261024poder';
+import { monsterAttackPlayer } from './actions.js?v=20261024poder';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024poder';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261024poder';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -456,7 +456,7 @@ function homeFlowFor(zone, r, mon) {
 function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
   const dpx = P.px - r.fx;
   const dpy = P.py - r.fy;
-  const dist = Math.hypot(dpx, dpy);
+  const dist = P.hidden ? 999 : Math.hypot(dpx, dpy); // 20261024poder: Bomba de Fumaça (herói invisível) — ninguém o detecta/persegue
   const toPlayer = Math.atan2(dpx, -dpy);
   const hx = mon.homeX + 0.5;
   const hy = mon.homeY + 0.5;
@@ -1163,6 +1163,7 @@ export function onMonsterHit(mon, info) {
 }
 
 function integrate(mon, r, dtSec, cfg) {
+  { const sm = (mon.slowMult > 0 ? mon.slowMult : 1) * (mon.slowMultR > 0 ? mon.slowMultR : 1); if (sm < 1) { r.wantVx *= sm; r.wantVy *= sm; } } // 20261024poder: lentidão (maldição/armadilha)
   // aceleração até a velocidade desejada
   const dvx = r.wantVx - r.vx;
   const dvy = r.wantVy - r.vy;

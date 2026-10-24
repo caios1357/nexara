@@ -14,9 +14,9 @@
  * applyDamageToMonster (XP/loot/quests) — o Núcleo Divino (+15% dano de habilidade) vale aqui.
  * Todos os números em gameplay-config (actions / dodge / defense / specials).
  */
-import { getConfig, DEG } from './gameplay-config.js?v=20261024apex';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261024apex';
-import { getStat, STATS } from './modifiers.js?v=20261024apex';
+import { getConfig, DEG } from './gameplay-config.js?v=20261024poder';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261024poder';
+import { getStat, STATS } from './modifiers.js?v=20261024poder';
 
 export const ACTION_STATES = Object.freeze({
   DEAD: 'DEAD', CRITICAL_ANIM: 'CRITICAL_ANIM', DODGE: 'DODGE', SPECIAL: 'SPECIAL',
@@ -256,6 +256,8 @@ export function createPlayerActions(deps) {
   function specialCfg(id) {
     const b = cfgAll().specials[id]; let o = deps.swordSpecial?.(id);
     if (!o && b) { const w = deps.weaponSpecial?.(id); if (w?.custoMult > 0 && Number.isFinite(b.cost)) o = w._costO || (w._costO = { cost: Math.max(1, Math.round(b.cost * w.custoMult)) }); } // 20261017perf: VARINHA = especiais mais baratos
+    const h = b && deps.heroSpecial?.(id); // 20261024poder: poder do herói (recarga/tempos) sobrepõe a base + arma
+    if (h) { const k = 'h_' + id; const c = swMerge.get(k); if (c && c.b === b && c.o === o && c.h === h) return c.v; const v = { ...b, ...(o || {}), ...h }; swMerge.set(k, { b, o, h, v }); return v; }
     if (!o || !b) return b;
     const c = swMerge.get(id); if (c && c.b === b && c.o === o) return c.v;
     const v = { ...b, ...o }; swMerge.set(id, { b, o, v }); return v;
@@ -409,6 +411,10 @@ export function createPlayerActions(deps) {
     const id = sp.id;
     const c = specialCfg(id);
     const bodyR = deps.bodyRadius();
+    if (deps.heroResolve) { // 20261024poder: poderes do herói escolhido (partida justa)
+      const p = deps.motion.getPos(); const dirX = Math.sin(sp.yaw), dirY = -Math.cos(sp.yaw);
+      if (deps.heroResolve(id, { yaw: sp.yaw, dirX, dirY, x: p.x, y: p.y, targetUid: sp.targetUid })) { log('special_impact', { id, hits: sp.hits, hero: true }); return; }
+    }
     const wv = deps.weaponSpecial?.(id);
     if (wv && resolveWeaponSpecial(id, c, wv)) return;
     if (id === 'golpe_poderoso') {
@@ -642,6 +648,9 @@ export function createPlayerActions(deps) {
     getEvents: () => events.slice(),
     clearEvents: () => { events.length = 0; },
     cooldownLeft, specialCfg,
+    /** 20261024poder: SAMURAI (bloqueio perfeito) adianta a recarga; VENTO (investida dupla) zera a do dash */
+    reduceCooldowns: (ms, ids = SPECIAL_IDS) => { for (const id of ids) if (cooldowns[id] > clock) cooldowns[id] = Math.max(clock, cooldowns[id] - ms); },
+    resetCooldown: (id) => { if (id in cooldowns) cooldowns[id] = clock; },
     getClock: () => clock,
     isDefending: () => defend.active,
     isDodging: () => dodge.active,

@@ -4,8 +4,8 @@
  * Mini-dragão companheiro: azul. Falha de carregamento → procedural continua.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261024apex';
-import { addScales } from './surface-fx.js?v=20261024apex';
+import { loadModel, getLoaded, cloneSkinned, fitHeight, findNode, createAnimator } from './model-lib.js?v=20261024poder';
+import { addScales } from './surface-fx.js?v=20261024poder';
 
 export const DRAGON_PRESETS = {
   boss: {
