@@ -5,10 +5,10 @@
  *  · LOBBY: você + 49 rivais (BOT offline) com personagem, skin, nível — exatamente os que vão cair no mapa; queda em 5 s.
  * Toque, retrato e paisagem (CSS). Persistência: quem chama grava player.heroStyle (+ skin) e a "última escolha".
  */
-import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261024r2';
-import { heroStyleOf } from './hero-styles.js?v=20261024r2';
-import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261024r2';
-import { ICONS } from './icons.js?v=20261024r2';
+import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261024x1';
+import { heroStyleOf } from './hero-styles.js?v=20261024x1';
+import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261024x1';
+import { ICONS } from './icons.js?v=20261024x1';
 
 export const LAST_PICK_KEY = 'nexara.ultimaEscolha';
 export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PERSONAGENS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
@@ -38,7 +38,7 @@ export function openHeroSelect(o) {
   let pick = cur.id; let skin = cur.skin || ''; let arma = cur.arma === 'cajado' ? 'cajado' : 'espada'; let left = Math.max(3, o.seconds ?? 15); let done = false; let preview = null;
   const el = document.createElement('div'); el.id = 'hero-select'; el.className = 'hsel'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Escolha seu herói');
   el.innerHTML = `
-    <div class="hsel-top"><div class="hsel-title">ESCOLHA SEU HERÓI<small>${o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA'} · 50 JOGADORES</small></div>
+    <div class="hsel-top"><div class="hsel-title">ESCOLHA SEU HERÓI<small>${o.mode === 'x1' ? 'X1 ⚔ · DUELO 1×1 · RIVAL SORTEADO' : (o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA') + ' · 50 JOGADORES'}</small></div>
       <div class="hsel-timer" id="hsel-timer" aria-live="polite"><b id="hsel-left">${left}</b><small>escolha automática</small></div></div>
     <div class="hsel-body">
       <div class="hsel-grid" id="hsel-grid">${PERSONAGENS.map((p) => { const s = heroStyleOf(p.id); return `<button type="button" class="hsel-card" data-id="${p.id}" style="--hc:${s.css}" aria-label="${esc(p.name)}">
@@ -96,7 +96,7 @@ export function openHeroSelect(o) {
   $('hsel-back').onclick = () => { if (done) return; done = true; closeHeroSelect(); o.onCancel?.(); };
   const tm = setInterval(() => { if (done || !el.isConnected) { clearInterval(tm); return; } left--; const lb = $('hsel-left'); if (lb) lb.textContent = String(Math.max(0, left)); el.classList.toggle('hsel-urgent', left <= 5); if (left <= 0) { clearInterval(tm); finish(true); } }, 1000);
   el._timer = tm;
-  import('./fps/hero-preview.js?v=20261024r2').then((m) => {
+  import('./fps/hero-preview.js?v=20261024x1').then((m) => {
     if (!el.isConnected) return;
     try { preview = m.createHeroPreview($('hsel-canvas'), { interactive: true, autoSpin: 0.6 }); el._preview = preview; paint(); } catch (e) { console.warn('[seleção] prévia 3D indisponível', e); }
   }).catch(() => {});

@@ -11,15 +11,15 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024r2';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261024r2';
-import { getConfig } from './gameplay-config.js?v=20261024r2';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024r2';
-import { planRoster } from './br-roster.js?v=20261024r2';
-import { listPassives } from './passives.js?v=20261024r2';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024r2';
-import { kitFor } from './hero-kits.js?v=20261024r2';
-import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra } from './rival-kits.js?v=20261024r2';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024x1';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261024x1';
+import { getConfig } from './gameplay-config.js?v=20261024x1';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024x1';
+import { planRoster } from './br-roster.js?v=20261024x1';
+import { listPassives } from './passives.js?v=20261024x1';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024x1';
+import { kitFor } from './hero-kits.js?v=20261024x1';
+import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra } from './rival-kits.js?v=20261024x1';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -68,7 +68,7 @@ export function createRivals(ctx) {
   function spawn(p) {
     const c = RC(); const br = ctx.br(); if (!c.ativo || br.rivals) return;
     br.rivals = []; br.rivalFinal = false; br.championUid = null; br.rivalsDown = 0;
-    const m = ctx.map(); const n = Math.max(3, Math.min(c.nMax || 5, c.n || 4)); // NEXARA FAST: nMax 10
+    const m = ctx.map(); const n = br.x1 ? 1 : Math.max(3, Math.min(c.nMax || 5, c.n || 4)); // X1 ⚔: um rival só // NEXARA FAST: nMax 10
     const pts = m.spawnPoints.filter((q) => !ctx.inCovil(q.x, q.y, q.region) && Math.hypot(q.x - p.x, q.y - p.y) >= (c.distInicialMin || 30));
     const chosen = [];
     for (let k = 0; k < 900 && chosen.length < n && pts.length; k++) { /* 20 rivais: separação vai cedendo (22 → 12 → 6) */
@@ -208,6 +208,7 @@ export function createRivals(ctx) {
     f.tgt = foe;
     const nexa0 = f.nexa; const hp0 = f.hp;
     let usedId = null;
+    if (foe === hf && ctx.powerGate && !ctx.powerGate(rv, mon, dist)) return; // X1 ⚔: a IA escolhe a HORA do poder (janela em que o herói gastou esquiva/poder)
     const slot = foe ? botPower(f, foe, dist, clock, { hit: (alvo, n, kind, extra) => { const d = deliver(rv, mon, alvo, n, kind, extra, clock, usedId); return d; }, hide: (ff, ms) => { mon.rivalHiddenUntil = br.clock + ms; } }) : null;
     if (f.hp > hp0) mon.hp = Math.min(mon.hpMax, mon.hp + (f.hp - hp0)); // Corrente de Almas / Fera
     if (slot) {
@@ -346,6 +347,7 @@ export function createRivals(ctx) {
     }
     { const ck = ctx.br()?.clock || 0; if (rv.shieldUntil > ck) n = Math.max(1, Math.round(n * (1 - (rv.shieldRed || 0)))); if (rv.veilUntil > ck) n = Math.max(1, Math.round(n * 0.25)); } // BB: escudo / véu
     if (rv.fk && (rv.fk.b.imortalUntil || 0) > (ctx.br()?.clock || 0) && mon.hp - n < 1) n = Math.max(0, mon.hp - 1); // Fúria de Lava
+    if (ctx.br()?.x1 && ctx.x1Clamp) n = ctx.x1Clamp(mon, n); // X1 ⚔: veneno/reflexo também só levam a 1 HP (a rodada acaba)
     if (lethal && killer && !elimAllowed(ctx.br())) lethal = false; // ainda não pode cair: fica no piso de HP (hpMinFrac)
     const floor = lethal ? 0 : Math.ceil((mon.hpMax || 1) * (c.hpMinFrac ?? 0.3));
     if (mon.hp <= floor) return false;
@@ -553,7 +555,8 @@ export function createRivals(ctx) {
       if (v && v.state === AI_STATES.ATTACK_PREPARE && rv.lastSt !== AI_STATES.ATTACK_PREPARE && dP < 9) { countAtk('jogador'); { const W = (br.atkWhy = br.atkWhy || {}); const why = clock < (rv.threatPlayerUntil || 0) ? 'provocado' : dP <= (c.alvo?.jogadorPertoR ?? 4) ? 'perto' : br.rivalFinal && rv.champion ? 'campeao' : br.rivalFinal ? 'final' : 'livre:' + (rv.tgt?.kind || 'nenhum'); W[why] = (W[why] || 0) + 1; } const D = (br.atkDbg = br.atkDbg || {}); const k = `${rv.name}|t:${rv.tgt?.kind}|d${Math.round(dP)}`; D[k] = (D[k] || 0) + 1; } // golpe do rival NO HERÓI (métrica 'ataques ao jogador')
       if (v) rv.lastSt = v.state;
       if (rv.sela && !ctx.br().rivalFinal || rv.fly) { if (stepFly(rv, mon, mp, p, dP, clock, dtMs) && rv.fly) continue; } // voando: o resto (caminho/combate a pé) espera o pouso
-      if (br.rivalFinal && rv.champion && c.finalLivre) { mon.aggroR = c.tatica?.aggro ?? c.alvo?.jogadorAlcance ?? 12; mon.loseR = c.alvo?.perdeR ?? 22; rv.tgt = { kind: 'jogador', uid: 0, d: dP }; } // campeão: o desafio final é o herói
+      if (br.x1) { mon.aggroR = 40; mon.loseR = 60; mon.leash = 999; mon.x1Atk = RC().x1Ataque || null; rv.tgt = { kind: 'jogador', uid: 0, d: dP }; mon.homeX = Math.floor(p.x); mon.homeY = Math.floor(p.y); } // X1 ⚔: o único alvo é o herói
+      else if (br.rivalFinal && rv.champion && c.finalLivre) { mon.aggroR = c.tatica?.aggro ?? c.alvo?.jogadorAlcance ?? 12; mon.loseR = c.alvo?.perdeR ?? 22; rv.tgt = { kind: 'jogador', uid: 0, d: dP }; } // campeão: o desafio final é o herói
       else if (c.alvo && (!br.rivalFinal || c.finalLivre) && (!rv.tgtAt || clock - rv.tgtAt >= (c.alvo.reavaliaMs ?? 700))) {
         const prev = rv.tgt; rv.tgt = stickTarget(rv, prev, pickTarget(rv, mon, mp, p, dP, clock), mp, p, dP, clock); rv.tgtAt = clock; if ((prev?.kind || null) !== (rv.tgt?.kind || null) || prev?.uid !== rv.tgt?.uid) { rv.tgtSince = clock; rv.tgtSwitches = (rv.tgtSwitches || 0) + 1; }
         if (rv.tgt?.kind === 'rival') { { const th = clock < (rv.threatPlayerUntil || 0); mon.aggroR = th ? (c.alvo.defesaR ?? 3.2) : (c.alvo.ignoraR ?? 0.6); mon.loseR = th ? (c.alvo.perdeR ?? 22) : 0.5; } if (!prev || prev.kind !== 'rival' || prev.uid !== rv.tgt.uid) rv.goalAt = -1e9; } // alvo é outro rival: só se defende do herói (perto); caminha até o rival
@@ -745,5 +748,25 @@ export function createRivals(ctx) {
           champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, goal: rv.goal?.kind || null, tgt: rv.tgt?.kind || null, tgtUid: rv.tgt?.uid ?? null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
     };
   }
-  return { update, onKill, onHit, view, spawn, spawnOne, mitigateFromHero, powersView, byUid: (uid) => list().find((q) => q.uid === uid) || null, startFinal: () => { const a = aliveRivals(); if (a.length && !ctx.br().rivalFinal) startFinal(a); }, aliveRivals, list, debugPlace: (uid, x, y) => { const m = ctx.st().monstersAlive.find((q) => q.uid === uid); const f = ctx.nearestFree(Math.floor(x), Math.floor(y)); if (!m || !f) return false; placeMonster(ctx.st(), uid, f.x + 0.5, f.y + 0.5); const rv = list().find((q) => q.uid === uid); if (rv) { rv.path = null; rv.goalAt = -1e9; } return true; } };
+  /** X1 ⚔: nova rodada — rival com HP cheio, kit zerado (recargas/Nexa/estados) e os dois nos cantos */
+  function x1Reset(hx, hy, rx, ry) {
+    const br = ctx.br(); const rv = list()[0]; const mon = rv && monOf(rv); if (!rv || !mon) return false;
+    mon.hp = mon.hpMax; mon.alive = true; rv.dodgeReady = 0; rv.guardReady = 0; rv.nextSwing = 0; rv.retreat = null; rv.path = null; rv.goal = null;
+    if (rv.kit) { rv.fk = newFighter(rv.kit, 100, 1, br.clock || 0, ctx.R); rv.fk.rv = rv; }
+    mon.rivalGuardUntil = 0; mon.rivalIframeUntil = 0; mon.slowMultR = 1;
+    placeMonster(ctx.st(), mon.uid, rx + 0.5, ry + 0.5); mon.homeX = hx; mon.homeY = hy;
+    return true;
+  }
+  /** X1 ⚔: esquiva de REAÇÃO (ao poder do herói) — mesma recarga/velocidade/i-frames da esquiva normal do rival */
+  function x1Dodge(px, py, modo = 'ambos') {
+    const br = ctx.br(); const rv = list()[0]; const mon = rv && monOf(rv); if (!rv || !mon || !mon.alive) return false;
+    const E = RC().esquiva || {}; const T = RC().tatica;
+    const guard = () => { if (!T || br.clock < (rv.guardReady || 0)) return false; rv.guardReady = br.clock + (T.bloqueioCooldownMs ?? 2200); rv.blocks = (rv.blocks || 0) + 1; mon.rivalGuardUntil = performance.now() + (T.bloqueioMs ?? 650); mon.rivalGuardMult = 1 - (T.bloqueioReduz ?? 0.5); return 'guarda'; };
+    if (modo === 'guarda' || br.clock < (rv.dodgeReady || 0)) return guard();
+    if (!rivalDodge(mon, px, py, { vel: E.vel || 7, ms: E.duracaoMs || 280 })) return guard();
+    rv.dodgeReady = br.clock + (T?.esquivaCooldownMs ?? E.cooldownMs ?? 2600); rv.dodges = (rv.dodges || 0) + 1;
+    mon.rivalIframeUntil = performance.now() + (E.iframesMs || 420); mon.rivalDodgeAt = performance.now();
+    return 'esquiva';
+  }
+  return { update, onKill, onHit, view, spawn, spawnOne, mitigateFromHero, powersView, x1Reset, x1Dodge, byUid: (uid) => list().find((q) => q.uid === uid) || null, startFinal: () => { const a = aliveRivals(); if (a.length && !ctx.br().rivalFinal) startFinal(a); }, aliveRivals, list, debugPlace: (uid, x, y) => { const m = ctx.st().monstersAlive.find((q) => q.uid === uid); const f = ctx.nearestFree(Math.floor(x), Math.floor(y)); if (!m || !f) return false; placeMonster(ctx.st(), uid, f.x + 0.5, f.y + 0.5); const rv = list().find((q) => q.uid === uid); if (rv) { rv.path = null; rv.goalAt = -1e9; } return true; } };
 }

@@ -4,8 +4,8 @@
  * A IA só decide POSIÇÃO/TEMPO (punir esquiva, fintar bloqueio, distância, hora do poder) — nunca ganha atributo.
  * Nada do save é tocado: o perfil de aprendizado vive na chave própria 'nexara.x1.perfil.v1'.
  */
-import { createX1Brain } from './x1-brain.js?v=20261024r2';
-import { X1_SPAWNS } from './x1-map.js?v=20261024r2';
+import { createX1Brain } from './x1-brain.js?v=20261024x1';
+import { X1_SPAWNS } from './x1-map.js?v=20261024x1';
 
 const LADO_VEC = { esq: [0, -1], dir: [0, 1], tras: [-1, 0], frente: [1, 0] }; // [along, side] relativos ao eixo jogador→rival
 
@@ -78,7 +78,7 @@ export function createX1Mode(deps) {
       else { brain.onPlayerPower(d.id, M.t); pushLog('p_power', { id: d.id });
         if (mon && dist < 6 && brain.dodgeOnPlayerPower()) M.pend.push({ kind: 'esquivaPoder', at: M.t + 120, until: M.t + 600 }); }
     } else if (type === 'dash_strike') { brain.onPlayerDash(dist); pushLog('p_dash', { dist: +dist.toFixed(1) }); }
-    else if (type === 'attack') brain.onPlayerAttack(M.t);
+    else if (type === 'attack') { brain.onPlayerAttack(M.t); if (mon && dist < 2.6) { M.pend.push({ kind: 'defesa', at: M.t + 60, until: M.t + 220 }); M.pend.push({ kind: 'contra', at: M.t + 380, until: M.t + 900 }); } } // reação (~60 ms) ao golpe dele: esquiva ou guarda, com as recargas normais
   }
   /** passo por quadro (arena-br.update no X1) */
   function step(dtMs) {
@@ -87,7 +87,7 @@ export function createX1Mode(deps) {
     if (M.phase === 'espera') { if (rival()) nextRound(); return; }
     if (M.phase === 'contagem') {
       const left = cfg().contagemMs - (M.t - M.phaseAt);
-      if (left <= 0) { M.phase = 'luta'; M.fightAt = M.t; deps.clearGrace?.(); deps.banner?.('<b>LUTE!</b>', 700); pushLog('fight'); }
+      if (left <= 0) { M.phase = 'luta'; M.fightAt = M.t; deps.clearGrace?.(); { const mon = rival(); if (mon) deps.alert?.(mon); } deps.banner?.('<b>LUTE!</b>', 700); pushLog('fight'); }
       updateHud(); return;
     }
     if (M.phase === 'pausa') { if (M.t - M.phaseAt >= cfg().rodadaPausaMs) nextRound(); return; }
@@ -95,6 +95,7 @@ export function createX1Mode(deps) {
     const st = deps.getState(); const mon = rival(); if (!mon) return;
     const p = deps.playerPos(); const mp = deps.monPos(mon); const dist = Math.hypot(mp.x - p.x, mp.y - p.y);
     brain.tickDist(dist, dtMs);
+    if (M.t - (M.refreshAt || 0) > 6000) { M.refreshAt = M.t; brain.refresh(); }
     if (M.hpR != null && mon.hp < M.hpR) brain.onPlayerDamage(M.hpR - mon.hp, dist); M.hpR = mon.hp;
     if (M.hpP != null && st.player.hp < M.hpP) { brain.onRivalDamage(M.hpP - st.player.hp, dist); M.justHit = M.t; } M.hpP = st.player.hp;
     const v = deps.aiView(mon); const prep = v?.state === 'ATTACK_PREPARE';
@@ -118,10 +119,12 @@ export function createX1Mode(deps) {
     for (let i = M.pend.length - 1; i >= 0; i--) {
       const a = M.pend[i]; if (M.t < a.at) continue; if (M.t > a.until) { M.pend.splice(i, 1); continue; }
       const s = deps.aiView(mon)?.state;
+      if (a.kind === 'defesa') { if (s !== 'ATTACK' && s !== 'STUN') { const k = deps.rivalDodge?.(p.x, p.y, s === 'ATTACK_PREPARE' ? 'guarda' : 'ambos'); if (k) { M.decisions.push({ t: M.t, k: 'defesa', como: k }); pushLog('ai_defesa', { como: k }); } } M.pend.splice(i, 1); continue; }
       if (a.kind === 'finta') { if (s === 'ATTACK_PREPARE') { deps.steer(mon, { feintMs: a.espera }); pushLog('ai_finta_ok'); } M.pend.splice(i, 1); continue; }
       if (s === 'ATTACK' || s === 'RECOVERY' || s === 'STUN' || s === 'ATTACK_PREPARE') continue;
-      if (a.kind === 'pune') { const dx = a.land.x - mp.x, dy = a.land.y - mp.y; const d = Math.hypot(dx, dy) || 1; if (d > 1.2) deps.steer(mon, { vx: dx / d * 7, vy: dy / d * 7, ms: Math.min(320, d / 7 * 1000), attackNow: true }); else deps.steer(mon, { attackNow: true }); pushLog('ai_pune_ok', { d: +d.toFixed(1) }); }
-      else if (a.kind === 'esquivaPoder') { const ok = deps.rivalDodge?.(p.x, p.y); pushLog('ai_esquiva_poder', { ok: !!ok }); } // respeita a recarga da esquiva do rival
+      if (a.kind === 'contra') { if (dist < 2.2) { deps.steer(mon, { attackNow: true }); pushLog('ai_contra'); } }
+      else if (a.kind === 'pune') { const dx = a.land.x - mp.x, dy = a.land.y - mp.y; const d = Math.hypot(dx, dy) || 1; if (d > 1.2) deps.steer(mon, { vx: dx / d * 7, vy: dy / d * 7, ms: Math.min(320, d / 7 * 1000), attackNow: true }); else deps.steer(mon, { attackNow: true }); pushLog('ai_pune_ok', { d: +d.toFixed(1) }); }
+      else if (a.kind === 'esquivaPoder') { const ok = deps.rivalDodge?.(p.x, p.y, 'ambos'); pushLog('ai_esquiva_poder', { ok: !!ok }); } // respeita a recarga da esquiva do rival
       M.pend.splice(i, 1);
     }
     updateHud();
@@ -133,7 +136,7 @@ export function createX1Mode(deps) {
   function ensureHud() {
     if (hud || typeof document === 'undefined') return hud;
     hud = document.createElement('div'); hud.id = 'x1-hud';
-    hud.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;text-align:center;font:700 13px/1.25 system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px #000';
+    hud.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 168px);left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;text-align:center;font:700 13px/1.25 system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px #000';
     hud.innerHTML = '<div id="x1-score" style="background:rgba(10,14,24,.72);border:1px solid #ffc83066;border-radius:10px;padding:3px 12px;display:inline-block"></div><div id="x1-ia" style="margin-top:3px;font-size:11px;color:#9ff;opacity:.95"></div>';
     document.body.appendChild(hud); return hud;
   }

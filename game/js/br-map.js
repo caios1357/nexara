@@ -7,7 +7,8 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261024r2';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261024x1';
+import { generateX1Map } from './x1-map.js?v=20261024x1';
 export const BR_ZONE_ID = 'zone_arena_br';
 export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
 export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
@@ -52,6 +53,7 @@ export function scaleBrConfig(cfg0, forceS = 0) {
 
 /** @param {object} cfg data.arena_br */
 export function generateBrMap(cfg) {
+  if (cfg.zona.gerador === 'x1') return generateX1Map(cfg, { BR_LEGEND, BR_SOLID }); // NEXARA X1 ⚔: arena pequena fixa
   if (cfg.zona.gerador === 2) return generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise });
   const W = cfg.zona.width; const H = cfg.zona.height; const seed = cfg.zona.seed | 0;
   const R = rng32(seed);

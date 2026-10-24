@@ -10,19 +10,19 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261024r2';
-import { getConfig } from './gameplay-config.js?v=20261024r2';
-import { pushLog } from './state.js?v=20261024r2';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024r2';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024r2';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261024r2';
-import { createRivals } from './arena-rivals.js?v=20261024r2';
+import { createArenaState } from './arena.js?v=20261024x1';
+import { getConfig } from './gameplay-config.js?v=20261024x1';
+import { pushLog } from './state.js?v=20261024x1';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024x1';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024x1';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261024x1';
+import { createRivals } from './arena-rivals.js?v=20261024x1';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
-const zoneCaches = { full: null, fast: null }; // NEXARA FAST não descarta o mapa completo (e vice-versa)
+const zoneCaches = { full: null, fast: null, x1: null }; // NEXARA FAST não descarta o mapa completo (e vice-versa)
 function brZone(cfg) {
-  const key = `${cfg.zona.seed}|${cfg.zona.width}|${cfg.zona.height}`; const slot = cfg.fastRun ? 'fast' : 'full';
+  const key = `${cfg.zona.seed}|${cfg.zona.width}|${cfg.zona.height}`; const slot = cfg.x1 ? 'x1' : cfg.fastRun ? 'fast' : 'full';
   if (!zoneCaches[slot] || zoneCaches[slot].key !== key) zoneCaches[slot] = { key, zone: buildBrZone(cfg) };
   // cópia rasa: o mapa (imutável) é compartilhado; flags da zona por corrida
   return { ...zoneCaches[slot].zone, closed: {} };
@@ -91,7 +91,8 @@ export function createArenaBr(deps) {
     getPos: () => deps.getPos(), heroHidden: () => !!deps.heroHidden?.(), powerHitHero: (n, mon, kind, o) => deps.powerHitHero?.(n, mon, kind, o) || 0, heroStatus: (x) => deps.heroStatus?.(x), rivalPowerFx: (rv, mon, kit, slot, to) => deps.rivalPowerFx?.(rv, mon, kit, slot, to), // 20261024poder
     st: () => st, br: () => br, cfg, map: () => map(), R: () => R(), walk: (x, y) => walk(x, y), nearestFree: (x, y) => nearestFree(x, y),
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
-    rollLootFor, credit: (n, why) => deps.credit?.(n, why), onGiantByRival: (g, rv) => { const q = br?.giants?.find((x) => x.uid === g.uid); if (q) { q.killedAt = Date.now(); q.by = rv.name; } }, regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
+    rollLootFor, credit: (n, why) => deps.credit?.(n, why), onGiantByRival: (g, rv) => { const q = br?.giants?.find((x) => x.uid === g.uid); if (q) { q.killedAt = Date.now(); q.by = rv.name; } }, regionAt: (x, y) => brRegionAt(map(), cfg(), x, y),
+    powerGate: (rv, mon, d) => (br?.x1 && deps.x1PowerGate ? deps.x1PowerGate(rv, mon, d) : true), x1Clamp: (mon, n) => (br?.x1 && deps.x1Clamp ? deps.x1Clamp(mon, n) : n)
   });
   function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); stats.byKind[kind] = (stats.byKind[kind] || 0) + 1; if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
 
@@ -110,6 +111,7 @@ export function createArenaBr(deps) {
       nextUid: UID_BASE, nextSpawnAt: 1500, secretFound: false, lastMutateAt: 0, rivals: null
     };
     br.rng = rng32((Date.now() & 0x7fffffff) ^ 0x5bd1e995);
+    if (c.x1) { br.x1 = true; br.zone.phase = 'off'; const sp = map().spawnPoints[0]; if (sp) { st.player.x = sp.x; st.player.y = sp.y; br.heroSpawn = { x: sp.x, y: sp.y, region: sp.region || null }; } note('run_start', { x1: true }); return; } // NEXARA X1 ⚔: sem guardiões/gigantes/encontros/zona
     spawnGuardians();
     spawnElementalGiants();
     setupEncounters();
@@ -574,6 +576,7 @@ export function createArenaBr(deps) {
     if (!isActive()) return;
     if (br.spectate) { updateSpectate(dtMs); return; }
     br.clock += dtMs; stats.ticks++;
+    if (br.x1) { rivals.update(dtMs, p); try { deps.x1Step?.(dtMs, p); } catch (e) { console.warn('[x1]', e); } return; } // NEXARA X1 ⚔: só o duelo
     updateDensity(dtMs);
     director(p);
     rivals.update(dtMs, p);
@@ -612,6 +615,7 @@ export function createArenaBr(deps) {
     if (!br || state !== st) return false;
     const killer = mon?.rival?.name || null; // quem deu o golpe fatal (rival BOT) — o gancho de morte passa o atacante
     state.player.hp = 1;
+    if (br.x1) { deps.x1PlayerDown?.(); return true; } // X1: a rodada acaba (o herói não morre de verdade)
     if (br.ended || br.spectate) return true;
     // NEXARA FAST: a partida só acaba quando o ÚLTIMO herói cai. Jogador morto com ≥ 2 rivais vivos → espectador (a briga continua até sobrar 1)
     const alive = cfg().rivais?.fimUltimoHeroi ? rivals.aliveRivals() : [];
@@ -659,7 +663,7 @@ export function createArenaBr(deps) {
     start, stop, update, isActive, onKill, spectateAdvance, isSpectating: () => !!(br && br.spectate && !br.ended),
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
     rivalTgtKind: (uid) => rivals.byUid(uid)?.tgt?.kind || null,
-    rivalMitigate(mon, dmg, opts) { return isActive() && mon?.rival ? rivals.mitigateFromHero(mon, dmg, opts) : dmg; }, rivalPowers: () => (br ? rivals.powersView() : null),
+    rivalMitigate(mon, dmg, opts) { if (!(isActive() && mon?.rival)) return dmg; const d = rivals.mitigateFromHero(mon, dmg, opts); return br.x1 && deps.x1Clamp ? deps.x1Clamp(mon, d) : d; }, x1Reset: (hx, hy, rx, ry) => (br?.x1 ? rivals.x1Reset(hx, hy, rx, ry) : false), x1Dodge: (x, y, modo) => (br?.x1 ? rivals.x1Dodge(x, y, modo) : false), rivalPowers: () => (br ? rivals.powersView() : null),
     onRivalHit(mon, info) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos(), info || {}); },
     giants: () => (br?.giants || []).map((g) => { const m = st.monstersAlive.find((q) => q.uid === g.uid); return { ...g, alive: !!m?.alive, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0, mx: m?.x, my: m?.y }; }),
     rivals: () => (br ? rivals.view(deps.getPos()) : null), heroSpawn: () => br?.heroSpawn || null, rivalSpawns: () => br?.rivalSpawns || null, onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,

@@ -19,12 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261024r2';
-import { getConfig, DEG } from './gameplay-config.js?v=20261024r2';
-import { isWalkable, getTileType } from './map.js?v=20261024r2';
-import { monsterAttackPlayer } from './actions.js?v=20261024r2';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024r2';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261024r2';
+import { bossCfgFor } from './boss-variants.js?v=20261024x1';
+import { getConfig, DEG } from './gameplay-config.js?v=20261024x1';
+import { isWalkable, getTileType } from './map.js?v=20261024x1';
+import { monsterAttackPlayer } from './actions.js?v=20261024x1';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024x1';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261024x1';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
@@ -293,6 +293,17 @@ export function rivalDodge(mon, fromX, fromY, opt = {}) {
   r.dodgeUntil = clock + (opt.ms || 280); r.dodgeAt = clock; r.hitReactUntil = 0;
   if (r.state === S.ATTACK_PREPARE || r.state === S.RECOVERY) { releaseToken(r, 0); setState(mon, r, S.CHASE); }
   logEvent('RIVAL_DODGE', mon, {});
+  return true;
+}
+
+/** X1 ⚔: comandos táticos do rival (só posição/tempo — mesmas velocidades/recargas): facingOffset (mira adiantada),
+ *  vx/vy/ms (passo/investida curta, como a esquiva do rival), attackNow (golpe assim que a recarga normal permitir), feintMs (finta: cancela o preparo) */
+export function rivalSteer(mon, o = {}) {
+  const r = runtimes.get(mon); if (!r || !mon.alive || r.state === S.STUN) return false;
+  if (o.facingOffset) r.facing += o.facingOffset;
+  if (o.vx != null && r.state !== S.ATTACK && r.state !== S.ATTACK_PREPARE && r.state !== S.RECOVERY) { r.dodgeVx = o.vx; r.dodgeVy = o.vy; r.dodgeUntil = clock + (o.ms || 250); r.hitReactUntil = 0; }
+  if (o.attackNow) r.nextAttackAt = Math.min(r.nextAttackAt, Math.max(clock, r.x1CdAt || 0));
+  if (o.feintMs != null && r.state === S.ATTACK_PREPARE) { releaseToken(r, 0); setState(mon, r, S.CHASE); r.nextAttackAt = clock + o.feintMs; logEvent('RIVAL_FEINT', mon, {}); }
   return true;
 }
 
@@ -579,7 +590,7 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
     case S.ATTACK_PREPARE: {
       // Compromete-se: não anda; acompanha o herói devagar (dá para contornar)
       turnToward(r, toPlayer, cfg.prepareTurnSpeedDeg, dtSec);
-      if (t >= cfg.attackStartupMs) {
+      if (t >= (mon.x1Atk?.startup ?? cfg.attackStartupMs)) { // X1 ⚔: rival-HERÓI usa o ritmo de golpe de herói (mon.x1Atk) — sem ele, igual a antes
         setState(mon, r, S.ATTACK);
         // —— FRAME DE IMPACTO: só acerta se o herói ainda está no alcance/ângulo ——
         r.didImpact = true;
@@ -602,9 +613,9 @@ function think(state, zone, mon, r, P, dtSec, cfg, arena, result) {
       break;
     }
     case S.RECOVERY: {
-      if (t >= cfg.attackRecoveryMs) {
+      if (t >= (mon.x1Atk?.recovery ?? cfg.attackRecoveryMs)) {
         releaseToken(r, cfg.tokenGapMs);
-        r.nextAttackAt = clock + rand(cfg.attackCooldownMinMs, cfg.attackCooldownMaxMs) * (mon.cdMult || 1);
+        { const A = mon.x1Atk; const cmin = A?.cdMin ?? cfg.attackCooldownMinMs, cmax = A?.cdMax ?? cfg.attackCooldownMaxMs; r.nextAttackAt = clock + rand(cmin, cmax) * (A ? 1 : (mon.cdMult || 1)); r.x1CdAt = clock + cmin * (A ? 1 : (mon.cdMult || 1)); } // X1: 'atacar já' nunca fura a recarga MÍNIMA
         setState(mon, r, S.CHASE);
       }
       break;

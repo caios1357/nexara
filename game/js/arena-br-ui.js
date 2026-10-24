@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261024r2';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261024x1';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -91,11 +91,11 @@ export function createArenaBrUi(deps) {
     setText('#br-bag', `🎒 ${n} / ${cap}`);
     root.querySelector('#br-bag').classList.toggle('full', n >= cap);
     const z = v.zone;
-    const zt = z.phase === 'wait' ? `ZONA SEGURA fecha em ${mmss(z.msLeft + 30000)}` : z.phase === 'warn' ? `⚠ ZONA FECHA EM ${mmss(z.msLeft)} (${z.stage}/${z.stages})` : z.phase === 'shrink' ? `ZONA FECHANDO · ${mmss(z.msLeft)}` : 'ZONA FINAL';
+    const cfg0x1 = (st) => !!st?._data?.arena_br?.x1; const zt = z.phase === 'wait' ? `ZONA SEGURA fecha em ${mmss(z.msLeft + 30000)}` : z.phase === 'warn' ? `⚠ ZONA FECHA EM ${mmss(z.msLeft)} (${z.stage}/${z.stages})` : z.phase === 'shrink' ? `ZONA FECHANDO · ${mmss(z.msLeft)}` : 'ZONA FINAL';
     // LOTE-b M2: HUD compacto/mínimo → ZONA + EVENTO numa faixa só (o #br-event segue atualizado, só fica oculto por CSS)
     const merge = document.body.classList.contains('hud-compacto') && v.event;
     const zShort = z.phase === 'wait' ? `ZONA ${mmss(z.msLeft + 30000)}` : z.phase === 'warn' ? `⚠ ZONA ${mmss(z.msLeft)}` : z.phase === 'shrink' ? `ZONA FECHANDO ${mmss(z.msLeft)}` : 'ZONA FINAL';
-    setText('#br-zone', merge ? `${zShort} · ${v.event.kind === 'cacada' ? '🎯' : '📦'} ${v.event.nome}${v.event.done ? ' ✓' : ''} ${mmss(v.event.msLeft)}` : zt);
+    if (cfg0x1(s)) setText('#br-zone', 'X1 ⚔ DUELO · MELHOR DE 3'); else setText('#br-zone', merge ? `${zShort} · ${v.event.kind === 'cacada' ? '🎯' : '📦'} ${v.event.nome}${v.event.done ? ' ✓' : ''} ${mmss(v.event.msLeft)}` : zt);
     root.querySelector('#br-zone').classList.toggle('warn', z.phase === 'warn' || z.phase === 'shrink');
     root.querySelector('#br-outside').classList.toggle('hidden', !(z.outside && z.phase !== 'wait'));
     const ev = root.querySelector('#br-event');
@@ -126,6 +126,7 @@ export function createArenaBrUi(deps) {
       for (const q of cfg.extracao.pontos) { const d = Math.hypot(q.x + 0.5 - p.x, q.y + 0.5 - p.y); if (d < bd) { bd = d; best = q; } }
       if (best) return { x: best.x + 0.5, y: best.y + 0.5, label: best.nome, cor: '#5dff8a' };
     }
+    if (cfg.x1) { const m = s.monstersAlive.find((q) => q.rival && q.alive); return m ? { x: m.x + 0.5, y: m.y + 0.5, label: (m.rival?.name || 'RIVAL').toUpperCase(), cor: '#ff3b5c' } : null; } // X1 ⚔: a seta aponta o rival
     if (!v.bossKilled) return { x: cfg.dragao.x + 0.5, y: cfg.dragao.y + 0.5, label: 'COVIL DO DRAGÃO', cor: '#5dff6a' };
     return null;
   }

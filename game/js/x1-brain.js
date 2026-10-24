@@ -51,6 +51,7 @@ export function deriveTactics(p) {
   return {
     amostras: tot + p.bloqueio.n + p.ataques.golpes,
     preveEsquiva: lado, confEsquiva: +conf.toFixed(2), puneEsquivaChance: lado ? Math.min(0.95, 0.45 + conf * 0.5) : 0.35,
+    reacaoEsquiva: +reacao.toFixed(2), taxaBloqueio: +blockRate.toFixed(2),
     iscaBloqueio: blockRate >= 0.3 || reacao >= 0.4, iscaChance: Math.min(0.8, 0.2 + blockRate * 0.6 + reacao * 0.3), guardaMs: blockMs,
     distAlvo, batESai, faixaForteJogador: forte, faixaFracaJogador: fraca,
     segurarPoder: true, dashPorRodada: +dashPorRodada.toFixed(2), poderFav: p.poderes[poderFav] > 0 ? poderFav : null
@@ -66,8 +67,10 @@ export function createX1Brain(opts = {}) {
   const live = { rivalPrepAt: -1e9, lastDodgeAt: -1e9, lastPowerAt: -1e9, lastBlockStart: -1, combo: 0, comboAt: -1e9, decisions: { pune: 0, isca: 0, recuo: 0, poderSegurado: 0, poderLiberado: 0, esquivaReacao: 0 }, round: 0 };
   const stats = { eventos: 0 };
   function onRoundStart(n) { live.round = n; tac = deriveTactics(prof); prof.hist.push({ r: prof.rodadas + 1, at: Date.now(), tac: { lado: tac.preveEsquiva, conf: tac.confEsquiva, isca: tac.iscaBloqueio, dist: tac.distAlvo, batESai: tac.batESai } }); if (prof.hist.length > 20) prof.hist.splice(0, prof.hist.length - 20); }
-  function onRoundEnd(winner) { prof.rodadas++; if (winner === 'rival') prof.vitoriasIA++; else prof.vitoriasJogador++; saveProfile(prof, ls); }
-  function onMatchEnd() { prof.partidas++; saveProfile(prof, ls); }
+  function onRoundEnd(winner) { prof.rodadas++; if (winner === 'rival') prof.vitoriasIA++; else prof.vitoriasJogador++; saveProfile(prof, ls); tac = deriveTactics(prof); } // adapta já no fim da rodada
+  function onMatchEnd() { prof.partidas++; saveProfile(prof, ls); tac = deriveTactics(prof); }
+  /** re-leitura no meio da rodada (a cada ~6 s de luta): a IA adapta sem esperar a próxima rodada */
+  function refresh() { tac = deriveTactics(prof); return tac; }
   /** distância jogador↔rival a cada passo (para faixa preferida) */
   function tickDist(d, dtMs) { prof.tempoFaixa[binOf(d)] += dtMs; }
   /** lado da esquiva RELATIVO ao rival: vetor esquiva (dx,dy) e vetor jogador→rival (rx,ry) */
@@ -93,14 +96,19 @@ export function createX1Brain(opts = {}) {
   // 1) logo depois da esquiva do jogador → punir no lado previsto (ou no lado em que ele foi, se ainda sem dados)
   function punishDodge() { const ch = tac.puneEsquivaChance; if (R() < ch) { live.decisions.pune++; return { lado: tac.preveEsquiva || live.lastDodgeSide || 'tras', conf: tac.confEsquiva }; } return null; }
   // 2) preparo do golpe do rival: fintar? (cancela e bate quando a guarda cair)
-  function baitNow() { if (tac.iscaBloqueio && R() < tac.iscaChance) { live.decisions.isca++; return { esperaMs: Math.min(1400, tac.guardaMs + 120) }; } return null; }
+  function baitNow() {
+    if (!(tac.iscaBloqueio && R() < tac.iscaChance)) return null; live.decisions.isca++;
+    // quem ESQUIVA no preparo: finta e golpeia JÁ (o golpe real cai dentro da recarga da esquiva dele) · quem BLOQUEIA: espera a guarda cair
+    const esquivador = (tac.reacaoEsquiva || 0) >= (tac.taxaBloqueio || 0);
+    return { esperaMs: esquivador ? 0 : Math.min(1400, tac.guardaMs + 120), tipo: esquivador ? 'esquiva' : 'bloqueio' };
+  }
   // 3) distância: recuar para a faixa fraca do jogador depois de bater (bate e sai)
-  function wantRetreat(d, justHit) { if (tac.distAlvo == null) return false; if (d < tac.distAlvo - 0.6 && (justHit || !tac.batESai)) { live.decisions.recuo++; return true; } return false; }
+  function wantRetreat(d, justHit) { if (tac.distAlvo == null || !justHit) return false; const alvo = Math.min(tac.distAlvo, 3.0); if (tac.batESai && d < alvo - 0.4) { live.decisions.recuo++; return true; } return false; } // só BATE-E-SAI: recua logo depois de acertar, sem sair do alcance de volta (rival corpo a corpo)
   // 4) poder: só quando o jogador acabou de gastar esquiva/poder (janela 1,2 s) ou está colado sem esquiva
   function powerGate(now) { const open = now - live.lastDodgeAt < 1500 || now - live.lastPowerAt < 1500; if (open) live.decisions.poderLiberado++; else live.decisions.poderSegurado++; return open || R() < 0.12; }
   // 5) o jogador começou um poder → o rival esquiva na reação (se a esquiva estiver pronta)
   function dodgeOnPlayerPower() { live.decisions.esquivaReacao++; return true; }
-  return { onRoundStart, onRoundEnd, onMatchEnd, tickDist, onPlayerDodge, onPlayerBlock, onPlayerDash, onPlayerAttack, onPlayerPower, onPlayerDamage, onRivalDamage, onRivalPrepare,
+  return { onRoundStart, onRoundEnd, onMatchEnd, refresh, tickDist, onPlayerDodge, onPlayerBlock, onPlayerDash, onPlayerAttack, onPlayerPower, onPlayerDamage, onRivalDamage, onRivalPrepare,
     punishDodge, baitNow, wantRetreat, powerGate, dodgeOnPlayerPower,
     profile: () => prof, tactics: () => tac, decisions: () => ({ ...live.decisions }), reset: () => { prof = emptyProfile(); tac = deriveTactics(prof); saveProfile(prof, ls); }, stats };
 }

@@ -15,17 +15,17 @@
   <meta name="apple-mobile-web-app-title" content="NEXARA" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/app-192.png" />
   <link rel="apple-touch-icon" href="assets/icons/app-192.png" />
-  <link rel="stylesheet" href="css/theme.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/ui.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/mobile-controls.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/hud-modern.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/inventory.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/hero-style.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/vestiario.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/berco.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/arsenal.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/arena-br.css?v=20261024r2" />
-  <link rel="stylesheet" href="css/hero-select.css?v=20261024r2" />
+  <link rel="stylesheet" href="css/theme.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/ui.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/mobile-controls.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/hud-modern.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/inventory.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/hero-style.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/vestiario.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/berco.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/arsenal.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/arena-br.css?v=20261024x1" />
+  <link rel="stylesheet" href="css/hero-select.css?v=20261024x1" />
   <script type="importmap">
   {
     "imports": {
@@ -56,13 +56,14 @@
   <div id="title-screen" class="screen">
     <div class="logo">NEXARA</div>
     <div class="subtitle">ANO 2847 — FASE 02 · CONTROLE</div>
-    <div id="build-stamp" style="margin:0.4rem 0 0.8rem;padding:0.35rem 0.7rem;display:inline-block;border:1px solid #3ecfbf;color:#3ecfbf;font-size:0.75rem;letter-spacing:0.06em;border-radius:4px">BUILD 20261024r2 · r2: montaria sentada, distritos com a arte do Caio, heróis equilibrados</div>
+    <div id="build-stamp" style="margin:0.4rem 0 0.8rem;padding:0.35rem 0.7rem;display:inline-block;border:1px solid #3ecfbf;color:#3ecfbf;font-size:0.75rem;letter-spacing:0.06em;border-radius:4px">BUILD 20261024x1 · X1: duelo 1x1 offline com IA que aprende</div>
     <div class="menu-col panel nx-main-menu">
       <!-- ARENA PRINCIPAL: menu com 4 entradas; os modos antigos continuam em ARENA → Outros modos (nada removido) -->
       <button class="primary nx-main" id="btn-main-arena" type="button" data-sub="Battle royale · 50 jogadores (você + 49 bots)">⚔ ARENA</button>
       <div id="arena-panel" class="nx-arena-panel hidden">
         <button class="primary" id="btn-br-entrar" type="button" data-sub="Mapa completo · 50 jogadores (49 bots)">ARENA NEXARA (mapa completo)</button>
         <button class="primary nx-fast" id="btn-fast-entrar" type="button" data-sub="Começar do zero · partida rápida" title="UM distrito do mapa grande sorteado por partida, 49 rivais (BOT) — 50 jogadores, zona rápida (~6–10 min), gigante no final">NEXARA FAST ⚡</button>
+        <button class="primary nx-x1" id="btn-x1-entrar" type="button" data-sub="Duelo 1×1 offline · melhor de 3 · IA que aprende com você" title="Você contra 1 herói rival sorteado, arena pequena com pilares, muretas e caixas. NV1, arma básica, mesmas regras. A IA estuda seus padrões (só neste aparelho).">X1 ⚔</button>
         <label class="nx-fast-zero" for="fast-zero"><input type="checkbox" id="fast-zero" checked> Começar do zero (partida) — todos no NV1; seu herói salvo não muda</label>
         <button id="btn-fast-ranking" type="button" data-sub="Seus recordes offline">RANKING · NEXARA FAST</button>
         <button id="btn-outros-modos" type="button" aria-expanded="false" data-sub="Eventos · Desafios">Outros modos ▸</button>
@@ -196,6 +197,6 @@
   <div id="modal-overlay" class="modal-overlay hidden"></div>
   <div id="mcb-pop-layer" class="mcb-pop-layer" aria-live="polite"></div>
 
-  <script type="module" src="js/main.js?v=20261024r2"></script>
+  <script type="module" src="js/main.js?v=20261024x1"></script>
 </body>
 </html>

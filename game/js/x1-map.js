@@ -56,6 +56,8 @@ export function makeX1Config(fastCfg, opts = {}) {
   R.tatica = { ...(R.tatica || {}), esquivaChance: 0.85, bloqueioChance: 0.6, aggro: 30 };
   R.alvo = { ...(R.alvo || {}), jogadorAlcance: 40, perdeR: 60, compromissoJogadorMs: 1e9 };
   R.fimUltimoHeroi = false; R.lutamSempre = false; delete R.pisoVivos; delete R.cacaRivalDist;
+  // golpe básico do rival com RITMO DE HERÓI (o herói: preparo 140 + ativo 90 + recuperação 260 ms, combo). Preparo 320 ms = ainda legível para esquivar.
+  R.x1Ataque = { startup: 320, recovery: 300, cdMin: 150, cdMax: 350 }; // herói não tem recarga de golpe básico (só a recuperação) → 150–350 ms ainda é mais lento que o combo do herói
   c.spawnAleatorio = false; c.lodIa = { ...(c.lodIa || {}), perto: 40, medio: 60 };
   return c;
 }

@@ -102,6 +102,7 @@
 .br-pop-card.full { border-color: #ff8a7a; }
 .br-pop-actions button.danger { background: rgba(160, 40, 30, 0.55); border-color: #ff6a5a; color: #fff; }
 /* NEXARA FAST ⚡ — modo compacto (ao lado da ARENA NEXARA mapa completo) */
+#btn-x1-entrar.nx-x1 { background: linear-gradient(90deg, #ff3b5c, #9b5cff); color: #fff; border-color: #ffb0c0; font-weight: 800; letter-spacing: 0.06em; }
 #btn-fast-entrar.nx-fast { background: linear-gradient(90deg, #ffb020, #ff6a1a); color: #1a0d00; border-color: #ffd27a; font-weight: 800; letter-spacing: 0.05em; }
 /* NEXARA FAST — RANKING pessoal */
 .nx-fast-ranking { position: fixed; inset: 0; z-index: 9600; display: flex; align-items: center; justify-content: center; background: rgba(2, 6, 10, 0.82); }
