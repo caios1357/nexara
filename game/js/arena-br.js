@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261024glb3';
-import { getConfig } from './gameplay-config.js?v=20261024glb3';
-import { pushLog } from './state.js?v=20261024glb3';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024glb3';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024glb3';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261024glb3';
-import { createRivals } from './arena-rivals.js?v=20261024glb3';
+import { createArenaState } from './arena.js?v=20261024apex';
+import { getConfig } from './gameplay-config.js?v=20261024apex';
+import { pushLog } from './state.js?v=20261024apex';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261024apex';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261024apex';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261024apex';
+import { createRivals } from './arena-rivals.js?v=20261024apex';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -80,7 +80,7 @@ export function createArenaBr(deps) {
   const map = () => st?._data.zones.zones.find((z) => z.id === BR_ZONE_ID)?.brMap || null;
   const R = () => br.rng();
   const ADAPT_OFF = typeof location !== 'undefined' && new URLSearchParams(location.search).get('adaptive') === '0';
-  const stats = { spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [], enc: { normal: 0, grupo: 0, enxame: 0, patrulha: 0, escolta: 0, raro: 0, emboscada: 0, ninho: 0 }, minSpawnDist: 999, lootRar: {} };
+  const stats = { byKind: {}, spawned: 0, despawned: 0, maxAlive: 0, ticks: 0, opened: 0, picked: 0, zoneDamage: 0, events: [], enc: { normal: 0, grupo: 0, enxame: 0, patrulha: 0, escolta: 0, raro: 0, emboscada: 0, ninho: 0 }, minSpawnDist: 999, lootRar: {} };
 
   function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   // RIVAIS (BOTS offline): heróis rivais da IA local — ver arena-rivals.js
@@ -92,7 +92,7 @@ export function createArenaBr(deps) {
     spawnAt: (id, x, y, e) => spawnAt(id, x, y, e), note: (k, i) => note(k, i), finish: (k, i) => finish(k, i), spawnDrops: (x, y, l, s) => spawnDrops(x, y, l, s),
     rollLootFor, credit: (n, why) => deps.credit?.(n, why), onGiantByRival: (g, rv) => { const q = br?.giants?.find((x) => x.uid === g.uid); if (q) { q.killedAt = Date.now(); q.by = rv.name; } }, regionAt: (x, y) => brRegionAt(map(), cfg(), x, y)
   });
-  function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
+  function note(kind, info = {}) { const e = { kind, at: Math.round(br?.clock || 0), ...info }; stats.events.push(e); stats.byKind[kind] = (stats.byKind[kind] || 0) + 1; if (stats.events.length > 60) stats.events.shift(); deps.onEvent?.(kind, info); }
 
   function start(state) {
     st = state;
@@ -112,7 +112,19 @@ export function createArenaBr(deps) {
     spawnGuardians();
     spawnElementalGiants();
     setupEncounters();
+    if (cfg().rivais?.justa || cfg().spawnAleatorio) randomHeroSpawn();
     note('run_start', {});
+  }
+  /** 20261024apex: SPAWN ALEATÓRIO do herói (cada partida num ponto diferente): ponto de spawn válido do mapa (andável, alcançável,
+   *  fora do covil e longe de gigantes/guardiões, dentro da 1ª zona). Os 49 rivais nascem depois, espalhados e a ≥ distInicialMin dele. */
+  function randomHeroSpawn() {
+    const m = map(); if (!m?.spawnPoints?.length) return null;
+    const big = st.monstersAlive.filter((q) => q.alive && (q.boss || q.guard || q.elemental));
+    const z = br.zone; const ok = (q) => walk(q.x, q.y) && !inCovil(q.x, q.y, q.region) && big.every((b) => Math.hypot(b.x - q.x, b.y - q.y) >= 16) && Math.hypot(q.x + 0.5 - z.cx, q.y + 0.5 - z.cy) <= z.r * 0.9;
+    let pts = m.spawnPoints.filter(ok); if (!pts.length) pts = m.spawnPoints.filter((q) => walk(q.x, q.y) && !inCovil(q.x, q.y, q.region)); if (!pts.length) return null;
+    const q = pts[Math.floor(R() * pts.length)];
+    st.player.x = q.x; st.player.y = q.y; br.heroSpawn = { x: q.x, y: q.y, region: q.region || null };
+    return q;
   }
   /** 20261016 — ARENA PRINCIPAL: 4 GIGANTES ELEMENTAIS (fogo/gelo/raio/veneno = perfis de data/dragoes.json chefes[]), um no centro de cada região
    *  distante (Ruínas, Complexo, Periferia, Floresta). O Território do Dragão (GIGANTE VERDE no covil) não é tocado. Quem MATA um deles ganha a sela. */
@@ -647,7 +659,7 @@ export function createArenaBr(deps) {
     /** RIVAIS: o herói acertou um rival vivo (esquiva) */
     onRivalHit(mon, info) { if (isActive() && mon?.rival) rivals.onHit(mon, deps.getPos(), info || {}); },
     giants: () => (br?.giants || []).map((g) => { const m = st.monstersAlive.find((q) => q.uid === g.uid); return { ...g, alive: !!m?.alive, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0, mx: m?.x, my: m?.y }; }),
-    rivals: () => (br ? rivals.view(deps.getPos()) : null), onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
+    rivals: () => (br ? rivals.view(deps.getPos()) : null), heroSpawn: () => br?.heroSpawn || null, rivalSpawns: () => br?.rivalSpawns || null, onBossKilled, onPlayerDeath, addMcb, recordItem, summary, view, finish,
     /** M10: tira um drop do chão (vendido/descartado pelo jogador no popup de bolsa cheia). */
     removeDrop(id) { if (!br) return false; const i = br.drops.findIndex((d) => d.id === id); if (i < 0) return false; br.drops.splice(i, 1); return true; },
     densityExhausted, walkable: (x, y) => (br ? walk(x, y) : false),

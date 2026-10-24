@@ -1,0 +1,65 @@
+/* 20261024apex — SELEÇÃO DE HERÓI (estilo Apex) + LOBBY 50 jogadores. Toque · retrato e paisagem. */
+.hsel, .hlob { position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column; gap: 8px; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  background: radial-gradient(120% 90% at 50% 0%, #142a4a 0%, #070b16 60%, #04060c 100%); color: #e8f4ff; font-family: inherit; touch-action: manipulation; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
+.hsel *, .hlob * { box-sizing: border-box; }
+.hsel-top, .hlob-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hsel-title, .hlob-title { font-weight: 900; letter-spacing: .08em; font-size: clamp(16px, 4.6vw, 26px); line-height: 1.05; text-shadow: 0 0 12px rgba(58,156,255,.6); }
+.hsel-title small, .hlob-title small { display: block; font-size: 11px; letter-spacing: .12em; color: #8fb4d8; font-weight: 700; margin-top: 3px; }
+.hsel-timer { min-width: 64px; text-align: center; border: 2px solid var(--hc, #3a9cff); border-radius: 12px; padding: 4px 8px; background: rgba(10,20,40,.7); }
+.hsel-timer b { display: block; font-size: 26px; line-height: 1; }
+.hsel-timer small { font-size: 9px; color: #9db8d6; letter-spacing: .06em; }
+.hsel-urgent .hsel-timer { border-color: #ff5a4a; animation: hselPulse .5s infinite alternate; }
+@keyframes hselPulse { to { box-shadow: 0 0 18px #ff5a4a; } }
+.hsel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.hsel-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.hsel-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 3px 5px; min-height: 64px; border-radius: 10px; border: 2px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.25)); color: #dfefff; cursor: pointer; transition: transform .12s, border-color .12s; }
+.hsel-card b { font-size: 10px; letter-spacing: .04em; }
+.hsel-card small { font-size: 8px; color: #8fb4d8; letter-spacing: .04em; }
+.hsel-card.on { border-color: var(--hc); box-shadow: 0 0 14px var(--hc), inset 0 0 18px rgba(255,255,255,.08); transform: translateY(-2px); }
+.hsel-por { width: 100%; aspect-ratio: 1; max-height: 64px; border-radius: 8px; overflow: hidden; background: radial-gradient(circle at 50% 35%, var(--hc), #0a1220 75%); display: flex; align-items: center; justify-content: center; }
+.hsel-por img { width: 100%; height: 100%; object-fit: cover; }
+.hsel-detail { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.hsel-prev { position: relative; flex: 1; min-height: 150px; border-radius: 14px; background: radial-gradient(circle at 50% 70%, rgba(58,156,255,.25), rgba(4,8,16,.2) 70%); border: 1px solid rgba(255,255,255,.08); }
+.hsel-prev canvas { width: 100%; height: 100%; display: block; }
+.hsel-glb { position: absolute; left: 8px; top: 6px; font-size: 9px; letter-spacing: .1em; color: #8affe8; }
+.hsel-info { display: flex; flex-direction: column; gap: 4px; }
+.hsel-name { font-size: clamp(20px, 6vw, 30px); font-weight: 900; letter-spacing: .08em; }
+.hsel-role { font-size: 11px; color: #b7d3f0; }
+.hsel-lore { margin: 0; font-size: 11px; color: #8fa9c6; line-height: 1.3; }
+.hsel-row { display: flex; align-items: baseline; gap: 8px; font-size: 11px; }
+.hsel-row > span { min-width: 92px; color: #6f8fb0; font-weight: 800; letter-spacing: .06em; font-size: 9px; }
+.hsel-row b { color: #e8f4ff; font-weight: 700; }
+.hsel-skins > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.hsel-skins button { padding: 5px 8px; min-height: 30px; border-radius: 8px; border: 1px solid var(--sc, #6f8fb0); color: var(--sc, #cfe3ff); background: rgba(0,0,0,.35); font-size: 10px; font-weight: 800; }
+.hsel-skins button.on { background: var(--sc, #3a9cff); color: #04101c; }
+.hsel-bottom, .hlob-bottom { display: flex; gap: 8px; justify-content: flex-end; }
+.hsel-bottom button, .hlob-bottom button { min-height: 48px; padding: 0 22px; border-radius: 12px; font-weight: 900; letter-spacing: .08em; font-size: 15px; }
+.hsel-ok { flex: 1; max-width: 360px; background: linear-gradient(180deg, #3ad0ff, #1a6cff) !important; color: #fff; border: 0; box-shadow: 0 0 18px rgba(58,156,255,.6); }
+.hsel-back { background: rgba(255,255,255,.08); color: #cfe3ff; border: 1px solid rgba(255,255,255,.2); }
+/* paisagem: grade à esquerda, prévia+info à direita */
+@media (orientation: landscape) {
+  .hsel-body { flex-direction: row; }
+  .hsel-grid { width: 46%; grid-template-columns: repeat(3, 1fr); align-content: start; overflow: auto; }
+  .hsel-card { min-height: 0; }
+  .hsel-por { max-height: 52px; }
+  .hsel-detail { flex-direction: row; }
+  .hsel-prev { flex: 0 0 38%; min-height: 0; }
+  .hsel-info { flex: 1; overflow: auto; }
+}
+/* LOBBY */
+.hlob-drop { border: 2px solid #3ad0ff; border-radius: 12px; padding: 6px 10px; font-weight: 900; letter-spacing: .08em; font-size: 12px; background: rgba(10,20,40,.7); }
+.hlob-drop b { font-size: 22px; color: #8affe8; }
+.hlob-mix { display: flex; flex-wrap: wrap; gap: 4px; }
+.hlob-mix span { font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--pc); color: var(--pc); background: rgba(0,0,0,.35); }
+.hlob-mix b { color: #fff; }
+.hlob-list { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; align-content: start; }
+.hlob-p { display: flex; align-items: center; gap: 6px; padding: 3px 5px; border-radius: 8px; border-left: 3px solid var(--pc); background: rgba(255,255,255,.05); min-width: 0; }
+.hlob-p.you { background: rgba(58,208,255,.18); box-shadow: 0 0 10px rgba(58,208,255,.4); }
+.hlob-ic { flex: 0 0 26px; height: 26px; border-radius: 6px; overflow: hidden; background: radial-gradient(circle, var(--pc), #0a1220 80%); }
+.hlob-ic img { width: 100%; height: 100%; object-fit: cover; }
+.hlob-p span { min-width: 0; display: flex; flex-direction: column; }
+.hlob-p b { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hlob-p small { font-size: 8px; color: #8fb4d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (orientation: landscape) { .hlob-list { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 900px) and (orientation: portrait) { .hlob-list { grid-template-columns: repeat(3, 1fr); } }

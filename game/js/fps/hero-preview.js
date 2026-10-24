@@ -3,11 +3,11 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261024glb3';
-import { createHeroModel } from './hero-model.js?v=20261024glb3';
-import { kitFor } from './hero-kit.js?v=20261024glb3';
-import { heroStyleOf } from '../hero-styles.js?v=20261024glb3';
-import { getConfig } from '../gameplay-config.js?v=20261024glb3';
+import { attachHeroGlb } from './hero-glb.js?v=20261024apex';
+import { createHeroModel } from './hero-model.js?v=20261024apex';
+import { kitFor } from './hero-kit.js?v=20261024apex';
+import { heroStyleOf } from '../hero-styles.js?v=20261024apex';
+import { getConfig } from '../gameplay-config.js?v=20261024apex';
 /** 9 PERSONAGENS: a prévia/retrato mostram o MESMO herói procedural do jogo (kit + skin) — o GLB só com graphics.heroLook='glb' */
 const wantsGlb = () => { try { return (new URLSearchParams(location.search).get('herolook') || getConfig().graphics.heroLook) === 'glb'; } catch { return false; } };
 function attachProcHero(fake, o = {}) {
@@ -15,6 +15,7 @@ function attachProcHero(fake, o = {}) {
   const info = { status: 'ready', kind: 'procedural', style: null, kit: null };
   const api = {
     info,
+    get caioGlb() { return info.hmInfo?.caioGlb || null; },
     setStyle(styleId, extra = {}) {
       const kit = kitFor({ styleId, custom: extra.custom, equip: extra.equip }); const k2 = JSON.stringify(kit);
       const S0 = heroStyleOf(styleId); const cu = extra.custom || {};
@@ -23,7 +24,7 @@ function attachProcHero(fake, o = {}) {
       info.style = styleId;
       if (k2 === sig && hm) return; sig = k2;
       if (hm) { fake.root.remove(hm.root); hm.root.traverse((q) => { if (q.geometry && !q.geometry.userData?.shared) q.geometry.dispose(); }); }
-      hm = createHeroModel({ styleId, kit, glb: false }); hm.root.rotation.y = 0; fake.root.add(hm.root);
+      hm = createHeroModel({ styleId, kit, glb: false, caioGlb: o.caioGlb !== false /* 20261024apex: prévia/seleção mostram o GUERREIRO GLB do Caio (o mesmo do jogo) */ }); hm.root.rotation.y = 0; fake.root.add(hm.root); info.hmInfo = hm.kitInfo;
       info.kit = { style: kit.style, head: kit.head, weapon: kit.weapon, skin: kit.skin || null, shield: !!hm.kitInfo?.shield, parts: hm.kitInfo?.parts || 0 };
     },
     update(dt, i) { hm?.update(dt, { x: 0, z: 0, yaw: Math.PI, speed: 0, walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); },
@@ -106,7 +107,7 @@ export function createHeroPreview(canvas, opts = {}) {
   raf = requestAnimationFrame(frame);
   const api = {
     set(styleId, custom = {}, equip = {}) { glb.setStyle(styleId, { custom, equip }); },
-    info: () => ({ ...glb.info, yaw: +(((root.rotation.y % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)).toFixed(3), zoom: +dist.toFixed(2), touched, drags, autoSpin }),
+    info: () => ({ ...glb.info, hmInfo: undefined, caioGlb: glb.info.hmInfo?.caioGlb || null, yaw: +(((root.rotation.y % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)).toFixed(3), zoom: +dist.toFixed(2), touched, drags, autoSpin }),
     /** vista de FRENTE (botão do Vestiário) */
     front() { spin = 0; autoSpin = 0; touched = true; root.rotation.y = 0; },
     setYaw(r) { spin = r; autoSpin = 0; touched = true; },
@@ -148,7 +149,7 @@ export function makePortraitSnapshot(styleId, custom = {}, S = 96) {
       const root = new THREE.Group(); scene.add(root);
       const glb = attachLook({ root, setProceduralBodyVisible() {} }, { styleId, custom, force: true });
       const t0 = performance.now();
-      while (glb.info.status !== 'ready' && performance.now() - t0 < 4000) await new Promise((r) => setTimeout(r, 60));
+      while ((glb.info.status !== 'ready' || glb.info.hmInfo?.caioGlb === 'loading') && performance.now() - t0 < 4000) await new Promise((r) => setTimeout(r, 60));
       if (glb.info.status !== 'ready') return null;
       const idle = { action: null, attacking: false, combo: 0, attackPhase: 'IDLE', attackT: 0, hurtT: 0, moveK: 0, runK: 0, speed: 0, walkSpeed: 2.4, runSpeed: 3.4, yaw: 0, charge: 0.2, time: 0 };
       for (let i = 0; i < 6; i++) glb.update(0.05, idle);

@@ -26,7 +26,7 @@ const mixHex = (a, b, k) => {
 };
 const num = (v) => (v == null ? null : typeof v === 'number' ? v : parseInt(String(v).replace('#', ''), 16));
 
-import { SKINS } from '../personagens.js?v=20261024glb3';
+import { SKINS } from '../personagens.js?v=20261024apex';
 /** SKIN ELEMENTAL: brilho do elemento + armadura tingida (mantém a forma do personagem) */
 export function applySkin(k, skinId) {
   const S = SKINS[skinId]; if (!S) return k;
@@ -65,6 +65,7 @@ export function rivalKit(R0) {
   if (R0?.char && KIT_STYLES[R0.char]) { // 9 PERSONAGENS: bot usa o personagem sorteado (forma intacta) + skin elemental
     const k = { style: R0.char, ...KIT_STYLES[R0.char] }; if (k.plates) k.plates = { ...k.plates };
     if (R0.skin) applySkin(k, R0.skin);
+    if (R0.arma === 'cajado' || R0.arma === 'espada') k.weapon = R0.arma; // 20261024apex PARTIDA JUSTA: arma básica do bot (espada ou cajado)
     return k;
   }
   const base = KIT_STYLES[R0?.style] || pick(r, Object.values(KIT_STYLES));

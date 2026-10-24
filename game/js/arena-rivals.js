@@ -11,11 +11,13 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024glb3';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261024glb3';
-import { getConfig } from './gameplay-config.js?v=20261024glb3';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024glb3';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024glb3';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024apex';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261024apex';
+import { getConfig } from './gameplay-config.js?v=20261024apex';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024apex';
+import { planRoster } from './br-roster.js?v=20261024apex';
+import { listPassives } from './passives.js?v=20261024apex';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024apex';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -28,7 +30,11 @@ export function createRivals(ctx) {
   const URL_NOALVO = typeof location !== 'undefined' && new URLSearchParams(location.search).get('rivaisAlvo') === '0';
   const RC = () => (URL_OFF ? { ativo: false } : URL_NOALVO ? { ...(ctx.cfg().rivais || {}), alvo: null } : ctx.cfg().rivais || {});
   const list = () => ctx.br()?.rivals || [];
-  const monOf = (rv) => ctx.st()?.monstersAlive.find((m) => m.uid === rv.uid) || null;
+  // 20261024apex: 49 rivais → índice uid→monstro por quadro (antes: .find() em monstersAlive a cada consulta = O(rivais² × monstros))
+  let mIdx = new Map(); let mArr = null; let mLen = -1; let mClock = NaN;
+  const monOf = (rv) => { const st = ctx.st(); if (!st || !rv) return null; const arr = st.monstersAlive; const ck = ctx.br()?.clock;
+    if (arr !== mArr || arr.length !== mLen || ck !== mClock) { mIdx.clear(); for (let i = 0; i < arr.length; i++) if (!mIdx.has(arr[i].uid)) mIdx.set(arr[i].uid, arr[i]); mArr = arr; mLen = arr.length; mClock = ck; }
+    const m = mIdx.get(rv.uid); return m && m.uid === rv.uid ? m : null; };
   const pos = (m) => { const p = getMonsterPos(m); return p ? { x: p.x, y: p.y } : { x: m.x + 0.5, y: m.y + 0.5 }; };
   const lvl = () => Math.max(1, ctx.st()?.player?.nivel || 1);
 
@@ -39,11 +45,22 @@ export function createRivals(ctx) {
   }
   // NEXARA FAST: nível PRÓPRIO do rival (começa no NV1; sobe com XP de monstros e de rivais derrotados). Mapa completo: nível do herói.
   const fastRules = () => !!RC().nivelProprio;
-  const lvlFor = (rv) => (fastRules() ? (rv.ownL || 1) : lvl());
+  const lvlFor = (rv) => (fastRules() ? (rv.ownL || 1) : lvl() + (rv.lvlOff || 0));
   function gainXp(rv, n) {
     if (!fastRules() || !(n > 0)) return;
     rv.xp = (rv.xp || 0) + n * (RC().xpMult ?? 1); rv.xpTotal = (rv.xpTotal || 0) + n;
-    while (rv.xp >= xpForLevel(rv.ownL || 1)) { rv.xp -= xpForLevel(rv.ownL || 1); rv.ownL = (rv.ownL || 1) + 1; ctx.note('rival_levelup', { name: rv.name, level: rv.ownL }); }
+    while (rv.xp >= xpForLevel(rv.ownL || 1)) { rv.xp -= xpForLevel(rv.ownL || 1); rv.ownL = (rv.ownL || 1) + 1; ctx.note('rival_levelup', { name: rv.name, level: rv.ownL }); rivalPassive(rv); }
+  }
+  /** 20261024apex PARTIDA JUSTA: o rival também ganha uma PASSIVA a cada nível (mesmo registro data/passives.json do herói),
+   *  sorteada entre as que ele ainda não tem — vida máx./dano entram no HP/ataque do rival; anunciada ('rival_passive'). */
+  function rivalPassive(rv) {
+    if (!RC().justa) return null;
+    let pool = []; try { pool = listPassives().filter((d) => !(rv.passivas || []).includes(d.id)); } catch { pool = []; }
+    if (!pool.length) return null;
+    const d = pool[Math.floor(ctx.R() * pool.length)]; (rv.passivas ||= []).push(d.id);
+    for (const e of d.efeitos || []) { if (e.tipo !== 'mult') continue; if (e.stat === 'maxHp') rv.pHp = (rv.pHp || 0) + e.valor; else if (e.stat === 'damage') rv.pAtk = (rv.pAtk || 0) + e.valor; }
+    ctx.note('rival_passive', { name: rv.name, level: rv.ownL, passive: d.id, nome: d.nome });
+    return d.id;
   }
   const rivalXp = (rv) => Math.round((ctx.st()._monsters[RC().monstro || 'mon_br_rival']?.xp || 60) * (1 + 0.25 * ((rv.level || 1) - 1)));
   function spawn(p) {
@@ -57,8 +74,19 @@ export function createRivals(ctx) {
       const minSep = k < 200 ? 22 : k < 500 ? 12 : 6;
       if (chosen.every((o) => Math.hypot(o.x - q.x, o.y - q.y) >= minSep)) chosen.push(q);
     }
+    // 20261024apex: 50 jogadores — mapa pequeno (FAST) não tem pontos separados para todos → completa com pontos repetidos deslocados
+    for (let k = 0; chosen.length < n && k < 4000 && m.spawnPoints.length; k++) {
+      const base = (pts.length ? pts : m.spawnPoints)[Math.floor(ctx.R() * (pts.length || m.spawnPoints.length))];
+      const ang = ctx.R() * Math.PI * 2, rr = 2 + ctx.R() * 6; const q0 = ctx.nearestFree ? ctx.nearestFree(Math.round(base.x + Math.cos(ang) * rr), Math.round(base.y + Math.sin(ang) * rr)) : base; const q = q0 ? { ...q0, region: base.region } : null;
+      if (!q || !ctx.walk(q.x, q.y) || ctx.inCovil(q.x, q.y, q.region) || Math.hypot(q.x - p.x, q.y - p.y) < Math.min(c.distInicialMin || 30, 14)) continue;
+      if (chosen.every((o) => Math.hypot(o.x - q.x, o.y - q.y) >= (k < 2000 ? 4 : 2))) chosen.push(q);
+    }
     br.charOff = Math.floor(ctx.R() * 9); // 9 PERSONAGENS: rodízio embaralhado pela semente (todos aparecem)
-    chosen.forEach((q, i) => { const h = c.herois[i % c.herois.length]; spawnOne(h, q.x, q.y, i); });
+    // 20261024apex: ELENCO planejado (o LOBBY mostrou exatamente estes) — sem plano (testes antigos), planeja aqui com a semente da partida
+    const temPlano = Array.isArray(ctx.cfg().rivais?.plano) && ctx.cfg().rivais.plano.length >= chosen.length; const plano = temPlano ? ctx.cfg().rivais.plano : (c.justa || chosen.length > (c.herois || []).length) ? planRoster({ n: chosen.length, herois: c.herois || [], R: ctx.R, fast: fastRules(), justa: !!c.justa }) : chosen.map((q, i) => c.herois[i % c.herois.length]); // regras antigas (sem plano, ≤ heróis do JSON): elenco e sorteio IGUAIS ao de antes
+    if (ctx.cfg().rivais) delete ctx.cfg().rivais.plano; // consumido (a próxima partida planeja de novo)
+    br.roster = plano.slice(0, chosen.length); br.rivalSpawns = chosen.map((q) => ({ x: q.x, y: q.y, region: q.region || null, walk: !!ctx.walk(q.x, q.y), covil: !!ctx.inCovil(q.x, q.y, q.region) })); br.heroSpawnAt = { x: p.x, y: p.y };
+    chosen.forEach((q, i) => { const h = plano[i]; spawnOne(h, q.x, q.y, i); });
     ctx.note('rivals_spawn', { n: br.rivals.length, names: br.rivals.map((r) => r.name) });
   }
   function spawnOne(h, x, y, idx) {
@@ -69,12 +97,13 @@ export function createRivals(ctx) {
     const rv = { uid: mon.uid, idx, style: h.style, name: h.nome, primary: h.primary, glow: h.glow, bag: [], mcb: 0, kills: 0, chests: 0,
       goal: null, goalAt: -1e9, nextSwing: 0, nextHurt: 0, swingAt: -1e9, seenAt: -1e9, champion: false, out: false, by: null, path: null, pathI: 0, dodgeReady: 0,
       ownL: 1, xp: 0, xpTotal: 0, rivalKills: 0, killedBy: null };
-    { // 9 PERSONAGENS: o bot sorteia um dos 9 (mesmos do jogador) + skin elemental + PERSONALIDADE do personagem
-      const k = sorteiaPersonagem((idx + (br.charOff || 0)), ctx.R);
-      rv.char = k.char; rv.perso = k.perso; rv.persoLabel = k.persoLabel; rv.skin = k.skin; rv.style = k.char; rv.glow = k.glow;
+    { // 9 PERSONAGENS: o bot usa o personagem do ELENCO (lobby) — sem elenco, sorteia um dos 9 + skin elemental + PERSONALIDADE
+      const k = h.char ? h : sorteiaPersonagem((idx + (br.charOff || 0)), ctx.R);
+      rv.char = k.char; rv.perso = k.perso; rv.persoLabel = k.persoLabel || PERSONALIDADES[k.perso]?.label; rv.skin = k.skin; rv.style = k.char; rv.glow = k.glow;
+      rv.lvlOff = 0; /* partida justa: todos no mesmo nível inicial (substitui o 'nível variado' do 1º pedido) */ rv.arma = c.justa ? (h.arma === 'cajado' ? 'cajado' : 'espada') : null; // PARTIDA JUSTA: NV1 + arma básica (espada ou cajado) // nível VARIADO: herói + 0..3 (nunca abaixo do herói → força ≥ jogador)
     }
-    mon.rival = { name: h.nome, style: rv.style, char: rv.char, skin: rv.skin, perso: rv.perso, primary: h.primary, glow: rv.glow, champion: false };
-    if (fastRules()) rv.ownL = ctx.st()?.fastZero ? 1 : lvl(); // FAST do zero: todos no NV1 · sem 'do zero': começam no nível do herói e sobem por conta própria
+    mon.rival = { name: h.nome, style: rv.style, char: rv.char, skin: rv.skin, perso: rv.perso, primary: h.primary, glow: rv.glow, champion: false, arma: rv.arma };
+    if (fastRules()) rv.ownL = (ctx.st()?.fastZero ? 1 : lvl()) + (rv.lvlOff || 0); // FAST do zero: todos no NV1 · sem 'do zero': começam no nível do herói e sobem por conta própria
     { // 20261009berco: cada herói rival tem seu FILHOTE DE DRAGÃO (BB): cor/elemento próprios + 1 habilidade de apoio (data/dragoes.json)
       const bd = c.bb === false ? null : bbForRivalIndex(ctx.st()._data, idx);
       if (bd) { rv.bb = { def: bd, S: newBBState(1800 + idx * 350, br.clock), at: 0 }; mon.rival.bb = { id: bd.id, nome: bd.nome, cor: bd.cor, tipo: bbAbility(bd)?.tipo || null, wind: false, firedAt: -1e9 }; }
@@ -112,7 +141,8 @@ export function createRivals(ctx) {
   function applyLevel(rv, mon, playerL, full) {
     const champ = !!rv.champion; const L = Math.max(1, playerL + (champ ? (RC().campeao?.nivelExtra ?? 2) : 0));
     const S = rivalStats(L, champ, playerL); const frac = full || !(mon.hpMax > 0) ? 1 : Math.max(0, Math.min(1, mon.hp / mon.hpMax));
-    mon.hpMax = S.hp; mon.hp = Math.max(1, Math.round(S.hp * frac)); mon.atkScale = S.atk;
+    const pH = 1 + (rv.pHp || 0), pA = 1 + (rv.pAtk || 0); // passivas do rival (partida justa)
+    mon.hpMax = Math.round(S.hp * pH); mon.hp = Math.max(1, Math.round(mon.hpMax * frac)); mon.atkScale = S.atk * pA;
     const T = RC().tatica; if (T) { mon.cdMult = T.cdMult ?? 1; mon.tacSpeed = T.velMult ?? 1; if (T.aggro) mon.aggroR = T.aggro; } // FAST: reação mais rápida, mais agressivos
     else { const CA = RC().curvaAlta || {}; mon.cdMult = Math.max(CA.cdMin ?? 0.75, 1 - (CA.cdPorNivel ?? 0) * S.over); } // LOTE-b M3: NV alto → golpeia com menos espera entre ataques
     rv.gearSig = gearBonus().sig;
@@ -177,9 +207,12 @@ export function createRivals(ctx) {
     return null;
   }
   /** caminho grosso (BFS de tiles alcançáveis) para rival longe do herói (IA congelada pelo LOD) */
+  let bfsBuf = null; let bfsCount = 0; let bfsBudget = 0; let bfsLimit = false; let bfsDeferred = 0;
   function bfsPath(sx, sy, gx, gy) {
     const m = ctx.map(); const W = m.W, H = m.H; const N = W * H;
-    const prev = new Int32Array(N).fill(-1); const q = new Int32Array(N); let h = 0, t = 0;
+    // 20261024apex: buffers reaproveitados (49 rivais → sem alocar 2 arrays do tamanho do mapa por caminho)
+    if (!bfsBuf || bfsBuf.N !== N) bfsBuf = { N, prev: new Int32Array(N), q: new Int32Array(N) };
+    const prev = bfsBuf.prev; prev.fill(-1); const q = bfsBuf.q; let h = 0, t = 0; bfsCount++;
     if (!(sx >= 0 && sy >= 0 && sx < W && sy < H && gx >= 0 && gy >= 0 && gx < W && gy < H)) return null; // meta/posição fora do mapa → sem caminho (nunca laço infinito)
     const s = sx + sy * W, g = gx + gy * W; if (s === g) return [];
     prev[s] = s; q[t++] = s;
@@ -401,7 +434,7 @@ export function createRivals(ctx) {
     if (!br.rivals) { spawn(p); return; }
     const st = ctx.st(); const clock = br.clock; const C = c.combate || {}; const dtS = dtMs / 1000;
     const lodMed = (ctx.cfg().lodIa?.medio || 24) - 1;
-    const alive = aliveRivals();
+    const alive = aliveRivals(); bfsBudget = Math.max(3, Math.ceil(alive.length / 12)); bfsLimit = alive.length > 40; // 20261024apex: orçamento/limiar de caminho só com MUITOS rivais (50 jogadores); até 40 = comportamento antigo
     const gearSigNow = c.curvaAlta?.equip && !fastRules() ? gearBonus().sig : null; // trocou de equipamento no meio da corrida → rivais acompanham
     for (const rv of alive) {
       const mon = monOf(rv); const mp = pos(mon);
@@ -432,9 +465,15 @@ export function createRivals(ctx) {
       if (!engaged) { mon.homeX = hp.x; mon.homeY = hp.y; }
       // longe do herói: IA congelada pelo LOD → anda grosso pelo caminho
       if (dP > lodMed && !engaged) {
-        if (!rv.path || rv.pathGoal !== hp.x + hp.y * 10000) { rv.path = bfsPath(mon.x, mon.y, hp.x, hp.y) || []; rv.pathI = 0; rv.pathGoal = hp.x + hp.y * 10000; rv.pathAcc = 0; }
+        { // 20261024apex: refaz o caminho só se a meta andou > 3 tiles (ou o caminho acabou) e com ORÇAMENTO por quadro (49 rivais)
+          const gk = hp.x + hp.y * 10000; const moved = rv.pathGoal != null && rv.pathGoal !== gk && (!bfsLimit || Math.abs(hp.x - (rv.pathGX ?? hp.x)) + Math.abs(hp.y - (rv.pathGY ?? hp.y)) > 3 || rv.pathI >= (rv.path?.length || 0)); // ≤ 30 rivais: igual a antes (refaz a cada mudança de meta)
+          if (!rv.path || rv.pathGoal == null || moved) {
+            if (!bfsLimit || bfsBudget > 0) { bfsBudget--; rv.path = bfsPath(mon.x, mon.y, hp.x, hp.y) || []; rv.pathI = 0; rv.pathGoal = gk; rv.pathGX = hp.x; rv.pathGY = hp.y; rv.pathAcc = 0; }
+            else if (!rv.path) { rv.path = []; rv.pathI = 0; rv.pathGoal = null; bfsDeferred++; }
+          }
+        }
         // 20261010ajustes: zona final + morte súbita há > 30 s e caminho até o rival-alvo inexistente (separados por parede) → reaparece colado nele, longe do herói (ninguém trava a partida)
-        if ((rv.path.length === 0 || br.clock - br.suddenSince > 90000) && rv.goal.kind === 'rival' && br.zone?.stage >= 3 && br.suddenSince && br.clock - br.suddenSince > 30000 && (mon.x !== hp.x || mon.y !== hp.y)) { placeMonster(st, mon.uid, hp.x + 0.5, hp.y + 0.5); rv.moved = (rv.moved || 0) + 1; }
+        if (((rv.path.length === 0 && rv.pathGoal != null) || br.clock - br.suddenSince > 90000) && rv.goal.kind === 'rival' && br.zone?.stage >= 3 && br.suddenSince && br.clock - br.suddenSince > 30000 && (mon.x !== hp.x || mon.y !== hp.y)) { placeMonster(st, mon.uid, hp.x + 0.5, hp.y + 0.5); rv.moved = (rv.moved || 0) + 1; }
         rv.pathAcc = (rv.pathAcc || 0) + dtS * 2.6 * (mon.walkMult || 1);
         while (rv.pathAcc >= 1 && rv.pathI < rv.path.length) { rv.pathAcc -= 1; rv.pathI++; }
         if (rv.pathI > 0 && rv.path.length) { const W = ctx.map().W; const ci = rv.path[Math.min(rv.pathI, rv.path.length) - 1]; const nx = ci % W, ny = (ci / W) | 0; if (nx !== mon.x || ny !== mon.y) { placeMonster(st, mon.uid, nx + 0.5, ny + 0.5); rv.moved = (rv.moved || 0) + 1; } }
@@ -454,7 +493,7 @@ export function createRivals(ctx) {
       // combate grosso com monstros/rivais (fora do duelo com o herói)
       if (!engaged && clock >= rv.nextSwing && rv.goal?.kind === 'gigante') { const g = st.monstersAlive.find((q) => q.uid === rv.goal.uid && q.alive); if (g && Math.hypot(g.x + 0.5 - mp.x, g.y + 0.5 - mp.y) <= (GC().alcance ?? 3.4)) hitGiant(rv, mon, mp, g, clock); }
       if (!engaged && clock >= rv.nextSwing) {
-        const f = nearestFoe(rv, mon, mp, C.alcance || 1.7);
+        const f = nearestFoe(rv, mon, mp, (C.alcance || 1.7) * (rv.arma === 'cajado' ? 1.8 : 1)); // 20261024apex: bot de CAJADO alcança mais longe (rajada mágica) — o de espada bate colado
         if (f) {
           rv.nextSwing = clock + (C.cadenciaMs || 900) * (PERSO(rv).cadMult || 1) * (0.85 + ctx.R() * 0.3); rv.swingAt = clock; mon.rivalSwingAt = performance.now(); mon.rivalSwingN = (mon.rivalSwingN || 0) + 1;
           const def = st._monsters[mon.id]; const dmg = Math.max(1, Math.round((def.ataque || 10) * 1.6 * (mon.atkScale || 1) * (C.danoMult || 1) * (0.8 + ctx.R() * 0.4)));
@@ -584,9 +623,9 @@ export function createRivals(ctx) {
   function view(p) {
     const br = ctx.br(); if (!br?.rivals) return null; const c = RC();
     return {
-      giantHitsByRivals: br.giantHitsByRivals || 0, hunters: aliveRivals().filter(isHunter).length, giantsByRivals: br.giantsByRivals || 0, grazed: br.grazed || 0, provWhy: { ...(br.provWhy || {}) }, rivalFires: br.rivalFires || 0, clock: br.clock, atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, atkWhy: { ...(br.atkWhy || {}) }, bbHits: { ...(br.bbHits || { jogador: 0, rival: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
+      bfs: { n: bfsCount, deferred: bfsDeferred }, giantHitsByRivals: br.giantHitsByRivals || 0, hunters: aliveRivals().filter(isHunter).length, giantsByRivals: br.giantsByRivals || 0, grazed: br.grazed || 0, provWhy: { ...(br.provWhy || {}) }, rivalFires: br.rivalFires || 0, clock: br.clock, atk: { ...(br.atk || { jogador: 0, rival: 0, monstro: 0 }) }, atkWhy: { ...(br.atkWhy || {}) }, bbHits: { ...(br.bbHits || { jogador: 0, rival: 0 }) }, final: !!br.rivalFinal, championUid: br.championUid, championName: br.championName || null, down: br.rivalsDown, byHero: br.rivalsByHero || 0, monKills: br.rivalMonKills || 0,
       list: br.rivals.map((rv) => { const m = monOf(rv); const mp = m ? pos(m) : { x: 0, y: 0 };
-        return { uid: rv.uid, name: rv.name, level: rv.level || 1, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, char: rv.char, skin: rv.skin, perso: rv.perso, persoLabel: rv.persoLabel, retreat: rv.retreatUntil > (ctx.br()?.clock || 0) ? rv.retreat : null, retreats: rv.retreats || 0, backs: rv.backs || 0, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
+        return { uid: rv.uid, name: rv.name, level: rv.level || 1, lvlOff: rv.lvlOff || 0, arma: rv.arma || null, passivas: (rv.passivas || []).slice(), tgtKind: rv.tgt?.kind || null, atk: m ? +(m.atkScale || 1).toFixed(2) : 0, style: rv.style, char: rv.char, skin: rv.skin, perso: rv.perso, persoLabel: rv.persoLabel, retreat: rv.retreatUntil > (ctx.br()?.clock || 0) ? rv.retreat : null, retreats: rv.retreats || 0, backs: rv.backs || 0, color: rv.primary, alive: !!(m && m.alive && !rv.out), out: rv.out, by: rv.by, hp: m ? Math.round(m.hp) : 0, hpMax: m?.hpMax || 0,
           x: +mp.x.toFixed(2), y: +mp.y.toFixed(2), dist: p ? +Math.hypot(mp.x - p.x, mp.y - p.y).toFixed(1) : null, goal: rv.goal ? rv.goal.kind : null, sela: rv.sela ? rv.sela.nome || true : null, fly: rv.fly ? { phase: rv.fly.phase, alt: +rv.fly.alt.toFixed(2), leftMs: Math.round(rv.fly.leftMs), fires: rv.fly.fires || 0 } : null, flights: rv.flights || 0, landings: rv.landings || 0, flyCdUntil: rv.flyCdUntil || 0, kills: rv.kills, chests: rv.chests, bag: rv.bag.length, mcb: rv.mcb,
           champion: rv.champion, ownL: rv.ownL || 1, xpTotal: rv.xpTotal || 0, rivalKills: rv.rivalKills || 0, killedBy: rv.killedBy || null, seen: br.clock - rv.seenAt <= (c.lembraMs || 6000), dodges: rv.dodges || 0, blocks: rv.blocks || 0, tac: m?.tac || null, plen: rv.path ? rv.path.length : null, pi: rv.pathI ?? null, pg: rv.pathGoal ?? null, moved: rv.moved || 0, swingAt: rv.swingAt, state: m ? getAiView(m)?.state || null : null, goal: rv.goal?.kind || null, tgt: rv.tgt?.kind || null, tgtUid: rv.tgt?.uid ?? null, bb: rv.bb ? { id: rv.bb.def.id, nome: rv.bb.def.nome, elemento: rv.bb.def.elemento, tipo: bbAbility(rv.bb.def)?.tipo, fired: rv.bb.S.fired, heals: rv.bb.S.heals, shields: rv.bb.S.shields, veils: rv.bb.S.veils, last: rv.bb.S.lastKind } : null }; })
     };

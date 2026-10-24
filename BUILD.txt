@@ -1,3 +1,3 @@
-build=20261024glb3
-publicado=2026-10-24 09:20 -04
+build=20261024apex
+publicado=2026-10-24 11:37 -04
 origem=/workspace/nexara
