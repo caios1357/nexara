@@ -12,10 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023conc6';
-import { mergeStaticParts } from './merge-util.js?v=20261023conc6';
-import { attachHeroGlb } from './hero-glb.js?v=20261023conc6';
-import { addArmorDetail } from './surface-fx.js?v=20261023conc6';
+import { getConfig } from '../gameplay-config.js?v=20261023glb1';
+import { mergeStaticParts } from './merge-util.js?v=20261023glb1';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261023glb1';
+import { attachHeroGlb } from './hero-glb.js?v=20261023glb1';
+import { addArmorDetail } from './surface-fx.js?v=20261023glb1';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -639,6 +640,48 @@ export function createHeroModel(opts = {}) {
   if (kitDefW) setWeaponClass(kitDefW, glowHex);
   const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls, kit: K, kitInfo };
   // ANTES do merge? não: o merge roda acima; o GLB entra depois e não é mesclado
+
+  // ── MODELO 3D DO CAIO (guerreiro-lite.glb) com auto-rig no esqueleto procedural; falha/preset baixo → fica o procedural ──
+  if (K?.glbUrl && opts.caioGlb && !/[?&]caioGlb=0\b/.test(typeof location !== 'undefined' ? location.search : '')) {
+    kitInfo.caioGlb = 'loading';
+    loadCaioGlb(new URL(K.glbUrl, import.meta.url).href).then((src) => { try { bindCaioGlb(src); kitInfo.caioGlb = 'ready'; opts.onCaioReady?.(); } catch (e) { kitInfo.caioGlb = 'fail'; console.warn('[hero] caio glb', e); } }).catch(() => { kitInfo.caioGlb = 'fail'; });
+  }
+  function bindCaioGlb(src) {
+    const L = LM_GUERREIRO; const s = (K.glbHeight || 1.8) / 1.96;
+    const v = (a, b) => new THREE.Vector3((a[0] - b[0]) * s, (a[1] - b[1]) * s, (a[2] - b[2]) * s);
+    const J = { hips, spine, chest, neck, head, shoulderL: arms.L.shoulder, elbowL: arms.L.elbow, wristL: arms.L.wrist, shoulderR: arms.R.shoulder, elbowR: arms.R.elbow, wristR: arms.R.wrist, thighL: legs.L.thigh, kneeL: legs.L.knee, thighR: legs.R.thigh, kneeR: legs.R.knee };
+    for (const k of BONE_ORDER) { J[k].scale.set(1, 1, 1); J[k].rotation.set(0, 0, 0); }
+    HIPY = (L.hips[1] + 1) * s; hips.position.set(0, HIPY, 0);
+    spine.position.copy(v(L.spine, L.hips)); chest.position.copy(v(L.chest, L.spine)); neck.position.copy(v(L.neck, L.chest)); head.position.copy(v(L.head, L.neck));
+    for (const sd of ['L', 'R']) {
+      arms[sd].shoulder.position.copy(v(L['shoulder' + sd], L.chest));
+      arms[sd].elbow.position.set(0, -v(L['elbow' + sd], L['shoulder' + sd]).length(), 0);
+      arms[sd].wrist.position.set(0, -v(L['wrist' + sd], L['elbow' + sd]).length(), 0);
+      legs[sd].thigh.position.copy(v(L['thigh' + sd], L.hips)); legs[sd].knee.position.set(0, (L['knee' + sd][1] - L['thigh' + sd][1]) * s, 0);
+    }
+    arms.L.shoulder.rotation.z = Math.PI / 2; arms.R.shoulder.rotation.z = -Math.PI / 2; // pose de ligação = T-pose do modelo
+    const geo = src.geometry.clone(); if (!geo.attributes.normal) geo.computeVertexNormals(); autoWeights(geo, L);
+    const mat = src.material.clone(); mat.envMapIntensity = 0.35; mat.roughness = 0.7; const tint = { value: K.glow != null && K.glow !== 0x0aa8ff ? 1 : 0 };
+    mat.onBeforeCompile = (sh) => {
+      sh.uniforms.uRimCol = rimCol; sh.uniforms.uTint = tint;
+      sh.fragmentShader = 'uniform vec3 uRimCol; uniform float uTint;\n' + sh.fragmentShader
+        .replace('#include <map_fragment>', `#include <map_fragment>
+  { vec3 c = diffuseColor.rgb; float cy = smoothstep(0.06, 0.25, c.b - c.r) * smoothstep(0.12, 0.35, max(c.g, c.b)); diffuseColor.rgb = mix(c, uRimCol * max(c.g, c.b) * 1.2, cy * uTint); }`)
+        .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+  #ifdef USE_EMISSIVEMAP
+  { vec4 emC = texture2D(emissiveMap, vEmissiveMapUv); float el = max(emC.r, max(emC.g, emC.b)); totalEmissiveRadiance = mix(totalEmissiveRadiance, uRimCol * el * 0.9, uTint); }
+  #endif
+  { float fr = 1.0 - abs(dot(normalize(normal), normalize(vViewPosition))); totalEmissiveRadiance += uRimCol * pow(fr, 2.6) * 0.35; }`);
+    };
+    mat.customProgramCacheKey = () => 'nxcaio'; flashMats.push(mat); baseEmissive.push(mat.emissive.getHex());
+    const mesh = new THREE.SkinnedMesh(geo, mat); mesh.name = 'heroCaioGlb'; mesh.scale.setScalar(s); mesh.position.set(0, s, 0); mesh.frustumCulled = false; mesh.castShadow = true;
+    root.add(mesh); root.updateMatrixWorld(true);
+    mesh.bind(new THREE.Skeleton(BONE_ORDER.map((k) => J[k])), mesh.matrixWorld);
+    arms.L.shoulder.rotation.z = 0; arms.R.shoulder.rotation.z = 0;
+    const BODY = new Set([...BONE_ORDER, 'cape0', 'cape1', 'cape2', 'backSword']);
+    root.traverse((o) => { if (o.isMesh && o !== mesh && BODY.has(o.parent?.name)) o.visible = false; });
+    kitInfo.caio = { tris: geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3, bones: BONE_ORDER.length, scale: +s.toFixed(3) };
+  }
   const glb = opts.glb === false ? null : attachHeroGlb(api, { styleId: opts.styleId, onReady: opts.onGlbReady });
   api.glb = glb;
   return api;

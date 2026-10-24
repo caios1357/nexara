@@ -21,10 +21,10 @@ const W = (cols - 1) * sp; if (q.get('cam') === 'close') { cam.fov = 30; cam.asp
 const hs = []; const lb = document.getElementById('lb');
 ids.forEach((id, i) => {
   const kit = kitFor({ styleId: id, custom: skin ? { skin } : {} });
-  const hm = createHeroModel({ styleId: id, kit, glb: false });
+  const hm = createHeroModel({ styleId: id, kit, glb: false, caioGlb: q.get('caioGlb') === '1' }); (window.__hms ||= []).push(hm);
   const g = new THREE.Group(); g.add(hm.root); g.position.set(-W / 2 + i * sp, 0, 0); g.rotation.y = yaw; scene.add(g); hs.push(hm);
   const s = document.createElement('span'); s.textContent = (PERSONAGENS.find((p) => p.id === id)?.name || id) + (skin ? ' · ' + skin : ''); lb.appendChild(s);
 });
-let t = 0; function f() { t += 0.016; for (const h of hs) h.update(0.016, { x: 0, z: 0, yaw: Math.PI, speed: 0, walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); r.render(scene, cam); requestAnimationFrame(f); }
-f(); window.__ready = true;
+let t = 0; function f() { t += 0.016; for (const h of hs) h.update(0.016, { x: 0, z: 0, yaw: Math.PI, speed: +(q.get('speed') || 0), walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); r.render(scene, cam); requestAnimationFrame(f); }
+f(); const wr = () => ((window.__hms || []).some((h) => h.kitInfo.caioGlb === 'loading') ? setTimeout(wr, 100) : (window.__ready = true)); wr();
 </script></body></html>

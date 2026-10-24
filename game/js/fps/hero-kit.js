@@ -4,7 +4,7 @@
  * Também gera kits VARIADOS (determinísticos pelo nome) para os rivais. Puramente visual.
  */
 export const KIT_STYLES = {
-  cavaleiro: { head: 'guerreiro', face: 'visor', armor: 0x16264a, cloth: 0x101c38, helmColor: 0x14234a, glow: 0x0aa8ff, cape: true, weapon: 'espada', pad: 1, chibi: true, bigPads: true, emblem: true, bigBoots: true, backSword: true, tabardFront: true }, // GUERREIRO (heroi-guerreiro-folha)
+  cavaleiro: { glbUrl: '../../assets/modelos/guerreiro-lite.glb', head: 'guerreiro', face: 'visor', armor: 0x16264a, cloth: 0x101c38, helmColor: 0x14234a, glow: 0x0aa8ff, cape: true, weapon: 'espada', pad: 1, chibi: true, bigPads: true, emblem: true, bigBoots: true, backSword: true, tabardFront: true }, // GUERREIRO (heroi-guerreiro-folha)
   runico: { head: 'chapeu', face: 'olhos', armor: 0x2b2538, cloth: 0x281c3b, glow: 0xb46aff, cape: true, weapon: 'montante', pad: 1.1, rune: true },
   cacador: { head: 'capuz', face: 'mascara', armor: 0x212922, cloth: 0x1b281e, glow: 0x46ff8a, cape: false, weapon: 'adagas', pad: 0.85, scarf: true },
   // ── 9 PERSONAGENS (folhas do Caio) — cores/formas tiradas das referências ──
@@ -26,7 +26,7 @@ const mixHex = (a, b, k) => {
 };
 const num = (v) => (v == null ? null : typeof v === 'number' ? v : parseInt(String(v).replace('#', ''), 16));
 
-import { SKINS } from '../personagens.js?v=20261023conc6';
+import { SKINS } from '../personagens.js?v=20261023glb1';
 /** SKIN ELEMENTAL: brilho do elemento + armadura tingida (mantém a forma do personagem) */
 export function applySkin(k, skinId) {
   const S = SKINS[skinId]; if (!S) return k;

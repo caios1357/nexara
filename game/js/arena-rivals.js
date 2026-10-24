@@ -11,11 +11,11 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261023conc6';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261023conc6';
-import { getConfig } from './gameplay-config.js?v=20261023conc6';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261023conc6';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261023conc6';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261023glb1';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261023glb1';
+import { getConfig } from './gameplay-config.js?v=20261023glb1';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261023glb1';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261023glb1';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 

@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023conc6';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261023glb1';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
@@ -184,7 +184,7 @@ export function buildBrTerrain(zone, cfg, o) {
     strip: [geos.strip, mats.neon, false], vent: [geos.vent, mats.metal, false], banner: [geos.banner, mats.neon, false],
     bone: [geos.bone, mats.bone, false], skull: [geos.skull, mats.bone, false], claw: [geos.claw, mats.decal, false], scorch: [geos.scorch, mats.decal, false], ember: [geos.ember, mats.neon, false],
     pipe: [geos.pipe, mats.pipe, false],
-    win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, addOccluderFade(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.5, flatShading: true })), true], puddle: [geos.puddle, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }), false], sign: [geos.sign, mats.neon, false], awn: [geos.awn, mats.rust, false], acu: [geos.acu, mats.metal, false], balc: [geos.balc, mats.metal, true], upole: [geos.upole, mats.trunk, true], wire: [geos.wire, new THREE.MeshBasicMaterial({ color: 0x0a0a10 }), false], pot: [geos.pot, mats.rust, false], leaf: [geos.leaf, mats.canopy, false], door: [geos.door, new THREE.MeshStandardMaterial({ map: doorTex(), roughness: 0.7, side: THREE.DoubleSide }), false]
+    win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, addOccluderFade(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.5, flatShading: true })), true], puddle: [geos.puddle, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false }), false], sign: [geos.sign, mats.neon, false], awn: [geos.awn, mats.rust, false], acu: [geos.acu, mats.metal, false], balc: [geos.balc, mats.metal, true], upole: [geos.upole, mats.trunk, true], wire: [geos.wire, new THREE.MeshBasicMaterial({ color: 0x0a0a10 }), false], pot: [geos.pot, mats.rust, false], leaf: [geos.leaf, mats.canopy, false], door: [geos.door, new THREE.MeshStandardMaterial({ map: doorTex(), roughness: 0.7, side: THREE.DoubleSide }), false]
   };
   const COLORED = new Set(['puddle', 'leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };

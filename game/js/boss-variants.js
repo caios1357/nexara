@@ -9,7 +9,7 @@
  *   (ataques[x][campo] = MULTIPLICADOR do campo numérico; definir[x][campo] = valor absoluto)
  * O dano segue a regra da Arena: atkScale do chefe (= 2,5× o dano BASE) × atkMult do ataque — o telegraph/tempo de aviso NUNCA é encurtado abaixo do piso.
  */
-import { getConfig } from './gameplay-config.js?v=20261023conc6';
+import { getConfig } from './gameplay-config.js?v=20261023glb1';
 export const TELEGRAPH_MIN_MS = 700; // piso de aviso: o herói sempre pode reagir (esquiva dura ~0,3 s)
 
 const cache = new Map();
