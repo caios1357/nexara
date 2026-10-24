@@ -12,11 +12,11 @@
  * Dano sempre por deps.damage (main.damageMonsterFrom → applyDamageToMonster),
  * então XP/loot/quests contam como os do herói.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261024poder';
-import { getConfig, DEG } from './gameplay-config.js?v=20261024poder';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024poder';
-import { isWalkable } from './map.js?v=20261024poder';
-import { getStat, STATS } from './modifiers.js?v=20261024poder';
+import { bossCfgFor } from './boss-variants.js?v=20261024r2';
+import { getConfig, DEG } from './gameplay-config.js?v=20261024r2';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261024r2';
+import { isWalkable } from './map.js?v=20261024r2';
+import { getStat, STATS } from './modifiers.js?v=20261024r2';
 
 export const DRAGON_STATES = Object.freeze({
   FOLLOW: 'FOLLOW', IDLE: 'IDLE', SEARCH_TARGET: 'SEARCH_TARGET', COMBAT: 'COMBAT', ATTACK: 'ATTACK', RETURN: 'RETURN'
@@ -56,6 +56,7 @@ export function createDragon(deps) {
   const anchorOut = { x: 0, y: 0 };
   const CAND_F = [1, 0.7, -0.72, -0.64]; // × followForward
   const CAND_S = [1, 0.6, 1, 0];         // × lado
+  const CAND_X = [[0, -1], [-0.7, -0.7], [-1, 0], [0.7, 0.7], [0.7, -0.7]]; // r2: extras (× minSep): lado direito, trás-direita, trás, frente-esq./dir.
 
   // —— pool de projéteis (sem alocação por frame) ——
   const projectiles = [];
@@ -240,9 +241,13 @@ export function createDragon(deps) {
     // esquerda = rotaciona frente -90°
     const lx = fy;
     const ly = -fx;
-    for (let i = 0; i < CAND_F.length; i++) {
-      const f = CAND_F[i] * fwd;
-      const sd = CAND_S[i] * side;
+    // r2 (Caio: "o dragão fica em cima do herói"): todo ponto de voo fica a ≥ minSep do herói (antes um candidato era 0,45 m atrás
+    // dele e, com tudo bloqueado em corredor estreito, o ponto era o PRÓPRIO herói → mini-dragão dentro do corpo/cabeça)
+    const minSep = c.minSepTiles ?? 0.8;
+    for (let i = 0; i < CAND_F.length + CAND_X.length; i++) {
+      let f, sd;
+      if (i < CAND_F.length) { f = CAND_F[i] * fwd; sd = CAND_S[i] * side; } else { const q = CAND_X[i - CAND_F.length]; f = q[0] * minSep; sd = q[1] * minSep; }
+      const r = Math.hypot(f, sd); if (r < minSep) { if (r < 1e-3) { f = -minSep; sd = 0; } else { f *= minSep / r; sd *= minSep / r; } }
       const ax = px + fx * f + lx * sd;
       const ay = py + fy * f + ly * sd;
       if (!blocked(Math.floor(ax), Math.floor(ay)) && hasLineOfSight(zoneRef, px, py, ax, ay)) {
@@ -251,8 +256,10 @@ export function createDragon(deps) {
         return out;
       }
     }
-    out.x = px;
-    out.y = py;
+    // nada livre: fica onde está se já está afastado; senão recua para trás do herói (a colisão segura na parede; a altura sobe — ver update)
+    if (Math.hypot(pos.x - px, pos.y - py) >= minSep * 0.9) { out.x = pos.x; out.y = pos.y; return out; }
+    out.x = px - fx * minSep;
+    out.y = py - fy * minSep;
     return out;
   }
 
@@ -454,11 +461,12 @@ export function createDragon(deps) {
     if (recoverT > 0) recoverT = Math.max(0, recoverT - ms);
     stats.level = stateRef.dragon?.level || 1;
 
-    // pairar
-    h += ((c.hoverHeight + Math.sin(clock / 380) * c.hoverBobAmp) - h) * Math.min(1, dt * 6);
-
     // teleporte de segurança (preso atrás de paredes / muito longe)
     const dPlayer = Math.hypot(pos.x - px, pos.y - py);
+    // pairar · r2: perto demais do herói (corredor, curva) → sobe por cima da cabeça em vez de atravessar o corpo
+    const sep = c.minSepTiles ?? 0.8; const over = dPlayer < sep ? (1 - dPlayer / sep) * (c.overHeadLift ?? 1.5) : 0; stats.overLift = over;
+    h += ((c.hoverHeight + over + Math.sin(clock / 380) * c.hoverBobAmp) - h) * Math.min(1, dt * 6);
+
     if (dPlayer > c.teleportDistance || (dPlayer > c.leashDistance + 1 && !hasLineOfSight(zoneRef, pos.x, pos.y, px, py))) {
       farT += ms;
       if (farT > c.teleportAfterMs || dPlayer > c.teleportDistance) { teleportToPlayer(px, py, ctx.yaw, ctx.aspect); log('teleport'); }
@@ -490,7 +498,12 @@ export function createDragon(deps) {
       case S.FOLLOW:
       case S.IDLE:
       case S.RETURN: {
-        const d = steer(ax.x, ax.y, c.speed * stats.speedMult, dt);
+        // r2: espaço pessoal — se o herói chegou perto demais (andou na direção do dragão), sai radialmente antes de voltar ao ombro
+        const sepR = c.minSepTiles ?? 0.8; const hdx = pos.x - px, hdy = pos.y - py; const hd = Math.hypot(hdx, hdy);
+        let tx = ax.x, ty = ax.y, spd = c.speed * stats.speedMult;
+        if (hd < sepR * 0.9) { const ux = hd > 1e-3 ? hdx / hd : -Math.sin(ctx.yaw), uy = hd > 1e-3 ? hdy / hd : Math.cos(ctx.yaw); const rx = px + ux * sepR, ry = py + uy * sepR;
+          if (!blocked(Math.floor(rx), Math.floor(ry))) { tx = rx * 0.6 + ax.x * 0.4; ty = ry * 0.6 + ax.y * 0.4; } spd *= 1.6; stats.sepPush = (stats.sepPush || 0) + 1; }
+        const d = steer(tx, ty, spd, dt);
         turnTo(Math.hypot(vel.x, vel.y) > 0.4 ? Math.atan2(vel.x, -vel.y) : ctx.yaw, dt);
         if (st === S.RETURN && d < c.followArriveDist * 2) setState(S.FOLLOW);
         else if (st === S.FOLLOW && d < c.followArriveDist) setState(S.IDLE);
@@ -624,7 +637,7 @@ export function createDragon(deps) {
     let active = 0;
     for (const p of projectiles) if (p.active) active++;
     return {
-      x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), h: +h.toFixed(2), facing: +facing.toFixed(3), state: st,
+      x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), h: +h.toFixed(2), ax: +anchorOut.x.toFixed(2), ay: +anchorOut.y.toFixed(2), facing: +facing.toFixed(3), state: st,
       stage: stage(), target: targetUid, targetReason, attack: atk.id, phase: atk.phase,
       cooldowns: { ...cooldowns }, recoverMs: recoverT, activeProjectiles: active, clock: Math.round(clock),
       stats: { ...stats }, enabled, bossFollow: bossFollowActive(),

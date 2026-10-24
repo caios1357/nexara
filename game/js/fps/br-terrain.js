@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261024poder';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261024r2';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
@@ -126,6 +126,20 @@ export function buildBrTerrain(zone, cfg, o) {
   };
   if (o.detail) addWallDetail(mats.wall);
   addOccluderFade(mats.wall);
+  // r2 (Caio: "só dá favela pra cenário"): PAREDES/ROCHAS/PILARES por distrito com a textura da FOLHA do distrito (antes: wall-rust em todos)
+  //  periferia = tijolo+grafite (periferia-2) · ruínas/FÁBRICA = chapa ondulada (fabrica-2) · floresta/CAVERNA = rocha com cristais (caverna-2)
+  //  complexo/LABORATÓRIO = painel de aço com respiro (complexo-3) · ELITE = aço escovado com friso dourado (elite-1) · DRAGÃO = rocha de lava (caverna-0)
+  const WALL_ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: ['periferia-2', 0xffffff, 1.25], ruinas: ['fabrica-2', 0xe4ecff, 1.35], floresta: ['caverna-2', 0xe8f0ff, 1.6], complexo: ['complexo-3', 0xd4e2ff, 1.45], elite: ['elite-1', 0xffffff, 1.3], dragao: ['caverna-0', 0xffffff, 1.2] };
+  const ROCK_ARTE = WALL_ARTE ? { floresta: 'caverna-2', dragao: 'caverna-0', ruinas: 'fabrica-3' } : null;
+  const PILLAR_ARTE = WALL_ARTE ? { elite: 'elite-1', complexo: 'complexo-3', ruinas: 'fabrica-0' } : null;
+  stats.wallArte = {};
+  const artMat = (file, ry, extra) => { const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex(`../distritos/${file}.webp`, 1, ry), roughness: 0.8, metalness: 0.12, ...extra }); return m; };
+  for (const [rid, [file, tint, gain]] of Object.entries(WALL_ARTE || {})) {
+    const m = artMat(file, 1.3); m.color.setHex(tint).multiplyScalar(gain); if (rid === 'elite') { m.metalness = 0.55; m.roughness = 0.35; } if (rid === 'dragao') { m.emissive = new THREE.Color(0x401808); m.emissiveIntensity = 0.6; }
+    if (o.detail) addWallDetail(m); addOccluderFade(m); mats['wall_' + rid] = m; stats.wallArte[rid] = file;
+  }
+  for (const [rid, file] of Object.entries(ROCK_ARTE || {})) { const m = artMat(file, 1, { flatShading: true, roughness: 0.92 }); m.color.setScalar(1.5); mats['rock_' + rid] = m; }
+  for (const [rid, file] of Object.entries(PILLAR_ARTE || {})) { const m = artMat(file, 2, { roughness: 0.45, metalness: 0.55 }); m.color.setScalar(1.3); mats['pillar_' + rid] = m; }
   const geos = {
     wall: new THREE.BoxGeometry(T, 1, T).translate(0, 0.5, 0),
     pillar: new THREE.BoxGeometry(T * 0.62, 1, T * 0.62).translate(0, 0.5, 0),
@@ -186,7 +200,16 @@ export function buildBrTerrain(zone, cfg, o) {
     pipe: [geos.pipe, mats.pipe, false],
     win: [geos.win, new THREE.MeshBasicMaterial({ map: winTex(), color: 0xffffff, side: THREE.DoubleSide, transparent: true }), false], tank: [geos.tank, mats.prop, true], roof: [geos.roof, addOccluderFade(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.5, flatShading: true })), true], puddle: [geos.puddle, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false }), false], sign: [geos.sign, mats.neon, false], awn: [geos.awn, mats.rust, false], acu: [geos.acu, mats.metal, false], balc: [geos.balc, mats.metal, true], upole: [geos.upole, mats.trunk, true], wire: [geos.wire, new THREE.MeshBasicMaterial({ color: 0x0a0a10 }), false], pot: [geos.pot, mats.rust, false], leaf: [geos.leaf, mats.canopy, false], door: [geos.door, new THREE.MeshStandardMaterial({ map: doorTex(), roughness: 0.7, side: THREE.DoubleSide }), false]
   };
-  const COLORED = new Set(['puddle', 'leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
+  for (const rid of Object.keys(WALL_ARTE || {})) KIND['wall_' + rid] = [geos.wall, mats['wall_' + rid], true];
+  for (const rid of Object.keys(ROCK_ARTE || {})) KIND['rock_' + rid] = [geos.rock, mats['rock_' + rid], true];
+  for (const rid of Object.keys(PILLAR_ARTE || {})) KIND['pillar_' + rid] = [geos.pillar, mats['pillar_' + rid], true];
+  // r2: PEÇAS das folhas (instanciadas, 1 draw call por tipo/bloco): cristais da caverna, cubas verdes do laboratório, contêineres da fábrica, postes da elite
+  KIND.crystal = [new THREE.OctahedronGeometry(0.32, 0).scale(0.8, 2.4, 0.8).translate(0, 0.7, 0), mats.neon, false];
+  KIND.labTube = [new THREE.CylinderGeometry(0.42, 0.42, 1.9, 10).translate(0, 0.95, 0), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.78, toneMapped: false }), false];
+  KIND.labCap = [new THREE.CylinderGeometry(0.5, 0.5, 0.22, 10), mats.metal, false];
+  KIND.container = [new THREE.BoxGeometry(1.15, 1.15, 2.3).translate(0, 0.575, 0), new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('../distritos/fabrica-2.webp', 1, 1), roughness: 0.7, metalness: 0.4 }), true];
+  KIND.elamp = [new THREE.CylinderGeometry(0.06, 0.09, 3.2, 6).translate(0, 1.6, 0), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), false];
+  const COLORED = new Set(['crystal', 'labTube', 'container', 'elamp', 'puddle', 'leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
   const wallNear = (x, y) => { for (const [dx, dy, ry] of [[1, 0, Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, 0], [0, -1, 0]]) if (tileAt(x + dx, y + dy) === 'wall') return { dx, dy, ry }; return null; };
   const isLootTile = new Set([...(m.chests || []), ...(m.crates || [])].map((c) => c.x + c.y * W));
@@ -202,7 +225,9 @@ export function buildBrTerrain(zone, cfg, o) {
       if (st?.kind === 'ruina') h *= 0.45 + 0.55 * h32(x, y, 9);
       const wc = REGION_WALL[(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)) || {}).id] ?? 0x6a7080;
       tmpC.setHex(wc).multiplyScalar(0.85 + hs * 0.3);
-      push('wall', x, y, [wx, gy - 0.3, wz], 0, [1, h + 0.3, 1], tmpC.getHex());
+      const wrid = (reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)) || {}).id; const wk = WALL_ARTE && WALL_ARTE[wrid] && !border ? 'wall_' + wrid : 'wall';
+      if (wk !== 'wall') tmpC.setScalar(0.85 + hs * 0.3);
+      push(wk, x, y, [wx, gy - 0.3, wz], 0, [1, h + 0.3, 1], tmpC.getHex());
       // CONCEITO (Periferia à noite): casas de tijolo com janelas acesas, caixas d'água azuis e telhado de zinco
       if (reg?.id === 'periferia' && !border && o.props !== false) {
         const wq = h32(x, y, 120);
@@ -230,7 +255,7 @@ export function buildBrTerrain(zone, cfg, o) {
     } else if (t === 'pillar') {
       if (tower && x >= tower.x0 && x <= tower.x1 && y >= tower.y0 && y <= tower.y1) continue; // torre própria abaixo
       const h = reg?.id === 'elite' ? 4.4 : 3.6;
-      push('pillar', x, y, [wx, gy - 0.2, wz], 0, [1, h, 1], 0xffffff);
+      push(PILLAR_ARTE && PILLAR_ARTE[reg?.id] ? 'pillar_' + reg.id : 'pillar', x, y, [wx, gy - 0.2, wz], 0, [1, h, 1], 0xffffff);
       push('cap', x, y, [wx, gy + h - 0.1, wz], 0, [1, 1, 1], new THREE.Color(reg?.cor || '#ffc830').getHex());
     } else if (t === 'tree') {
       const s = 0.85 + hs * 0.55; const jx = (h32(x, y, 1) - 0.5) * 0.6, jz = (h32(x, y, 2) - 0.5) * 0.6;
@@ -243,7 +268,8 @@ export function buildBrTerrain(zone, cfg, o) {
       const cave = caveBox ? (x >= caveBox.x0 && x <= caveBox.x1 && y >= caveBox.y0 && y <= caveBox.y1) : (x >= 18 && x <= 31 && y >= 2 && y <= 9);
       const s = 0.95 + hs * 0.35;
       tmpC.setHex(reg?.id === 'dragao' ? 0x3a4a40 : 0x5a5650).multiplyScalar(0.8 + hs * 0.3);
-      push('rock', x, y, [wx, gy + (cave ? 0.6 : 0.2), wz], hs * 7, [s * 1.15, cave ? 2.4 + hs : 0.8 + hs * 0.6, s * 1.15], tmpC.getHex());
+      if (ROCK_ARTE && ROCK_ARTE[reg?.id]) tmpC.setScalar(0.8 + hs * 0.35);
+      push(ROCK_ARTE && ROCK_ARTE[reg?.id] ? 'rock_' + reg.id : 'rock', x, y, [wx, gy + (cave ? 0.6 : 0.2), wz], hs * 7, [s * 1.15, cave ? 2.4 + hs : 0.8 + hs * 0.6, s * 1.15], tmpC.getHex());
     } else if (t === 'crate') {
       const two = hs > 0.55; push('crate', x, y, [wx, gy, wz], (hs - 0.5) * 0.5, [1, 1, 1], 0xffffff);
       if (two) push('crate', x, y, [wx + 0.1, gy + 1.25, wz - 0.05], hs * 2, [0.85, 0.85, 0.85], 0xffffff);
@@ -270,18 +296,22 @@ export function buildBrTerrain(zone, cfg, o) {
         else if (o.extraProps && wn && q < 0.12) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
         else if (o.extraProps && q > 0.982) { tmpC.setHSL(0.6, 0.15, 0.08 + h32(x, y, 83) * 0.06); pushP('rock', x, y, [wx + (h32(x, y, 84) - 0.5), gy + 0.18, wz + (h32(x, y, 85) - 0.5)], q * 30, [0.34, 0.24, 0.38], tmpC.getHex()); }
       } else if (reg.id === 'ruinas') {
+        if (WALL_ARTE && wn && q > 0.93 && q < 0.955) { const cq = h32(x, y, 170); pushP('container', x, y, [wx + wn.dx * 0.42, gy, wz + wn.dy * 0.42], wn.ry + Math.PI / 2, [0.62, 0.62, 0.62], cq < 0.34 ? 0xd04a30 : cq < 0.67 ? 0x3a6ad0 : 0xe0b030); } // r2 FÁBRICA: contêineres coloridos da folha
         if (wn && q < 0.05) { tmpC.setHex(0xa8906c).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.5 + h32(x, y, 34) * 1.1, 1], tmpC.getHex()); }
         else if (q > 0.975) pushP('rubble', x, y, [wx, gy + 0.08, wz], q * 9, [1.4, 1, 1.2], 0xffffff);
         else if (o.extraProps && q > 0.962) { const a = h32(x, y, 86) * Math.PI; pushP('rubble', x, y, [wx, gy + 0.3, wz], a, [5.2, 1, 0.65], 0xffffff); }
       } else if (reg.id === 'floresta') {
+        if (WALL_ARTE && wn && q > 0.92 && q < 0.95) for (let k = 0; k < 3; k++) { const a = h32(x, y, 171 + k); pushP('crystal', x, y, [wx + wn.dx * 0.45 + (a - 0.5) * 0.5, gy - 0.1, wz + wn.dy * 0.45 + (h32(x, y, 175 + k) - 0.5) * 0.5], a * 6, [0.7 + a * 0.6, 0.6 + a * 0.9, 0.7 + a * 0.6], a < 0.5 ? 0x7a5aff : 0x4ab8ff); } // r2 CAVERNA: cristais azuis/roxos
         if (q < 0.07) { tmpC.setHSL(0.33 + h32(x, y, 35) * 0.08, 0.55, 0.2); pushP('fern', x, y, [wx + (h32(x, y, 36) - 0.5) * 1.2, gy, wz + (h32(x, y, 37) - 0.5) * 1.2], q * 60, [1, 0.8 + q * 6, 1], tmpC.getHex()); }
         else if (o.extraProps && q < 0.2) { tmpC.setHSL(0.3 + h32(x, y, 87) * 0.1, 0.6, 0.22 + h32(x, y, 88) * 0.1); pushP('fern', x, y, [wx + (h32(x, y, 89) - 0.5) * 1.6, gy - 0.02, wz + (h32(x, y, 91) - 0.5) * 1.6], h32(x, y, 93) * 6, [0.45, 0.45 + h32(x, y, 95) * 0.6, 0.45], tmpC.getHex()); }
         else if (q > 0.988) { pushP('shroom', x, y, [wx + (h32(x, y, 38) - 0.5), gy + 0.1, wz + (h32(x, y, 39) - 0.5)], 0, [1, 0.7, 1], h32(x, y, 40) < 0.5 ? 0x5dfff0 : 0xb36bff); }
       } else if (reg.id === 'complexo') {
+        if (WALL_ARTE && wn && q > 0.94 && q < 0.958) { const lx = wx + wn.dx * 0.4, lz = wz + wn.dy * 0.4; pushP('labTube', x, y, [lx, gy + 0.1, lz], 0, [1, 1, 1], h32(x, y, 178) < 0.7 ? 0x5dff6a : 0x4ad8ff); pushP('labCap', x, y, [lx, gy + 0.1, lz], 0, [1, 1, 1], 0xffffff); pushP('labCap', x, y, [lx, gy + 2.05, lz], 0, [1, 1, 1], 0xffffff); } // r2 LABORATÓRIO: cubas verdes
         if (wn && q < 0.08) pushP('strip', x, y, [wx + wn.dx * 0.42, gy + 0.03, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], h32(x, y, 41) < 0.7 ? 0x39e8ff : 0xff4a8a);
         else if (q > 0.985) pushP('vent', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff);
         else if (o.extraProps && wn && q < 0.2) { pushP('pipe', x, y, [wx + wn.dx * 0.42, gy + 1.05, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], 0xffffff); if (q < 0.15) pushP('pipe', x, y, [wx + wn.dx * 0.4, gy + 1.32, wz + wn.dy * 0.4], wn.ry, [1, 0.7, 0.7], 0xffffff); }
       } else if (reg.id === 'elite') {
+        if (WALL_ARTE && wn && q > 0.93 && q < 0.95) pushP('elamp', x, y, [wx + wn.dx * 0.42, gy, wz + wn.dy * 0.42], 0, [1, 1, 1], h32(x, y, 179) < 0.5 ? 0xb36bff : 0xffc860); // r2 ELITE: postes de luz roxo/dourado
         if (wn && q < 0.05) pushP('banner', x, y, [wx + wn.dx * 0.46, gy + 0.6, wz + wn.dy * 0.46], wn.ry + Math.PI / 2, [1, 1, 1], 0xffc830);
         else if (o.extraProps && q > 0.986) { tmpC.setHex(0x6a5a3a); pushP('stub', x, y, [wx, gy, wz], 0, [0.55, 0.9, 0.55], tmpC.getHex()); pushP('ember', x, y, [wx, gy + 1.0, wz], q * 9, [2.4, 2.8, 2.4], 0xffa030); }
       } else if (reg.id === 'dragao') {

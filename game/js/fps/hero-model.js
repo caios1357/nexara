@@ -12,11 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261024poder';
-import { mergeStaticParts } from './merge-util.js?v=20261024poder';
-import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261024poder';
-import { attachHeroGlb } from './hero-glb.js?v=20261024poder';
-import { addArmorDetail } from './surface-fx.js?v=20261024poder';
+import { getConfig } from '../gameplay-config.js?v=20261024r2';
+import { mergeStaticParts } from './merge-util.js?v=20261024r2';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261024r2';
+import { attachHeroGlb } from './hero-glb.js?v=20261024r2';
+import { addArmorDetail } from './surface-fx.js?v=20261024r2';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -440,7 +440,7 @@ export function createHeroModel(opts = {}) {
     root.position.set(inp.x, 0, inp.z);
     st.yaw = inp.yaw;
     root.rotation.y = Math.PI - inp.yaw;
-    const sp = Math.max(0, inp.speed || 0);
+    const sp = inp.mounted ? 0 : Math.max(0, inp.speed || 0); // r2 MONTADO: sem passada (antes o herói "corria" em cima do dragão)
     st.speed += (sp - st.speed) * Math.min(1, dt * 10);
     const moveK = Math.min(1, st.speed / Math.max(0.1, inp.walkSpeed || 2.4));
     const runK = Math.max(0, Math.min(1, (st.speed - (inp.walkSpeed || 2.4)) / Math.max(0.1, (inp.runSpeed || 3.4) - (inp.walkSpeed || 2.4))));
@@ -450,7 +450,7 @@ export function createHeroModel(opts = {}) {
     st.attackT = a?.t || 0;
     st.combo = a?.comboIndex || 0;
     if (attacking && a.swingId != null && a.swingId !== st.lastSwingId) { st.lastSwingId = a.swingId; st.swings++; }
-    st.anim = st.hurtT > 0 ? 'hurt' : attacking ? `attack${st.combo + 1}` : st.speed > 0.15 ? (runK > 0.3 ? 'run' : 'walk') : 'idle';
+    st.anim = inp.mounted ? 'montado' : st.hurtT > 0 ? 'hurt' : attacking ? `attack${st.combo + 1}` : st.speed > 0.15 ? (runK > 0.3 ? 'run' : 'walk') : 'idle';
 
     // ciclo de passada (fase pela distância percorrida → pés não "patinam")
     st.walkPhase += st.speed * dt * (2.6 + runK * 0.6);
@@ -550,8 +550,13 @@ export function createHeroModel(opts = {}) {
     bladeGlow.visible = chargeK > 0.02;
     chargeMat.opacity = Math.min(0.9, chargeK * (0.75 + Math.sin(st.animTime * 30) * 0.15));
     matBlade.emissiveIntensity = 2.2 + chargeK * 4.5;
+    if (inp.mounted) { // r2 MONTARIA: pose SENTADA (pernas abertas em volta do dorso, joelhos dobrados), quadril no assento
+      leapY = 0; hips.position.y = HIPY;
+      legs.L.thigh.rotation.set(-1.0, 0, 0.55); legs.R.thigh.rotation.set(-1.0, 0, -0.55);
+      legs.L.knee.rotation.x = 1.3; legs.R.knee.rotation.x = 1.3; spine.rotation.x = 0.1; st.mountedPose = true;
+    } else if (st.mountedPose) { st.mountedPose = false; legs.L.thigh.rotation.z = 0; legs.R.thigh.rotation.z = 0; }
     st.leap = leapY;
-    root.position.y = leapY + (inp.groundY || 0); // ARENA PRINCIPAL: relevo
+    root.position.y = inp.mounted && Number.isFinite(inp.seatY) ? inp.seatY - (HIPY - 0.1) : leapY + (inp.groundY || 0); // ARENA PRINCIPAL: relevo · montado: quadril no assento do dragão
     if (extraYaw) root.rotation.y = Math.PI - inp.yaw - extraYaw;
     arms.R.shoulder.rotation.set(p[0], p[1], p[2]);
     arms.R.elbow.rotation.x = p[3];

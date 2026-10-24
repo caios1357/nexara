@@ -13,13 +13,13 @@
  *  - INVESTIDA: faixa reta até onde ele vai parar (fixa no mundo), setas.
  */
 import * as THREE from 'three';
-import { attachDragonGlb } from './dragon-glb.js?v=20261024poder';
-import { TILE } from './fps-camera.js?v=20261024poder';
-import { mergeStaticParts } from './merge-util.js?v=20261024poder';
-import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261024poder';
-import { getConfig } from '../gameplay-config.js?v=20261024poder';
-import { artPalette } from './dragon-art.js?v=20261024poder';
-import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261024poder';
+import { attachDragonGlb } from './dragon-glb.js?v=20261024r2';
+import { TILE } from './fps-camera.js?v=20261024r2';
+import { mergeStaticParts } from './merge-util.js?v=20261024r2';
+import { addMembrane, addScales, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261024r2';
+import { getConfig } from '../gameplay-config.js?v=20261024r2';
+import { artPalette } from './dragon-art.js?v=20261024r2';
+import { scaleTex, veinEmissiveTex, membraneTex, lathe, addRim } from './creature-kit.js?v=20261024r2';
 
 const hexNum = (h) => parseInt(String(h || '#ffffff').replace('#', ''), 16) || 0xffffff;
 const GREEN_DARK = 0x214f29;
@@ -116,7 +116,7 @@ function hornGeo(len, r) {
 /**
  * @returns {{ root: THREE.Group, update: Function, parts: object }}
  */
-export function createBossDragon({ height = 6.4, palette = null } = {}) {
+export function createBossDragon({ height = 6.4, palette = null, mount = false } = {}) {
   palette = artPalette(palette); // 20261023: família de dragões da arte do Caio (verde/fogo/raio/veneno/gelo/sombrio)
   const M = mats(palette);
   const nexaMat = M.nexa.clone();
@@ -170,6 +170,7 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     sp.rotation.x = -0.45;
     torso.add(sp);
     spikes.push(sp);
+    if (mount && (i === 2 || i === 3)) { sp.visible = false; continue; } // r2 MONTARIA: sem espinho/cristal onde o herói senta (antes atravessavam o cavaleiro)
     for (const sx of [-1, 1]) { // CONCEITO: cristais facetados saindo das costas (2 por placa, inclinados para fora)
       const cr = mesh(new THREE.OctahedronGeometry(0.22, 0), M.crystal, sx * (0.55 + (i % 2) * 0.15), 1.35 - Math.abs(z) * 0.08, z + 0.1);
       cr.scale.set(0.9, 2.6 - Math.abs(i - 2.5) * 0.25, 0.9); cr.rotation.set(-0.35, 0, -sx * 0.5); torso.add(cr);
@@ -183,6 +184,8 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
       torso.add(pl);
     }
   }
+  // r2 MONTARIA: ASSENTO no dorso (entre as asas e a garupa, em cima das placas) — segue o balanço/rolagem/empinada do corpo
+  const seat = new THREE.Object3D(); seat.name = 'mountSeat'; seat.position.set(0, 1.22, -0.05); torso.add(seat);
   // NÚCLEO NEXA no peito
   const core = mesh(new THREE.IcosahedronGeometry(0.42, 0), nexaMat, 0, -0.05, 2.0);
   torso.add(core);
@@ -776,5 +779,5 @@ export function createBossDragon({ height = 6.4, palette = null } = {}) {
     update(v, o);
     glb.update(o.dt || 0.016, { state: v ? v.state : 'IDLE', progress: v ? v.progress : 0, speed: v ? v.speed : 0, attack: v ? v.attack : null });
   }
-  return { root, update: updateAll, glb, getTelegraph: () => st.visibleTele, height, mergeInfo, playIntro, introActive: () => st.introT >= 0, anim: () => st.anim || 'chao' };
+  return { root, update: updateAll, seat, glb, getTelegraph: () => st.visibleTele, height, mergeInfo, playIntro, introActive: () => st.introT >= 0, anim: () => st.anim || 'chao' };
 }

@@ -11,15 +11,15 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024poder';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261024poder';
-import { getConfig } from './gameplay-config.js?v=20261024poder';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024poder';
-import { planRoster } from './br-roster.js?v=20261024poder';
-import { listPassives } from './passives.js?v=20261024poder';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024poder';
-import { kitFor } from './hero-kits.js?v=20261024poder';
-import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra } from './rival-kits.js?v=20261024poder';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261024r2';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261024r2';
+import { getConfig } from './gameplay-config.js?v=20261024r2';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261024r2';
+import { planRoster } from './br-roster.js?v=20261024r2';
+import { listPassives } from './passives.js?v=20261024r2';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261024r2';
+import { kitFor } from './hero-kits.js?v=20261024r2';
+import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra } from './rival-kits.js?v=20261024r2';
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 

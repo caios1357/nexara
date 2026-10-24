@@ -4,7 +4,7 @@
  * nível relativo ≥ 0 — rival nunca mais fraco que o herói). O LOBBY mostra exatamente esta lista e o spawn usa a mesma.
  * Puramente local (sem rede, sem backend). Não altera data/*.json: os 30 nomes de lá vêm primeiro; o resto sai daqui.
  */
-import { sorteiaPersonagem, PERSONAGENS } from './personagens.js?v=20261024poder';
+import { sorteiaPersonagem, PERSONAGENS } from './personagens.js?v=20261024r2';
 
 /** total de jogadores por partida (você + rivais) — ?jogadores=N (testes/medição) e teto por preset */
 export const JOGADORES_PADRAO = 50;

@@ -5,9 +5,9 @@
  * Visual da ref. do Caio: armadura escura, NÚCLEO azul no peito, espada com brilho azul.
  */
 import * as THREE from 'three';
-import { loadModel, getLoaded, cloneSkinned, findNode, fitHeight, createAnimator } from './model-lib.js?v=20261024poder';
-import { heroStyleOf } from '../hero-styles.js?v=20261024poder';
-import { getConfig } from '../gameplay-config.js?v=20261024poder';
+import { loadModel, getLoaded, cloneSkinned, findNode, fitHeight, createAnimator } from './model-lib.js?v=20261024r2';
+import { heroStyleOf } from '../hero-styles.js?v=20261024r2';
+import { getConfig } from '../gameplay-config.js?v=20261024r2';
 
 const HERO_H = 1.66;
 /** Proporções (só visual; hitbox/tempos intactos): herói mais ALTO e mais MAGRO que o KayKit chibi.
