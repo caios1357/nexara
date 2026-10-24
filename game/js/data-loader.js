@@ -1,4 +1,4 @@
-import { scaleBrConfig } from './br-map.js?v=20261023glb1';
+import { scaleBrConfig } from './br-map.js?v=20261023glb2';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 

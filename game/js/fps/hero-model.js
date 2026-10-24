@@ -12,11 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261023glb1';
-import { mergeStaticParts } from './merge-util.js?v=20261023glb1';
-import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261023glb1';
-import { attachHeroGlb } from './hero-glb.js?v=20261023glb1';
-import { addArmorDetail } from './surface-fx.js?v=20261023glb1';
+import { getConfig } from '../gameplay-config.js?v=20261023glb2';
+import { mergeStaticParts } from './merge-util.js?v=20261023glb2';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261023glb2';
+import { attachHeroGlb } from './hero-glb.js?v=20261023glb2';
+import { addArmorDetail } from './surface-fx.js?v=20261023glb2';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -661,9 +661,11 @@ export function createHeroModel(opts = {}) {
     }
     arms.L.shoulder.rotation.z = Math.PI / 2; arms.R.shoulder.rotation.z = -Math.PI / 2; // pose de ligação = T-pose do modelo
     const geo = src.geometry.clone(); if (!geo.attributes.normal) geo.computeVertexNormals(); autoWeights(geo, L);
-    const mat = src.material.clone(); mat.envMapIntensity = 0.35; mat.roughness = 0.7; const tint = { value: K.glow != null && K.glow !== 0x0aa8ff ? 1 : 0 };
+    const mat = src.material.clone(); mat.envMapIntensity = 0.35; mat.roughness = 0.7;
+    // cores do MODELO DO CAIO: só a SKIN ELEMENTAL recolore (cor do editor/equipamento NÃO tinge — o guerreiro fica azul como na folha)
+    const skinOn = !!(K.skin && K.skin !== 'azul'); const tint = { value: skinOn ? 1 : 0 }; const glbCol = { value: new THREE.Color(skinOn ? K.glow : 0x2ad8ff) }; mat.color.multiplyScalar(0.8); kitInfo.caioTint = tint.value;
     mat.onBeforeCompile = (sh) => {
-      sh.uniforms.uRimCol = rimCol; sh.uniforms.uTint = tint;
+      sh.uniforms.uRimCol = glbCol; sh.uniforms.uTint = tint;
       sh.fragmentShader = 'uniform vec3 uRimCol; uniform float uTint;\n' + sh.fragmentShader
         .replace('#include <map_fragment>', `#include <map_fragment>
   { vec3 c = diffuseColor.rgb; float cy = smoothstep(0.06, 0.25, c.b - c.r) * smoothstep(0.12, 0.35, max(c.g, c.b)); diffuseColor.rgb = mix(c, uRimCol * max(c.g, c.b) * 1.2, cy * uTint); }`)
@@ -678,8 +680,11 @@ export function createHeroModel(opts = {}) {
     root.add(mesh); root.updateMatrixWorld(true);
     mesh.bind(new THREE.Skeleton(BONE_ORDER.map((k) => J[k])), mesh.matrixWorld);
     arms.L.shoulder.rotation.z = 0; arms.R.shoulder.rotation.z = 0;
-    const BODY = new Set([...BONE_ORDER, 'cape0', 'cape1', 'cape2', 'backSword']);
-    root.traverse((o) => { if (o.isMesh && o !== mesh && BODY.has(o.parent?.name)) o.visible = false; });
+    // esconde TODO o corpo procedural (inclusive capacete/armadura/calça de equipamento em grupos sem nome); ficam só ARMAS e VFX
+    const KEEPN = /^(blade|bladeOff|axeOff|w_arco|w_cajado|w_varinha)$/; const keepO = new Set([slash, bladeGlow, shield]);
+    const keepMesh = (o) => { for (let q = o; q && q !== root; q = q.parent) { if (keepO.has(q) || KEEPN.test(q.name || '')) return true; } return false; };
+    root.traverse((o) => { if (o.isMesh && o !== mesh && !keepMesh(o)) o.visible = false; });
+    kitInfo.caioHidden = 0; root.traverse((o) => { if (o.isMesh && !o.visible) kitInfo.caioHidden++; });
     kitInfo.caio = { tris: geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3, bones: BONE_ORDER.length, scale: +s.toFixed(3) };
   }
   const glb = opts.glb === false ? null : attachHeroGlb(api, { styleId: opts.styleId, onReady: opts.onGlbReady });
