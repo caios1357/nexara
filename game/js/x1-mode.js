@@ -4,9 +4,9 @@
  * A IA só decide POSIÇÃO/TEMPO (punir esquiva, fintar bloqueio, distância, hora do poder) — nunca ganha atributo.
  * Nada do save é tocado: o perfil de aprendizado vive na chave própria 'nexara.x1.perfil.v1'.
  */
-import { createX1Brain, computeEvolution } from './x1-brain.js?v=20261025vfx2';
-import { openEvolutionPanel } from './x1-evolucao.js?v=20261025vfx2';
-import { X1_SPAWNS } from './x1-map.js?v=20261025vfx2';
+import { createX1Brain, computeEvolution } from './x1-brain.js?v=20261025perf';
+import { openEvolutionPanel } from './x1-evolucao.js?v=20261025perf';
+import { X1_SPAWNS } from './x1-map.js?v=20261025perf';
 
 const LADO_VEC = { esq: [0, -1], dir: [0, 1], tras: [-1, 0], frente: [1, 0] }; // [along, side] relativos ao eixo jogador→rival
 

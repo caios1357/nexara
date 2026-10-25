@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261025vfx2';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261025perf';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
@@ -401,25 +401,36 @@ export function buildBrTerrain(zone, cfg, o) {
 
   // —— BAÚS e CAIXAS de loot (instanciados: base / tampa / brilho de raridade) ——
   const lootSpots = [...m.chests, ...m.crates];
-  const chestBase = new THREE.InstancedMesh(new THREE.BoxGeometry(1.1, 0.6, 0.75).translate(0, 0.3, 0), mats.metal, lootSpots.length);
-  const chestLid = new THREE.InstancedMesh(new THREE.BoxGeometry(1.14, 0.18, 0.79).translate(0, 0.09, 0.395), mats.rust, lootSpots.length);
-  const chestGlow = new THREE.InstancedMesh(new THREE.BoxGeometry(1.16, 0.06, 0.81), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), lootSpots.length);
+  // PERF 20261025perf: baús em LOTES espaciais (antes 3 InstancedMesh com os ~300 baús do mapa inteiro, nunca recortados).
+  //   Mesmas instâncias/materiais; cada lote é recortado pelo frustum. lootSpots/lootState/índices iguais.
+  const chestGeoB = new THREE.BoxGeometry(1.1, 0.6, 0.75).translate(0, 0.3, 0), chestGeoL = new THREE.BoxGeometry(1.14, 0.18, 0.79).translate(0, 0.09, 0.395), chestGeoG = new THREE.BoxGeometry(1.16, 0.06, 0.81);
+  const chestGlowMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+  const LB = 24; const lotOf = new Map(); const slot = new Array(lootSpots.length);
+  lootSpots.forEach((sp, i) => { const key = `${Math.floor(sp.x / LB)}|${Math.floor(sp.y / LB)}`; let l = lotOf.get(key); if (!l) { l = []; lotOf.set(key, l); } l.push(i); });
+  const chestLots = [];
+  for (const idx of lotOf.values()) {
+    const L = { base: new THREE.InstancedMesh(chestGeoB, mats.metal, idx.length), lid: new THREE.InstancedMesh(chestGeoL, mats.rust, idx.length), glow: new THREE.InstancedMesh(chestGeoG, chestGlowMat, idx.length) };
+    idx.forEach((i, j) => { slot[i] = { L, j }; }); chestLots.push(L);
+  }
   const lootState = lootSpots.map((s) => ({ id: s.id, opened: false }));
   const setLoot = (i, opened) => {
-    const s = lootSpots[i]; const fx = s.x + 0.5, fy = s.y + 0.5; const gy = G(fx, fy); const yaw = h32(s.x, s.y, 7) * Math.PI * 2; const sc = s.kind === 'caixa' ? 0.8 : 1;
-    dummy.position.set(fx * T, gy, fy * T); dummy.rotation.set(0, yaw, 0); dummy.scale.setScalar(sc); dummy.updateMatrix(); chestBase.setMatrixAt(i, dummy.matrix);
+    const s = lootSpots[i]; const { L, j } = slot[i]; const fx = s.x + 0.5, fy = s.y + 0.5; const gy = G(fx, fy); const yaw = h32(s.x, s.y, 7) * Math.PI * 2; const sc = s.kind === 'caixa' ? 0.8 : 1;
+    dummy.position.set(fx * T, gy, fy * T); dummy.rotation.set(0, yaw, 0); dummy.scale.setScalar(sc); dummy.updateMatrix(); L.base.setMatrixAt(j, dummy.matrix);
     const lid = new THREE.Object3D(); lid.position.set(0, 0.6 * sc, -0.395 * sc); lid.rotation.x = opened ? -1.9 : 0;
     const base = new THREE.Object3D(); base.position.copy(dummy.position); base.rotation.copy(dummy.rotation); base.scale.setScalar(sc); base.add(lid); base.updateMatrixWorld(true);
-    chestLid.setMatrixAt(i, lid.matrixWorld);
-    dummy.position.set(fx * T, gy + 0.5 * sc, fy * T); dummy.scale.setScalar(opened ? 0.0001 : sc); dummy.updateMatrix(); chestGlow.setMatrixAt(i, dummy.matrix);
-    chestGlow.setColorAt(i, tmpC.setHex(s.kind === 'caixa' ? 0x39e8ff : (RARITY_GLOW[s.loot] || 0xffffff)));
-    chestBase.instanceMatrix.needsUpdate = true; chestLid.instanceMatrix.needsUpdate = true; chestGlow.instanceMatrix.needsUpdate = true; if (chestGlow.instanceColor) chestGlow.instanceColor.needsUpdate = true;
+    L.lid.setMatrixAt(j, lid.matrixWorld);
+    dummy.position.set(fx * T, gy + 0.5 * sc, fy * T); dummy.scale.setScalar(opened ? 0.0001 : sc); dummy.updateMatrix(); L.glow.setMatrixAt(j, dummy.matrix);
+    L.glow.setColorAt(j, tmpC.setHex(s.kind === 'caixa' ? 0x39e8ff : (RARITY_GLOW[s.loot] || 0xffffff)));
+    L.base.instanceMatrix.needsUpdate = true; L.lid.instanceMatrix.needsUpdate = true; L.glow.instanceMatrix.needsUpdate = true; if (L.glow.instanceColor) L.glow.instanceColor.needsUpdate = true;
     lootState[i].opened = opened;
   };
   for (let i = 0; i < lootSpots.length; i++) setLoot(i, false);
-  for (const im of [chestBase, chestLid]) { im.castShadow = true; im.receiveShadow = true; }
-  chestBase.computeBoundingSphere(); chestLid.computeBoundingSphere(); chestGlow.computeBoundingSphere();
-  chestBase.name = 'br-chests'; group.add(chestBase, chestLid, chestGlow); stats.meshes += 3;
+  for (const L of chestLots) {
+    for (const im of [L.base, L.lid]) { im.castShadow = true; im.receiveShadow = true; }
+    L.base.computeBoundingSphere(); L.lid.computeBoundingSphere(); L.glow.computeBoundingSphere();
+    L.base.name = 'br-chests'; group.add(L.base, L.lid, L.glow); stats.meshes += 3;
+  }
+  const chestGlow = { material: chestGlowMat };
 
   // —— DROPS no chão (loot): gema girando + coluna de luz curta na cor da raridade; 1 draw call cada (pool de 64) ——
   const DROP_MAX = 64;

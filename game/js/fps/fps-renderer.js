@@ -10,44 +10,44 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261025vfx2';
-import { buildArenaDressing } from './arena-dressing.js?v=20261025vfx2';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261025vfx2';
-import { createHeroModel } from './hero-model.js?v=20261025vfx2';
-import { artPalette } from './dragon-art.js?v=20261025vfx2';
-import { setTrailSkin } from './ground-trail.js?v=20261025vfx2';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261025vfx2';
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261025vfx2';
-import { attachHeroGlb } from './hero-glb.js?v=20261025vfx2';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261025vfx2';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261025vfx2';
-import { createActionVfx } from './action-vfx.js?v=20261025vfx2';
-import { createPassiveVfx } from './passive-vfx.js?v=20261025vfx2';
-import { createFpsControls } from './fps-controls.js?v=20261025vfx2';
-import { createViewmodel } from './viewmodel.js?v=20261025vfx2';
-import { createDragonView } from './dragon-view.js?v=20261025vfx2';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261025vfx2';
-import { getSprite } from '../assets.js?v=20261025vfx2';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261025vfx2';
-import { createBossDragon } from './boss-dragon-view.js?v=20261025vfx2';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261025vfx2';
-import { mergeStaticParts } from './merge-util.js?v=20261025vfx2';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261025vfx2';
-import { attachDragonGlb } from './dragon-glb.js?v=20261025vfx2';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261025vfx2';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261025vfx2';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261025vfx2';
-import { createPostFx } from './post-fx.js?v=20261025vfx2';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261025vfx2';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261025vfx2';
-import { createContactShadows } from './contact-shadows.js?v=20261025vfx2';
-import { createPowerVfx } from './power-vfx.js?v=20261025vfx2';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261025vfx2';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261025vfx2';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261025vfx2';
-import { groundAt, setGroundFn } from './ground.js?v=20261025vfx2';
-import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261025vfx2';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261025vfx2';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261025perf';
+import { buildArenaDressing } from './arena-dressing.js?v=20261025perf';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261025perf';
+import { createHeroModel } from './hero-model.js?v=20261025perf';
+import { artPalette } from './dragon-art.js?v=20261025perf';
+import { setTrailSkin } from './ground-trail.js?v=20261025perf';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261025perf';
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261025perf';
+import { attachHeroGlb } from './hero-glb.js?v=20261025perf';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261025perf';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261025perf';
+import { createActionVfx } from './action-vfx.js?v=20261025perf';
+import { createPassiveVfx } from './passive-vfx.js?v=20261025perf';
+import { createFpsControls } from './fps-controls.js?v=20261025perf';
+import { createViewmodel } from './viewmodel.js?v=20261025perf';
+import { createDragonView } from './dragon-view.js?v=20261025perf';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261025perf';
+import { getSprite } from '../assets.js?v=20261025perf';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261025perf';
+import { createBossDragon } from './boss-dragon-view.js?v=20261025perf';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261025perf';
+import { mergeStaticParts } from './merge-util.js?v=20261025perf';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261025perf';
+import { attachDragonGlb } from './dragon-glb.js?v=20261025perf';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261025perf';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261025perf';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261025perf';
+import { createPostFx } from './post-fx.js?v=20261025perf';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261025perf';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261025perf';
+import { createContactShadows } from './contact-shadows.js?v=20261025perf';
+import { createPowerVfx } from './power-vfx.js?v=20261025perf';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261025perf';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261025perf';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261025perf';
+import { groundAt, setGroundFn } from './ground.js?v=20261025perf';
+import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261025perf';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261025perf';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -2736,14 +2736,20 @@ export function createFpsRenderer() {
   function ensureAbrigos() {
     if (abrigoVis !== null) return; const L = hooks.getCoverList?.(); if (!L) return; const A = L.filter((c) => c.kind === 'abrigo'); abrigoVis = { n: A.length, group: null }; if (!A.length) return;
     const g = new THREE.Group(); g.name = 'abrigosGigante';
-    const post = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 2.4, 0.18), new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.7, metalness: 0.4 }), A.length * 4);
-    const roof = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.16, 1), new THREE.MeshStandardMaterial({ color: 0x3b3328, roughness: 0.85, emissive: 0x2a1a08, emissiveIntensity: 0.6 }), A.length);
-    const edge = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.05, 1), new THREE.MeshBasicMaterial({ color: 0x39e8ff }), A.length);
-    const M = new THREE.Matrix4(); let pi = 0;
-    A.forEach((c, i) => { const w = (c.x1 - c.x0) * TILE, d = (c.y1 - c.y0) * TILE, cx = (c.x0 + c.x1) / 2 * TILE, cz = (c.y0 + c.y1) / 2 * TILE; const gy = groundAt((c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2);
-      for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { M.makeTranslation(cx + sx * (w / 2 - 0.15), gy + 1.2, cz + sz * (d / 2 - 0.15)); post.setMatrixAt(pi++, M); }
-      M.makeScale(w + 0.4, 1, d + 0.4).setPosition(cx, gy + 2.45, cz); roof.setMatrixAt(i, M); M.makeScale(w + 0.5, 1, d + 0.5).setPosition(cx, gy + 2.36, cz); edge.setMatrixAt(i, M); });
-    g.add(post, roof, edge); worldRoot.add(g); abrigoVis.group = g;
+    // PERF 20261025perf: abrigos em LOTES espaciais (antes 3 InstancedMesh com os abrigos do mapa inteiro, nunca recortados) — mesmas peças/materiais.
+    const postGeo = new THREE.BoxGeometry(0.18, 2.4, 0.18), roofGeo = new THREE.BoxGeometry(1, 0.16, 1), edgeGeo = new THREE.BoxGeometry(1, 0.05, 1);
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.7, metalness: 0.4 }), roofMat = new THREE.MeshStandardMaterial({ color: 0x3b3328, roughness: 0.85, emissive: 0x2a1a08, emissiveIntensity: 0.6 }), edgeMat = new THREE.MeshBasicMaterial({ color: 0x39e8ff });
+    const LB = 24; const lots = new Map(); for (const c of A) { const k = `${Math.floor((c.x0 + c.x1) / 2 / LB)}|${Math.floor((c.y0 + c.y1) / 2 / LB)}`; let l = lots.get(k); if (!l) { l = []; lots.set(k, l); } l.push(c); }
+    const M = new THREE.Matrix4();
+    for (const lot of lots.values()) {
+      const post = new THREE.InstancedMesh(postGeo, postMat, lot.length * 4), roof = new THREE.InstancedMesh(roofGeo, roofMat, lot.length), edge = new THREE.InstancedMesh(edgeGeo, edgeMat, lot.length); let pi = 0;
+      lot.forEach((c, i) => { const w = (c.x1 - c.x0) * TILE, d = (c.y1 - c.y0) * TILE, cx = (c.x0 + c.x1) / 2 * TILE, cz = (c.y0 + c.y1) / 2 * TILE; const gy = groundAt((c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2);
+        for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { M.makeTranslation(cx + sx * (w / 2 - 0.15), gy + 1.2, cz + sz * (d / 2 - 0.15)); post.setMatrixAt(pi++, M); }
+        M.makeScale(w + 0.4, 1, d + 0.4).setPosition(cx, gy + 2.45, cz); roof.setMatrixAt(i, M); M.makeScale(w + 0.5, 1, d + 0.5).setPosition(cx, gy + 2.36, cz); edge.setMatrixAt(i, M); });
+      for (const im of [post, roof, edge]) im.computeBoundingSphere();
+      g.add(post, roof, edge);
+    }
+    worldRoot.add(g); abrigoVis.group = g;
   }
   /* 20261016: efeito do PODER ESPECIAL do dragão — anel + disco no chão na cor do elemento (2 malhas reaproveitadas, sem custo extra parado) */
   const spFx = { list: [], n: 0 };
@@ -2924,6 +2930,21 @@ export function createFpsRenderer() {
       viewmodel?.play(anim === 'attack' ? 'attack' : anim === 'hurt' ? 'hurt' : anim === 'interact' ? 'interact' : 'idle', lock);
     },
     powerVfx: () => powerVfx(),
+    /** 20261025perf (teste): contagem de malhas VISÍVEIS no frustum por grupo de topo da cena — de onde vêm os draw calls */
+    /** 20261025perf (teste): esconde grupos de topo da cena por nome (medição de custo) — volta com vis=true */
+    /** 20261025perf (teste): filhos de um grupo de topo — draw calls e triângulos no frustum + material */
+    debugTris: (name) => { const cam = fpsCam.camera; const fr = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse)); const t = scene.children.find((c) => c.name === name); const out = [];
+      for (const ch of t?.children || []) { if (!ch.visible) continue; let calls = 0, tris = 0, inst = 0; const mats = new Set(); ch.traverseVisible((o) => { if (!o.isMesh) return; if (o.frustumCulled !== false && o.geometry) { if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); if (!fr.intersectsObject(o)) return; } const g = o.geometry; const tri = (g.index ? g.index.count : g.attributes.position.count) / 3; const k = o.isInstancedMesh ? o.count : 1; calls++; tris += tri * k; inst += o.isInstancedMesh ? 1 : 0; mats.add(o.material?.type + (o.material?.transparent ? '+T' : '')); });
+        if (calls) out.push({ n: ch.name || ch.type, calls, ktris: +(tris / 1000).toFixed(1), inst, mats: [...mats].join(',') }); }
+      return out.sort((a, b) => b.ktris - a.ktris); },
+    debugCtx: () => (navigator.webdriver ? { THREE, renderer, scene, camera: fpsCam.camera, postFx } : null), // perf: só testes/medição
+    debugHide: (names, vis) => { if (!navigator.webdriver) return 0; let n = 0; const list = []; scene.traverse((o) => { if (o !== scene && names.includes(o.name || o.type) && (o.parent === scene || names.some((x) => x === o.name && o.name))) list.push(o); }); for (const c of list) { c.traverse((o) => { if (!vis) { if (o.userData.__dl == null) o.userData.__dl = o.layers.mask; o.layers.mask = 1 << 30; } else if (o.userData.__dl != null) { o.layers.mask = o.userData.__dl; delete o.userData.__dl; } }); n++; } return n; },
+    drawCensus: (detail) => { const cam = fpsCam.camera; cam.updateMatrixWorld(); const fr = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse)); const out = {}; let tot = 0;
+      for (const top of scene.children) { if (!top.visible) continue; const key = (top.name || top.type) + (top.userData?.kind ? ':' + top.userData.kind : ''); let n = 0;
+        top.traverseVisible((o) => { if (!(o.isMesh || o.isPoints || o.isLine || o.isSprite)) return; if (o.isInstancedMesh && o.count === 0) return; if (o.frustumCulled !== false && o.geometry) { if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); if (!fr.intersectsObject(o)) return; } n += Array.isArray(o.material) ? o.material.length : 1; });
+        if (n) { out[key] = (out[key] || 0) + n; tot += n; } }
+      if (detail) { const t = scene.children.find((c) => c.name === detail); const d = []; t?.traverseVisible((o) => { if (o.isMesh || o.isPoints || o.isSprite) { let path = o.name || o.type; for (let q = o.parent; q && q !== t; q = q.parent) path = (q.name || q.type) + '/' + path; d.push(path + (o.isInstancedMesh ? '#' + o.count : '') + (o.frustumCulled === false ? ' (nocull)' : '')); } }); return d; }
+      return { tot, calls: frameStats.calls, top: Object.entries(out).sort((a, b) => b[1] - a[1]).slice(0, 25) }; },
     shake(n = 6) {
       fpsCam.shake(n);
     },

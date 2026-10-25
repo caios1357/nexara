@@ -5,10 +5,10 @@
  *  · LOBBY: você + 49 rivais (BOT offline) com personagem, skin, nível — exatamente os que vão cair no mapa; queda em 5 s.
  * Toque, retrato e paisagem (CSS). Persistência: quem chama grava player.heroStyle (+ skin) e a "última escolha".
  */
-import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025vfx2';
-import { heroStyleOf } from './hero-styles.js?v=20261025vfx2';
-import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025vfx2';
-import { ICONS } from './icons.js?v=20261025vfx2';
+import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025perf';
+import { heroStyleOf } from './hero-styles.js?v=20261025perf';
+import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025perf';
+import { ICONS } from './icons.js?v=20261025perf';
 
 export const LAST_PICK_KEY = 'nexara.ultimaEscolha';
 export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PERSONAGENS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
@@ -96,7 +96,7 @@ export function openHeroSelect(o) {
   $('hsel-back').onclick = () => { if (done) return; done = true; closeHeroSelect(); o.onCancel?.(); };
   const tm = setInterval(() => { if (done || !el.isConnected) { clearInterval(tm); return; } left--; const lb = $('hsel-left'); if (lb) lb.textContent = String(Math.max(0, left)); el.classList.toggle('hsel-urgent', left <= 5); if (left <= 0) { clearInterval(tm); finish(true); } }, 1000);
   el._timer = tm;
-  import('./fps/hero-preview.js?v=20261025vfx2').then((m) => {
+  import('./fps/hero-preview.js?v=20261025perf').then((m) => {
     if (!el.isConnected) return;
     try { preview = m.createHeroPreview($('hsel-canvas'), { interactive: true, autoSpin: 0.6 }); el._preview = preview; paint(); } catch (e) { console.warn('[seleção] prévia 3D indisponível', e); }
   }).catch(() => {});

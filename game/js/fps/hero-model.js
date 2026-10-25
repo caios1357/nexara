@@ -12,11 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261025vfx2';
-import { mergeStaticParts } from './merge-util.js?v=20261025vfx2';
-import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261025vfx2';
-import { attachHeroGlb } from './hero-glb.js?v=20261025vfx2';
-import { addArmorDetail } from './surface-fx.js?v=20261025vfx2';
+import { getConfig } from '../gameplay-config.js?v=20261025perf';
+import { mergeStaticParts } from './merge-util.js?v=20261025perf';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261025perf';
+import { attachHeroGlb } from './hero-glb.js?v=20261025perf';
+import { addArmorDetail } from './surface-fx.js?v=20261025perf';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */

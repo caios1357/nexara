@@ -248,22 +248,29 @@ export function buildCity(zone, key, TILE, tileType, opts = {}) {
     const geo = new THREE.CylinderGeometry(0.09, 0.09, TILE, 8);
     const mat = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.35, metalness: 0.85 });
     disposables.push(geo, mat);
-    const im = new THREE.InstancedMesh(geo, mat, seg.length * 2);
-    let k = 0;
-    for (const [tx, ty] of seg) {
-      const horiz = ty === 0 || ty === zone.map.height - 1;
-      for (let j = 0; j < 2; j++) {
-        dummy.position.set((tx + 0.5) * TILE, 2.95 + j * 0.24, (ty + 0.5) * TILE + (horiz ? (j ? 0.25 : -0.2) : 0));
-        if (!horiz) dummy.position.x += j ? 0.25 : -0.2;
-        dummy.rotation.set(horiz ? 0 : Math.PI / 2, 0, horiz ? Math.PI / 2 : 0);
-        dummy.scale.set(1, 1, 1);
-        dummy.updateMatrix();
-        im.setMatrixAt(k++, dummy.matrix);
+    // PERF 20261025perf: canos em LOTES de 12 tiles (antes 1 InstancedMesh com o mapa inteiro → ~45k triângulos por quadro mesmo longe).
+    //   Mesmas instâncias/posições; o recorte por frustum de cada lote tira os que estão fora da tela.
+    const PB = 12; const lots = new Map();
+    for (const st of seg) { const key = `${Math.floor(st[0] / PB)}|${Math.floor(st[1] / PB)}`; let l = lots.get(key); if (!l) { l = []; lots.set(key, l); } l.push(st); }
+    for (const lot of lots.values()) {
+      const im = new THREE.InstancedMesh(geo, mat, lot.length * 2);
+      let k = 0;
+      for (const [tx, ty] of lot) {
+        const horiz = ty === 0 || ty === zone.map.height - 1;
+        for (let j = 0; j < 2; j++) {
+          dummy.position.set((tx + 0.5) * TILE, 2.95 + j * 0.24, (ty + 0.5) * TILE + (horiz ? (j ? 0.25 : -0.2) : 0));
+          if (!horiz) dummy.position.x += j ? 0.25 : -0.2;
+          dummy.rotation.set(horiz ? 0 : Math.PI / 2, 0, horiz ? Math.PI / 2 : 0);
+          dummy.scale.set(1, 1, 1);
+          dummy.updateMatrix();
+          im.setMatrixAt(k++, dummy.matrix);
+        }
       }
+      im.instanceMatrix.needsUpdate = true;
+      im.computeBoundingSphere();
+      im.name = 'pipes';
+      group.add(im);
     }
-    im.instanceMatrix.needsUpdate = true;
-    im.name = 'pipes';
-    group.add(im);
   }
 
   // ── cabos em catenária entre prédios e o topo das paredes (LineSegments, 1 draw call) ──
