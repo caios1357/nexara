@@ -5,10 +5,10 @@
  * Dano de poder = `dano` do kit (vs rival NV1) → main.hitSpecial({ flatDano }) → applyPlayerHit (escala com o nível, passa
  * pelos modificadores/passivas, XP/loot/quests iguais). VFX = heroShots (projéteis/explosões) + textos; SFX = sfx.js.
  */
-import { kitFor, SLOTS } from './hero-kits.js?v=20261025hud';
-import { getStat, addModifier, STATS } from './modifiers.js?v=20261025hud';
-import { DEG } from './gameplay-config.js?v=20261025hud';
-import { wrapAngle } from './collision.js?v=20261025hud';
+import { kitFor, SLOTS } from './hero-kits.js?v=20261025ia';
+import { getStat, addModifier, STATS } from './modifiers.js?v=20261025ia';
+import { DEG } from './gameplay-config.js?v=20261025ia';
+import { wrapAngle } from './collision.js?v=20261025ia';
 
 const KIND = { cone: 'melee', investida: 'melee', giro: 'melee', salto: 'melee', area_self: 'melee', mil_cortes: 'melee', linha: 'area', area_alvo: 'area', portal: 'area' };
 export function createHeroPowers(deps) {

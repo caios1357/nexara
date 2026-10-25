@@ -227,3 +227,28 @@ body.br-hud-on .toast { font-size: 0.66rem; padding: 0.22rem 0.6rem; max-width: 
 #br-hud .br-top .br-distrito { position: static !important; top: auto !important; right: auto !important; max-width: none; font-size: 0.6rem; padding: 1px 7px; }
 #br-hud .br-arrow-txt { max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
 @media (orientation: portrait) { #br-hud .br-arrow-txt { max-width: 22vw; } }
+
+/* 20261025ia — painel EVOLUÇÃO DA IA (X1) */
+#x1-evolucao{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;background:rgba(2,6,12,.82);font:600 13px/1.3 system-ui,sans-serif;color:#e8f2ff}
+#x1-evolucao .evo-box{position:relative;width:min(94vw,520px);max-height:calc(100dvh - 16px);display:flex;flex-direction:column;border:1px solid #39c6ff88;border-radius:12px;background:#0b1220;box-shadow:0 0 24px #39c6ff33}
+#x1-evolucao .evo-title{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font-weight:900;letter-spacing:.08em;color:#9ff;border-bottom:1px solid #ffffff14}
+#x1-evolucao .evo-title button{min-width:40px;min-height:36px;background:none;border:0;color:#cde;font-size:18px}
+#x1-evolucao .evo-body{overflow:auto;padding:6px 12px;-webkit-overflow-scrolling:touch}
+#x1-evolucao .evo-head{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;margin:2px 0 4px}
+#x1-evolucao .evo-nv{font-size:18px;color:#ffc830}#x1-evolucao .evo-nv b{font-size:22px}
+#x1-evolucao .evo-bar{height:8px;border-radius:4px;background:#ffffff14;overflow:hidden}#x1-evolucao .evo-bar i{display:block;height:100%;background:linear-gradient(90deg,#39c6ff,#ffc830)}
+#x1-evolucao .evo-pts{grid-column:2;font-size:10px;opacity:.7}
+#x1-evolucao .evo-sec{margin:8px 0 2px;font-size:10px;letter-spacing:.12em;color:#7fb4d8;font-weight:900}
+#x1-evolucao .evo-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #ffffff0d;font-size:12px}
+#x1-evolucao .evo-row .v{text-align:right}#x1-evolucao .evo-row b{color:#fff}#x1-evolucao small{opacity:.65;font-weight:500}
+#x1-evolucao .sd{opacity:.55;font-weight:500}
+#x1-evolucao .evo-chart{height:110px;background:#ffffff06;border-radius:6px}#x1-evolucao .evo-chart-empty{font-size:12px;opacity:.85;padding:8px 0}
+#x1-evolucao .evo-leg{font-size:10px;display:flex;gap:10px;flex-wrap:wrap}
+#x1-evolucao .evo-form{margin:8px 0 4px;font-size:10px;opacity:.7;font-weight:500}
+#x1-evolucao .evo-foot{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-top:1px solid #ffffff14}
+#x1-evolucao .evo-foot button{min-height:42px;min-width:110px}#x1-evolucao #evo-reset{background:#2a1018;color:#ff8aa0;border:1px solid #ff4a6a66;border-radius:8px}
+#x1-evolucao #evo-confirm{position:absolute;inset:auto 10px 10px 10px;padding:12px;border-radius:10px;background:#1a0b12;border:1px solid #ff4a6a;text-align:center}
+#x1-evolucao .evo-cbtn{display:flex;gap:10px;justify-content:center;margin-top:10px}#x1-evolucao .evo-cbtn button{min-height:42px;min-width:120px}
+#x1-evolucao #evo-reset-sim{background:#ff4a6a;color:#fff;border:0;border-radius:8px}
+#btn-x1-evolucao{margin-top:6px}
+#btn-x1-evolucao.nx-x1evo{background:#12203a;color:#9ff;border:1px solid #39c6ff88;font-weight:800;letter-spacing:.05em}

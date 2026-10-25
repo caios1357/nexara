@@ -1,5 +1,5 @@
 /** Nexara — combat calculation */
-import { skillBonusDamage } from './skills.js?v=20261025hud';
+import { skillBonusDamage } from './skills.js?v=20261025ia';
 
 export function calcDamage(attacker, defender, skillLevel, opts = {}) {
   const atk = (attacker.ataque || 0) + skillBonusDamage(skillLevel) + (opts.weaponAtk || 0);

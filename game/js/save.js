@@ -1,5 +1,5 @@
-import { walletSig, verifyWallet } from './mcb.js?v=20261025hud';
-import { getLocalProfile } from './auth.js?v=20261025hud';
+import { walletSig, verifyWallet } from './mcb.js?v=20261025ia';
+import { getLocalProfile } from './auth.js?v=20261025ia';
 
 const SAVE_KEY = 'nexara_phase01_save';
 const SETTINGS_KEY = 'nexara.settings.v1';
