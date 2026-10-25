@@ -83,7 +83,7 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   }
   // —— assinatura das variantes do Guerreiro (fogo chamas · raio arcos · veneno verde · terra pedras · vento redemoinho) ——
   function flavor(v, x, y, r = 1, k = 1) {
-    if (v === 'fogo') emit(12 * r, { x, y, h: 0.4, spread: 0.5 * r, col: 0xff5a10, col2: 0xffd040, vel: 0.6, up: 3.2, grav: -1, size: 0.6, life: 650, k });
+    if (v === 'fogo') emit(10 * r, { x, y, h: 0.4, spread: 0.5 * r, col: 0xff4a08, col2: 0xffb030, vel: 0.6, up: 3.2, grav: -1, size: 0.45, life: 600, k });
     else if (v === 'raio') { for (let i = 0; i < 3; i++) { const a = rnd(0, TAU); bolt(x, y, x + Math.sin(a) * r * 1.4, y + Math.cos(a) * r * 1.4, 0xfff27a, 200, 4); } }
     else if (v === 'veneno') emit(10 * r, { x, y, h: 0.8, spread: 0.6 * r, col: 0x6aff3a, col2: 0x2a8a10, vel: 0.8, up: 1, grav: 4, size: 0.4, life: 700, k });
     else if (v === 'terra') { for (let i = 0; i < 4; i++) { const a = rnd(0, TAU), d = rnd(0.3, r); obj(P.rock, { ...wp(x + Math.sin(a) * d, y + Math.cos(a) * d, 0.2), c: 0x8a6a40, life: 900, sx: rnd(0.3, 0.6), sy: rnd(0.3, 0.6), sz: rnd(0.3, 0.6), vy: rnd(3, 6), g: 14, land: GY(x, y) + 0.15, rx: rnd(0, 3), ry: rnd(0, 3), fade: 'late', solid: true }); } emit(8, { x, y, h: 0.2, spread: r * 0.5, col: 0x9a8060, vel: 1.4, up: 0.8, size: 0.7, life: 600, smoke: true, k }); }
@@ -94,9 +94,9 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   // GUERREIRO
   S.corte_azul = (o) => { flavor(o.var, o.x, o.y, 0.8, o.k); };
   S.grito_guerra = (o) => { shock(o.x, o.y, o.c, 3.2, 650); at(120, () => shock(o.x, o.y, o.c, 4.2, 600)); aura(o.follow, o.c, o.p0.dur || 6000, { r: 0.75, top: true, k: o.k }); flavor(o.var, o.x, o.y, 1.4, o.k); shake(3); };
-  S.lamina_nucleo = (o) => { const L = o.p0.alcance || 8; obj(P.blade, { ...wp(o.x + o.dx * 0.9, o.y + o.dy * 0.9, 1.0), fy: o.yaw, c: o.c, life: 520, s0: W(0.7), s1: W(1.4), grow: true, rz: 0, tiltX: 0.35 });
-    every(26, 12, (i) => { const t = (i + 1) / 12; const x = o.x + o.dx * L * t, y = o.y + o.dy * L * t; emit(4, { x, y, h: 0.6, spread: 0.5, col: o.c, col2: 0xffffff, vel: 2.5, up: 2.5, grav: 5, size: 0.5, life: 420, k: o.k }); if (i % 3 === 0) flavor(o.var, x, y, 0.6, o.k * 0.6); });
-    streak(o.x, o.y, o.x + o.dx * L, o.y + o.dy * L, o.c, 420, 0.5, 0.3); streak(o.x, o.y, o.x + o.dx * L, o.y + o.dy * L, 0xffffff, 200, 0.16, 1.1); scorch(o.x + o.dx * L * 0.5, o.y + o.dy * L * 0.5, 0.7, 2500); shake(6); };
+  S.lamina_nucleo = (o) => { const L = o.p0.alcance || 8; obj(P.blade, { ...wp(o.x + o.dx * 0.9, o.y + o.dy * 0.9, 1.0), fy: o.yaw, c: o.c, life: 480, s0: W(0.7), s1: W(1.4), grow: true, rz: 0, tiltX: 0.35, a: 0.75 });
+    every(26, 12, (i) => { const t = (i + 1) / 12; const x = o.x + o.dx * L * t, y = o.y + o.dy * L * t; emit(3, { x, y, h: 0.6, spread: 0.5, col: o.c, vel: 2.5, up: 2.5, grav: 5, size: 0.35, life: 380, k: o.k }); if (i % 4 === 0) flavor(o.var, x, y, 0.5, o.k * 0.4); });
+    streak(o.x, o.y, o.x + o.dx * L, o.y + o.dy * L, o.c, 380, 0.35, 0.3); scorch(o.x + o.dx * L * 0.5, o.y + o.dy * L * 0.5, 0.7, 2500); shake(6); };
   // ARQUEIRO
   S.flecha_perfurante = (o) => { emit(8, { x: o.x + o.dx * 0.6, y: o.y + o.dy * 0.6, h: 1.2, col: o.c, col2: 0xffffff, dir: { x: o.dx, y: o.dy }, vel: 6, up: 0.2, size: 0.35, life: 260, k: o.k }); };
   S.salto_tras = (o) => { emit(12, { x: o.x, y: o.y, h: 0.2, spread: 0.4, col: 0xb8a888, vel: 1.6, up: 0.6, size: 0.8, life: 650, smoke: true, k: o.k }); const tr = o.p0.armadilha || {}; const r = tr.raio || 1.7;
@@ -144,8 +144,8 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   S.iaijutsu = (o) => { const x = o.x + o.dx * 1.2, y = o.y + o.dy * 1.2; obj(P.blade, { ...wp(x, y, 1.05), fy: o.yaw, c: 0xffffff, life: 200, s0: W(0.9), s1: W(1.7), grow: true, tiltX: 0.25 }); obj(P.blade, { ...wp(x, y, 1.0), fy: o.yaw, c: 0xffe14a, life: 300, s0: W(1.0), s1: W(1.8), grow: true, tiltX: 0.25 });
     obj(P.ghost, { ...wp(o.x - o.dx * 0.6, o.y - o.dy * 0.6, 1.25), c: 0xffe8a0, life: 300, sx: 1.6, sy: 1.6, sz: 1.6 }); emit(10, { x, y, h: 1, spread: 0.5, col: 0xffe14a, col2: 0xffffff, vel: 4, size: 0.3, life: 300, k: o.k }); };
   S.postura = (o) => { const D = o.p0.dur || 2500; obj(P.ring, { follow: o.follow, h: 0.06, c: 0xffe14a, life: D, s0: W(1.0), spin: 0.6, fade: 'late', pulse: 1 }); obj(P.star, { follow: o.follow, h: 0.07, c: 0xffe14a, life: D, s0: W(0.95), spin: -0.8, fade: 'late', a: 0.5 }); obj(P.torus, { follow: o.follow, h: 1.0, c: 0xfff0a0, life: D, s0: W(0.6), spin: 2, tilt: 0.9, fade: 'late' }); };
-  S.corte_raio = (o) => { const L = o.p0.alcance || 10; const x1 = o.x + o.dx * L, y1 = o.y + o.dy * L; for (let i = 0; i < 3; i++) at(i * 60, () => bolt(o.x, o.y, x1, y1, i === 1 ? 0xffffff : 0xfff27a, 260, 10)); streak(o.x, o.y, x1, y1, 0xfff6c0, 300, 0.4, 0.3);
-    obj(P.blade, { ...wp(o.x + o.dx, o.y + o.dy, 1.0), fy: o.yaw, c: 0xffffff, life: 220, s0: W(1), s1: W(2), grow: true, tiltX: 1.3 }); every(30, 8, (i) => { const t = (i + 1) / 8; emit(3, { x: o.x + o.dx * L * t, y: o.y + o.dy * L * t, h: 1, col: 0xfff27a, col2: 0xffffff, vel: 3, size: 0.3, life: 280, k: o.k }); }); shake(6); };
+  S.corte_raio = (o) => { const L = o.p0.alcance || 10; const x1 = o.x + o.dx * L, y1 = o.y + o.dy * L; for (let i = 0; i < 3; i++) at(i * 60, () => bolt(o.x, o.y, x1, y1, i === 1 ? 0xffffff : 0xfff27a, 260, 10)); streak(o.x, o.y, x1, y1, 0xfff6c0, 260, 0.25, 0.3);
+    obj(P.blade, { ...wp(o.x + o.dx, o.y + o.dy, 1.0), fy: o.yaw, c: 0xfff6c0, life: 200, s0: W(0.6), s1: W(1.2), grow: true, tiltX: 0.35, a: 0.7 }); every(30, 8, (i) => { const t = (i + 1) / 8; emit(3, { x: o.x + o.dx * L * t, y: o.y + o.dy * L * t, h: 1, col: 0xfff27a, col2: 0xffffff, vel: 3, size: 0.3, life: 280, k: o.k }); }); shake(6); };
   // BERSERKER
   S.machado_giratorio = (o) => { const D = o.p0.durMs || 2000, R = o.p0.raio || 2.1; for (let i = 0; i < 2; i++) obj(P.blade, { follow: o.follow, h: 0.9 + i * 0.12, c: i ? 0xffffff : 0xff4a2a, life: D, s0: W(R * (i ? 0.85 : 1)), spin: -16, rot0: i * Math.PI, fade: 'late', tiltX: 0 });
     every(110, Math.floor(D / 110), (i) => { const q = o.follow(); if (!q) return; const a = -i * 1.76; emit(3, { x: q.x + Math.sin(a) * R, y: q.y + Math.cos(a) * R, h: 0.9, col: 0xff6a2a, col2: 0xffe060, vel: 2, up: 1, grav: 5, size: 0.3, life: 300, k: o.k }); }); };
@@ -158,7 +158,7 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
     const fn = S[id]; if (!fn) return false; stats.casts++; stats.byId[id] = (stats.byId[id] || 0) + 1;
     shakeK = o.src === 'rival' ? 0.35 : 1; curA = o.src === 'rival' ? 0.55 : 1; o.dx = Math.sin(o.yaw || 0); o.dy = -Math.cos(o.yaw || 0); o.k = (o.src === 'rival' ? 0.5 : 1) * (o.k ?? 1);
     if (o.cx == null) { o.cx = o.tx ?? o.x + o.dx * 3; o.cy = o.ty ?? o.y + o.dy * 3; }
-    if (o.src !== 'rival') { const q = wp(o.x, o.y, 0); obj(P.ring, { x: q.x, y: q.y + 0.08, z: q.z, c: o.c, life: 300, s0: W(0.3), s1: W(1), grow: true }); emit(8, { x: o.x, y: o.y, h: 1.2, spread: 0.25, col: o.c, col2: 0xffffff, vel: 0.8, up: 2, size: 0.35, life: 380 }); } // pose: brilho de conjuração no herói
+    if (o.src !== 'rival') { const q = wp(o.x, o.y, 0); obj(P.ring, { x: q.x, y: q.y + 0.08, z: q.z, c: o.c, life: 300, s0: W(0.3), s1: W(1), grow: true }); emit(6, { x: o.x, y: o.y, h: 1.2, spread: 0.25, col: o.c, vel: 0.8, up: 2, size: 0.3, life: 340 }); } // pose: brilho de conjuração no herói
     try { fn(o); } catch (e) { console.warn('[power-vfx]', id, e); }
     return true;
   }
