@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261024x1';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261025hud';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -46,6 +46,7 @@ export function createArenaBrUi(deps) {
       <div class="br-outside hidden" id="br-outside">FORA DA ZONA SEGURA — volte para o círculo</div>`;
     wrap.appendChild(root);
     mm = root.querySelector('#br-minimap');
+    { const d = root.querySelector('#br-distrito'); const col = root.querySelector('.br-top'); if (d && col) col.insertBefore(d, col.querySelector('.br-chips')); } // 20261025hud: nome do distrito na coluna do canto
     mm.addEventListener('click', () => toggleBigMap());
     root.querySelector('#br-bag').addEventListener('click', () => openBag());
     arrow = root.querySelector('#br-arrow');
@@ -68,11 +69,27 @@ export function createArenaBrUi(deps) {
     }
   }
 
-  function show() { ensure(); root.classList.remove('hidden'); shown = true; document.getElementById('game-screen')?.classList.add('br-mode'); }
+  function show() { ensure(); root.classList.remove('hidden'); shown = true; document.getElementById('game-screen')?.classList.add('br-mode'); document.body.classList.add('br-hud-on'); layoutAt = 0; }
   function hide() {
     shown = false; root?.classList.add('hidden'); toggleBigMap(false); closePanel(); closeSummary(); hideSpectate();
     popQueue.length = 0; popCur = null; popup?.classList.add('hidden'); clearTimeout(popTimer);
-    document.getElementById('game-screen')?.classList.remove('br-mode');
+    document.getElementById('game-screen')?.classList.remove('br-mode'); document.body.classList.remove('br-hud-on');
+  }
+  /* 20261025hud (pedido do Caio: "tire informações do meio da tela… põe num canto igual ao CoD"): a coluna de info fica no canto
+     superior ESQUERDO logo abaixo das barras HP/Nexa/XP (altura medida, muda com retrato/paisagem/HUD) e a seta de objetivo ao lado
+     do minimapa (paisagem: à esquerda dele · retrato: embaixo). Medido a cada 500 ms (barato). */
+  let layoutAt = 0;
+  function layoutCorner() {
+    const now = performance.now(); if (now - layoutAt < 500) return; layoutAt = now;
+    const rb = root.getBoundingClientRect(); const tb = document.getElementById('top-bar'); const tr = tb ? tb.getBoundingClientRect() : null;
+    const y = Math.max(6, Math.round((tr && tr.height > 0 ? tr.bottom : 44) - rb.top + 4));
+    if (last.__y !== y) { last.__y = y; root.style.setProperty('--br-top-y', y + 'px'); document.body.style.setProperty('--br-top-y', y + 'px'); }
+    const ar = root.querySelector('#br-arrow'); const m = mm?.getBoundingClientRect(); if (!ar || !m || !m.width) return;
+    const land = innerWidth > innerHeight; const dist = root.querySelector('#br-distrito'); const dr = dist && !dist.classList.contains('hidden') ? dist.getBoundingClientRect() : null;
+    const key = true ? `L${Math.round(rb.right - m.left + 8)}|${Math.round(m.top - rb.top)}` : `P${Math.round(Math.max(m.bottom, dr?.bottom || 0) - rb.top + 4)}`;
+    if (last.__ar === key) return; last.__ar = key;
+    if (true) { ar.style.right = Math.round(rb.right - m.left + 8) + 'px'; ar.style.top = Math.round(m.top - rb.top + 2) + 'px'; }
+    else { ar.style.right = Math.max(8, Math.round(rb.right - m.right)) + 'px'; ar.style.top = Math.round(Math.max(m.bottom, dr?.bottom || 0) - rb.top + 4) + 'px'; }
   }
 
   /* ── HUD por quadro (barato: só textContent quando muda) ── */
@@ -81,7 +98,8 @@ export function createArenaBrUi(deps) {
   function update() {
     if (!shown) return;
     const v = deps.getView(); const s = deps.getState(); if (!v || !s) return;
-    setText('#br-reg', v.regionNome || '—');
+    setText('#br-reg', v.regionNome || '—'); { const rg = root.querySelector('.br-region'); if (rg) rg.classList.toggle('hidden', !v.regionNome); } // sem região (X1): pílula '—' some
+    layoutCorner();
     { const fr = s._data.arena_br?.fastRun; const el = root.querySelector('#br-distrito'); if (el) { el.classList.toggle('hidden', !fr); if (fr) { setText('#br-distrito', `⚡ DISTRITO · ${fr.distritoNome}`); el.style.setProperty('--dc', fr.cor || '#3ecfbf'); } } } // FAST: o distrito sorteado fica sempre à vista (junto do minimapa)
     setText('#br-risk', '●'.repeat(v.risco || 0) + '○'.repeat(Math.max(0, 5 - (v.risco || 0))));
     setText('#br-time', `⏱ ${mmss(v.clock)}`);

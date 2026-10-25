@@ -4,8 +4,8 @@
  * A IA só decide POSIÇÃO/TEMPO (punir esquiva, fintar bloqueio, distância, hora do poder) — nunca ganha atributo.
  * Nada do save é tocado: o perfil de aprendizado vive na chave própria 'nexara.x1.perfil.v1'.
  */
-import { createX1Brain } from './x1-brain.js?v=20261024x1';
-import { X1_SPAWNS } from './x1-map.js?v=20261024x1';
+import { createX1Brain } from './x1-brain.js?v=20261025hud';
+import { X1_SPAWNS } from './x1-map.js?v=20261025hud';
 
 const LADO_VEC = { esq: [0, -1], dir: [0, 1], tras: [-1, 0], frente: [1, 0] }; // [along, side] relativos ao eixo jogador→rival
 
@@ -31,7 +31,7 @@ export function createX1Mode(deps) {
     deps.grace?.(cfg().contagemMs + 150);
     brain.onRoundStart(M.round);
     pushLog('round_start', { tac: brain.tactics() });
-    deps.banner?.(`<b>RODADA ${M.round}</b>${M.score.heroi} × ${M.score.rival} · melhor de ${cfg().melhorDe}`, cfg().contagemMs);
+    deps.banner?.(`<b>RODADA ${M.round}</b>${M.score.heroi} × ${M.score.rival} · melhor de ${cfg().melhorDe}`, 1500);
     updateHud();
   }
   /** fim de rodada: 'heroi' (rival chegou a 1 HP) ou 'rival' (herói caiu) — chamado pelos ganchos de dano/morte */
@@ -45,7 +45,7 @@ export function createX1Mode(deps) {
     if (M.score[winner] >= need) { M.phase = 'fim'; M.done = true; brain.onMatchEnd(); pushLog('match_end', { winner });
       const res = { winner, score: { ...M.score }, rodadas: M.rodadas.slice(), rival: M.rivalName, kit: M.rivalKit, partidas: brain.profile().partidas };
       deps.grace?.(36e5); showEnd(res); deps.onMatchEnd?.(res);
-    } else deps.banner?.(`<b>${winner === 'heroi' ? 'VOCÊ VENCEU A RODADA' : `${(M.rivalName || 'RIVAL').toUpperCase()} VENCEU A RODADA`}</b>${M.score.heroi} × ${M.score.rival}`, cfg().rodadaPausaMs);
+    } else deps.banner?.(`<b>${winner === 'heroi' ? 'VOCÊ VENCEU A RODADA' : `${(M.rivalName || 'RIVAL').toUpperCase()} VENCEU A RODADA`}</b>${M.score.heroi} × ${M.score.rival}`, 1500);
     updateHud(); return true;
   }
   /** chamado pelo mitigador: o golpe do herói no rival nesta rodada — clampa o letal (rival nunca "morre" no X1; a rodada termina) */
@@ -87,7 +87,7 @@ export function createX1Mode(deps) {
     if (M.phase === 'espera') { if (rival()) nextRound(); return; }
     if (M.phase === 'contagem') {
       const left = cfg().contagemMs - (M.t - M.phaseAt);
-      if (left <= 0) { M.phase = 'luta'; M.fightAt = M.t; deps.clearGrace?.(); { const mon = rival(); if (mon) deps.alert?.(mon); } deps.banner?.('<b>LUTE!</b>', 700); pushLog('fight'); }
+      if (left <= 0) { M.phase = 'luta'; M.fightAt = M.t; deps.clearGrace?.(); { const mon = rival(); if (mon) deps.alert?.(mon); } deps.banner?.('<b>LUTE!</b>', 600); pushLog('fight'); }
       updateHud(); return;
     }
     if (M.phase === 'pausa') { if (M.t - M.phaseAt >= cfg().rodadaPausaMs) nextRound(); return; }
@@ -137,17 +137,18 @@ export function createX1Mode(deps) {
     if (hud || typeof document === 'undefined') return hud;
     hud = document.createElement('div'); hud.id = 'x1-hud';
     hud.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 168px);left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;text-align:center;font:700 13px/1.25 system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px #000';
-    hud.innerHTML = '<div id="x1-score" style="background:rgba(10,14,24,.72);border:1px solid #ffc83066;border-radius:10px;padding:3px 12px;display:inline-block"></div><div id="x1-ia" style="margin-top:3px;font-size:11px;color:#9ff;opacity:.95"></div>';
-    document.body.appendChild(hud); return hud;
+    hud.innerHTML = '<div id="x1-score" style="background:rgba(10,14,24,.6);border:1px solid #ffc83055;border-radius:6px;padding:2px 8px;display:inline-block"></div><div id="x1-ia" style="margin-top:2px;font-size:11px;color:#9ff;opacity:.9"></div>';
+    (document.querySelector('#br-hud .br-top') || document.body).appendChild(hud); return hud; // 20261025hud: na coluna do canto (sem HUD da arena: fixo no topo)
   }
-  function showIndicator() { ensureHud(); if (hud) hud.style.display = ''; updateHud(); }
+  function showIndicator() { ensureHud(); if (hud) { const col = document.querySelector('#br-hud .br-top'); if (col && hud.parentElement !== col) col.appendChild(hud); hud.style.display = ''; } updateHud(); }
   function hideHud() { if (hud) hud.style.display = 'none'; }
   function updateHud() {
     if (!hud || !M) return; const pr = brain.profile();
+    if (!hud.__col) { const col = typeof document !== 'undefined' && document.querySelector('#br-hud .br-top'); if (col) { col.appendChild(hud); hud.__col = true; } } // 20261025hud: entra na coluna do canto assim que o HUD da arena existir
     const sc = hud.querySelector('#x1-score'); const ia = hud.querySelector('#x1-ia');
-    const txt = `X1 ⚔ RODADA ${M.round} · VOCÊ ${M.score.heroi} × ${M.score.rival} ${(M.rivalName || 'RIVAL').toUpperCase()}`;
+    const txt = `⚔ R${M.round} · VOCÊ ${M.score.heroi} × ${M.score.rival} ${(M.rivalName || 'RIVAL').toUpperCase()}`;
     if (sc.textContent !== txt) sc.textContent = txt;
-    const it = `🧠 IA aprendendo: ${pr.partidas}x partidas · ${pr.rodadas} rodadas`;
+    const it = `🧠 IA aprendendo: ${pr.partidas}x partidas`;
     if (ia.textContent !== it) ia.textContent = it;
   }
   // —— tela de VITÓRIA/DERROTA da partida (melhor de 3) ——

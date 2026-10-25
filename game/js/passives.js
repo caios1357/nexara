@@ -12,8 +12,8 @@
  * - Estado por partida em state.passives = { owned:[ids], pending:n, lastOffer:[ids], offer:[ids]|null }
  *   (salvo no save do mundo; saves antigos carregam owned=[]).
  */
-import { addModifier, getStat, STATS } from './modifiers.js?v=20261024x1';
-import { getConfig } from './gameplay-config.js?v=20261024x1';
+import { addModifier, getStat, STATS } from './modifiers.js?v=20261025hud';
+import { getConfig } from './gameplay-config.js?v=20261025hud';
 
 const registry = new Map(); // id → def normalizada
 let rarities = {};
