@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261025ia';
-import { pushLog } from './state.js?v=20261025ia';
-import { isArenaState } from './arena.js?v=20261025ia';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261025ia';
-import { ICONS } from './icons.js?v=20261025ia';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261025vfx';
+import { pushLog } from './state.js?v=20261025vfx';
+import { isArenaState } from './arena.js?v=20261025vfx';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261025vfx';
+import { ICONS } from './icons.js?v=20261025vfx';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -691,6 +691,9 @@ export function createMobileControls(hooks) {
       if (btnState[b.id] === key) continue;
       btnState[b.id] = key;
       el.style.setProperty('--cd', String(frac));
+      if (SPECIAL_BTN.has(b.id)) { const was = el.classList.contains('mc-on-cd'); // 20261025vfx: lampejo de PRONTO quando a recarga acaba; pulso de conjuração quando entra em recarga
+        if (was && frac <= 0) { el.classList.remove('mc-ready'); void el.offsetWidth; el.classList.add('mc-ready'); clearTimeout(el._nxR); el._nxR = setTimeout(() => el.classList.remove('mc-ready'), 650); }
+        if (!was && frac > 0) { el.classList.remove('mc-cast'); void el.offsetWidth; el.classList.add('mc-cast'); clearTimeout(el._nxC); el._nxC = setTimeout(() => el.classList.remove('mc-cast'), 450); } }
       el.classList.toggle('mc-on-cd', frac > 0);
       el.classList.toggle('mc-no-nexa', !it.affordable);
       el.classList.toggle('mc-active', !!it.active);

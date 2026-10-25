@@ -5,10 +5,10 @@
  * Dano de poder = `dano` do kit (vs rival NV1) → main.hitSpecial({ flatDano }) → applyPlayerHit (escala com o nível, passa
  * pelos modificadores/passivas, XP/loot/quests iguais). VFX = heroShots (projéteis/explosões) + textos; SFX = sfx.js.
  */
-import { kitFor, SLOTS } from './hero-kits.js?v=20261025ia';
-import { getStat, addModifier, STATS } from './modifiers.js?v=20261025ia';
-import { DEG } from './gameplay-config.js?v=20261025ia';
-import { wrapAngle } from './collision.js?v=20261025ia';
+import { kitFor, SLOTS } from './hero-kits.js?v=20261025vfx';
+import { getStat, addModifier, STATS } from './modifiers.js?v=20261025vfx';
+import { DEG } from './gameplay-config.js?v=20261025vfx';
+import { wrapAngle } from './collision.js?v=20261025vfx';
 
 const KIND = { cone: 'melee', investida: 'melee', giro: 'melee', salto: 'melee', area_self: 'melee', mil_cortes: 'melee', linha: 'area', area_alvo: 'area', portal: 'area' };
 export function createHeroPowers(deps) {
@@ -123,13 +123,15 @@ export function createHeroPowers(deps) {
   }
 
   // —— helpers de efeito ——
+  const VX = () => deps.renderer?.powerVfx?.() || null; // 20261025vfx
   function fx(x, y, r, color, kind = 'area', ms = 520) { try { deps.heroShots.burst(x, y, r, color, kind, ms); } catch {} }
   function text(t, color) { try { deps.renderer.spawnFloatText?.(t, color, { size: 16, dy: -12 }); } catch {} }
   const colOf = (p) => p.cor ?? (kit.variante ? ({ azul: 0x3a9cff, fogo: 0xff6a1a, raio: 0xffe14a, veneno: 0x7dff3a, terra: 0xd8a040, vento: 0x8affe8 })[kit.variante] : 0xb0c8ff);
   function hit(mon, dano, info = {}) {
     if (!mon?.alive) return null;
     const p = P(); const mp = mpos(mon);
-    const res = deps.hitFlat(mon, dano, { fromX: p.x, fromY: p.y, x: mp.x, y: mp.y, heavy: !!info.heavy, knockbackScale: (info.kb ?? 1) * (kit.var?.kb || 1), stunMs: info.stunMs || 0, slot: info.slot, kind: info.kind || 'proj' });
+    const res = deps.hitFlat(mon, dano, { fromX: p.x, fromY: p.y, x: mp.x, y: mp.y, heavy: !!info.heavy, knockbackScale: (info.kb ?? 1) * (kit.var?.kb || 1), stunMs: info.stunMs || 0, slot: info.slot, kind: info.kind || 'proj', special: true });
+    if (res && res.dmgOut > 0) { try { VX()?.hit(mp.x, mp.y, info.cor ?? 0xffffff, !!info.heavy); } catch { /* */ } }
     if (res) { stats.hits++; stats.dmg += res.dmgOut || 0; log('hit', { slot: info.slot, uid: mon.uid, dmg: res.dmgOut || 0, poder: info.poder }); }
     return res;
   }
@@ -151,22 +153,28 @@ export function createHeroPowers(deps) {
     stats.uses[id]++; log('poder', { slot: id, poder: p0.id, nome: p0.nome });
     const p = P(); const col = colOf(p0); const kv = kit.var || {};
     const kindOf = KIND[p0.tipo] || 'proj';
-    const H = (m, dano, o = {}) => hit(m, dano, { slot: id, poder: p0.id, kind: kindOf, ...o });
+    const H = (m, dano, o = {}) => hit(m, dano, { slot: id, poder: p0.id, kind: kindOf, cor: col, ...o });
     text(p0.nome, '#' + col.toString(16).padStart(6, '0'));
     if (p0.tipo === 'linha' || p0.tipo === 'cone') { // mira assistida: alinha com o inimigo mais à frente (cone de 45°) — mesma ajuda do Golpe Poderoso
       const t = pickTarget(api, p0.alcance, 45); if (t && t.d > 0.3) { const yaw = Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)); api = { ...api, yaw, dirX: Math.sin(yaw), dirY: -Math.cos(yaw) }; }
     }
+    const V = VX(); const FIRE = (o) => { const pr = deps.heroShots.fire(o); try { V?.attach(pr, p0.id, kit.variante, col, 'hero'); } catch { /* */ } return pr; };
+    if (V) try { // 20261025vfx: VFX próprio do poder (mesmos alvos/centro que o golpe vai usar)
+      const tg = p0.tipo === 'marca' || p0.tipo === 'maldicao' || p0.tipo === 'dreno' ? pickTarget(api, p0.alcance, p0.tipo === 'maldicao' ? 40 : 45) : null;
+      const ctr = p0.tipo === 'area_alvo' || p0.tipo === 'portal' ? areaCenter(api, p0.alcance) : null;
+      V.cast(p0.id, { x: p.x, y: p.y, yaw: api.yaw, c: col, var: kit.variante, p0, src: 'hero', follow: () => P(), yawNow: () => deps.getYaw(), cx: ctr?.x, cy: ctr?.y, tx: tg?.mp.x, ty: tg?.mp.y, tf: tg ? () => (tg.m.alive ? mpos(tg.m) : null) : null });
+    } catch (e) { console.warn('[power-vfx]', e); }
     switch (p0.tipo) {
       case 'projetil': {
         const t = pickTarget(api, p0.alcance, 30);
-        const fire = (yaw, target) => deps.heroShots.fire({ x: p.x + Math.sin(yaw) * 0.35, y: p.y - Math.cos(yaw) * 0.35, yaw, target, kind: p0.kind, speed: p0.kind === 'arrow' ? 26 : p0.homing ? 13 : 20, range: p0.alcance + 0.6, radius: 0.5, color: col, pierce: p0.pierce || 0, turnDeg: p0.homing ? 900 : undefined,
+        const fire = (yaw, target) => FIRE({ x: p.x + Math.sin(yaw) * 0.35, y: p.y - Math.cos(yaw) * 0.35, yaw, target, kind: p0.kind, speed: p0.kind === 'arrow' ? 26 : p0.homing ? 13 : 20, range: p0.alcance + 0.6, radius: 0.5, color: col, pierce: p0.pierce || 0, turnDeg: p0.homing ? 900 : undefined,
           onHit: (m) => { const r = H(m, p0.dano, { heavy: true });
             if (r && p0.puxa && m.alive) { const pp = P(); const mp = mpos(m); const dx = mp.x - pp.x, dy = mp.y - pp.y, d = Math.hypot(dx, dy) || 1; if (d > 1.6 && deps.placeMonster(m.uid, pp.x + dx / d * 1.3, pp.y + dy / d * 1.3)) { stats.pulled++; log('puxou', { uid: m.uid }); } }
             if (r && p0.id === 'corte_azul' && kv.corteSalta) chain(m, kv.corteSalta - 1, p0.dano, col); } });
         fire(t ? Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)) : api.yaw, t ? t.m : null);
         deps.sfx?.special?.('strike'); break; }
       case 'leque': { const t = pickTarget(api, p0.alcance, 30); const yaw0 = t ? Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)) : api.yaw;
-        for (let i = 0; i < p0.n; i++) { const yaw = yaw0 + (i - (p0.n - 1) / 2) * p0.spreadDeg * DEG; deps.heroShots.fire({ x: p.x, y: p.y, yaw, target: null, kind: p0.kind, speed: 22, range: p0.alcance, radius: 0.45, color: col, onHit: (m) => H(m, p0.dano) }); }
+        for (let i = 0; i < p0.n; i++) { const yaw = yaw0 + (i - (p0.n - 1) / 2) * p0.spreadDeg * DEG; FIRE({ x: p.x, y: p.y, yaw, target: null, kind: p0.kind, speed: 22, range: p0.alcance, radius: 0.45, color: col, onHit: (m) => H(m, p0.dano) }); }
         deps.sfx?.special?.('dash'); break; }
       case 'cone': { for (const o of monsNear(p.x, p.y, p0.alcance)) { const ang = Math.abs(wrapAngle(Math.atan2(o.mp.x - p.x, -(o.mp.y - p.y)) - api.yaw)); if (ang <= p0.meioAngulo * DEG || o.d < 0.9) H(o.m, p0.dano, { heavy: true }); }
         fx(p.x + api.dirX * 1.4, p.y + api.dirY * 1.4, 1.3, 0xffe14a, 'spark', 260); deps.sfx?.special?.('strike'); break; }
@@ -208,7 +216,7 @@ export function createHeroPowers(deps) {
       case 'marca': { const t = pickTarget(api, p0.alcance, 45); if (t) { const x = stOf(t.m); x.marca = clock + p0.dur; x.marcaMult = p0.mult; t.m.markedUntil = performance.now() + p0.dur; fx(t.mp.x, t.mp.y, 1, 0xffb020, 'ring', p0.dur); log('marca', { uid: t.m.uid }); } else text('SEM ALVO', '#ffffff'); deps.sfx?.cue?.('mark'); break; }
       case 'maldicao': { const t = pickTarget(api, p0.alcance, 40); if (t) { const r = H(t.m, p0.dano); const x = stOf(t.m); x.lento = clock + p0.dur; x.lentoMult = 1 - p0.lento; x.vuln = clock + p0.dur; x.vulnMult = p0.vuln; fx(t.mp.x, t.mp.y, 1.1, 0x9b4dff, 'ring', p0.dur); log('maldicao', { uid: t.m.uid, ok: !!r }); } deps.sfx?.special?.('spin'); break; }
       case 'dreno': { const t = pickTarget(api, p0.alcance, 45); if (t) { const r = H(t.m, p0.dano); if (r && r.dmgOut > 0) { const s = S(); const h = Math.min(p0.cura, s.player.hpMax - s.player.hp); s.player.hp += h; stats.heal = (stats.heal || 0) + h; log('dreno', { uid: t.m.uid, heal: h }); }
-          deps.heroShots.fire({ x: t.mp.x, y: t.mp.y, yaw: Math.atan2(p.x - t.mp.x, -(p.y - t.mp.y)), target: null, kind: 'arcane', speed: 14, range: t.d, radius: 0.1, color: 0x7dff3a, onHit: () => {} }); fx(p.x, p.y, 0.9, 0x7dff3a, 'splash', 500); } deps.sfx?.special?.('spin'); break; }
+          FIRE({ x: t.mp.x, y: t.mp.y, yaw: Math.atan2(p.x - t.mp.x, -(p.y - t.mp.y)), target: null, kind: 'arcane', speed: 14, range: t.d, radius: 0.1, color: 0x7dff3a, onHit: () => {} }); fx(p.x, p.y, 0.9, 0x7dff3a, 'splash', 500); } deps.sfx?.special?.('spin'); break; }
       default: return false;
     }
     return true;
@@ -218,7 +226,7 @@ export function createHeroPowers(deps) {
     let cur = from; const seen = new Set([from.uid]);
     for (let i = 0; i < n; i++) {
       const cp = mpos(cur); const nx = monsNear(cp.x, cp.y, 4.5).find((o) => !seen.has(o.m.uid)); if (!nx) break;
-      seen.add(nx.m.uid); deps.heroShots.fire({ x: cp.x, y: cp.y, yaw: Math.atan2(nx.mp.x - cp.x, -(nx.mp.y - cp.y)), target: null, kind: 'bolt', speed: 40, range: nx.d + 0.2, radius: 0.1, color: 0xffe14a, onHit: () => {} });
+      seen.add(nx.m.uid); try { VX()?.zap(cp.x, cp.y, nx.mp.x, nx.mp.y, 0xfff27a); } catch { /* */ } deps.heroShots.fire({ x: cp.x, y: cp.y, yaw: Math.atan2(nx.mp.x - cp.x, -(nx.mp.y - cp.y)), target: null, kind: 'bolt', speed: 40, range: nx.d + 0.2, radius: 0.1, color: 0xffe14a, onHit: () => {} });
       fx(nx.mp.x, nx.mp.y, 0.7, 0xffe14a, 'spark', 300); hit(nx.m, dano, { slot: 'golpe_poderoso', poder: 'corte_azul_salto' }); stats.chain++; cur = nx.m;
     }
   }
