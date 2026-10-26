@@ -7,6 +7,7 @@
  *  - `dano` = dano no NV1 contra um rival NV1 (defesa 7); escala com o nível (ataque) e passa pelos modificadores.
  *  - Só vale na PARTIDA JUSTA (todos NV1, armas básicas); fora dela os especiais antigos continuam.
  */
+import { ARCONTE_JOGADOR } from './arconte-kit.js?v=20261025arconte2'; // 20261025arconte2: Arconte JOGÁVEL (fora de KITS → sims/rivais dos 9 intocados)
 export const SLOTS = ['golpe_poderoso', 'ataque_area', 'suprema'];
 
 export const KITS = {
@@ -82,6 +83,7 @@ export const temVariantes = (id) => id === 'cavaleiro';
 /** Kit efetivo (herói + variante do Guerreiro). Objeto novo e congelável (cache por chave). */
 const cache = new Map();
 export function kitFor(heroId, skin) {
+  if (heroId === 'arconte') return ARCONTE_JOGADOR;
   const base = KITS[heroId]; if (!base) return null;
   const vId = temVariantes(heroId) ? (VARIANTES[skin] ? skin : 'azul') : null;
   const key = heroId + '|' + (vId || ''); if (cache.has(key)) return cache.get(key);

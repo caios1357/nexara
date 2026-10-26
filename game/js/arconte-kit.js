@@ -26,3 +26,23 @@ export const isArconte = (id) => id === ARCONTE_ID;
 export function arconteRoster() {
   return [{ nome: 'Arconte', primary: '#9b4dff', glow: '#9b4dff', char: ARCONTE_ID, skin: '', perso: 'equilibrado', persoLabel: 'Soberano', lvlOff: 0, arma: 'espada', chefe: true }];
 }
+/**
+ * 20261025arconte2 — ARCONTE JOGÁVEL (pedido do Caio: "jogar com o Arconte"). Kit do JOGADOR, separado do chefe do X1:
+ * mesmos 3 poderes/passiva/VFX, números de HERÓI (sim bot×bot ≈ 50% contra os 9 — scripts/sim-arconte.mjs KIT=jogador).
+ * Sem «fase 2» (guardaHp) — o jogador usa o Eclipse quando quiser. Os 9 kits (hero-kits.js) continuam intocados.
+ */
+export const ARCONTE_JOGADOR = Object.freeze({
+  heroi: 'arconte', variante: null, nome: 'ARCONTE', papel: 'Soberano · energia negra dos 6 Núcleos',
+  hp: 102, vel: 1, atk: 1.06, dmgTaken: 1,
+  passiva: ARCONTE_KIT.passiva,
+  poderes: Object.freeze({
+    golpe_poderoso: Object.freeze({ ...ARCONTE_KIT.poderes.golpe_poderoso, pierce: 2,
+      desc: 'Flecha NEGRA perfurante (fraca): 16 de dano, atravessa até 2 alvos, + lentidão 35% por 1,5 s.' }),
+    ataque_area: Object.freeze({ ...ARCONTE_KIT.poderes.ataque_area,
+      desc: 'Você GIRA com a espada negra por 1,6 s acertando tudo em volta (4×9, raio 2,6); o último giro deixa 60% lento por 1,2 s.' }),
+    suprema: Object.freeze((({ guardaHp, ...p }) => ({ ...p, desc: 'Uma BOLA GIGANTE de energia negra cresce sobre o alvo com raios das 6 cores e desaba após 1,1 s (46 em área de raio 3, 50% lento por 1,5 s).' }))(ARCONTE_KIT.poderes.suprema))
+  }),
+  var: Object.freeze({})
+});
+/** entrada da SELEÇÃO de herói (fora de PERSONAGENS → os rivais da Arena/FAST continuam só os 9) */
+export const ARCONTE_PICK = Object.freeze({ id: ARCONTE_ID, name: 'ARCONTE', perso: 'equilibrado', skin: '', art: null, extra: true });

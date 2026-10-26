@@ -1,87 +1,87 @@
-import { loadAllData } from './data-loader.js?v=20261025arconte';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261025arconte';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261025arconte';
-import { addToInventory } from '../../rules/loot.js?v=20261025arconte';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261025arconte';
-import { rollLoot } from '../../rules/loot.js?v=20261025arconte';
-import { isWalkable } from './map.js?v=20261025arconte';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261025arconte';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261025arconte';
+import { loadAllData } from './data-loader.js?v=20261025arconte2';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261025arconte2';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261025arconte2';
+import { addToInventory } from '../../rules/loot.js?v=20261025arconte2';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261025arconte2';
+import { rollLoot } from '../../rules/loot.js?v=20261025arconte2';
+import { isWalkable } from './map.js?v=20261025arconte2';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261025arconte2';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261025arconte2';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, setRivalMitigateHook, applyDamageToMonster as applyDmgMon, swordStats, resetSwordStats
-} from './actions.js?v=20261025arconte';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261025arconte';
-import { createMcbUi } from './mcb-ui.js?v=20261025arconte';
-import { createVestiario } from './vestiario.js?v=20261025arconte';
-import { createBerco } from './dragon-berco.js?v=20261025arconte';
-import { bossCfgFor } from './boss-variants.js?v=20261025arconte';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261025arconte';
-import { createMount } from './mount.js?v=20261025arconte';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261025arconte';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261025arconte';
-import { getLocalProfile, authProviders } from './auth.js?v=20261025arconte';
-import { lastWalletCheck } from './save.js?v=20261025arconte';
-import { maybeTrigger0217 } from './events.js?v=20261025arconte';
-import { createRenderer } from './renderer.js?v=20261025arconte';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261025arconte';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261025arconte';
-import { itemRarity } from './sprites.js?v=20261025arconte';
-import { createArenaState, isArenaState } from './arena.js?v=20261025arconte';
-import { createMobileControls } from './mobile-controls.js?v=20261025arconte';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261025arconte';
+} from './actions.js?v=20261025arconte2';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261025arconte2';
+import { createMcbUi } from './mcb-ui.js?v=20261025arconte2';
+import { createVestiario } from './vestiario.js?v=20261025arconte2';
+import { createBerco } from './dragon-berco.js?v=20261025arconte2';
+import { bossCfgFor } from './boss-variants.js?v=20261025arconte2';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261025arconte2';
+import { createMount } from './mount.js?v=20261025arconte2';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261025arconte2';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261025arconte2';
+import { getLocalProfile, authProviders } from './auth.js?v=20261025arconte2';
+import { lastWalletCheck } from './save.js?v=20261025arconte2';
+import { maybeTrigger0217 } from './events.js?v=20261025arconte2';
+import { createRenderer } from './renderer.js?v=20261025arconte2';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261025arconte2';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261025arconte2';
+import { itemRarity } from './sprites.js?v=20261025arconte2';
+import { createArenaState, isArenaState } from './arena.js?v=20261025arconte2';
+import { createMobileControls } from './mobile-controls.js?v=20261025arconte2';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261025arconte2';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261025arconte';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261025arconte';
-import { createArenaRun } from './arena-run.js?v=20261025arconte';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261025arconte';
+} from './enemy-ai.js?v=20261025arconte2';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261025arconte2';
+import { createArenaRun } from './arena-run.js?v=20261025arconte2';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261025arconte2';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261025arconte';
-import { generateBrMap } from './br-map.js?v=20261025arconte';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261025arconte';
-import { createX1Mode } from './x1-mode.js?v=20261025arconte';
-import { makeX1Config } from './x1-map.js?v=20261025arconte';
-import { rivalSteer } from './enemy-ai.js?v=20261025arconte';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261025arconte';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261025arconte';
-import { createMusic } from './music.js?v=20261025arconte';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261025arconte';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261025arconte';
-import { createBossHud } from './boss-hud.js?v=20261025arconte';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261025arconte';
-import { createPlayerMotion } from './player-motion.js?v=20261025arconte';
-import { createPlayerCombat } from './player-combat.js?v=20261025arconte';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261025arconte';
-import { createHeroPowers } from './hero-powers.js?v=20261025arconte';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261025arconte2';
+import { generateBrMap } from './br-map.js?v=20261025arconte2';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261025arconte2';
+import { createX1Mode } from './x1-mode.js?v=20261025arconte2';
+import { makeX1Config } from './x1-map.js?v=20261025arconte2';
+import { rivalSteer } from './enemy-ai.js?v=20261025arconte2';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261025arconte2';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261025arconte2';
+import { createMusic } from './music.js?v=20261025arconte2';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261025arconte2';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261025arconte2';
+import { createBossHud } from './boss-hud.js?v=20261025arconte2';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261025arconte2';
+import { createPlayerMotion } from './player-motion.js?v=20261025arconte2';
+import { createPlayerCombat } from './player-combat.js?v=20261025arconte2';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261025arconte2';
+import { createHeroPowers } from './hero-powers.js?v=20261025arconte2';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats, sfxDragonRoar, sfxDragonFlap, sfxDragonBreath
-} from './sfx.js?v=20261025arconte';
+} from './sfx.js?v=20261025arconte2';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261025arconte';
-import { createPassiveUi } from './passives-ui.js?v=20261025arconte';
-import { createSettingsMenu } from './settings-menu.js?v=20261025arconte';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261025arconte';
-import { createPassiveHud } from './passive-hud.js?v=20261025arconte';
-import { createDragon } from './companion-dragon.js?v=20261025arconte';
-import { createFullscreenUi } from './fullscreen.js?v=20261025arconte';
-import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261025arconte';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261025arconte';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261025arconte';
-import { createTutorial } from './tutorial.js?v=20261025arconte';
-import { openHeroSelect, openLobby, closeHeroSelect, closeLobby, readLastPick, writeLastPick, readX1Rival, writeX1Rival } from './hero-select.js?v=20261025arconte';
-import { arconteRoster } from './arconte-kit.js?v=20261025arconte'; // 20261025arconte: ARCONTE (chefe) como rival do X1
-import { planRoster, rivaisPara } from './br-roster.js?v=20261025arconte';
-import { PERSONAGEM_IDS } from './personagens.js?v=20261025arconte';
+} from './passives.js?v=20261025arconte2';
+import { createPassiveUi } from './passives-ui.js?v=20261025arconte2';
+import { createSettingsMenu } from './settings-menu.js?v=20261025arconte2';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261025arconte2';
+import { createPassiveHud } from './passive-hud.js?v=20261025arconte2';
+import { createDragon } from './companion-dragon.js?v=20261025arconte2';
+import { createFullscreenUi } from './fullscreen.js?v=20261025arconte2';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261025arconte2';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261025arconte2';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261025arconte2';
+import { createTutorial } from './tutorial.js?v=20261025arconte2';
+import { openHeroSelect, openLobby, closeHeroSelect, closeLobby, readLastPick, writeLastPick, readX1Rival, writeX1Rival } from './hero-select.js?v=20261025arconte2';
+import { arconteRoster } from './arconte-kit.js?v=20261025arconte2'; // 20261025arconte: ARCONTE (chefe) como rival do X1
+import { planRoster, rivaisPara } from './br-roster.js?v=20261025arconte2';
+import { PERSONAGEM_IDS } from './personagens.js?v=20261025arconte2';
 
 let DATA = null;
 let state = null;
@@ -257,6 +257,7 @@ const heroPowers = createHeroPowers({
   blink: (x, y) => heroBlink(x, y),
   rivalTargetsHero: (mon) => arenaBr.rivalTgtKind?.(mon.uid) === 'jogador',
   isRangedAttacker: (atk) => !!atk && (atk.rival?.arma === 'cajado' || /arqueir|atirad|mago|cuspid|ranged/i.test(atk.id || '')),
+  onHeroFx: (k, ms) => renderer.heroArconteFx?.(k, ms), onNucleos: (n) => renderer.heroArconteFx?.('nucleos', n), // 20261025arconte2: modelo do Arconte jogável (giro/eclipse/Núcleos)
   onHidden: (on) => { document.body.classList.toggle('nx-fumaca', !!on); if (on) renderer.spawnFloatText?.('INVISÍVEL', '#c8c8d8', { size: 16, dy: -20 }); }
 });
 /** Teleporte/Salto/Mil Cortes/Investida do kit: só para tile andável e com linha de visão (não atravessa parede) */
@@ -481,7 +482,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261025arconte').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261025arconte2').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -1868,7 +1869,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261025arconte').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261025arconte2').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -2077,7 +2078,8 @@ async function boot() {
   window.__NEXARA__ = {
     /** NEXARA FAST ⚡ (testes): entrar, estado, e teste do gerador para várias seeds (6 regiões ligadas, baús alcançáveis) */
     /** NEXARA X1 ⚔ (e2e-x1): estado da partida, perfil aprendido e decisões da IA */
-    x1: { view: () => x1.view(), rivalChoice: () => ({ saved: readX1Rival(), cur: x1RivalCur }), vfx: () => renderer.powerVfx?.()?.stats?.() || null, arconteHeights: () => renderer.arconteHeights?.() || null, setRival: (v) => writeX1Rival(v), enter: () => enterArenaBr('x1'), enterNow: () => enterArenaBrNow('x1'), mode: () => brModeCur, resetProfile: () => x1.brain.reset(), openEvolution: () => !!x1.openEvolution(), rematch: () => x1.start(),
+    arconte: { heroi: () => ({ modelo: renderer.heroArconteInfo?.() || null, kit: heroPowers.view().kit, nucleos: heroPowers.view().nucleos, estilo: state?.player?.heroStyle || null }) }, // 20261025arconte2: teste do Arconte JOGÁVEL
+    x1: { view: () => x1.view(), rivalChoice: () => ({ saved: readX1Rival(), cur: x1RivalCur, fixo: X1_RIVAL_FIXO }), vfx: () => renderer.powerVfx?.()?.stats?.() || null, arconteHeights: () => renderer.arconteHeights?.() || null, setRival: (v) => writeX1Rival(v), enter: () => enterArenaBr('x1'), enterNow: () => enterArenaBrNow('x1'), mode: () => brModeCur, resetProfile: () => x1.brain.reset(), openEvolution: () => !!x1.openEvolution(), rematch: () => x1.start(),
       rival: () => { const m = state?.monstersAlive?.find((q) => q.rival && q.alive); if (!m) return null; const q = getMonsterPos(m); const v = getAiView(m); return { uid: m.uid, x: q.x, y: q.y, hp: m.hp, hpMax: m.hpMax, state: v?.state || null, name: m.rival?.name, kit: m.rival?.kit || null, char: m.rival?.char }; },
       map: () => { const m = state?._data?.zones?.zones?.find((z) => z.brMap)?.brMap; return m ? { W: m.W, H: m.H, x1: !!m.x1, tiles: m.tiles, structures: m.structures } : null; } },
     fast: {
@@ -2447,7 +2449,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261025arconte');
+      const { addXp } = await import('./state.js?v=20261025arconte2');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };
@@ -2838,6 +2840,7 @@ const pickOn = () => { const q = location.search; if (/[?&]pick=0\b/.test(q)) re
 let pickStats = { opened: 0, confirmed: 0, auto: 0, last: null, lobby: 0, roster: null };
 let pendingRoster = null;
 let x1RivalCur = null; // 20261025arconte
+const X1_RIVAL_FIXO = 'arconte'; // 20261025arconte2: pedido do Caio — o ARCONTE é SEMPRE o rival do X1 (sem escolha). A chave nexara.x1.rival.v1 é ignorada (não apagada); o caminho do rival sorteado continua no código (X1_RIVAL_FIXO = null o reativa).
 function currentPick() {
   const perm = resolvePermanent().state; const lp = readLastPick();
   if (lp) return lp;
@@ -2852,11 +2855,11 @@ function enterArenaBr(mode = 'full') {
   if (!brEnabled(DATA)) { ui.showToast('ARENA PRINCIPAL — EM DESENVOLVIMENTO (arena_br.enabled = false).'); return false; }
   if (mode === 'x1') { // X1 ⚔: seleção de herói (Apex) → direto para o duelo (sem lobby); rival = herói SORTEADO
     // 20261025arconte: rival = herói SORTEADO (como antes) ou o ARCONTE (chefe) — escolha na seleção, guardada em 'nexara.x1.rival.v1' (?x1rival= sobrepõe)
-    const go = (rv = readX1Rival()) => { x1RivalCur = rv === 'arconte' ? 'arconte' : 'sorteado'; pendingRoster = x1RivalCur === 'arconte' ? arconteRoster() : planRoster({ n: 1, herois: DATA.arena_br_design?.fast?.herois || [], fast: true, justa: true }); return enterArenaBrNow('x1'); };
+    const go = (rv = X1_RIVAL_FIXO || readX1Rival()) => { x1RivalCur = rv === 'arconte' ? 'arconte' : 'sorteado'; pendingRoster = x1RivalCur === 'arconte' ? arconteRoster() : planRoster({ n: 1, herois: DATA.arena_br_design?.fast?.herois || [], fast: true, justa: true }); return enterArenaBrNow('x1'); };
     if (!pickOn()) return go();
     pickStats.opened++;
-    openHeroSelect({ mode: 'x1', current: currentPick(), rival: readX1Rival(), seconds: +(new URLSearchParams(location.search).get('pickSec') || 15), onCancel: () => {},
-      onConfirm: (v) => { pickStats.confirmed++; if (v.auto) pickStats.auto++; applyHeroPick(v); if (v.rival) writeX1Rival(v.rival); go(v.rival || readX1Rival()); } });
+    openHeroSelect({ mode: 'x1', current: currentPick(), rival: X1_RIVAL_FIXO || readX1Rival(), rivalFixo: !!X1_RIVAL_FIXO, seconds: +(new URLSearchParams(location.search).get('pickSec') || 15), onCancel: () => {},
+      onConfirm: (v) => { pickStats.confirmed++; if (v.auto) pickStats.auto++; applyHeroPick(v); if (v.rival && !X1_RIVAL_FIXO) writeX1Rival(v.rival); go(X1_RIVAL_FIXO || v.rival || readX1Rival()); } });
     return true;
   }
   if (!pickOn()) { pendingRoster = null; return enterArenaBrNow(mode); }

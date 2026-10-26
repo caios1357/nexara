@@ -3,11 +3,12 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261025arconte';
-import { createHeroModel } from './hero-model.js?v=20261025arconte';
-import { kitFor } from './hero-kit.js?v=20261025arconte';
-import { heroStyleOf } from '../hero-styles.js?v=20261025arconte';
-import { getConfig } from '../gameplay-config.js?v=20261025arconte';
+import { attachHeroGlb } from './hero-glb.js?v=20261025arconte2';
+import { createHeroModel } from './hero-model.js?v=20261025arconte2';
+import { createArconteModel } from './arconte-model.js?v=20261025arconte2'; // 20261025arconte2: Arconte jogável na prévia
+import { kitFor } from './hero-kit.js?v=20261025arconte2';
+import { heroStyleOf } from '../hero-styles.js?v=20261025arconte2';
+import { getConfig } from '../gameplay-config.js?v=20261025arconte2';
 /** 9 PERSONAGENS: a prévia/retrato mostram o MESMO herói procedural do jogo (kit + skin) — o GLB só com graphics.heroLook='glb' */
 const wantsGlb = () => { try { return (new URLSearchParams(location.search).get('herolook') || getConfig().graphics.heroLook) === 'glb'; } catch { return false; } };
 function attachProcHero(fake, o = {}) {
@@ -17,14 +18,14 @@ function attachProcHero(fake, o = {}) {
     info,
     get caioGlb() { return info.hmInfo?.caioGlb || null; },
     setStyle(styleId, extra = {}) {
-      const kit = kitFor({ styleId, custom: extra.custom, equip: extra.equip }); const k2 = JSON.stringify(kit);
+      const kit = kitFor({ styleId, custom: extra.custom, equip: extra.equip }); const k2 = (styleId === 'arconte' ? 'arconte|' : '') + JSON.stringify(kit);
       const S0 = heroStyleOf(styleId); const cu = extra.custom || {};
       info.model = S0.model; info.glow = kit.glow ?? S0.glow; info.capeOn = kit.cape !== false; info.weapon = cu.weapon || S0.weapon; info.skin = kit.skin || null;
       const eq = extra.equip || {}; info.helmet = !!eq.helmet; info.helmetKind = eq.helmet ? (eq.helmet.crest === 'demon' ? 'demon' : eq.helmet.crest === 'horns' ? 'horns' : 'crest') : null; info.weaponFamily = eq.weapon?.family || null; if (eq.weapon?.model) info.weapon = eq.weapon.model; info.armorPads = !!eq.armor?.plates; info.greaves = !!eq.pants?.greaves;
       info.style = styleId;
       if (k2 === sig && hm) return; sig = k2;
       if (hm) { fake.root.remove(hm.root); hm.root.traverse((q) => { if (q.geometry && !q.geometry.userData?.shared) q.geometry.dispose(); }); }
-      hm = createHeroModel({ styleId, kit, glb: false, caioGlb: o.caioGlb !== false /* 20261024apex: prévia/seleção mostram o GUERREIRO GLB do Caio (o mesmo do jogo) */ }); hm.root.rotation.y = 0; fake.root.add(hm.root); info.hmInfo = hm.kitInfo;
+      hm = styleId === 'arconte' ? createArconteModel({ scale: 1, espada: true }) : createHeroModel({ styleId, kit, glb: false, caioGlb: o.caioGlb !== false /* 20261024apex: prévia/seleção mostram o GUERREIRO GLB do Caio (o mesmo do jogo) */ }); hm.root.rotation.y = 0; fake.root.add(hm.root); info.hmInfo = hm.kitInfo;
       info.kit = { style: kit.style, head: kit.head, weapon: kit.weapon, skin: kit.skin || null, shield: !!hm.kitInfo?.shield, parts: hm.kitInfo?.parts || 0 };
     },
     update(dt, i) { hm?.update(dt, { x: 0, z: 0, yaw: Math.PI, speed: 0, walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); },

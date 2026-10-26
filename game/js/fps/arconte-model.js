@@ -10,13 +10,14 @@
  * Puramente visual. Custo: ~1 modelo de herói + 6 cristais + 2 nuvens nas mãos (poucas chamadas de desenho a mais).
  */
 import * as THREE from 'three';
-import { createHeroModel } from './hero-model.js?v=20261025arconte';
+import { createHeroModel } from './hero-model.js?v=20261025arconte2';
 
 export const NUCLEO_CORES = [0x2a6cff, 0xff2a2a, 0xffd02a, 0x2aff5a, 0xd0782a, 0xf4f4ff]; // azul · vermelho · amarelo · verde · laranja/marrom · branco
 export const ARCONTE_ESCALA = 1.26;
 
 export const ARCONTE_LOOK = { style: 'arconte', head: 'careca', face: 'olhos', armor: 0xd8d2c4, cloth: 0xe9e4d8, glow: 0x9b4dff, cape: true, weapon: 'espada', pad: 1.35, robe: true, chibi: true, bigBoots: true };
 
+export const ARCONTE_ESCALA_JOGADOR = 1.15; // 20261025arconte2: Arconte JOGÁVEL um pouco menor que o chefe (câmera/colisão de herói)
 export function createArconteModel(opts = {}) {
   const fx = { cicUntil: 0, crystals: [], crystalMats: [], hands: [], bolts: [], aura: null, nuc: 0, nucShown: -1, eclipseUntil: 0, t: 0 };
   const hm = createHeroModel({ styleId: 'arconte', kit: { ...ARCONTE_LOOK }, glb: false, decorate: (c) => decorate(c, fx) });
@@ -35,12 +36,12 @@ export function createArconteModel(opts = {}) {
   fx.root = hm.root;
   const baseUpdate = hm.update;
   hm.update = (dt, inp) => { baseUpdate(dt, inp); animate(fx, dt || 0.016);
-    const cic = fx.t < fx.cicUntil; if (fx.sword) fx.sword.visible = cic;
+    const cic = fx.t < fx.cicUntil; if (fx.sword) fx.sword.visible = cic || !!opts.espada; // jogador: espada negra sempre na mão
     if (cic) { fx.cicAng = (fx.cicAng || 0) + (dt || 0.016) * 15; fx.root.rotation.y += fx.cicAng; if (fx.armR) { fx.armR.shoulder.rotation.set(0, 0, CIC_ARM); fx.armR.elbow.rotation.set(0, 0, 0); } if (fx.edgeMat) fx.edgeMat.color.setHex(NUCLEO_CORES[Math.floor(fx.t * 12) % 6]); } else fx.cicAng = 0; }; // GIRO MORTAL: corpo gira com a espada negra (raios coloridos no fio)
   hm.ciclone = (ms = 1600) => { fx.cicUntil = fx.t + ms / 1000; };
   hm.setNucleos = (n) => { fx.nuc = Math.max(0, Math.min(6, n | 0)); };
   hm.eclipse = (ms = 1400) => { fx.eclipseUntil = fx.t + ms / 1000; };
-  hm.arconte = { parts: fx.parts, crystals: fx.crystals.length, info: () => ({ nucleos: fx.nuc, eclipse: fx.t < fx.eclipseUntil, ciclone: fx.t < fx.cicUntil, espada: !!fx.sword, crystals: fx.crystals.length, hands: fx.hands.length, parts: fx.parts }) };
+  hm.arconte = { parts: fx.parts, crystals: fx.crystals.length, info: () => ({ nucleos: fx.nuc, eclipse: fx.t < fx.eclipseUntil, ciclone: fx.t < fx.cicUntil, espada: !!fx.sword, espadaVisivel: !!fx.sword?.visible, crystals: fx.crystals.length, hands: fx.hands.length, parts: fx.parts }) };
   hm.kitInfo.arconte = true;
   return hm;
 }

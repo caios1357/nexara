@@ -96,3 +96,11 @@ body.nx-fumaca::after { content: ''; position: fixed; inset: 0; pointer-events: 
 .hsel-rvbox img { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; border: 1px solid #d8a63a; background: #120a1c; flex: none; }
 .hsel-rvbox b { color: #ffe2a0; }
 .hsel-rvbox small { display: block; color: #bfb0dc; font-size: 9px; margin-top: 2px; }
+/* 20261025arconte2: ARCONTE jogável — cartão de destaque (paisagem: linha inteira e baixa para caber); sem elemento/cajado */
+.hsel-card-arconte { --hc: #c89aff; background: linear-gradient(135deg, rgba(20,6,32,.92), rgba(48,20,70,.85)); border-color: rgba(200,154,255,.35); }
+.hsel-card-arconte b { color: #ffe2a0; }
+@media (orientation: landscape) {
+  .hsel-card-arconte { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 8px; padding: 2px 6px; }
+  .hsel-card-arconte .hsel-por { max-height: 30px; width: 30px; }
+}
+.hsel.hsel-is-arconte .hsel-skins:not(.hsel-armas), .hsel.hsel-is-arconte .hsel-armas, .hsel.hsel-is-arconte #hsel-vdesc { display: none; }

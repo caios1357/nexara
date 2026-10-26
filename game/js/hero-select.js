@@ -5,11 +5,13 @@
  *  · LOBBY: você + 49 rivais (BOT offline) com personagem, skin, nível — exatamente os que vão cair no mapa; queda em 5 s.
  * Toque, retrato e paisagem (CSS). Persistência: quem chama grava player.heroStyle (+ skin) e a "última escolha".
  */
-import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025arconte';
-import { heroStyleOf } from './hero-styles.js?v=20261025arconte';
-import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025arconte';
-import { ICONS } from './icons.js?v=20261025arconte';
-import { ARCONTE_KIT } from './arconte-kit.js?v=20261025arconte';
+import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025arconte2';
+import { heroStyleOf } from './hero-styles.js?v=20261025arconte2';
+import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025arconte2';
+import { ICONS } from './icons.js?v=20261025arconte2';
+import { ARCONTE_KIT, ARCONTE_PICK } from './arconte-kit.js?v=20261025arconte2';
+/** 20261025arconte2: heróis ESCOLHÍVEIS = os 9 + ARCONTE (PERSONAGENS fica com os 9 → rivais da Arena/FAST não mudam) */
+const PICKS = [...PERSONAGENS, ARCONTE_PICK];
 
 /** 20261025arconte: escolha do RIVAL no X1 (chave própria; o save não é tocado) — 'sorteado' (herói sorteado, como antes) ou 'arconte' (chefe) */
 export const X1_RIVAL_KEY = 'nexara.x1.rival.v1';
@@ -17,7 +19,7 @@ export function readX1Rival() { try { const q = new URLSearchParams(location.sea
 export function writeX1Rival(v) { try { if (v === 'arconte') localStorage.setItem(X1_RIVAL_KEY, 'arconte'); else localStorage.removeItem(X1_RIVAL_KEY); } catch { /* sem storage */ } } // padrão (sorteado) = sem chave
 
 export const LAST_PICK_KEY = 'nexara.ultimaEscolha';
-export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PERSONAGENS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
+export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PICKS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
 export function writeLastPick(v) { try { localStorage.setItem(LAST_PICK_KEY, JSON.stringify({ id: v.id, skin: v.skin || '', arma: v.arma === 'cajado' ? 'cajado' : 'espada', at: Date.now() })); } catch { /* sem storage */ } }
 
 /** papel + habilidades mostrados na seleção (as 3 especiais são as do jogo; a arma é a do kit do personagem) */
@@ -30,7 +32,8 @@ const INFO = {
   cacadora: { papel: 'CAÇADORA', passiva: 'Caça gigantes: +dano contra gigantes' },
   bruxo: { papel: 'CONTROLE', passiva: 'Oportunista: escolhe alvos fracos' },
   samurai: { papel: 'DUELISTA', passiva: 'Duelista: +dano em duelo entre heróis' },
-  berserker: { papel: 'BRUTAMONTES', passiva: 'Agressivo: pressão constante' }
+  berserker: { papel: 'BRUTAMONTES', passiva: 'Agressivo: pressão constante' },
+  arconte: { papel: 'SOBERANO', passiva: 'Equilibrado: energia negra dos 6 Núcleos' } // 20261025arconte2: jogável
 };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -40,20 +43,20 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
  */
 export function openHeroSelect(o) {
   closeHeroSelect();
-  const cur = o.current && PERSONAGENS.some((p) => p.id === o.current.id) ? o.current : { id: 'cavaleiro', skin: '' };
+  const cur = o.current && PICKS.some((p) => p.id === o.current.id) ? o.current : { id: 'cavaleiro', skin: '' };
   let x1rv = o.mode === 'x1' ? (o.rival === 'arconte' ? 'arconte' : 'sorteado') : null; let pick = cur.id; let skin = cur.skin || ''; let arma = cur.arma === 'cajado' ? 'cajado' : 'espada'; let left = Math.max(3, o.seconds ?? 15); let done = false; let preview = null;
   const el = document.createElement('div'); el.id = 'hero-select'; el.className = 'hsel'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Escolha seu herói');
   el.innerHTML = `
     <div class="hsel-top"><div class="hsel-title">ESCOLHA SEU HERÓI<small id="hsel-sub">${o.mode === 'x1' ? 'X1 ⚔ · DUELO 1×1 · RIVAL SORTEADO' : (o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA') + ' · 50 JOGADORES'}</small></div>
       <div class="hsel-timer" id="hsel-timer" aria-live="polite"><b id="hsel-left">${left}</b><small>escolha automática</small></div></div>
     <div class="hsel-body">
-      <div class="hsel-grid" id="hsel-grid">${PERSONAGENS.map((p) => { const s = heroStyleOf(p.id); return `<button type="button" class="hsel-card" data-id="${p.id}" style="--hc:${s.css}" aria-label="${esc(p.name)}">
+      <div class="hsel-grid" id="hsel-grid">${PICKS.map((p) => { const s = heroStyleOf(p.id); return `<button type="button" class="hsel-card${p.extra ? ' hsel-card-arconte' : ''}" data-id="${p.id}" style="--hc:${s.css}" aria-label="${esc(p.name)}">
         <span class="hsel-por"><img src="assets/ui/herois/${p.id}.webp?v=20261024glb3" alt="" loading="eager" onerror="this.remove()"></span><b>${esc(p.name)}</b><small>${esc(INFO[p.id]?.papel || '')}</small></button>`; }).join('')}</div>
       <div class="hsel-detail">
         <div class="hsel-prev"><canvas id="hsel-canvas" aria-label="Prévia 3D do herói"></canvas><span class="hsel-glb" id="hsel-glb"></span></div>
         <div class="hsel-info">
-          ${o.mode === 'x1' ? `<div class="hsel-x1rv" id="hsel-x1rv"><span>RIVAL DO X1</span><div><button type="button" data-rv="sorteado">🎲 HERÓI SORTEADO</button><button type="button" data-rv="arconte" class="hsel-rv-boss">👑 ARCONTE (CHEFE)</button></div>
-            <div class="hsel-rvbox" id="hsel-rvbox"><img src="assets/ui/arconte-retrato.webp?v=20261025arconte" alt="" onerror="this.remove()"><div><b>ARCONTE</b> · ${esc(ARCONTE_KIT.papel)} · VIDA ${ARCONTE_KIT.hp}<small>${esc(ARCONTE_KIT.passiva.nome)}: ${esc(ARCONTE_KIT.passiva.desc)}</small>
+          ${o.mode === 'x1' && !o.rivalFixo ? `<div class="hsel-x1rv" id="hsel-x1rv"><span>RIVAL DO X1</span><div><button type="button" data-rv="sorteado">🎲 HERÓI SORTEADO</button><button type="button" data-rv="arconte" class="hsel-rv-boss">👑 ARCONTE (CHEFE)</button></div>
+            <div class="hsel-rvbox" id="hsel-rvbox"><img src="assets/ui/arconte-retrato.webp?v=20261025arconte2" alt="" onerror="this.remove()"><div><b>ARCONTE</b> · ${esc(ARCONTE_KIT.papel)} · VIDA ${ARCONTE_KIT.hp}<small>${esc(ARCONTE_KIT.passiva.nome)}: ${esc(ARCONTE_KIT.passiva.desc)}</small>
               <small>${SLOTS.map((sl) => `<b>${esc(ARCONTE_KIT.poderes[sl].nome)}</b> (${Math.round(ARCONTE_KIT.poderes[sl].cd / 1000)} s)`).join(' · ')}</small></div></div></div>` : ''}
           <div class="hsel-name" id="hsel-name"></div>
           <div class="hsel-role" id="hsel-role"></div>
@@ -74,7 +77,7 @@ export function openHeroSelect(o) {
   document.body.appendChild(el);
   const $ = (id) => el.querySelector(`#${id}`);
   function paint() {
-    const p = PERSONAGENS.find((q) => q.id === pick) || PERSONAGENS[0]; const s = heroStyleOf(p.id); const I = INFO[p.id] || {};
+    const p = PICKS.find((q) => q.id === pick) || PICKS[0]; const s = heroStyleOf(p.id); const I = INFO[p.id] || {};
     el.querySelectorAll('.hsel-card').forEach((b) => { const on = b.dataset.id === pick; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     el.querySelectorAll('#hsel-skin button').forEach((b) => b.classList.toggle('on', b.dataset.sk === skin));
     el.querySelectorAll('#hsel-arma button').forEach((b) => b.classList.toggle('on', b.dataset.arma === arma));
@@ -96,6 +99,7 @@ export function openHeroSelect(o) {
       const V = vv ? VARIANTES[k.variante] : null; $('hsel-vdesc').innerHTML = V ? `<b>${esc(V.nome)}</b> ${esc(V.desc)}` : '';
     }
     $('hsel-pass').textContent = `${PERSONALIDADES[p.perso]?.label || ''} — ${I.passiva || ''}`;
+    el.classList.toggle('hsel-is-arconte', pick === 'arconte'); // Arconte: sem elemento/cajado (espada negra fixa)
     el.style.setProperty('--hc', col);
     try { preview?.set(p.id, skin ? { skin } : {}, {}); } catch { /* prévia opcional */ }
   }
@@ -103,12 +107,12 @@ export function openHeroSelect(o) {
   el.querySelectorAll('#hsel-skin button').forEach((b) => { b.onclick = () => { skin = b.dataset.sk; paint(); }; });
   el.querySelectorAll('#hsel-arma button').forEach((b) => { b.onclick = () => { arma = b.dataset.arma; paint(); }; });
   el.querySelectorAll('#hsel-x1rv button').forEach((b) => { b.onclick = () => { x1rv = b.dataset.rv; paint(); }; });
-  const finish = (auto) => { if (done) return; done = true; const v = { id: pick, skin, arma, auto: !!auto, ...(x1rv ? { rival: x1rv } : {}) }; closeHeroSelect(); o.onConfirm(v); };
+  const finish = (auto) => { if (done) return; done = true; const v = { id: pick, skin: pick === 'arconte' ? '' : skin, arma: pick === 'arconte' ? 'espada' : arma, auto: !!auto, ...(x1rv ? { rival: x1rv } : {}) }; closeHeroSelect(); o.onConfirm(v); };
   $('hsel-ok').onclick = () => finish(false);
   $('hsel-back').onclick = () => { if (done) return; done = true; closeHeroSelect(); o.onCancel?.(); };
   const tm = setInterval(() => { if (done || !el.isConnected) { clearInterval(tm); return; } left--; const lb = $('hsel-left'); if (lb) lb.textContent = String(Math.max(0, left)); el.classList.toggle('hsel-urgent', left <= 5); if (left <= 0) { clearInterval(tm); finish(true); } }, 1000);
   el._timer = tm;
-  import('./fps/hero-preview.js?v=20261025arconte').then((m) => {
+  import('./fps/hero-preview.js?v=20261025arconte2').then((m) => {
     if (!el.isConnected) return;
     try { preview = m.createHeroPreview($('hsel-canvas'), { interactive: true, autoSpin: 0.6 }); el._preview = preview; paint(); } catch (e) { console.warn('[seleção] prévia 3D indisponível', e); }
   }).catch(() => {});
@@ -130,7 +134,7 @@ export function openLobby(o) {
   let left = Math.max(1, o.seconds ?? 5); let done = false;
   const total = o.roster.length + 1;
   const count = {}; for (const r of o.roster) count[r.char] = (count[r.char] || 0) + 1;
-  const tile = (nm, id, sk, lv, you, arma) => { const p = PERSONAGENS.find((q) => q.id === id); const css = sk && SKINS[sk] ? SKINS[sk].css : heroStyleOf(id).css;
+  const tile = (nm, id, sk, lv, you, arma) => { const p = PICKS.find((q) => q.id === id); const css = sk && SKINS[sk] ? SKINS[sk].css : heroStyleOf(id).css;
     return `<li class="hlob-p${you ? ' you' : ''}" style="--pc:${css}"><i class="hlob-ic"><img src="assets/ui/herois/${id}.webp?v=20261024glb3" alt="" onerror="this.remove()"></i><span><b>${esc(nm)}</b><small>${esc(p?.name || id)}${you ? ' · VOCÊ' : ' · BOT'} · NV ${lv}${arma ? ` · ${arma === 'cajado' ? '🔮' : '⚔'}` : ''}</small></span></li>`; };
   const el = document.createElement('div'); el.id = 'hero-lobby'; el.className = 'hlob';
   el.innerHTML = `<div class="hlob-top"><div class="hlob-title">${o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA'} · <b id="hlob-n">${total}</b> JOGADORES<small>você + ${o.roster.length} rivais (BOT, offline)</small></div>

@@ -47,8 +47,12 @@ export const HERO_STYLES = [
   }
 ];
 export const DEFAULT_HERO_STYLE = 'cavaleiro';
+/** 20261025arconte2: ARCONTE jogável — fora de HERO_STYLES (o editor/vestiário continua com os mesmos estilos) */
+export const ARCONTE_STYLE = Object.freeze({ id: 'arconte', name: 'ARCONTE', tag: 'Coroa de chifres · 6 Núcleos · espada negra', lore: 'Soberano antigo dos 6 Núcleos de Nexa. A energia dele é negra, cortada por raios das seis cores.',
+  model: 'hero-knight', primary: 0xe8e4f0, glow: 0x9b4dff, head: null, cape: 'Knight_Cape', capeOn: true, weapon: '1H_Sword', weaponLabel: 'Espada negra e garras', css: '#c89aff', personagem: true, extra: true });
 export function heroStyleOf(idOrState) {
   const id = typeof idOrState === 'string' ? idOrState : idOrState?.player?.heroStyle;
+  if (id === 'arconte') return ARCONTE_STYLE;
   return HERO_STYLES.find((s) => s.id === id) || HERO_STYLES[0];
 }
 /** Visual do equipamento (data/items.json → item.visual) para o modelo 3D. */

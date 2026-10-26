@@ -10,45 +10,45 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261025arconte';
-import { buildArenaDressing } from './arena-dressing.js?v=20261025arconte';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261025arconte';
-import { createHeroModel } from './hero-model.js?v=20261025arconte';
-import { artPalette } from './dragon-art.js?v=20261025arconte';
-import { setTrailSkin } from './ground-trail.js?v=20261025arconte';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261025arconte';
-import { createArconteModel, ARCONTE_ESCALA } from './arconte-model.js?v=20261025arconte'; // 20261025arconte
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261025arconte';
-import { attachHeroGlb } from './hero-glb.js?v=20261025arconte';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261025arconte';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261025arconte';
-import { createActionVfx } from './action-vfx.js?v=20261025arconte';
-import { createPassiveVfx } from './passive-vfx.js?v=20261025arconte';
-import { createFpsControls } from './fps-controls.js?v=20261025arconte';
-import { createViewmodel } from './viewmodel.js?v=20261025arconte';
-import { createDragonView } from './dragon-view.js?v=20261025arconte';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261025arconte';
-import { getSprite } from '../assets.js?v=20261025arconte';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261025arconte';
-import { createBossDragon } from './boss-dragon-view.js?v=20261025arconte';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261025arconte';
-import { mergeStaticParts } from './merge-util.js?v=20261025arconte';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261025arconte';
-import { attachDragonGlb } from './dragon-glb.js?v=20261025arconte';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261025arconte';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261025arconte';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261025arconte';
-import { createPostFx } from './post-fx.js?v=20261025arconte';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261025arconte';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261025arconte';
-import { createContactShadows } from './contact-shadows.js?v=20261025arconte';
-import { createPowerVfx } from './power-vfx.js?v=20261025arconte';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261025arconte';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261025arconte';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261025arconte';
-import { groundAt, setGroundFn } from './ground.js?v=20261025arconte';
-import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261025arconte';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261025arconte';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261025arconte2';
+import { buildArenaDressing } from './arena-dressing.js?v=20261025arconte2';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261025arconte2';
+import { createHeroModel } from './hero-model.js?v=20261025arconte2';
+import { artPalette } from './dragon-art.js?v=20261025arconte2';
+import { setTrailSkin } from './ground-trail.js?v=20261025arconte2';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261025arconte2';
+import { createArconteModel, ARCONTE_ESCALA, ARCONTE_ESCALA_JOGADOR } from './arconte-model.js?v=20261025arconte2'; // 20261025arconte
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261025arconte2';
+import { attachHeroGlb } from './hero-glb.js?v=20261025arconte2';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261025arconte2';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261025arconte2';
+import { createActionVfx } from './action-vfx.js?v=20261025arconte2';
+import { createPassiveVfx } from './passive-vfx.js?v=20261025arconte2';
+import { createFpsControls } from './fps-controls.js?v=20261025arconte2';
+import { createViewmodel } from './viewmodel.js?v=20261025arconte2';
+import { createDragonView } from './dragon-view.js?v=20261025arconte2';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261025arconte2';
+import { getSprite } from '../assets.js?v=20261025arconte2';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261025arconte2';
+import { createBossDragon } from './boss-dragon-view.js?v=20261025arconte2';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261025arconte2';
+import { mergeStaticParts } from './merge-util.js?v=20261025arconte2';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261025arconte2';
+import { attachDragonGlb } from './dragon-glb.js?v=20261025arconte2';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261025arconte2';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261025arconte2';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261025arconte2';
+import { createPostFx } from './post-fx.js?v=20261025arconte2';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261025arconte2';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261025arconte2';
+import { createContactShadows } from './contact-shadows.js?v=20261025arconte2';
+import { createPowerVfx } from './power-vfx.js?v=20261025arconte2';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261025arconte2';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261025arconte2';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261025arconte2';
+import { groundAt, setGroundFn } from './ground.js?v=20261025arconte2';
+import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261025arconte2';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261025arconte2';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -136,10 +136,10 @@ export function createFpsRenderer() {
      Os outros estilos (caçador/rúnico/ciborgue) continuam com o modelo GLB próprio. graphics.heroLook: 'classico' (padrão) | 'glb'. */
   const heroLookUrl = (() => { try { return new URLSearchParams(location.search).get('herolook'); } catch { return null; } })();
   /* HERÓI 3 (20261017perf): o visual CLÁSSICO vale para TODOS os estilos (o Caio usa GUARDIÃO RÚNICO e via o GLB KayKit) — estilo/editor/equipamento viram o KIT do procedural. */
-  const heroWantsGlb = () => (heroLookUrl || getConfig().graphics.heroLook) === 'glb';
-  const heroKitNow = () => (heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
+  const heroWantsGlb = () => heroStyleId !== 'arconte' && (heroLookUrl || getConfig().graphics.heroLook) === 'glb'; // Arconte jogável: sempre o modelo procedural dele
+  const heroKitNow = () => (heroStyleId === 'arconte' ? { style: 'arconte', jogador: true } : heroWantsGlb() ? null : kitFor({ styleId: heroStyleId, custom: heroExtra.custom, equip: heroExtra.equip }));
   let heroKitSig = '';
-  function buildHero() { const kit = heroKitNow(); heroKitSig = kitSig(kit); return createHeroModel({ styleId: heroStyleId, kit, caioGlb: true /* glb3: o GLB do guerreiro vale em TODO preset (1 malha skinned ≈ 20k tris; o LOW também) */, glb: heroWantsGlb() ? undefined : false, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } }); }
+  function buildHero() { const kit = heroKitNow(); heroKitSig = kitSig(kit); if (heroStyleId === 'arconte') return createArconteModel({ scale: ARCONTE_ESCALA_JOGADOR, espada: true }); return createHeroModel({ styleId: heroStyleId, kit, caioGlb: true /* glb3: o GLB do guerreiro vale em TODO preset (1 malha skinned ≈ 20k tris; o LOW também) */, glb: heroWantsGlb() ? undefined : false, onGlbReady: (rig, sync) => { modelReadyAt.hero = performance.now(); if (!sync) { try { renderer.compile(scene, fpsCam.camera); } catch { /* sem compile */ } } } }); }
   let heroExtra = {};
   const modelReadyAt = {};
   const heroSt = { yaw: 0, init: false };
@@ -2961,6 +2961,8 @@ export function createFpsRenderer() {
     /** M3D: estilo do herói (cosmético) — troca o GLB sem perder o estado */
     hasPostFx: () => !!postFx,
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
+    heroArconteFx: (k, v) => { const h = hero; if (!h?.arconte) return false; if (k === 'ciclone') h.ciclone(v); else if (k === 'eclipse') h.eclipse(v); else if (k === 'nucleos') h.setNucleos(v); return true; }, // 20261025arconte2
+    heroArconteInfo: () => (hero?.arconte ? { ...hero.arconte.info(), visible: !!hero.root?.visible, h: +(new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y).toFixed(2) } : null),
     setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; setTrailSkin(heroExtra.custom?.skin || null); if (hero && (!!hero.glb !== heroWantsGlb() || (!heroWantsGlb() && kitSig(heroKitNow()) !== heroKitSig))) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
     getRivalMounts: () => ({ ...rivalMountStats }),
     /** 20261025arconte (testes): altura do modelo do Arconte × do herói (caixa do corpo visível, sem etiqueta/anel) */

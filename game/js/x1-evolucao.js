@@ -2,7 +2,7 @@
  * Painel "EVOLUÇÃO DA IA" do X1 (20261025ia). Tudo calculado do perfil REAL (localStorage nexara.x1.perfil.v1)
  * via computeEvolution — nenhum número inventado; histórico que não existia antes da v2 aparece como "sem dados".
  */
-import { computeEvolution } from './x1-brain.js?v=20261025arconte';
+import { computeEvolution } from './x1-brain.js?v=20261025arconte2';
 
 const SD = '<i class="sd">sem dados</i>';
 const f = (v) => String(v).replace('.', ',');

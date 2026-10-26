@@ -4,7 +4,7 @@
  * (arena-rivals.js) e na simulação (simDuel) — a tabela de vitórias vem deste código, não de uma conta à parte.
  * Lutador (f): { kit, hp, hpMax, atk, cd{slot:readyAt}, b{buffs}, s{status}, escudo, pend[], tgt (quem ele encara) }
  */
-import { KITS, SLOTS, kitFor } from './hero-kits.js?v=20261025arconte';
+import { KITS, SLOTS, kitFor } from './hero-kits.js?v=20261025arconte2';
 
 /** custo em Nexa de cada slot (igual ao do jogador: gameplay-config.specials) e Nexa do NV1 */
 export const SLOT_COST = { golpe_poderoso: 10, ataque_area: 18, suprema: 35 };

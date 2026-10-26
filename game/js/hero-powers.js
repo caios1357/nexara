@@ -5,16 +5,17 @@
  * Dano de poder = `dano` do kit (vs rival NV1) → main.hitSpecial({ flatDano }) → applyPlayerHit (escala com o nível, passa
  * pelos modificadores/passivas, XP/loot/quests iguais). VFX = heroShots (projéteis/explosões) + textos; SFX = sfx.js.
  */
-import { kitFor, SLOTS } from './hero-kits.js?v=20261025arconte';
-import { getStat, addModifier, STATS } from './modifiers.js?v=20261025arconte';
-import { DEG } from './gameplay-config.js?v=20261025arconte';
-import { wrapAngle } from './collision.js?v=20261025arconte';
+import { kitFor, SLOTS } from './hero-kits.js?v=20261025arconte2';
+import { getStat, addModifier, STATS } from './modifiers.js?v=20261025arconte2';
+import { DEG } from './gameplay-config.js?v=20261025arconte2';
+import { wrapAngle } from './collision.js?v=20261025arconte2';
 
-const KIND = { cone: 'melee', investida: 'melee', giro: 'melee', salto: 'melee', area_self: 'melee', mil_cortes: 'melee', linha: 'area', area_alvo: 'area', portal: 'area' };
+const KIND = { ciclone: 'melee', eclipse: 'area', cone: 'melee', investida: 'melee', giro: 'melee', salto: 'melee', area_self: 'melee', mil_cortes: 'melee', linha: 'area', area_alvo: 'area', portal: 'area' };
 export function createHeroPowers(deps) {
   let kit = null; let clock = 0;
   const b = {}; // buffs do herói: dmg/dmgUntil, dragao, imortalUntil, muralhaUntil, posturaUntil, hiddenUntil, iframeUntil, velUntil/vel, curaUntil/cura
   let escudo = 0;
+  const nuc = { n: 0, last: 0 }; // 20261025arconte2: Núcleos acesos (passiva do Arconte jogável)
   const st = new Map(); // monstro → status { ven, venDps, que, queDps, lento, lentoMult, vuln, vulnMult, marca, marcaMult, fraco, fracoMult, tick }
   const pend = []; // golpes agendados { at, fn }
   const traps = []; // armadilhas { x, y, r, until, dano, lento, dur, hit:Set }
@@ -39,7 +40,7 @@ export function createHeroPowers(deps) {
     return kit;
   }
   function stop() { kit = null; reset(); deps.onKit?.(null); }
-  function reset() { for (const k of Object.keys(b)) delete b[k]; escudo = 0; for (const [m] of st) if (m.slowMult) m.slowMult = 1; st.clear(); pend.length = 0; traps.length = 0; dashSecondUntil = 0; dashSecondUsed = false; }
+  function reset() { for (const k of Object.keys(b)) delete b[k]; escudo = 0; nuc.n = 0; nuc.last = 0; for (const [m] of st) if (m.slowMult) m.slowMult = 1; st.clear(); pend.length = 0; traps.length = 0; dashSecondUntil = 0; dashSecondUsed = false; }
 
   // —— CONFIG DOS SLOTS (custo/recarga/tempos): objetos estáveis por kit (cache do player-actions) ——
   const cfgCache = new Map();
@@ -67,6 +68,7 @@ export function createHeroPowers(deps) {
     if (pa.tipo === 'longe') { const p = P(); const mp = mpos(mon); if (Math.hypot(mp.x - p.x, mp.y - p.y) >= pa.dist) m *= 1 + pa.mult; }
     else if (pa.tipo === 'costas') { if (behind(mon)) m *= 1 + pa.mult; }
     else if (pa.tipo === 'execucao') { if (mon.hp < (mon.hpMax || 1) * pa.abaixo) m *= 1 + pa.mult; }
+    else if (pa.tipo === 'nucleos') { m *= 1 + pa.por * nuc.n; }
     else if (pa.tipo === 'furia') { const s = S(); m *= 1 + pa.max * Math.max(0, 1 - s.player.hp / Math.max(1, s.player.hpMax)); }
     m *= 1 + vulnOf(mon);
     return v * m;
@@ -106,6 +108,7 @@ export function createHeroPowers(deps) {
     if (!active() || !res || !(res.dmgOut > 0)) return;
     if (on(b.hiddenUntil)) { b.hiddenUntil = 0; deps.onHidden?.(false); log('revelado', {}); } // atacar revela
     const s = S(); const pa = kit.passiva;
+    if (pa.tipo === 'nucleos') { nuc.n = Math.min(pa.max, nuc.n + 1); nuc.last = clock; deps.onNucleos?.(nuc.n); }
     if (pa.tipo === 'escudo_acerto') escudo = Math.min(s.player.hpMax * pa.teto, escudo + s.player.hpMax * pa.frac);
     if (!mon?.alive) return;
     const ven = pa.tipo === 'veneno' ? pa : kit.var?.veneno;
@@ -154,14 +157,14 @@ export function createHeroPowers(deps) {
     const p = P(); const col = colOf(p0); const kv = kit.var || {};
     const kindOf = KIND[p0.tipo] || 'proj';
     const H = (m, dano, o = {}) => hit(m, dano, { slot: id, poder: p0.id, kind: kindOf, cor: col, ...o });
-    text(p0.nome, '#' + col.toString(16).padStart(6, '0'));
+    text(p0.nome, '#' + (p0.corTexto ?? col).toString(16).padStart(6, '0'));
     if (p0.tipo === 'linha' || p0.tipo === 'cone') { // mira assistida: alinha com o inimigo mais à frente (cone de 45°) — mesma ajuda do Golpe Poderoso
       const t = pickTarget(api, p0.alcance, 45); if (t && t.d > 0.3) { const yaw = Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)); api = { ...api, yaw, dirX: Math.sin(yaw), dirY: -Math.cos(yaw) }; }
     }
     const V = VX(); const FIRE = (o) => { const pr = deps.heroShots.fire(o); try { V?.attach(pr, p0.id, kit.variante, col, 'hero'); } catch { /* */ } return pr; };
     if (V) try { // 20261025vfx: VFX próprio do poder (mesmos alvos/centro que o golpe vai usar)
       const tg = p0.tipo === 'marca' || p0.tipo === 'maldicao' || p0.tipo === 'dreno' ? pickTarget(api, p0.alcance, p0.tipo === 'maldicao' ? 40 : 45) : null;
-      const ctr = p0.tipo === 'area_alvo' || p0.tipo === 'portal' ? areaCenter(api, p0.alcance) : null;
+      const ctr = p0.tipo === 'area_alvo' || p0.tipo === 'portal' || p0.tipo === 'eclipse' ? (api.__ctr = areaCenter(api, p0.alcance)) : null;
       V.cast(p0.id, { x: p.x, y: p.y, yaw: api.yaw, c: col, var: kit.variante, p0, src: 'hero', follow: () => P(), yawNow: () => deps.getYaw(), cx: ctr?.x, cy: ctr?.y, tx: tg?.mp.x, ty: tg?.mp.y, tf: tg ? () => (tg.m.alive ? mpos(tg.m) : null) : null });
     } catch (e) { console.warn('[power-vfx]', e); }
     switch (p0.tipo) {
@@ -170,7 +173,8 @@ export function createHeroPowers(deps) {
         const fire = (yaw, target) => FIRE({ x: p.x + Math.sin(yaw) * 0.35, y: p.y - Math.cos(yaw) * 0.35, yaw, target, kind: p0.kind, speed: p0.kind === 'arrow' ? 26 : p0.homing ? 13 : 20, range: p0.alcance + 0.6, radius: 0.5, color: col, pierce: p0.pierce || 0, turnDeg: p0.homing ? 900 : undefined,
           onHit: (m) => { const r = H(m, p0.dano, { heavy: true });
             if (r && p0.puxa && m.alive) { const pp = P(); const mp = mpos(m); const dx = mp.x - pp.x, dy = mp.y - pp.y, d = Math.hypot(dx, dy) || 1; if (d > 1.6 && deps.placeMonster(m.uid, pp.x + dx / d * 1.3, pp.y + dy / d * 1.3)) { stats.pulled++; log('puxou', { uid: m.uid }); } }
-            if (r && p0.id === 'corte_azul' && kv.corteSalta) chain(m, kv.corteSalta - 1, p0.dano, col); } });
+            if (r && p0.id === 'corte_azul' && kv.corteSalta) chain(m, kv.corteSalta - 1, p0.dano, col);
+            if (r && p0.lento && m.alive) { const x = stOf(m); x.lento = clock + p0.dur; x.lentoMult = 1 - p0.lento; stats.slowed = (stats.slowed || 0) + 1; log('lento', { uid: m.uid, poder: p0.id }); } } }); // Flecha do Abismo: lentidão
         fire(t ? Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)) : api.yaw, t ? t.m : null);
         deps.sfx?.special?.('strike'); break; }
       case 'leque': { const t = pickTarget(api, p0.alcance, 30); const yaw0 = t ? Math.atan2(t.mp.x - p.x, -(t.mp.y - p.y)) : api.yaw;
@@ -187,6 +191,14 @@ export function createHeroPowers(deps) {
         else { pend.push({ at: clock + (p0.atrasoMs || 0), fn: () => { fx(c.x, c.y, p0.raio, col, 'area', 900); deps.sfx?.impact?.(true); deps.renderer.shake?.(7); for (const o of monsNear(c.x, c.y, p0.raio)) H(o.m, p0.dano, { heavy: true, kb: 1.8 }); } }); deps.sfx?.charge?.(p0.atrasoMs || 300); }
         break; }
       case 'area_self': { for (const o of monsNear(p.x, p.y, p0.raio)) H(o.m, p0.dano, { heavy: true, stunMs: p0.stunMs, kb: 2 }); fx(p.x, p.y, p0.raio, col, 'area', 800); deps.sfx?.impact?.(true); deps.renderer.shake?.(8); break; }
+      case 'ciclone': { // 20261025arconte2: GIRO MORTAL do Arconte (espada negra) — acerta tudo em volta a cada giro; o último deixa lento
+        const per = Math.round(p0.dano / p0.ticks); deps.onHeroFx?.('ciclone', p0.durMs); b.ciclone = clock + p0.durMs;
+        for (let i = 0; i < p0.ticks; i++) pend.push({ at: clock + (i + 1) * (p0.durMs / p0.ticks), fn: () => { const q = P(); deps.sfx?.special?.('spin'); for (const o of monsNear(q.x, q.y, p0.raio)) { const r = H(o.m, per, { kb: 0.4 }); if (r && i === p0.ticks - 1 && o.m.alive) { const x = stOf(o.m); x.lento = clock + p0.dur; x.lentoMult = 1 - p0.lento; } } } });
+        break; }
+      case 'eclipse': { // 20261025arconte2: BOLA GIGANTE ESCURA cai no alvo após atrasoMs (área checada na hora)
+        const c = api.__ctr || areaCenter(api, p0.alcance); deps.onHeroFx?.('eclipse', p0.atrasoMs + 300); deps.sfx?.charge?.(p0.atrasoMs);
+        pend.push({ at: clock + p0.atrasoMs, fn: () => { deps.sfx?.impact?.(true); deps.renderer.shake?.(8); for (const o of monsNear(c.x, c.y, p0.raio)) { const r = H(o.m, p0.dano, { heavy: true, kb: 1.6 }); if (r && o.m.alive && p0.lento) { const x = stOf(o.m); x.lento = clock + p0.dur; x.lentoMult = 1 - p0.lento; } } } });
+        break; }
       case 'giro': { const per = Math.round(p0.dano / p0.ticks); for (let i = 0; i < p0.ticks; i++) pend.push({ at: clock + i * (p0.durMs / p0.ticks), fn: () => { const q = P(); fx(q.x, q.y, p0.raio, col, 'ring', 450); deps.sfx?.special?.('spin'); for (const o of monsNear(q.x, q.y, p0.raio)) H(o.m, per, { kb: 0.6 }); } }); break; }
       case 'salto': { const t = pickTarget(api, p0.alcance, 50); if (t) { const dx = t.mp.x - p.x, dy = t.mp.y - p.y, d = Math.hypot(dx, dy) || 1; blinkTo(t.mp.x - dx / d * 1.1, t.mp.y - dy / d * 1.1); }
         const q = P(); for (const o of monsNear(q.x, q.y, p0.raio)) H(o.m, p0.dano, { heavy: true, stunMs: p0.stunMs, kb: 1.6 }); fx(q.x, q.y, p0.raio, col, 'area', 700); deps.sfx?.impact?.(true); deps.renderer.shake?.(6); break; }
@@ -248,13 +260,14 @@ export function createHeroPowers(deps) {
       for (const o of monsNear(t.x, t.y, t.r)) { if (t.hit.has(o.m.uid)) continue; t.hit.add(o.m.uid); const x = stOf(o.m); x.lento = clock + t.dur; x.lentoMult = 1 - t.lento; fx(t.x, t.y, t.r, 0x9fe8ff, 'area', 400); hit(o.m, t.dano, { slot: 'ataque_area', poder: 'armadilha' }); log('armadilha', { uid: o.m.uid }); } }
     if (b.hiddenUntil && !on(b.hiddenUntil)) { b.hiddenUntil = 0; deps.onHidden?.(false); }
     if (dashSecondUntil && clock > dashSecondUntil) { dashSecondUntil = 0; dashSecondUsed = false; }
+    if (nuc.n > 0 && kit.passiva?.tipo === 'nucleos' && clock - nuc.last >= kit.passiva.decaiMs) { nuc.n--; nuc.last = clock; deps.onNucleos?.(nuc.n); } // 4 s sem acertar apaga 1 Núcleo
   }
   /** status de PODER de rival no herói: lentidão (Maldição / armadilha) — atordoar fica de fora (o herói nunca perde o controle por bot) */
   function statusFromRival(x) { if (!active() || !x) return; if (x.lento) { b.slow = Math.min(0.6, x.lento); b.slowUntil = clock + (x.dur || 2000); log('lento_heroi', { lento: b.slow, dur: x.dur || 2000 }); } }
   function view() {
     return { kit: kit ? { heroi: kit.heroi, variante: kit.variante, hp: kit.hp, vel: kit.vel, atk: kit.atk, dmgTaken: kit.dmgTaken, passiva: kit.passiva.tipo } : null,
       buffs: Object.fromEntries(Object.entries(b).filter(([k, v]) => !k.endsWith('Until') || v > clock).map(([k, v]) => [k, k.endsWith('Until') ? Math.round(v - clock) : v])),
-      escudo: Math.round(escudo), hidden: on(b.hiddenUntil), status: [...st].map(([m, x]) => ({ uid: m.uid, ven: on(x.ven), que: on(x.que), lento: on(x.lento) ? x.lentoMult : 0, vuln: on(x.vuln), marca: on(x.marca), fraco: on(x.fraco), slowMult: m.slowMult })),
+      escudo: Math.round(escudo), nucleos: nuc.n, hidden: on(b.hiddenUntil), status: [...st].map(([m, x]) => ({ uid: m.uid, ven: on(x.ven), que: on(x.que), lento: on(x.lento) ? x.lentoMult : 0, vuln: on(x.vuln), marca: on(x.marca), fraco: on(x.fraco), slowMult: m.slowMult })),
       traps: traps.length, pend: pend.length, stats: { ...stats, uses: { ...stats.uses } }, clock: Math.round(clock) };
   }
   return { start, stop, active, kit: () => (active() ? kit : null), slotCfg, resolve, absorb, onHit, onParry, onDash, update, hidden: () => active() && on(b.hiddenUntil), weakOf,
