@@ -12,11 +12,11 @@
  * yaw do jogo (0 = olhando −Z) → root.rotation.y = π − yaw.
  */
 import * as THREE from 'three';
-import { getConfig } from '../gameplay-config.js?v=20261025perf';
-import { mergeStaticParts } from './merge-util.js?v=20261025perf';
-import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261025perf';
-import { attachHeroGlb } from './hero-glb.js?v=20261025perf';
-import { addArmorDetail } from './surface-fx.js?v=20261025perf';
+import { getConfig } from '../gameplay-config.js?v=20261025arconte';
+import { mergeStaticParts } from './merge-util.js?v=20261025arconte';
+import { loadCaioGlb, autoWeights, LM_GUERREIRO, BONE_ORDER } from './hero-caio-glb.js?v=20261025arconte';
+import { attachHeroGlb } from './hero-glb.js?v=20261025arconte';
+import { addArmorDetail } from './surface-fx.js?v=20261025arconte';
 
 /* LOTE-b M7 (pedido do Caio: "heróis quadrados demais"): volumes do herói/rivais com CANTOS ARREDONDADOS (bisel suave com normais
    esféricas — lê como peça moldada) e membros em CÁPSULA. Mesmo desenho/proporções; ?heroiQuadrado=1 volta às caixas (comparação). */
@@ -395,6 +395,11 @@ export function createHeroModel(opts = {}) {
   shield.visible = false;
   root.add(shield);
 
+  // 20261025arconte: gancho OPCIONAL de decoração (personagens especiais, ex.: ARCONTE) — roda antes da sombra/merge; sem opts.decorate nada muda
+  let decoX = null;
+  if (typeof opts.decorate === 'function') { try { decoX = opts.decorate({ THREE, K, root, hips, spine, chest, neck, head, skull, visor, hood, hoodPeak, mantle, core, coreHalo, coreBack, arms, legs, pads, fores, cape, blade, slash, arcMat, shield,
+    mats: { armor: matArmor, armor2: matArmor2, cloth: matCloth, under: matUnder, glow: matGlow, skin: matSkin, faceDark: matFaceDark, eye: matEye, halo: matHalo, core: matCore, blade: matBlade },
+    flashMats, baseEmissive, addRim, roundedBoxGeo, limbGeo, setHipY: (y) => { HIPY = y; hips.position.y = y; } }) || null; } catch (e) { console.warn('[hero] decorate', e); } }
   root.traverse((o) => { if (o.isMesh && o.material !== matEdge && o.material !== arcMat && o.material !== chargeMat && o.material !== shieldMat && o.material !== shieldEdgeMat) { o.castShadow = true; } });
 
   // ── poses de ataque: [ombroR.x, ombroR.y, ombroR.z, cotoveloR.x, pulsoR.x, torçãoTronco, inclinação, ombroL.x] ──
@@ -610,8 +615,9 @@ export function createHeroModel(opts = {}) {
   if (getConfig().graphics?.mergeCharacterParts !== false) {
     const keep = [slash, bladeGlow];
     root.traverse((o) => { if (o.type === 'Group') keep.push(o); });
+    if (decoX?.keep) keep.push(...decoX.keep); // 20261025arconte
     const cm = getConfig().graphics?.mergeByColor !== false && !/[?&]mergeCor=0\b/.test(location.search);
-    mergeInfo = mergeStaticParts(root, keep, { colorMerge: cm, exclude: [matBlade, arcMat, chargeMat, shieldMat, shieldEdgeMat] });
+    mergeInfo = mergeStaticParts(root, keep, { colorMerge: cm, exclude: [matBlade, arcMat, chargeMat, shieldMat, shieldEdgeMat, ...(decoX?.exclude || [])] });
     // META-69: o pisco de dano continua valendo nos materiais mesclados (cor por vértice) — mesmo emissivo base
     if (mergeInfo.matMap?.size) for (let i = 0; i < flashMats.length; i++) { const nm = mergeInfo.matMap.get(flashMats[i]); if (nm && !flashMats.includes(nm)) { flashMats.push(nm); baseEmissive.push(nm.emissive.getHex()); } }
   }
@@ -643,7 +649,7 @@ export function createHeroModel(opts = {}) {
     if (glow != null) altW._g.color.setHex(glow);
   }
   if (kitDefW) setWeaponClass(kitDefW, glowHex);
-  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls, kit: K, kitInfo };
+  const api = { root, update, hurt, setVisible, getDebug, blade, mergeInfo, setProceduralBodyVisible, glb: null, setWeaponClass, weaponClass: () => weaponCls, kit: K, kitInfo, deco: decoX };
   // ANTES do merge? não: o merge roda acima; o GLB entra depois e não é mesclado
 
   // ── MODELO 3D DO CAIO (guerreiro-lite.glb) com auto-rig no esqueleto procedural; falha/preset baixo → fica o procedural ──

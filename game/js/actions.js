@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261025perf';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261025perf';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261025perf';
-import { addReputation } from '../../rules/reputation.js?v=20261025perf';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261025perf';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261025perf';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261025perf';
-import { reveal } from './arquivo.js?v=20261025perf';
-import { checkEventReady } from './events.js?v=20261025perf';
-import { getConfig } from './gameplay-config.js?v=20261025perf';
-import { getStat, STATS } from './modifiers.js?v=20261025perf';
+import { trainSkill } from '../../rules/skills.js?v=20261025arconte';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261025arconte';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261025arconte';
+import { addReputation } from '../../rules/reputation.js?v=20261025arconte';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261025arconte';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261025arconte';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261025arconte';
+import { reveal } from './arquivo.js?v=20261025arconte';
+import { checkEventReady } from './events.js?v=20261025arconte';
+import { getConfig } from './gameplay-config.js?v=20261025arconte';
+import { getStat, STATS } from './modifiers.js?v=20261025arconte';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;

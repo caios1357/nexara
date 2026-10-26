@@ -40,8 +40,11 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   const P = { // pools
     glow: mkIM(G.quad, CAP_P, { map: tex, order: 7 }), smoke: mkIM(G.quad, low ? 40 : 70, { map: tex, additive: true, opacity: 0.5, order: 6 }) /* aditivo: névoa clara (normal-blend saía preto) */,
     blade: mkIM(G.blade, 24), ring: mkIM(G.ring, 32, { order: 4 }), disc: mkIM(G.disc, 16, { opacity: 0.45, order: 3 }), arrow: mkIM(G.arrow, 64),
-    rock: mkIM(G.rock, 40, { additive: false, order: 5, side: THREE.FrontSide }), beam: mkIM(G.box, 64), wall: mkIM(G.wall, 6, { opacity: 0.5 }),
-    torus: mkIM(G.torus, 20), ghost: mkIM(G.ghost, 16, { opacity: 0.55 }), star: mkIM(G.star, 16), scorch: mkIM(G.disc, 12, { additive: false, opacity: 0.6, order: 2 })
+    rock: mkIM(G.rock, 40, { additive: false, order: 5, side: THREE.FrontSide }), beam: mkIM(G.box, 96), wall: mkIM(G.wall, 6, { opacity: 0.5 }),
+    torus: mkIM(G.torus, 20), ghost: mkIM(G.ghost, 16, { opacity: 0.55 }), star: mkIM(G.star, 16), scorch: mkIM(G.disc, 12, { additive: false, opacity: 0.6, order: 2 }),
+    // 20261025arconte: ENERGIA NEGRA (mistura normal — aditivo não fica preto): fumaça escura, esfera do vazio e lâminas negras (pools vazios = 0 draw calls)
+    dark: mkIM(G.quad, low ? 48 : 80, { map: tex, additive: false, opacity: 0.8, order: 6 }), voidc: mkIM(new THREE.IcosahedronGeometry(0.5, 1), 10, { additive: false, opacity: 0.94, order: 5, side: THREE.FrontSide }),
+    dblade: mkIM(G.blade, 8, { additive: false, opacity: 0.85, order: 5 })
   };
   for (const k in P) P[k].userData.key = k;
   const parts = []; const objs = []; const jobs = []; const free = [];
@@ -51,10 +54,10 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   function emit(n, o) {
     const k = o.k ?? 1; n = Math.max(1, Math.round(n * k));
     for (let i = 0; i < n; i++) {
-      if (parts.length >= (o.smoke ? CAP_P + 70 : CAP_P)) { stats.capped++; return; }
+      if (parts.length >= (o.smoke || o.dark ? CAP_P + 70 : CAP_P)) { stats.capped++; return; }
       const a = rnd(0, TAU), sp = rnd(0, o.spread ?? 0.3), v = o.vel ?? 1;
       const p = free.pop() || {};
-      p.smoke = !!o.smoke; p.x = W(o.x) + Math.sin(a) * W(sp); p.z = W(o.y) + Math.cos(a) * W(sp); p.y = GY(o.x, o.y) + (o.h ?? 1) + rnd(-(o.hj ?? 0.2), o.hj ?? 0.2);
+      p.smoke = !!o.smoke; p.dark = !!o.dark; p.x = W(o.x) + Math.sin(a) * W(sp); p.z = W(o.y) + Math.cos(a) * W(sp); p.y = GY(o.x, o.y) + (o.h ?? 1) + rnd(-(o.hj ?? 0.2), o.hj ?? 0.2);
       const dir = o.dir; // {x,y} em tiles (opcional) → jato
       p.vx = (dir ? dir.x * v : Math.sin(a) * v * rnd(0.3, 1)) + rnd(-0.4, 0.4) * (o.jit ?? 1); p.vz = (dir ? dir.y * v : Math.cos(a) * v * rnd(0.3, 1)) + rnd(-0.4, 0.4) * (o.jit ?? 1);
       p.vy = (o.up ?? 1) * rnd(0.5, 1.2); p.g = o.grav ?? 0; p.drag = o.drag ?? 1.5;
@@ -74,7 +77,7 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
   function scorch(x, y, r, ms = 4000, c = 0x1a0d06) { obj(P.scorch, { ...wp(x, y, 0.035), c, life: ms, sx: W(r), sy: 1, sz: W(r), fade: 'late' }); }
   function pillar(x, y, c, h = 6, ms = 500, w = 0.35) { obj(P.beam, { ...wp(x, y, h / 2), c, life: ms, sx: w, sy: h, sz: w, fade: 'out', pulse: 0 }); }
   function streak(x0, y0, x1, y1, c, ms = 260, w = 0.12, h = 1.1) { const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 0.01; const m = wp((x0 + x1) / 2, (y0 + y1) / 2, h); obj(P.beam, { ...m, ry: Math.atan2(dx, dy), c, life: ms, sx: w, sy: w, sz: W(L) }); }
-  function bolt(x0, y0, x1, y1, c, ms = 220, segs = 6) { let px = x0, py = y0; const nx = -(y1 - y0), ny = x1 - x0, L = Math.hypot(nx, ny) || 1; for (let i = 1; i <= segs; i++) { const t = i / segs; const j = i === segs ? 0 : rnd(-0.35, 0.35); const qx = x0 + (x1 - x0) * t + nx / L * j, qy = y0 + (y1 - y0) * t + ny / L * j; streak(px, py, qx, qy, c, ms, 0.07, 1.2 + rnd(-0.2, 0.2)); px = qx; py = qy; } }
+  function bolt(x0, y0, x1, y1, c, ms = 220, segs = 6, w = 0.07, bh = 1.2) { let px = x0, py = y0; const nx = -(y1 - y0), ny = x1 - x0, L = Math.hypot(nx, ny) || 1; for (let i = 1; i <= segs; i++) { const t = i / segs; const j = i === segs ? 0 : rnd(-0.35, 0.35); const qx = x0 + (x1 - x0) * t + nx / L * j, qy = y0 + (y1 - y0) * t + ny / L * j; streak(px, py, qx, qy, c, ms, w, bh + rnd(-0.2, 0.2)); px = qx; py = qy; } }
   function aura(follow, c, ms, o = {}) { // anel + brasas presos ao herói/rival
     const t = obj(P.torus, { follow, c, life: ms, h: o.h ?? 0.15, s0: W(o.r ?? 0.8), spin: o.spin ?? 2, fade: 'late', pulse: 1 });
     if (o.top) obj(P.torus, { follow, c, life: ms, h: 1.9, s0: W(0.45), spin: -3, fade: 'late', pulse: 1 });
@@ -153,6 +156,33 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
     at(40, () => { const q = o.follow(); if (!q) return; streak(o.x, o.y, q.x, q.y, 0xc87a3a, 260, 0.2, 2.2); shock(q.x, q.y, 0xc87a3a, o.p0.raio || 2, 550); scorch(q.x, q.y, 1.3, 3500, 0x20140a); flavor('terra', q.x, q.y, 1.4, o.k); emit(20, { x: q.x, y: q.y, h: 0.2, spread: 0.5, col: 0xffa040, vel: 6, up: 3, grav: 10, size: 0.4, life: 450, k: o.k }); shake(8); }); };
   S.furia_lava = (o) => { const D = o.p0.dur || 6000; aura(o.follow, 0xff3a10, D, { r: 0.85, top: true, c2: 0xffa020, n: 3, up: 3, size: 0.45, k: o.k }); shock(o.x, o.y, 0xff3a10, 2.6, 600); emit(24, { x: o.x, y: o.y, h: 0.3, spread: 0.6, col: 0xff4a10, col2: 0xffd040, vel: 4, up: 4, grav: 6, size: 0.6, life: 700, k: o.k }); scorch(o.x, o.y, 1.4, 2500); shake(5); };
 
+  // ARCONTE (20261025arconte): energia NEGRA (núcleo escuro) cortada por RAIOS nas 6 cores dos Núcleos
+  const NUC = [0x2a6cff, 0xff2a2a, 0xffd02a, 0x2aff5a, 0xd0782a, 0xf4f4ff];
+  function darkPuff(x, y, n, o = {}) { emit(n, { x, y, h: o.h ?? 1, spread: o.spread ?? 0.4, col: 0x06020c, vel: o.vel ?? 1.2, up: o.up ?? 0.6, drag: 2.2, size: o.size ?? 1.1, size1: o.size1 ?? 0.15, life: o.life ?? 650, swirl: o.swirl || 0, inward: o.inward || null, dark: true, k: o.k }); }
+  function zapRing(x, y, r, n, ms = 160, h0 = 0) { for (let i = 0; i < n; i++) { const a = rnd(0, TAU), b = a + rnd(0.6, 1.4); bolt(x + Math.sin(a) * r * rnd(0.2, 1), y + Math.cos(a) * r * rnd(0.2, 1), x + Math.sin(b) * r, y + Math.cos(b) * r, NUC[(i + h0) % 6], ms, 4, 0.1); } }
+  function abyssHit(x, y, k = 1) { darkPuff(x, y, 10, { h: 1.1, spread: 0.2, vel: 2.6, size: 1.2, k }); zapRing(x, y, 1.1, 4, 180); emit(6, { x, y, h: 1.1, spread: 0.1, col: 0xc89aff, col2: 0xffffff, vel: 4, up: 2, grav: 8, size: 0.3, life: 260, k }); obj(P.voidc, { ...wp(x, y, 1.1), c: 0x040008, life: 260, s0: 0.9, s1: 0.1, grow: true, sx: 0.9, sy: 0.9, sz: 0.9, solid: true }); shake(2); }
+  S.flecha_abismo = (o) => { const hx = o.x + o.dx * 0.5, hy = o.y + o.dy * 0.5; darkPuff(hx, hy, 8, { h: 1.2, spread: 0.2, vel: 1.5, k: o.k }); zapRing(hx, hy, 0.8, 3, 160); obj(P.ring, { ...wp(o.x, o.y, 0.07), c: NUC[(Math.random() * 6) | 0], life: 320, s0: 0.3, s1: W(1.1), grow: true, a: 0.6 }); };
+  S.ciclone_negro = (o) => { const D = o.p0.durMs || 1600, R = o.p0.raio || 2.6;
+    obj(P.scorch, { follow: o.follow, h: 0.04, c: 0x05010a, life: D, sx: W(R), sy: 1, sz: W(R), fade: 'late' }); // chão NEGRO no raio
+    obj(P.ring, { follow: o.follow, h: 0.06, c: 0xd8d0e8, life: D, s0: W(R), fade: 'late', pulse: 1, a: 0.55 }); // aviso: borda do raio (fina, clara)
+    for (let i = 0; i < 2; i++) obj(P.dblade, { follow: o.follow, h: 0.85 + i * 0.35, c: 0x05010a, life: D, s0: W(R * (i ? 0.82 : 1)), spin: i ? 13 : -15, rot0: i * Math.PI, fade: 'late', tiltX: i ? 0.12 : -0.08 });
+    every(70, Math.floor(D / 70), (i) => { const q = o.follow(); if (!q) return; const a = -i * 1.1; const ex = q.x + Math.sin(a) * R, ey = q.y + Math.cos(a) * R;
+      bolt(q.x, q.y, ex, ey, NUC[i % 6], 150, 5, 0.11); if (i % 2) zapRing(q.x, q.y, R * 0.9, 1, 120, i); darkPuff(ex, ey, 2, { h: 0.9, spread: 0.3, vel: 0.6, size: 0.9, swirl: 6, k: o.k }); });
+    at(D - 60, () => { const q = o.follow(); const t = o.tf?.() || null; if (q) { shock(q.x, q.y, 0xe8e0ff, R, 420); zapRing(q.x, q.y, R, 4, 200, 1); darkPuff(q.x, q.y, 10, { h: 0.6, spread: R * 0.5, vel: 2, size: 1.2, k: o.k }); }
+      if (t) { for (let j = 0; j < 3; j++) obj(P.torus, { follow: o.tf, h: 0.35 + j * 0.45, c: NUC[(j * 2) % 6], life: o.p0.dur || 1200, s0: W(0.45), spin: 6 - j * 4, tilt: 0.3, fade: 'late' }); zapRing(t.x, t.y, 0.7, 4, 200, 2); } shake(4); }); };
+  S.eclipse_primordial = (o) => { const D = o.p0.atrasoMs || 1100, R = o.p0.raio || 3; const cx = o.cx, cy = o.cy;
+    obj(P.scorch, { ...wp(cx, cy, 0.04), c: 0x05010a, life: D + 900, s0: W(0.4), s1: W(R), grow: true, sy: 1, fade: 'late' }); // eclipse se abrindo no chão
+    obj(P.voidc, { ...wp(cx, cy, 4.3), c: 0x020004, life: D + 80, s0: 0.3, s1: W(R * 0.46), grow: true, sx: 1, sy: 1, sz: 1, solid: true, fade: 'none', vy: 0, tick: (b) => { const age = (now() - b.born) / b.life; if (age > 0.8) b.y -= 0.5; } }); // BOLA GIGANTE ESCURA: cresce sobre o alvo e desaba
+    every(90, Math.floor(D / 90), (i) => { const rr = R * 0.55 * Math.min(1, (i + 2) / 9); const a = i * 2.4, b2 = a + rnd(0.8, 1.6); bolt(cx + Math.sin(a) * rr * 0.6, cy + Math.cos(a) * rr * 0.6, cx + Math.sin(b2) * rr, cy + Math.cos(b2) * rr, NUC[i % 6], 130, 4, 0.1, 4.3); }); // raios das 6 cores estalando na bola
+    obj(P.ring, { ...wp(cx, cy, 0.07), c: 0xffe2a0, life: D, sx: W(R), sy: 1, sz: W(R), fade: 'none', pulse: 1 });
+    for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; at(i * (D / 8), () => { pillar(cx + Math.sin(a) * R, cy + Math.cos(a) * R, NUC[i], 3.2, D - i * (D / 8) + 120, 0.16); emit(6, { x: cx + Math.sin(a) * R, y: cy + Math.cos(a) * R, h: 0.3, spread: 0.2, col: NUC[i], col2: 0xffffff, vel: 0.6, up: 3, size: 0.35, life: 500, k: o.k }); }); }
+    every(110, Math.floor(D / 110), (i) => { if (i % 2 === 0) zapRing(cx, cy, R * 0.85, 1, 140, i); const q = o.follow(); if (q) { const a = i * 1.05; emit(1, { x: q.x + Math.sin(a) * 0.9, y: q.y + Math.cos(a) * 0.9, h: 1.3, spread: 0.05, col: NUC[i % 6], col2: 0xffffff, vel: 0.2, up: 0.2, size: 0.5, life: 380, inward: { x: q.x, y: q.y }, k: o.k }); darkPuff(q.x, q.y, 1, { h: 1.2, spread: 0.6, vel: 0.4, size: 0.9, inward: { x: q.x, y: q.y }, k: o.k }); } darkPuff(cx, cy, 2, { h: 0.5, spread: R * 0.8, vel: 0, size: 1, inward: { x: cx, y: cy }, swirl: 4, k: o.k }); });
+    at(D, () => { const g = wp(cx, cy, 1.4);
+      obj(P.voidc, { ...g, c: 0x030006, life: 700, s0: 0.5, s1: W(1.3), grow: true, sx: 1, sy: 1, sz: 1, solid: true, fade: 'none' }); // SOL NEGRO
+      obj(P.ring, { ...wp(cx, cy, 0.12), c: 0xffe2a0, life: 650, s0: W(0.6), s1: W(R * 1.05), grow: true }); // onda dourada no chão
+      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + 0.3; const ex = cx + Math.sin(a) * R, ey = cy + Math.cos(a) * R; pillar(ex, ey, NUC[i], 6, 360, 0.26); bolt(cx, cy, ex, ey, NUC[i], 340, 5, 0.13); if (i % 2) at(70, () => bolt(cx, cy, ex, ey, NUC[i], 260, 4, 0.11)); }
+      shock(cx, cy, 0xffe2a0, R * 1.1, 650); darkPuff(cx, cy, 22, { h: 0.8, spread: 0.4, vel: 7, up: 1.5, size: 1.6, life: 900, k: o.k });
+      emit(26, { x: cx, y: cy, h: 1, spread: 0.3, col: 0xffffff, col2: 0xc89aff, vel: 8, up: 3, grav: 7, size: 0.4, life: 520, k: o.k }); scorch(cx, cy, R * 0.8, 4500, 0x0a0410); shake(10); }); };
   /** dispara o VFX de um poder. o: { x,y,yaw, c, var, p0, follow:()=>{x,y}, cx,cy (centro da área), tf:()=>{x,y} alvo, tx,ty, src } */
   function cast(id, o) {
     const fn = S[id]; if (!fn) return false; stats.casts++; stats.byId[id] = (stats.byId[id] || 0) + 1;
@@ -163,7 +193,7 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
     return true;
   }
   /** rastro preso a um PROJÉTIL real (Corte Azul, flechas, orbe, shurikens, lança...) até ele sumir */
-  const KIND_TRAIL = { corte_azul: 'blade', flecha_perfurante: 'arrow', lanca: 'spear', shurikens: 'star', orbe_arcano: 'orb', corrente_almas: null };
+  const KIND_TRAIL = { flecha_abismo: 'abyss', flecha_abismo_p: 'abyss', corte_azul: 'blade', flecha_perfurante: 'arrow', lanca: 'spear', shurikens: 'star', orbe_arcano: 'orb', corrente_almas: null };
   function attach(p, id, v, c, src) {
     if (!p) return; const t = KIND_TRAIL[id]; if (!t) return; const k = src === 'rival' ? 0.5 : 1;
     const fol = () => (p.alive ? { x: p.x, y: p.y } : null);
@@ -171,17 +201,20 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
     if (t === 'arrow') obj(P.arrow, { follow: fol, fy: p.yaw, h: 1.2, c: 0xffffff, life: 3000, sx: 3, sy: 3, sz: 1.4, fade: 'none', untilDead: true, aimYaw: true });
     if (t === 'spear') obj(P.beam, { follow: fol, fy: p.yaw, h: 1.2, c, life: 3000, sx: 0.08, sy: 0.08, sz: 2.2, fade: 'none', untilDead: true });
     if (t === 'star') obj(P.star, { follow: fol, h: 1.2, c: 0xe8f0ff, life: 3000, s0: 0.45, spin: 30, fade: 'none', untilDead: true });
+    if (t === 'abyss') { obj(P.voidc, { follow: fol, fy: p.yaw, h: 1.15, c: 0x030006, life: 3000, sx: 0.2, sy: 0.2, sz: 1.5, fade: 'none', untilDead: true, solid: true }); obj(P.voidc, { follow: fol, fy: p.yaw, h: 1.15, c: 0x0a0414, life: 3000, sx: 0.42, sy: 0.08, sz: 0.5, fade: 'none', untilDead: true, solid: true }); } // FLECHA NEGRA: haste longa + aletas (pool escuro, sem roxo)
     const trail = { fol, c, t, v, k, last: null };
     objs.push({ pool: null, born: now(), life: 3000, trail, untilDead: true, follow: fol });
   }
   function trailStep(tr) { const q = tr.fol(); if (!q) return; const big = tr.t === 'orb' || tr.t === 'blade';
     emit(big ? 2 : 1, { x: q.x, y: q.y, h: 1.18, spread: big ? 0.12 : 0.04, col: tr.c, col2: 0xffffff, vel: 0.1, up: 0.05, size: big ? 0.7 : 0.3, life: big ? 300 : 180, k: tr.k });
     if (tr.t === 'blade' && tr.v && tr.v !== 'azul' && Math.random() < 0.35) flavor(tr.v, q.x, q.y, 0.35, tr.k * 0.5);
+    if (tr.t === 'abyss') { emit(2, { x: q.x, y: q.y, h: 1.15, spread: 0.12, col: 0x07020e, vel: 0.15, up: 0.1, size: 0.9, size1: 0.2, life: 420, dark: true, k: tr.k });
+      if (Math.random() < 0.55) { const a = rnd(0, TAU), L = rnd(0.5, 1.1); bolt(q.x, q.y, q.x + Math.sin(a) * L, q.y + Math.cos(a) * L, NUC[(tr.i = (tr.i || 0) + 1) % 6], 120, 3); } }
     if (tr.t === 'orb') emit(1, { x: q.x, y: q.y, h: 1.2, spread: 0.3, col: 0xe0b0ff, vel: 0.2, size: 0.25, life: 300, swirl: 9, inward: { x: q.x, y: q.y }, k: tr.k }); }
   /** tiro só VISUAL (rivais: o dano deles é resolvido pelo kit, sem projétil com colisão) */
   const shots = [];
   function fakeShot(id, x, y, tx, ty, c, v, src, speed = 18) { const d = Math.hypot(tx - x, ty - y); if (d < 0.4) return; const p = { x, y, alive: true, yaw: Math.atan2(tx - x, -(ty - y)), vx: (tx - x) / d, vy: (ty - y) / d, left: d };
-    shots.push({ p, speed, tx, ty, c, src }); attach(p, id, v, c, src); }
+    shots.push({ p, speed, tx, ty, c, src, end: id === 'flecha_abismo' ? () => { abyssHit(tx, ty, src === 'rival' ? 0.5 : 1); fakeShot('flecha_abismo_p', tx, ty, tx + p.vx * 4, ty + p.vy * 4, c, v, src, speed); } : null }); attach(p, id, v, c, src); } // Flecha do Abismo PERFURA: atravessa o alvo e segue mais 4 tiles
   /** impacto de poder: faíscas + mini-tremor */
   function hit(x, y, c, heavy) { stats.hits++; emit(heavy ? 14 : 8, { x, y, h: 1.1, spread: 0.15, col: c, col2: 0xffffff, vel: heavy ? 6 : 4, up: 2, grav: 8, size: 0.32, life: 300 }); emit(1, { x, y, h: 1.1, spread: 0, col: 0xffffff, vel: 0, up: 0, size: heavy ? 2.2 : 1.5, size1: 0.4, life: 140 }); shake(heavy ? 3 : 1.5); }
 
@@ -191,21 +224,21 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
     const t = now(); const dt = Math.min(0.05, (t - lastT) / 1000); lastT = t;
     if (!parts.length && !objs.length && !jobs.length && !shots.length) { if (idleClean) return; for (const k in P) P[k].visible = false; idleClean = true; return; } idleClean = false;
     for (let i = jobs.length - 1; i >= 0; i--) if (t >= jobs[i].at) { const j = jobs[i]; jobs.splice(i, 1); try { j.fn(); } catch { /* */ } }
-    for (let i = shots.length - 1; i >= 0; i--) { const s0 = shots[i]; const st = s0.speed * dt; s0.p.x += s0.p.vx * st; s0.p.y += s0.p.vy * st; s0.p.left -= st; if (s0.p.left <= 0) { s0.p.alive = false; shots.splice(i, 1); emit(s0.src === 'rival' ? 5 : 8, { x: s0.tx, y: s0.ty, h: 1.1, col: s0.c, col2: 0xffffff, vel: 4, up: 2, grav: 8, size: 0.3, life: 260 }); } }
+    for (let i = shots.length - 1; i >= 0; i--) { const s0 = shots[i]; const st = s0.speed * dt; s0.p.x += s0.p.vx * st; s0.p.y += s0.p.vy * st; s0.p.left -= st; if (s0.p.left <= 0) { s0.p.alive = false; shots.splice(i, 1); if (s0.end) { s0.end(); continue; } emit(s0.src === 'rival' ? 5 : 8, { x: s0.tx, y: s0.ty, h: 1.1, col: s0.c, col2: 0xffffff, vel: 4, up: 2, grav: 8, size: 0.3, life: 260 }); } }
     camera.getWorldQuaternion(qCam);
     // partículas
-    let ng = 0, ns = 0; const pg = P.glow, ps = P.smoke;
+    let ng = 0, ns = 0, nd = 0; const pg = P.glow, ps = P.smoke, pd = P.dark;
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i]; const age = (t - p.born) / p.life; if (age >= 1) { parts[i] = parts[parts.length - 1]; parts.pop(); free.push(p); continue; }
       if (p.inward) { const dx = W(p.inward.x) - p.x, dz = W(p.inward.y) - p.z; p.vx += dx * 6 * dt; p.vz += dz * 6 * dt; }
       if (p.swirl) { const vx = p.vx; p.vx += -p.vz * p.swirl * dt; p.vz += vx * p.swirl * dt; }
       p.vy -= p.g * dt; const dr = Math.max(0, 1 - p.drag * dt); p.vx *= dr; p.vz *= dr; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
-      const im = p.smoke ? ps : pg; const n = p.smoke ? ns : ng; if (n >= im.instanceMatrix.count) continue;
+      const im = p.dark ? pd : p.smoke ? ps : pg; const n = p.dark ? nd : p.smoke ? ns : ng; if (n >= im.instanceMatrix.count) continue;
       dummy.position.set(p.x, p.y, p.z); dummy.quaternion.copy(qCam); const s = p.s0 + (p.s1 - p.s0) * age; dummy.scale.set(s, s, s); dummy.updateMatrix(); im.setMatrixAt(n, dummy.matrix);
-      col.setHex(p.c); if (age < 0.25 && p.c2 !== p.c) { colB.setHex(p.c2); col.lerp(colB, 1 - age * 4); } col.multiplyScalar(p.smoke ? 0.55 * (1 - age) : (1 - age) * 0.95); im.setColorAt(n, col);
-      if (p.smoke) ns++; else ng++;
+      col.setHex(p.c); if (age < 0.25 && p.c2 !== p.c) { colB.setHex(p.c2); col.lerp(colB, 1 - age * 4); } if (!p.dark) col.multiplyScalar(p.smoke ? 0.55 * (1 - age) : (1 - age) * 0.95); im.setColorAt(n, col);
+      if (p.dark) nd++; else if (p.smoke) ns++; else ng++;
     }
-    pg.count = ng; ps.count = ns; pg.visible = ng > 0; ps.visible = ns > 0; // pool vazio = 0 draw calls stats.peakP = Math.max(stats.peakP, ng + ns);
+    pg.count = ng; ps.count = ns; pg.visible = ng > 0; ps.visible = ns > 0; pd.count = nd; pd.visible = nd > 0; stats.peakP = Math.max(stats.peakP, ng + ns + nd); // pool vazio = 0 draw calls
     // objetos
     const cnt = {}; for (const k in P) cnt[k] = 0;
     for (let i = objs.length - 1; i >= 0; i--) {
@@ -220,12 +253,12 @@ export function createPowerVfx({ scene, camera, TILE, groundAt, shake: shake0, l
       dummy.position.set(b.x, b.y, b.z); dummy.quaternion.identity();
       if (b.faceCam) dummy.quaternion.copy(qCam);
       else { const gy = b.followYaw ? b.followYaw() : b.fy; const rotY = gy != null ? Math.PI - gy : (b.ry || 0); const spin = b.spin ? (t - b.born) / 1000 * b.spin + (b.rot0 || 0) : 0; dummy.rotation.set((b.rx || 0) + (b.tiltX || 0) + (b.spinX ? (t - b.born) / 1000 * b.spinX : 0), rotY + spin, (b.rz || 0) + (b.tilt || 0)); }
-      let sx = b.sx, sy = b.sy, sz = b.sz; if (b.s0 != null) { const e = b.grow ? 1 - Math.pow(1 - Math.min(1, age * 1.6), 3) : 1; const s = b.s1 != null && b.grow ? b.s0 + (b.s1 - b.s0) * e : b.s0; sx = sz = s; sy = b.pool === P.torus || b.pool === P.blade || b.pool === P.ring || b.pool === P.disc || b.pool === P.star ? 1 : s; if (b.pool === P.torus) { sy = s; } }
+      let sx = b.sx, sy = b.sy, sz = b.sz; if (b.s0 != null) { const e = b.grow ? 1 - Math.pow(1 - Math.min(1, age * 1.6), 3) : 1; const s = b.s1 != null && b.grow ? b.s0 + (b.s1 - b.s0) * e : b.s0; sx = sz = s; sy = b.pool === P.torus || b.pool === P.blade || b.pool === P.dblade || b.pool === P.ring || b.pool === P.disc || b.pool === P.star ? 1 : s; if (b.pool === P.torus) { sy = s; } }
       dummy.scale.set(sx, sy, sz); dummy.updateMatrix(); im.setMatrixAt(n, dummy.matrix);
       let a = b.a ?? 1; if (b.fade === 'out') a *= 1 - age; else if (b.fade === 'late') a *= age > 0.8 ? (1 - age) / 0.2 : 1; if (b.pulse) a *= 0.75 + 0.25 * Math.sin(t * 0.012);
       col.setHex(b.c).multiplyScalar(b.solid ? 1 : 0.9 * a); im.setColorAt(n, col); cnt[key] = n + 1;
     }
-    for (const k in P) { const im = P[k]; if (k === 'glow' || k === 'smoke') { if (!im.visible) continue; } else { im.count = cnt[k]; im.visible = cnt[k] > 0; if (!im.visible) continue; } im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+    for (const k in P) { const im = P[k]; if (k === 'glow' || k === 'smoke' || k === 'dark') { if (!im.visible) continue; } else { im.count = cnt[k]; im.visible = cnt[k] > 0; if (!im.visible) continue; } im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
     stats.peakO = Math.max(stats.peakO, objs.length);
   }
   function clear() { shots.length = 0; parts.length = 0; objs.length = 0; jobs.length = 0; }

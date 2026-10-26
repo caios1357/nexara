@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NEXARA — ARCONTE (visualizador de teste)</title>
+<style>html,body{margin:0;background:#111;overflow:hidden;font:12px sans-serif;color:#ddd}#lb{position:fixed;left:0;right:0;bottom:4px;display:flex;justify-content:space-around;pointer-events:none;font-weight:700}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body><div id="lb"></div>
+<script type="module">
+import * as THREE from 'three';
+import { createHeroModel } from '../js/fps/hero-model.js?v=20261025arconte';
+import { kitFor } from '../js/fps/hero-kit.js?v=20261025arconte';
+import { createArconteModel } from '../js/fps/arconte-model.js?v=20261025arconte';
+import { createPowerVfx } from '../js/fps/power-vfx.js?v=20261025arconte';
+import { ARCONTE_KIT } from '../js/arconte-kit.js?v=20261025arconte';
+const q = new URLSearchParams(location.search);
+const ids = (q.get('ids') || 'cavaleiro,arconte,mago').split(',');
+const yaw = +(q.get('yaw') || 0.3);
+const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(innerWidth, innerHeight); r.setPixelRatio(1); r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace; document.body.appendChild(r.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(q.get('bg') ? '#' + q.get('bg') : 0x1d2230);
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x3a3020, 1.3)); const sun = new THREE.DirectionalLight(0xfff1dd, 2.4); sun.position.set(3, 8, 7); scene.add(sun);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(40, 32), new THREE.MeshStandardMaterial({ color: 0x3a4032, roughness: 0.95 })); ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const sp = 1.4; const W = (ids.length - 1) * sp;
+const cam = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.1, 100);
+const close = q.get('cam') === 'close';
+if (close) { const z = +(q.get("zoom") || 1); cam.position.set(0, 1.95 + (z > 1 ? 0.25 : 0), 3.6 / z); cam.lookAt(0, 1.72 + (z > 1 ? 0.3 : 0), 0); } else { cam.position.set(0, 1.6, 7.5); cam.lookAt(0, 1.1, 0); }
+const hs = []; const lb = document.getElementById('lb');
+ids.forEach((id, i) => {
+  const hm = id === 'arconte' ? createArconteModel() : createHeroModel({ styleId: id, kit: kitFor({ styleId: id }), glb: false });
+  if (id === 'arconte') { hm.setNucleos(+(q.get('nuc') || 3)); if (q.get('eclipse')) hm.eclipse(1e6); }
+  const g = new THREE.Group(); g.add(hm.root); g.position.set(close ? 0 : -W / 2 + i * sp, 0, 0); g.rotation.y = yaw; if (close && id !== 'arconte') g.visible = false; scene.add(g); hs.push(hm);
+  if (!q.get("nolabel")) { const s = document.createElement("span"); s.textContent = id.toUpperCase(); lb.appendChild(s); }
+});
+// fx=<id do poder>: vitrine do VFX do Arconte (mesma função do jogo) — Arconte em (0,0) mirando um cavaleiro a 1,8 tile
+const FX = q.get('fx'); let vfx = null;
+if (FX) {
+  hs.forEach((h, i) => { const g = h.root.parent; if (ids[i] === 'arconte') { g.position.set(0, 0, 0); g.rotation.y = 0; } else { g.visible = ids[i] === 'cavaleiro'; g.position.set(0, 0, 3.6); g.rotation.y = Math.PI; } });
+  cam.position.set(+(q.get('cx') || 7.2), +(q.get('cy') || 3.4), +(q.get('cz') || 3.2)); cam.lookAt(0, 0.9, 1.8);
+  vfx = createPowerVfx({ scene, camera: cam, TILE: 2, groundAt: () => 0, shake: () => {}, low: q.get('low') === '1' });
+  const p0 = Object.values(ARCONTE_KIT.poderes).find((p) => p.id === FX);
+  setTimeout(() => { const ah = hs[ids.indexOf('arconte')]; if (FX === 'eclipse_primordial') ah?.eclipse(1500); if (FX === 'ciclone_negro') ah?.ciclone(1600);
+    vfx.cast(FX, { x: 0, y: 0, yaw: Math.PI, c: p0.cor, p0, src: q.get('src') || 'rival', follow: () => ({ x: 0, y: 0 }), yawNow: () => Math.PI, cx: 0, cy: 1.8, tx: 0, ty: 1.8, tf: () => ({ x: 0, y: 1.8 }) });
+    if (FX === 'flecha_abismo') vfx.fakeShot?.(FX, 0, 0.2, 0, 1.8, p0.cor, null, q.get('src') || 'rival', 4);
+    window.__fxAt = performance.now(); }, 300);
+}
+let t = 0; function f() { t += 0.016; for (const h of hs) h.update(0.016, { x: 0, z: 0, yaw: Math.PI, speed: +(q.get('speed') || 0), walkSpeed: 2.4, runSpeed: 3.4, attack: null, action: null, groundY: 0, leapHeight: 0.9 }); vfx?.update(); r.render(scene, cam); requestAnimationFrame(f); }
+f(); window.__hms = hs; window.__calls = () => r.info.render.calls; window.__vfx = () => vfx?.stats(); setTimeout(() => (window.__ready = true), 400);
+</script></body></html>

@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261025perf';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261025arconte';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };

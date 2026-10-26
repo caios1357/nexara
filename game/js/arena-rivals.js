@@ -11,15 +11,16 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261025perf';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261025perf';
-import { getConfig } from './gameplay-config.js?v=20261025perf';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261025perf';
-import { planRoster } from './br-roster.js?v=20261025perf';
-import { listPassives } from './passives.js?v=20261025perf';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261025perf';
-import { kitFor } from './hero-kits.js?v=20261025perf';
-import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra } from './rival-kits.js?v=20261025perf';
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261025arconte';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261025arconte';
+import { getConfig } from './gameplay-config.js?v=20261025arconte';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261025arconte';
+import { planRoster } from './br-roster.js?v=20261025arconte';
+import { listPassives } from './passives.js?v=20261025arconte';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261025arconte';
+import { kitFor } from './hero-kits.js?v=20261025arconte';
+import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra, nucleoUp } from './rival-kits.js?v=20261025arconte';
+import { ARCONTE_KIT, isArconte } from './arconte-kit.js?v=20261025arconte'; // 20261025arconte: rival chefe do X1
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 
@@ -110,7 +111,7 @@ export function createRivals(ctx) {
       const bd = c.bb === false ? null : bbForRivalIndex(ctx.st()._data, idx);
       if (bd) { rv.bb = { def: bd, S: newBBState(1800 + idx * 350, br.clock), at: 0 }; mon.rival.bb = { id: bd.id, nome: bd.nome, cor: bd.cor, tipo: bbAbility(bd)?.tipo || null, wind: false, firedAt: -1e9 }; }
     }
-    if (c.justa && kitsOn()) { rv.kit = kitFor(rv.char, rv.skin) || kitFor('cavaleiro', 'azul'); rv.fk = newFighter(rv.kit, 100, 1, br.clock || 0, ctx.R); rv.fk.rv = rv; mon.rival.kit = { heroi: rv.kit.heroi, variante: rv.kit.variante }; } // 20261024poder: PODERES do herói do bot
+    if (c.justa && kitsOn()) { rv.kit = (isArconte(rv.char) ? ARCONTE_KIT : kitFor(rv.char, rv.skin)) || kitFor('cavaleiro', 'azul'); if (isArconte(rv.char)) { mon.rival.chefe = true; mon.rival.nuc = 0; } rv.fk = newFighter(rv.kit, 100, 1, br.clock || 0, ctx.R); rv.fk.rv = rv; mon.rival.kit = { heroi: rv.kit.heroi, variante: rv.kit.variante }; } // 20261024poder: PODERES do herói do bot
     applyLevel(rv, mon, lvlFor(rv), true);
     mon.walkMult = (c.velocidade || 1.2) * (PERSO(rv).velMult || 1);
     mon.route = { pts: [], i: 0, rival: true };
@@ -189,11 +190,16 @@ export function createRivals(ctx) {
     mon.slowMultR = onT(f.s.lentoUntil, clock) ? 1 - (f.s.lento || 0) : 1;
     const hf = heroF();
     mon.rivalOutMult = outMult(f, hf, clock, { dist: dP }); // golpe básico do rival NO HERÓI (actions.monsterAttackPlayer)
+    if (f.kit?.passiva?.tipo === 'nucleos') { // 20261025arconte: golpe básico que acertou o herói também acende 1 Núcleo
+      const hpNow = st.player.hp; if (rv.tgt?.kind === 'jogador' && rv.nucHp != null && hpNow < rv.nucHp && dP <= 3.2 && !f.pend.length && clock - (rv.pwLast?.at ?? -1e9) > 400) nucleoUp(f, clock);
+      rv.nucHp = hpNow; mon.rival.nuc = f.nuc || 0; mon.rival.eclipseUntil = f.b.eclipseUntil || 0; mon.rival.cicloneUntil = f.b.cicloneUntil || 0; mon.rival.clock = clock; }
     if (br.testCalm?.noPowers) return;
     const out = rv.pwOut || (rv.pwOut = []); out.length = 0; kitTick(f, clock, out);
     for (const e of out) {
       if (e.alvo === f) { if (e.n > 0) damageRival(rv, mon, Math.max(1, Math.round(e.n * (rv.eq || 1))), 'veneno', false); continue; }
-      deliver(rv, mon, e.alvo, e.n, e.kind, null, clock, e.slotId);
+      if ((e.zone || e.selfR) && !pendReach(rv, mon, e)) { const S2 = (br.pwStats ||= newPwStats()); (S2.areaMiss ||= {})[e.slotId || '?'] = ((S2.areaMiss[e.slotId || '?']) || 0) + 1; continue; } // 20261025arconte: saiu da área a tempo
+      const dlt = deliver(rv, mon, e.alvo, e.n, e.kind, e.extra || null, clock, e.slotId);
+      if ((e.zone || e.selfR) && dlt > 0) { const S2 = (br.pwStats ||= newPwStats()); (S2.areaHit ||= {})[e.slotId || '?'] = ((S2.areaHit[e.slotId || '?']) || 0) + 1; }
     }
     if (!mon.alive || onT(f.s.stunUntil, clock)) return;
     // alvo: o do bot (herói só quando ele mira o herói — limite de rivais no herói já vale) ou o rival que ele caça
@@ -209,17 +215,26 @@ export function createRivals(ctx) {
     const nexa0 = f.nexa; const hp0 = f.hp;
     let usedId = null;
     if (foe === hf && ctx.powerGate && !ctx.powerGate(rv, mon, dist)) return; // X1 ⚔: a IA escolhe a HORA do poder (janela em que o herói gastou esquiva/poder)
-    const slot = foe ? botPower(f, foe, dist, clock, { hit: (alvo, n, kind, extra) => { const d = deliver(rv, mon, alvo, n, kind, extra, clock, usedId); return d; }, hide: (ff, ms) => { mon.rivalHiddenUntil = br.clock + ms; } }) : null;
+    const slot = foe ? botPower(f, foe, dist, clock, { hit: (alvo, n, kind, extra) => { const d = deliver(rv, mon, alvo, n, kind, extra, clock, usedId); return d; }, hide: (ff, ms) => { mon.rivalHiddenUntil = br.clock + ms; }, foePos: () => (foe === hf ? (ctx.getPos?.() || null) : (foe?.rv && monOf(foe.rv) ? pos(monOf(foe.rv)) : null)) }) : null;
     if (f.hp > hp0) mon.hp = Math.min(mon.hpMax, mon.hp + (f.hp - hp0)); // Corrente de Almas / Fera
     if (slot) {
       usedId = f.kit.poderes[slot].id;
       for (const e of f.pend) if (!e.slotId) e.slotId = usedId;
       const S = (br.pwStats ||= newPwStats()); S.uses++; S.bySlot[slot]++; S.byPower[usedId] = (S.byPower[usedId] || 0) + 1; if (foe === hf) { S.vsHero++; br.pwHeroNext = clock + (P0.heroiMs ?? 1500); (S.heroAt ||= []).push(Math.round(clock)); if (S.heroAt.length > 40) S.heroAt.shift(); }
       rv.pwLast = { slot, id: usedId, at: clock, vsHero: foe === hf };
+      if (f.kit?.passiva?.tipo === 'nucleos') { mon.rival.eclipseUntil = f.b.eclipseUntil || 0; mon.rival.cicloneUntil = f.b.cicloneUntil || 0; mon.rival.clock = clock; mon.rival.nuc = f.nuc || 0; } // 20261025arconte
       mon.rivalPower = { id: usedId, slot, at: performance.now() };
       if (dP <= (P0.vfxDist ?? 18)) { try { ctx.rivalPowerFx?.(rv, mon, f.kit, slot, foe === hf ? { x: p.x, y: p.y } : (foe?.rv ? pos(monOf(foe.rv)) : null)); } catch {} }
     }
     void nexa0;
+  }
+  /** 20261025arconte: golpe de área agendado só acerta se o alvo AINDA está na área (Ciclone: em volta do Arconte · Eclipse: no ponto marcado) */
+  function pendReach(rv, mon, e) {
+    const a = e.alvo; if (!a) return false; let q = null;
+    if (a.hero) q = ctx.getPos?.() || null; else { const om = a.rv && monOf(a.rv); q = om ? pos(om) : null; }
+    if (!q) return false;
+    if (e.selfR) { const mp = pos(mon); return Math.hypot(q.x - mp.x, q.y - mp.y) <= e.selfR; }
+    return Math.hypot(q.x - e.zone.x, q.y - e.zone.y) <= e.zone.r + 0.3;
   }
   /** aplica um golpe de PODER do bot no alvo (herói ou outro rival) */
   function deliver(rv, mon, alvo, n, kind, extra, clock, pid) {

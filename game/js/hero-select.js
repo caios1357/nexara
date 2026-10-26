@@ -5,10 +5,16 @@
  *  · LOBBY: você + 49 rivais (BOT offline) com personagem, skin, nível — exatamente os que vão cair no mapa; queda em 5 s.
  * Toque, retrato e paisagem (CSS). Persistência: quem chama grava player.heroStyle (+ skin) e a "última escolha".
  */
-import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025perf';
-import { heroStyleOf } from './hero-styles.js?v=20261025perf';
-import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025perf';
-import { ICONS } from './icons.js?v=20261025perf';
+import { PERSONAGENS, SKINS, PERSONALIDADES } from './personagens.js?v=20261025arconte';
+import { heroStyleOf } from './hero-styles.js?v=20261025arconte';
+import { kitFor, statLine, temVariantes, VARIANTES, SLOTS } from './hero-kits.js?v=20261025arconte';
+import { ICONS } from './icons.js?v=20261025arconte';
+import { ARCONTE_KIT } from './arconte-kit.js?v=20261025arconte';
+
+/** 20261025arconte: escolha do RIVAL no X1 (chave própria; o save não é tocado) — 'sorteado' (herói sorteado, como antes) ou 'arconte' (chefe) */
+export const X1_RIVAL_KEY = 'nexara.x1.rival.v1';
+export function readX1Rival() { try { const q = new URLSearchParams(location.search).get('x1rival'); if (q === 'arconte' || q === 'sorteado') return q; return localStorage.getItem(X1_RIVAL_KEY) === 'arconte' ? 'arconte' : 'sorteado'; } catch { return 'sorteado'; } }
+export function writeX1Rival(v) { try { if (v === 'arconte') localStorage.setItem(X1_RIVAL_KEY, 'arconte'); else localStorage.removeItem(X1_RIVAL_KEY); } catch { /* sem storage */ } } // padrão (sorteado) = sem chave
 
 export const LAST_PICK_KEY = 'nexara.ultimaEscolha';
 export function readLastPick() { try { const v = JSON.parse(localStorage.getItem(LAST_PICK_KEY) || 'null'); return v && PERSONAGENS.some((p) => p.id === v.id) ? v : null; } catch { return null; } }
@@ -35,10 +41,10 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 export function openHeroSelect(o) {
   closeHeroSelect();
   const cur = o.current && PERSONAGENS.some((p) => p.id === o.current.id) ? o.current : { id: 'cavaleiro', skin: '' };
-  let pick = cur.id; let skin = cur.skin || ''; let arma = cur.arma === 'cajado' ? 'cajado' : 'espada'; let left = Math.max(3, o.seconds ?? 15); let done = false; let preview = null;
+  let x1rv = o.mode === 'x1' ? (o.rival === 'arconte' ? 'arconte' : 'sorteado') : null; let pick = cur.id; let skin = cur.skin || ''; let arma = cur.arma === 'cajado' ? 'cajado' : 'espada'; let left = Math.max(3, o.seconds ?? 15); let done = false; let preview = null;
   const el = document.createElement('div'); el.id = 'hero-select'; el.className = 'hsel'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Escolha seu herói');
   el.innerHTML = `
-    <div class="hsel-top"><div class="hsel-title">ESCOLHA SEU HERÓI<small>${o.mode === 'x1' ? 'X1 ⚔ · DUELO 1×1 · RIVAL SORTEADO' : (o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA') + ' · 50 JOGADORES'}</small></div>
+    <div class="hsel-top"><div class="hsel-title">ESCOLHA SEU HERÓI<small id="hsel-sub">${o.mode === 'x1' ? 'X1 ⚔ · DUELO 1×1 · RIVAL SORTEADO' : (o.mode === 'fast' ? 'NEXARA FAST ⚡' : 'ARENA NEXARA') + ' · 50 JOGADORES'}</small></div>
       <div class="hsel-timer" id="hsel-timer" aria-live="polite"><b id="hsel-left">${left}</b><small>escolha automática</small></div></div>
     <div class="hsel-body">
       <div class="hsel-grid" id="hsel-grid">${PERSONAGENS.map((p) => { const s = heroStyleOf(p.id); return `<button type="button" class="hsel-card" data-id="${p.id}" style="--hc:${s.css}" aria-label="${esc(p.name)}">
@@ -46,6 +52,9 @@ export function openHeroSelect(o) {
       <div class="hsel-detail">
         <div class="hsel-prev"><canvas id="hsel-canvas" aria-label="Prévia 3D do herói"></canvas><span class="hsel-glb" id="hsel-glb"></span></div>
         <div class="hsel-info">
+          ${o.mode === 'x1' ? `<div class="hsel-x1rv" id="hsel-x1rv"><span>RIVAL DO X1</span><div><button type="button" data-rv="sorteado">🎲 HERÓI SORTEADO</button><button type="button" data-rv="arconte" class="hsel-rv-boss">👑 ARCONTE (CHEFE)</button></div>
+            <div class="hsel-rvbox" id="hsel-rvbox"><img src="assets/ui/arconte-retrato.webp?v=20261025arconte" alt="" onerror="this.remove()"><div><b>ARCONTE</b> · ${esc(ARCONTE_KIT.papel)} · VIDA ${ARCONTE_KIT.hp}<small>${esc(ARCONTE_KIT.passiva.nome)}: ${esc(ARCONTE_KIT.passiva.desc)}</small>
+              <small>${SLOTS.map((sl) => `<b>${esc(ARCONTE_KIT.poderes[sl].nome)}</b> (${Math.round(ARCONTE_KIT.poderes[sl].cd / 1000)} s)`).join(' · ')}</small></div></div></div>` : ''}
           <div class="hsel-name" id="hsel-name"></div>
           <div class="hsel-role" id="hsel-role"></div>
           <p class="hsel-lore" id="hsel-lore"></p>
@@ -69,6 +78,8 @@ export function openHeroSelect(o) {
     el.querySelectorAll('.hsel-card').forEach((b) => { const on = b.dataset.id === pick; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     el.querySelectorAll('#hsel-skin button').forEach((b) => b.classList.toggle('on', b.dataset.sk === skin));
     el.querySelectorAll('#hsel-arma button').forEach((b) => b.classList.toggle('on', b.dataset.arma === arma));
+    if (x1rv) { el.querySelectorAll('#hsel-x1rv button').forEach((b) => { const on = b.dataset.rv === x1rv; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+      const bx = $('hsel-rvbox'); if (bx) bx.hidden = x1rv !== 'arconte'; const sub = $('hsel-sub'); if (sub) sub.textContent = x1rv === 'arconte' ? 'X1 ⚔ · DUELO 1×1 · RIVAL: ARCONTE (CHEFE)' : 'X1 ⚔ · DUELO 1×1 · RIVAL SORTEADO'; el.classList.toggle('hsel-boss', x1rv === 'arconte'); }
     const col = skin && SKINS[skin] ? SKINS[skin].css : s.css;
     $('hsel-name').textContent = p.name; $('hsel-name').style.color = col;
     $('hsel-role').textContent = `${I.papel || ''} · ${s.tag}`;
@@ -91,18 +102,19 @@ export function openHeroSelect(o) {
   el.querySelectorAll('.hsel-card').forEach((b) => { b.onclick = () => { pick = b.dataset.id; paint(); }; });
   el.querySelectorAll('#hsel-skin button').forEach((b) => { b.onclick = () => { skin = b.dataset.sk; paint(); }; });
   el.querySelectorAll('#hsel-arma button').forEach((b) => { b.onclick = () => { arma = b.dataset.arma; paint(); }; });
-  const finish = (auto) => { if (done) return; done = true; const v = { id: pick, skin, arma, auto: !!auto }; closeHeroSelect(); o.onConfirm(v); };
+  el.querySelectorAll('#hsel-x1rv button').forEach((b) => { b.onclick = () => { x1rv = b.dataset.rv; paint(); }; });
+  const finish = (auto) => { if (done) return; done = true; const v = { id: pick, skin, arma, auto: !!auto, ...(x1rv ? { rival: x1rv } : {}) }; closeHeroSelect(); o.onConfirm(v); };
   $('hsel-ok').onclick = () => finish(false);
   $('hsel-back').onclick = () => { if (done) return; done = true; closeHeroSelect(); o.onCancel?.(); };
   const tm = setInterval(() => { if (done || !el.isConnected) { clearInterval(tm); return; } left--; const lb = $('hsel-left'); if (lb) lb.textContent = String(Math.max(0, left)); el.classList.toggle('hsel-urgent', left <= 5); if (left <= 0) { clearInterval(tm); finish(true); } }, 1000);
   el._timer = tm;
-  import('./fps/hero-preview.js?v=20261025perf').then((m) => {
+  import('./fps/hero-preview.js?v=20261025arconte').then((m) => {
     if (!el.isConnected) return;
     try { preview = m.createHeroPreview($('hsel-canvas'), { interactive: true, autoSpin: 0.6 }); el._preview = preview; paint(); } catch (e) { console.warn('[seleção] prévia 3D indisponível', e); }
   }).catch(() => {});
   const glbTick = setInterval(() => { if (!el.isConnected) { clearInterval(glbTick); return; } const i = preview?.info?.(); const g = $('hsel-glb'); if (g) g.textContent = i?.caioGlb === 'ready' ? 'MODELO 3D DO CAIO' : ''; }, 400);
   paint();
-  return { el, info: () => ({ pick, skin, arma, left, preview: preview?.info?.() || null }) };
+  return { el, info: () => ({ pick, skin, arma, rival: x1rv, left, preview: preview?.info?.() || null }) };
 }
 export function closeHeroSelect() {
   const el = document.getElementById('hero-select'); if (!el) return;

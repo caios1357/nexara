@@ -4,7 +4,7 @@
  * (arena-rivals.js) e na simulação (simDuel) — a tabela de vitórias vem deste código, não de uma conta à parte.
  * Lutador (f): { kit, hp, hpMax, atk, cd{slot:readyAt}, b{buffs}, s{status}, escudo, pend[], tgt (quem ele encara) }
  */
-import { KITS, SLOTS, kitFor } from './hero-kits.js?v=20261025perf';
+import { KITS, SLOTS, kitFor } from './hero-kits.js?v=20261025arconte';
 
 /** custo em Nexa de cada slot (igual ao do jogador: gameplay-config.specials) e Nexa do NV1 */
 export const SLOT_COST = { golpe_poderoso: 10, ataque_area: 18, suprema: 35 };
@@ -25,6 +25,7 @@ export function outMult(a, d, now, o = {}) {
     else if (P.tipo === 'costas' && d && d.tgt !== a) m *= 1 + P.mult;
     else if (P.tipo === 'execucao' && d && d.hp < d.hpMax * P.abaixo) m *= 1 + P.mult;
     else if (P.tipo === 'furia') m *= 1 + P.max * Math.max(0, 1 - a.hp / Math.max(1, a.hpMax));
+    else if (P.tipo === 'nucleos') m *= 1 + P.por * (a.nuc || 0); // 20261025arconte: Soberania dos Núcleos
   }
   if (on(a.s.fracoUntil, now)) m *= 1 - (a.s.fraco || 0);
   if (d) { let v = 0; if (on(d.s.vulnUntil, now)) v += d.s.vuln || 0; if (on(d.s.marcaUntil, now)) v += d.s.marca || 0; m *= 1 + v; }
@@ -48,6 +49,7 @@ export function onHitFx(a, d, dealt, now) {
   if (!a || dealt <= 0) return;
   const k = a.kit; const P = k?.passiva;
   if (P?.tipo === 'escudo_acerto') a.escudo = Math.min(a.hpMax * P.teto, a.escudo + a.hpMax * P.frac);
+  if (P?.tipo === 'nucleos') nucleoUp(a, now); // 20261025arconte
   if (d) {
     const ven = P?.tipo === 'veneno' ? P : k?.var?.veneno;
     if (ven) { d.s.venenoUntil = now + ven.dur; d.s.venenoDps = ven.dps; }
@@ -55,11 +57,14 @@ export function onHitFx(a, d, dealt, now) {
   }
   if (on(a.b.curaUntil, now)) a.hp = Math.min(a.hpMax, a.hp + Math.max(1, Math.round(a.hpMax * (a.b.cura || 0))));
 }
+/** 20261025arconte: acende 1 Núcleo (passiva do Arconte) */
+export function nucleoUp(a, now) { const P = a?.kit?.passiva; if (P?.tipo !== 'nucleos') return; a.nuc = Math.min(P.max, (a.nuc || 0) + 1); a.nucAt = now; }
 /** DoT (veneno/queima) e golpes agendados (meteoro, chuva, giro): devolve [{ alvo, n, kind }] a aplicar */
 export function tick(f, now, out) {
   if (now >= f.nextTick) {
     f.nextTick = now + 1000;
     f.nexa = Math.min(f.nexaMax, f.nexa + NEXA_REGEN * (f.kit?.passiva?.tipo === 'nexa_regen' ? 1 + f.kit.passiva.mult : 1));
+    if (f.kit?.passiva?.tipo === 'nucleos' && f.nuc > 0 && now - (f.nucAt || 0) >= f.kit.passiva.decaiMs) { f.nuc--; f.nucAt = now; } // 20261025arconte: Núcleo apaga sem acertar
     let dot = 0; if (on(f.s.venenoUntil, now)) dot += f.s.venenoDps || 0; if (on(f.s.queimaUntil, now)) dot += f.s.queimaDps || 0;
     if (dot > 0) out.push({ alvo: f, n: dot, kind: 'dot' });
   }
@@ -67,9 +72,13 @@ export function tick(f, now, out) {
   return out;
 }
 /** decide e usa UM poder (o 1º pronto que faz sentido). api: { hit(alvo, n, kind, extra), self, R, nearFoes() } — devolve o slot usado ou null */
+const SLOT_ORDER = ['suprema', 'golpe_poderoso', 'ataque_area'], SLOT_ORDER_CICLONE = ['suprema', 'ataque_area', 'golpe_poderoso'];
 export function botPower(f, foe, dist, now, api) {
   if (on(f.s.stunUntil, now)) return null;
-  for (const slot of ['suprema', 'golpe_poderoso', 'ataque_area']) {
+  { const su = f.kit.poderes?.suprema; if (su?.guardaHp && !f.b.fase2 && f.hp / f.hpMax <= su.guardaHp) { f.b.fase2 = now; f.nexa = Math.max(f.nexa, SLOT_COST.suprema); } } // Arconte 'fase 2' (1× por vida): ao cair a 75% recarrega o Nexa do Eclipse
+  // Arconte (chefe): colado no alvo prefere o Ciclone (corpo a corpo) à Flecha (distância); os 9 heróis seguem a ordem de sempre
+  const cic = f.kit.poderes?.ataque_area; const order = cic?.tipo === 'ciclone' && dist <= cic.raio + 1.2 ? SLOT_ORDER_CICLONE : SLOT_ORDER;
+  for (const slot of order) {
     if (now < (f.cd[slot] || 0) || f.nexa < SLOT_COST[slot]) continue;
     const p = f.kit.poderes[slot]; if (!want(f, p, foe, dist, now)) continue;
     f.cd[slot] = now + p.cd; f.nexa -= SLOT_COST[slot];
@@ -82,6 +91,8 @@ function want(f, p, foe, dist, now) {
   if (['muralha', 'postura', 'invisivel', 'teleporte', 'salto_tras'].includes(t)) return !!foe && dist <= 3 && (hpF < 0.8 || t === 'postura' || t === 'muralha');
   if (t === 'buff') return !!foe && dist <= 3.5 && (!p.imortal || hpF < 0.45); // Fúria de Lava: o bot guarda para quando está ferido
   if (!foe) return false;
+  if (p.guardaHp && hpF > p.guardaHp && f.nexa < SLOT_COST.suprema + SLOT_COST.ataque_area) return false; // Arconte: o Eclipse é a 'fase 2' — guarda até ferir (ou sobrar Nexa p/ o Ciclone)
+  if (t === 'ciclone') return dist <= p.raio + 1.2; // gira e AVANÇA: começa a até 1,2 além do raio (cada giro confere a distância na hora)
   const reach = p.alcance ?? p.raio ?? 2.5;
   return dist <= reach;
 }
@@ -91,7 +102,7 @@ function use(f, p, foe, dist, now, api) {
   switch (t) {
     case 'projetil': {
       if (p.id === 'corte_azul' && kv.corteSalta) { hit(p.dano, 'proj', { salta: kv.corteSalta }); break; }
-      hit(p.dano, 'proj', p.puxa ? { puxa: true } : null); break; }
+      hit(p.dano, 'proj', p.puxa ? { puxa: true } : p.lento ? { lento: p.lento, dur: p.dur, perfura: !!p.perfura } : null); break; } // lento: Flecha do Abismo (Arconte)
     case 'leque': for (let i = 0; i < p.n; i++) hit(p.dano, 'proj'); break;
     case 'cone': hit(p.dano, 'melee'); break;
     case 'investida': hit(p.dano, 'melee', { stunMs: p.stunMs }); break;
@@ -120,6 +131,9 @@ function use(f, p, foe, dist, now, api) {
     case 'teleporte': f.b.iframeUntil = now + p.iframeMs; f.b.kiteUntil = now + 1200; break;
     case 'salto_tras': f.b.kiteUntil = now + 1200; hit(p.armadilha.dano, 'area', { lento: p.armadilha.lento, dur: p.armadilha.dur }); break;
     case 'marca': if (foe) { foe.s.marca = p.mult; foe.s.marcaUntil = now + p.dur; } break;
+    // —— 20261025arconte: poderes do ARCONTE (área com checagem de posição na hora do golpe → dá para sair) ——
+    case 'ciclone': { f.b.cicloneUntil = now + p.durMs; const per = Math.round(p.dano / p.ticks); for (let i = 0; i < p.ticks; i++) f.pend.push({ at: now + (i + 1) * (p.durMs / p.ticks), alvo: foe, n: per, kind: 'area', from: f, selfR: p.raio + 0.4, extra: i === p.ticks - 1 ? { lento: p.lento, dur: p.dur } : null }); break; }
+    case 'eclipse': { const tp = api.foePos?.() || null; f.b.eclipseUntil = now + p.atrasoMs; f.pend.push({ at: now + p.atrasoMs, alvo: foe, n: p.dano, kind: 'area', from: f, zone: tp ? { x: tp.x, y: tp.y, r: p.raio } : null, extra: { lento: p.lento, dur: p.dur } }); break; }
     default: break;
   }
 }
