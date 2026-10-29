@@ -7,7 +7,7 @@
  *  - `dano` = dano no NV1 contra um rival NV1 (defesa 7); escala com o nível (ataque) e passa pelos modificadores.
  *  - Só vale na PARTIDA JUSTA (todos NV1, armas básicas); fora dela os especiais antigos continuam.
  */
-import { ARCONTE_JOGADOR } from './arconte-kit.js?v=20261025arconte2'; // 20261025arconte2: Arconte JOGÁVEL (fora de KITS → sims/rivais dos 9 intocados)
+import { ARCONTE_JOGADOR } from './arconte-kit.js?v=20261029mapa'; // 20261025arconte2: Arconte JOGÁVEL (fora de KITS → sims/rivais dos 9 intocados)
 export const SLOTS = ['golpe_poderoso', 'ataque_area', 'suprema'];
 
 export const KITS = {

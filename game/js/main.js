@@ -1,87 +1,87 @@
-import { loadAllData } from './data-loader.js?v=20261025arconte2';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261025arconte2';
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261025arconte2';
-import { addToInventory } from '../../rules/loot.js?v=20261025arconte2';
-import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261025arconte2';
-import { rollLoot } from '../../rules/loot.js?v=20261025arconte2';
-import { isWalkable } from './map.js?v=20261025arconte2';
-import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261025arconte2';
-import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261025arconte2';
+import { loadAllData } from './data-loader.js?v=20261029mapa';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261029mapa';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261029mapa';
+import { addToInventory } from '../../rules/loot.js?v=20261029mapa';
+import { createNewGame, applySave, pushLog, getEquippedStats, xpForLevel, addXp as addXpState } from './state.js?v=20261029mapa';
+import { rollLoot } from '../../rules/loot.js?v=20261029mapa';
+import { isWalkable } from './map.js?v=20261029mapa';
+import { hasSave, loadFromLocal, saveToLocal } from './save.js?v=20261029mapa';
+import { createUI, bindRenderer, getNexaFxStats } from './ui.js?v=20261029mapa';
 import {
   tryMove, applyPlayerHit, applyDamageToMonster, monsterAttackPlayer, interactAdjacent, talkNpc, maybeRespawn,
   setPlayerDefenseHook, setPlayerAbsorbHook, setPlayerDeathHook, setBossKillHook, equipItem, setMonsterKillHook, setRivalHitHook, setRivalMitigateHook, applyDamageToMonster as applyDmgMon, swordStats, resetSwordStats
-} from './actions.js?v=20261025arconte2';
-import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261025arconte2';
-import { createMcbUi } from './mcb-ui.js?v=20261025arconte2';
-import { createVestiario } from './vestiario.js?v=20261025arconte2';
-import { createBerco } from './dragon-berco.js?v=20261025arconte2';
-import { bossCfgFor } from './boss-variants.js?v=20261025arconte2';
-import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261025arconte2';
-import { createMount } from './mount.js?v=20261025arconte2';
-import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261025arconte2';
-import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261025arconte2';
-import { getLocalProfile, authProviders } from './auth.js?v=20261025arconte2';
-import { lastWalletCheck } from './save.js?v=20261025arconte2';
-import { maybeTrigger0217 } from './events.js?v=20261025arconte2';
-import { createRenderer } from './renderer.js?v=20261025arconte2';
-import { createFpsRenderer } from './fps/fps-renderer.js?v=20261025arconte2';
-import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261025arconte2';
-import { itemRarity } from './sprites.js?v=20261025arconte2';
-import { createArenaState, isArenaState } from './arena.js?v=20261025arconte2';
-import { createMobileControls } from './mobile-controls.js?v=20261025arconte2';
-import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261025arconte2';
+} from './actions.js?v=20261029mapa';
+import { bindArsenalConfig, creditKill, mcbStats, ensureWallet, rewardFor, priceOf, basePriceOf, isTestPricing, applyTestGrant, testGrantConfig } from './mcb.js?v=20261029mapa';
+import { createMcbUi } from './mcb-ui.js?v=20261029mapa';
+import { createVestiario } from './vestiario.js?v=20261029mapa';
+import { createBerco } from './dragon-berco.js?v=20261029mapa';
+import { bossCfgFor } from './boss-variants.js?v=20261029mapa';
+import { getChosenBB, bbById, bbAbility, bbPlayerSupported, newBBState, stepBB } from './dragon-bb.js?v=20261029mapa';
+import { createMount } from './mount.js?v=20261029mapa';
+import { refreshEquipment, getEquipTotals, weaponClassOf, weaponFamilyOf } from './equipment.js?v=20261029mapa';
+import { createWeaponProjectiles } from './weapon-projectiles.js?v=20261029mapa';
+import { getLocalProfile, authProviders } from './auth.js?v=20261029mapa';
+import { lastWalletCheck } from './save.js?v=20261029mapa';
+import { maybeTrigger0217 } from './events.js?v=20261029mapa';
+import { createRenderer } from './renderer.js?v=20261029mapa';
+import { createFpsRenderer } from './fps/fps-renderer.js?v=20261029mapa';
+import { spawnDamage, spawnArc, spawnImpact, spawnLootGlow } from './vfx.js?v=20261029mapa';
+import { itemRarity } from './sprites.js?v=20261029mapa';
+import { createArenaState, isArenaState } from './arena.js?v=20261029mapa';
+import { createMobileControls } from './mobile-controls.js?v=20261029mapa';
+import { preloadAssets, assetsReady, spriteCount } from './assets.js?v=20261029mapa';
 import {
   forceAiTick, tickEnemyAi, getTokenStats, setAiEnabled, grantAiGrace, clearAiGrace, getBodies, getMonsterPos,
   onMonsterHit, aiDebug, placeMonster, getAiEvents, clearAiEvents, debugResetMonster, getAiClock, getTacStats, resetTacStats,
   graceRemainingMs, resetAttackTokens, getAttackTokenHolders, getThreatsToPlayer, isTargetingPlayer,
   isAttackingPlayer, monBodyRadius, getBossView, debugBossAttack,
   addPosture, isPostureBroken, getPosture, setPostureEnabled, alertMonster, resetMonsterRuntime, clearEnemyHazards, debugBossPhase
-} from './enemy-ai.js?v=20261025arconte2';
-import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261025arconte2';
-import { createArenaRun } from './arena-run.js?v=20261025arconte2';
-import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261025arconte2';
+} from './enemy-ai.js?v=20261029mapa';
+import { getPlayerSlow, getHazardStats } from './enemy-behaviors.js?v=20261029mapa';
+import { createArenaRun } from './arena-run.js?v=20261029mapa';
+import { createCampo, createCampoState, CAMPO_ZONE_ID } from './campo-ascensao.js?v=20261029mapa';
 // ARENA PRINCIPAL (BR PvE): corrida, HUD/minimapa/bolsa/mercado, itens com raridade
-import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261025arconte2';
-import { generateBrMap } from './br-map.js?v=20261025arconte2';
-import { makeFastConfig, fastSeed } from './br-fast.js?v=20261025arconte2';
-import { createX1Mode } from './x1-mode.js?v=20261025arconte2';
-import { makeX1Config } from './x1-map.js?v=20261025arconte2';
-import { rivalSteer } from './enemy-ai.js?v=20261025arconte2';
-import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261025arconte2';
-import { createArenaBrUi } from './arena-br-ui.js?v=20261025arconte2';
-import { createMusic } from './music.js?v=20261025arconte2';
-import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261025arconte2';
-import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261025arconte2';
-import { createBossHud } from './boss-hud.js?v=20261025arconte2';
-import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261025arconte2';
-import { createPlayerMotion } from './player-motion.js?v=20261025arconte2';
-import { createPlayerCombat } from './player-combat.js?v=20261025arconte2';
-import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261025arconte2';
-import { createHeroPowers } from './hero-powers.js?v=20261025arconte2';
+import { createBrState, createArenaBr, brEnabled } from './arena-br.js?v=20261029mapa';
+import { generateBrMap } from './br-map.js?v=20261029mapa';
+import { makeFastConfig, fastSeed } from './br-fast.js?v=20261029mapa';
+import { createX1Mode } from './x1-mode.js?v=20261029mapa';
+import { makeX1Config } from './x1-map.js?v=20261029mapa';
+import { rivalSteer } from './enemy-ai.js?v=20261029mapa';
+import { recordMatch, rankingRows, showRanking } from './fast-ranking.js?v=20261029mapa';
+import { createArenaBrUi } from './arena-br-ui.js?v=20261029mapa';
+import { createMusic } from './music.js?v=20261029mapa';
+import { hydrateBrItems, addLootToBag, sellFromBag, bagCount, bagCap, bagEntries, bagAdd, stashEntries, brItemStats, previewLoot, sellLootDirect } from './br-items.js?v=20261029mapa';
+import { getAiLodStats, setAiLodScale, getAiView } from './enemy-ai.js?v=20261029mapa';
+import { createBossHud } from './boss-hud.js?v=20261029mapa';
+import { getStat, addModifier, clearModifiers, listModifiers, STATS } from './modifiers.js?v=20261029mapa';
+import { createPlayerMotion } from './player-motion.js?v=20261029mapa';
+import { createPlayerCombat } from './player-combat.js?v=20261029mapa';
+import { createPlayerActions, SPECIAL_IDS } from './player-actions.js?v=20261029mapa';
+import { createHeroPowers } from './hero-powers.js?v=20261029mapa';
 import {
   unlockAudio, sfxEnemyGrowl, sfxHit, sfxSwing, sfxHurt, sfxWarn, sfxWhiff, sfxDragonWhoosh, sfxDragonCharge, sfxDragonBlast, sfxDragonImpact,
   sfxDodge, sfxBlock, sfxDenied, sfxCharge, sfxSpecial,
   sfxComboHit, sfxCrit, sfxPerfectDodge, sfxBreak, sfxEnemyDeath, sfxLevelUp, sfxLoot, sfxEliteSpawn, sfxLootRarity, sfxTelegraph, sfxCue,
   sfxBossRoar, sfxBossWarn, sfxBossAttack, getSfxStats, sfxDragonRoar, sfxDragonFlap, sfxDragonBreath
-} from './sfx.js?v=20261025arconte2';
+} from './sfx.js?v=20261029mapa';
 import {
   registerPassivesFromData, bindPassiveState, rollOffer, choosePassive, getPassive, listPassives, getTotals,
   availablePool, weightedPick, ensurePassiveState, applyDerivedStats, getBuildSynergy, buildOfPassive
-} from './passives.js?v=20261025arconte2';
-import { createPassiveUi } from './passives-ui.js?v=20261025arconte2';
-import { createSettingsMenu } from './settings-menu.js?v=20261025arconte2';
-import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261025arconte2';
-import { createPassiveHud } from './passive-hud.js?v=20261025arconte2';
-import { createDragon } from './companion-dragon.js?v=20261025arconte2';
-import { createFullscreenUi } from './fullscreen.js?v=20261025arconte2';
-import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261025arconte2';
-import { hasLineOfSight, wrapAngle } from './collision.js?v=20261025arconte2';
-import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261025arconte2';
-import { createTutorial } from './tutorial.js?v=20261025arconte2';
-import { openHeroSelect, openLobby, closeHeroSelect, closeLobby, readLastPick, writeLastPick, readX1Rival, writeX1Rival } from './hero-select.js?v=20261025arconte2';
-import { arconteRoster } from './arconte-kit.js?v=20261025arconte2'; // 20261025arconte: ARCONTE (chefe) como rival do X1
-import { planRoster, rivaisPara } from './br-roster.js?v=20261025arconte2';
-import { PERSONAGEM_IDS } from './personagens.js?v=20261025arconte2';
+} from './passives.js?v=20261029mapa';
+import { createPassiveUi } from './passives-ui.js?v=20261029mapa';
+import { createSettingsMenu } from './settings-menu.js?v=20261029mapa';
+import { createPassiveProcs, describeProc } from './passive-procs.js?v=20261029mapa';
+import { createPassiveHud } from './passive-hud.js?v=20261029mapa';
+import { createDragon } from './companion-dragon.js?v=20261029mapa';
+import { createFullscreenUi } from './fullscreen.js?v=20261029mapa';
+import { ensureArmas, swapWeapon, setSlot2, activeClass, swapCdLeft, swapStats, SWAP_CD_MS, SLOT_INFO, SLOT2 } from './dual-weapons.js?v=20261029mapa';
+import { hasLineOfSight, wrapAngle } from './collision.js?v=20261029mapa';
+import { getConfig, setOverrides, resetOverrides, getOverrides, detectTouchMode, detectQualityTier, isSoftwareGL, DEG } from './gameplay-config.js?v=20261029mapa';
+import { createTutorial } from './tutorial.js?v=20261029mapa';
+import { openHeroSelect, openLobby, closeHeroSelect, closeLobby, readLastPick, writeLastPick, readX1Rival, writeX1Rival } from './hero-select.js?v=20261029mapa';
+import { arconteRoster } from './arconte-kit.js?v=20261029mapa'; // 20261025arconte: ARCONTE (chefe) como rival do X1
+import { planRoster, rivaisPara } from './br-roster.js?v=20261029mapa';
+import { PERSONAGEM_IDS } from './personagens.js?v=20261029mapa';
 
 let DATA = null;
 let state = null;
@@ -482,7 +482,7 @@ function syncHeroLook(s) {
 /** Retrato 3D do HUD em presets sem pós-processo: foto num contexto WebGL temporário (cache por estilo+cores). */
 function portraitSnap(styleId, custom) {
   if (/[?&](models|portrait)=0\b/.test(location.search)) return;
-  import('./fps/hero-preview.js?v=20261025arconte2').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
+  import('./fps/hero-preview.js?v=20261029mapa').then((m) => m.makePortraitSnapshot(styleId || 'cavaleiro', custom || {})).catch(() => {});
 }
 /** Chamado a cada quadro no Campo: grava quando algo da evolução mudou (no máx. 2×/s; eventos fortes forçam). */
 function maybeSyncCampo(s) {
@@ -1869,7 +1869,7 @@ async function boot() {
     // M3D: baixa/decodifica os GLB já na tela de título (prontos antes de entrar → sem troca no meio do combate)
     // só os GLB que o preset vai usar (LOW: nenhum; MEDIUM: herói; HIGH: todos) — decodificar GLB que não
     // aparece custava CPU justo na entrada do jogo (1º gesto perdia quadros)
-    import('./fps/model-lib.js?v=20261025arconte2').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
+    import('./fps/model-lib.js?v=20261029mapa').then((m) => { for (const n of preloadModelList()) m.loadModel(n); })
       .catch(() => {});
   } catch (e) {
     document.body.innerHTML = `<div class="screen"><p style="color:#e85d4c">Erro ao carregar data/: ${e.message}</p>
@@ -2145,6 +2145,10 @@ async function boot() {
       /** M10: coordenada do mapa de PROJETO (100×76) → tile andável mais próximo no mapa escalado */
       at: (dx, dy) => {
         const m = (state?._data || DATA)?.zones?.zones?.find((z) => z.brMap)?.brMap; const S = DATA.arena_br?._escala || 1; if (!m) return null;
+        if (DATA.arena_br?._mapa5x3 && DATA.arena_br_design) { // 20261029mapa: coordenada do PROJETO ANTIGO (100×76) → mesma posição relativa no quadrado novo do mesmo distrito
+          const r0 = DATA.arena_br_design.regioes.find((r) => dx >= r.x0 && dx <= r.x1 && dy >= r.y0 && dy <= r.y1); const r1 = r0 && DATA.arena_br.regioes.find((r) => r.id === r0.id);
+          if (r0 && r1) { dx = (r1.x0 + ((dx - r0.x0 + 0.5) / (r0.x1 - r0.x0 + 1)) * (r1.x1 - r1.x0 + 1)) / S - (S - 1) / (2 * S); dy = (r1.y0 + ((dy - r0.y0 + 0.5) / (r0.y1 - r0.y0 + 1)) * (r1.y1 - r1.y0 + 1)) / S - (S - 1) / (2 * S); }
+        }
         const tx = Math.min(m.W - 2, Math.max(1, Math.round(dx * S + (S - 1) / 2))), ty = Math.min(m.H - 2, Math.max(1, Math.round(dy * S + (S - 1) / 2)));
         for (let r = 0; r < 30; r++) for (let yy = ty - r; yy <= ty + r; yy++) for (let xx = tx - r; xx <= tx + r; xx++) {
           if (Math.max(Math.abs(xx - tx), Math.abs(yy - ty)) !== r || xx < 0 || yy < 0 || xx >= m.W || yy >= m.H) continue;
@@ -2449,7 +2453,7 @@ async function boot() {
     /** XP pelo caminho real (addXp → nível → fila de passivas). */
     grantXp: async (n) => {
       if (!state) return null;
-      const { addXp } = await import('./state.js?v=20261025arconte2');
+      const { addXp } = await import('./state.js?v=20261029mapa');
       addXp(state, n);
       ui.refresh();
       return { nivel: state.player.nivel, xp: state.player.xp, pending: state.passives?.pending || 0 };

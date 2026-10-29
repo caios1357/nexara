@@ -7,8 +7,8 @@
  * AudioContext dos efeitos (sfx.js) → volume funciona também no iOS. Sem contexto, cai em element.volume.
  * Faixa com peso ~0 por >3 s é pausada (bateria/CPU). Aba escondida → pausa tudo.
  */
-import { getConfig } from './gameplay-config.js?v=20261025arconte2';
-import { getAudioContext } from './sfx.js?v=20261025arconte2';
+import { getConfig } from './gameplay-config.js?v=20261029mapa';
+import { getAudioContext } from './sfx.js?v=20261029mapa';
 
 const BASE = new URL('../../assets/audio/music/', import.meta.url);
 /** M10 passo 2 — ambiente por região (loops CC0 ~26 s, ver assets/audio/CREDITS.md) + camada de tensão do dragão. */
@@ -50,7 +50,8 @@ export function createMusic() {
   function updateAmb(dt, info, hidden) {
     const c = ambCfg(); const tg = {};
     const live = scene === 'br' && c.on && !hidden && !info.ended;
-    const reg = AMB_REGIONS.includes(info.region) ? info.region : '';
+    const r0 = /^favela/.test(info.region || '') ? 'periferia' : /^guerra/.test(info.region || '') ? 'ruinas' : /^cidade2/.test(info.region || '') ? 'elite' : info.region; // 20261029mapa: distritos novos usam o ambiente do parecido
+    const reg = AMB_REGIONS.includes(r0) ? r0 : '';
     const tension = !live ? 0 : info.dragon ? 1 : info.near ? 0.55 : 0;
     ambSt.tension += (tension - ambSt.tension) * Math.min(1, dt / 1500); ambSt.region = reg;
     if (live && reg) { tg[reg] = reg === 'dragao' ? 1 : 1 - ambSt.tension * 0.6; tg.dragao = Math.max(tg.dragao || 0, ambSt.tension); }

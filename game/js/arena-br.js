@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261025arconte2';
-import { getConfig } from './gameplay-config.js?v=20261025arconte2';
-import { pushLog } from './state.js?v=20261025arconte2';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261025arconte2';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261025arconte2';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261025arconte2';
-import { createRivals } from './arena-rivals.js?v=20261025arconte2';
+import { createArenaState } from './arena.js?v=20261029mapa';
+import { getConfig } from './gameplay-config.js?v=20261029mapa';
+import { pushLog } from './state.js?v=20261029mapa';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261029mapa';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261029mapa';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261029mapa';
+import { createRivals } from './arena-rivals.js?v=20261029mapa';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -124,7 +124,9 @@ export function createArenaBr(deps) {
     const m = map(); if (!m?.spawnPoints?.length) return null;
     const big = st.monstersAlive.filter((q) => q.alive && (q.boss || q.guard || q.elemental));
     const z = br.zone; const ok = (q) => walk(q.x, q.y) && !inCovil(q.x, q.y, q.region) && big.every((b) => Math.hypot(b.x - q.x, b.y - q.y) >= 16) && Math.hypot(q.x + 0.5 - z.cx, q.y + 0.5 - z.cy) <= z.r * 0.9;
-    let pts = m.spawnPoints.filter(ok); if (!pts.length) pts = m.spawnPoints.filter((q) => walk(q.x, q.y) && !inCovil(q.x, q.y, q.region)); if (!pts.length) return null;
+    let pts = m.spawnPoints.filter(ok);
+    if (cfg()._mapa5x3) { const low = pts.filter((q) => (cfg().regioes.find((r) => r.id === q.region)?.risco ?? 9) <= 2); if (low.length) pts = low; } // 20261029mapa: herói nasce em distrito de risco baixo (Favela/Residência/Torre/Acesso) dentro da 1ª zona
+    if (!pts.length) pts = m.spawnPoints.filter((q) => walk(q.x, q.y) && !inCovil(q.x, q.y, q.region)); if (!pts.length) return null;
     const q = pts[Math.floor(R() * pts.length)];
     st.player.x = q.x; st.player.y = q.y; br.heroSpawn = { x: q.x, y: q.y, region: q.region || null };
     return q;
@@ -551,7 +553,7 @@ export function createArenaBr(deps) {
       note('region', { id: reg.id, nome: reg.nome, risco: reg.risco, first });
     }
     const t = cfg().dragao.territorio;
-    const SK = cfg()._escala || 1; const inD = cfg().fastRun ? reg?.id === 'dragao' : p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
+    const SK = cfg()._escala || 1; const inD = cfg().fastRun || cfg()._mapa5x3 ? reg?.id === 'dragao' : p.x >= t.x0 - 6 * SK && p.y <= t.y1 + 11 * SK && p.x >= 67 * SK;
     if (inD && !br.inDragon) { br.inDragon = true; note('dragon_territory', { first: !br.dragonWarned, nome: st.monstersAlive.find((q) => q.boss)?.arenaLabel || 'GIGANTE VERDE' }); br.dragonWarned = true; if (!br.bossArmed) { br.bossArmed = true; deps.armBoss?.(); } }
     else if (!inD && br.inDragon) { br.inDragon = false; note('dragon_leave', {}); }
   }

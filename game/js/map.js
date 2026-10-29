@@ -20,7 +20,7 @@ export function isWalkable(zone, x, y) {
   const t = getTileType(zone, x, y);
   if (t === 'wall') return false;
   // ARENA PRINCIPAL: árvores, rochas, caixas e pilares são sólidos (só existem na legenda da zona BR)
-  if (t === 'tree' || t === 'rock' || t === 'crate' || t === 'pillar') return false;
+  if (t === 'tree' || t === 'rock' || t === 'crate' || t === 'pillar' || t === 'blocked') return false; // blocked = Castelo do Arconte reservado (20261029mapa)
   // EVO: portões do Campo de Ascensão bloqueiam enquanto fechados (zone.closed[gate] = true)
   if (zone.closed && zone.closed[t]) return false;
   return true;

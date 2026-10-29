@@ -3,12 +3,12 @@
  * enquanto a tela está aberta (dispose ao fechar). Usa o mesmo hero-glb do jogo → o que se vê é o que entra.
  */
 import * as THREE from 'three';
-import { attachHeroGlb } from './hero-glb.js?v=20261025arconte2';
-import { createHeroModel } from './hero-model.js?v=20261025arconte2';
-import { createArconteModel } from './arconte-model.js?v=20261025arconte2'; // 20261025arconte2: Arconte jogável na prévia
-import { kitFor } from './hero-kit.js?v=20261025arconte2';
-import { heroStyleOf } from '../hero-styles.js?v=20261025arconte2';
-import { getConfig } from '../gameplay-config.js?v=20261025arconte2';
+import { attachHeroGlb } from './hero-glb.js?v=20261029mapa';
+import { createHeroModel } from './hero-model.js?v=20261029mapa';
+import { createArconteModel } from './arconte-model.js?v=20261029mapa'; // 20261025arconte2: Arconte jogável na prévia
+import { kitFor } from './hero-kit.js?v=20261029mapa';
+import { heroStyleOf } from '../hero-styles.js?v=20261029mapa';
+import { getConfig } from '../gameplay-config.js?v=20261029mapa';
 /** 9 PERSONAGENS: a prévia/retrato mostram o MESMO herói procedural do jogo (kit + skin) — o GLB só com graphics.heroLook='glb' */
 const wantsGlb = () => { try { return (new URLSearchParams(location.search).get('herolook') || getConfig().graphics.heroLook) === 'glb'; } catch { return false; } };
 function attachProcHero(fake, o = {}) {

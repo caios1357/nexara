@@ -5,7 +5,7 @@
  * VENDER), painel da BOLSA, MERCADO NEGRO (COMPRAR = Arsenal · VENDER = bolsa) e o resumo DERROTADO / EXTRAÇÃO.
  * Só DOM/canvas 2D — nenhum custo no WebGL.
  */
-import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261025arconte2';
+import { bagEntries, stashEntries, bagAdd, bagCap, sellPriceOfEntry, compareWithEquipped, compareSummary, isBrItemId } from './br-items.js?v=20261029mapa';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -173,6 +173,7 @@ export function createArenaBrUi(deps) {
       const t = z.map.legend[m.tiles[y][x]] || 'floor';
       const col = regCol[m.regionGrid[x + y * m.W]] || '#334';
       if (t === 'wall') g.fillStyle = '#0b0f14';
+      else if (t === 'blocked') g.fillStyle = ((x + y) % 6 < 2) ? '#3a1450' : '#1a0a24'; // 20261029mapa: Castelo do Arconte (reservado)
       else if (t === 'tree') g.fillStyle = '#1d5a36';
       else if (t === 'rock' || t === 'pillar' || t === 'crate') g.fillStyle = '#2a3036';
       else { g.fillStyle = col; g.globalAlpha = t === 'street' ? 0.46 : 0.32; }
@@ -256,7 +257,7 @@ export function createArenaBrUi(deps) {
     fog(g, s, m, 0, 0, sc, 0, 0, m.W, m.H);
     // nomes das regiões
     g.font = 'bold 13px system-ui, sans-serif'; g.textAlign = 'center';
-    for (const r of s._data.arena_br.regioes) { g.fillStyle = r.cor; g.globalAlpha = 0.85; g.fillText(r.nome.toUpperCase(), ((r.x0 + r.x1) / 2) * sc, ((r.y0 + r.y1) / 2) * sc + 22); g.globalAlpha = 1; }
+    for (const r of s._data.arena_br.regioes) { g.fillStyle = r.cor; g.globalAlpha = 0.85; g.fillText(r.nome.toUpperCase() + (r.bloqueado ? ' 🔒' : ''), ((r.x0 + r.x1) / 2) * sc, ((r.y0 + r.y1) / 2) * sc + 22); g.globalAlpha = 1; }
     drawLayer(g, s, v, 0, 0, sc, cv.width, cv.height, true);
   }
   function toggleBigMap(on = !bigOpen) {

@@ -7,11 +7,11 @@
  * covil), cobertura (caixas, pilares, árvores, rochas), espaço vazio proposital, local secreto,
  * relevo suave (alturas por tile, rampas por suavização) e pontos de spawn/baús só em tiles alcançáveis.
  */
-import { generateBrMapV2 } from './br-map-v2.js?v=20261025arconte2';
-import { generateX1Map } from './x1-map.js?v=20261025arconte2';
+import { generateBrMapV2 } from './br-map-v2.js?v=20261029mapa';
+import { generateX1Map } from './x1-map.js?v=20261029mapa';
 export const BR_ZONE_ID = 'zone_arena_br';
-export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass' };
-export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar']);
+export const BR_LEGEND = { W: 'wall', '.': 'floor', '#': 'street', T: 'tree', R: 'rock', b: 'bush', C: 'crate', P: 'pillar', '~': 'rubble', o: 'tech', g: 'grass', X: 'blocked' }; // X = área reservada/bloqueada (Castelo do Arconte, 20261029mapa)
+export const BR_SOLID = new Set(['wall', 'tree', 'rock', 'crate', 'pillar', 'blocked']);
 
 function rng32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function hash2(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 2147483647) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }

@@ -8,11 +8,13 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261025arconte2';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261029mapa';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232 };
-const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c };
+const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232, guerra: 0x8a3424, cidade2: 0xd6ccb4, castelo: 0x2a1420 };
+const VIS = { favela: 'periferia' }; // 20261029mapa: FAVELA usa o visual da Periferia Ferrugem
+const vid = (r) => (r ? (VIS[r.estilo] || r.estilo || r.id) : undefined);
+const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c, guerra: 0x9a4a38, cidade2: 0xf4eedc, castelo: 0x3a2030 };
 const TILE_FLOOR = { street: 0x3a4250, grass: 0x34583e, tech: 0x50627a, rubble: 0x6e5a44, bush: 0x34583e };
 const RARITY_GLOW = { basico: 0xc8d4d0, medio: 0x4aa0ff, avancado: 0xffc24a, alto: 0xb36bff, lendario: 0xffd34a };
 
@@ -68,7 +70,7 @@ export function buildBrTerrain(zone, cfg, o) {
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: o.loadTex('floor-metal-wet.png', 1, 1), roughness: 0.72, metalness: 0.12, envMapIntensity: 0.7, emissive: 0x18202a, emissiveIntensity: 1 }); if (o.detail) addFloorDetail(mat, { sky: o.skyColor ?? 0x2a4a7a }); // GRÁFICOS 3: juntas/variação/poças com reflexo do céu
     // M10: menos metal = chão legível sem envMap
     // 20261023: TEXTURAS DOS DISTRITOS (folhas do Caio: periferia, caverna, complexo=laboratório, fábrica, elite) — 1 material por região, mesmo programa
-    const ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: 'periferia-0', ruinas: 'fabrica-0', floresta: 'caverna-1', complexo: 'complexo-1', elite: 'elite-0', dragao: 'caverna-0' };
+    const ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: 'periferia-0', ruinas: 'fabrica-0', floresta: 'caverna-1', complexo: 'complexo-1', elite: 'elite-0', dragao: 'caverna-0', guerra: 'fabrica-0', cidade2: 'elite-0', castelo: 'caverna-0' };
     const regMats = {}; stats.distritoArte = {};
     const matOf = (rid) => {
       if (!ARTE || !ARTE[rid]) return mat; if (regMats[rid]) return regMats[rid];
@@ -89,7 +91,7 @@ export function buildBrTerrain(zone, cfg, o) {
         for (const [dx, dy] of [[0, 0], [-1, 0], [0, -1], [-1, -1]]) {
           const x = i + dx, y = j + dy; if (x < 0 || y < 0 || x >= W || y >= H) continue;
           const t = tileAt(x, y); const reg = regAt(x, y);
-          tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[reg.id] : 0x2a3038));
+          tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[vid(reg)] : 0x2a3038));
           const v = (0.86 + h32(x, y, 3) * 0.28) * 1.4; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
         }
         n = n || 1; col[k * 3] = r / n; col[k * 3 + 1] = g / n; col[k * 3 + 2] = b / n;
@@ -100,7 +102,7 @@ export function buildBrTerrain(zone, cfg, o) {
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
       geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeBoundingSphere();
       const cReg = regAt(Math.min(W - 1, fx0 + (cw >> 1)), Math.min(H - 1, fy0 + (chh >> 1)));
-      const floor = new THREE.Mesh(geo, matOf(cReg?.id)); floor.receiveShadow = true; floor.name = 'br-floor';
+      const floor = new THREE.Mesh(geo, matOf(vid(cReg))); floor.receiveShadow = true; floor.name = 'br-floor';
       floor.userData.cx = (fx0 + cw / 2) * T; floor.userData.cz = (fy0 + chh / 2) * T; floor.userData.rad = Math.hypot(cw, chh) * T * 0.5;
       floorChunks.push(floor); group.add(floor); stats.meshes++;
     }
@@ -129,9 +131,9 @@ export function buildBrTerrain(zone, cfg, o) {
   // r2 (Caio: "só dá favela pra cenário"): PAREDES/ROCHAS/PILARES por distrito com a textura da FOLHA do distrito (antes: wall-rust em todos)
   //  periferia = tijolo+grafite (periferia-2) · ruínas/FÁBRICA = chapa ondulada (fabrica-2) · floresta/CAVERNA = rocha com cristais (caverna-2)
   //  complexo/LABORATÓRIO = painel de aço com respiro (complexo-3) · ELITE = aço escovado com friso dourado (elite-1) · DRAGÃO = rocha de lava (caverna-0)
-  const WALL_ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: ['periferia-2', 0xffffff, 1.25], ruinas: ['fabrica-2', 0xe4ecff, 1.35], floresta: ['caverna-2', 0xe8f0ff, 1.6], complexo: ['complexo-3', 0xd4e2ff, 1.45], elite: ['elite-1', 0xffffff, 1.3], dragao: ['caverna-0', 0xffffff, 1.2] };
-  const ROCK_ARTE = WALL_ARTE ? { floresta: 'caverna-2', dragao: 'caverna-0', ruinas: 'fabrica-3' } : null;
-  const PILLAR_ARTE = WALL_ARTE ? { elite: 'elite-1', complexo: 'complexo-3', ruinas: 'fabrica-0' } : null;
+  const WALL_ARTE = /[?&]distritoArte=0\b/.test(typeof location !== 'undefined' ? location.search : '') ? null : { periferia: ['periferia-2', 0xffffff, 1.25], ruinas: ['fabrica-2', 0xe4ecff, 1.35], floresta: ['caverna-2', 0xe8f0ff, 1.6], complexo: ['complexo-3', 0xd4e2ff, 1.45], elite: ['elite-1', 0xffffff, 1.3], dragao: ['caverna-0', 0xffffff, 1.2], guerra: ['fabrica-2', 0xffa088, 1.15], cidade2: ['elite-1', 0xfff8ee, 1.75], castelo: ['caverna-0', 0xb090c0, 0.9] };
+  const ROCK_ARTE = WALL_ARTE ? { floresta: 'caverna-2', dragao: 'caverna-0', ruinas: 'fabrica-3', guerra: 'fabrica-3' } : null;
+  const PILLAR_ARTE = WALL_ARTE ? { elite: 'elite-1', complexo: 'complexo-3', ruinas: 'fabrica-0', cidade2: 'elite-1' } : null;
   stats.wallArte = {};
   const artMat = (file, ry, extra) => { const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex(`../distritos/${file}.webp`, 1, ry), roughness: 0.8, metalness: 0.12, ...extra }); return m; };
   for (const [rid, [file, tint, gain]] of Object.entries(WALL_ARTE || {})) {
@@ -221,15 +223,15 @@ export function buildBrTerrain(zone, cfg, o) {
     const t = tileAt(x, y); const wx = (x + 0.5) * T, wz = (y + 0.5) * T; const gy = G(x + 0.5, y + 0.5); const reg = regAt(x, y); const hs = h32(x, y);
     if (t === 'wall') {
       const st = structAt(x, y); const border = x === 0 || y === 0 || x === W - 1 || y === H - 1;
-      let h = border ? 4.6 : st ? st.h : 3.4;
+      let h = border ? 4.6 : st ? st.h : 3.4; if (vid(reg) === 'castelo') h = 5.6; // 20261029mapa: muralha do quadrado reservado
       if (st?.kind === 'ruina') h *= 0.45 + 0.55 * h32(x, y, 9);
-      const wc = REGION_WALL[(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)) || {}).id] ?? 0x6a7080;
+      const wc = REGION_WALL[vid(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)))] ?? 0x6a7080;
       tmpC.setHex(wc).multiplyScalar(0.85 + hs * 0.3);
-      const wrid = (reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)) || {}).id; const wk = WALL_ARTE && WALL_ARTE[wrid] && !border ? 'wall_' + wrid : 'wall';
+      const wrid = vid(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1))); const wk = WALL_ARTE && WALL_ARTE[wrid] && !border ? 'wall_' + wrid : 'wall';
       if (wk !== 'wall') tmpC.setScalar(0.85 + hs * 0.3);
       push(wk, x, y, [wx, gy - 0.3, wz], 0, [1, h + 0.3, 1], tmpC.getHex());
       // CONCEITO (Periferia à noite): casas de tijolo com janelas acesas, caixas d'água azuis e telhado de zinco
-      if (reg?.id === 'periferia' && !border && o.props !== false) {
+      if (vid(reg) === 'periferia' && !border && o.props !== false) {
         const wq = h32(x, y, 120);
         if (wq < 0.55 && h > 2.2) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) {
           if (tileAt(x + dx, y + dy) === 'wall') continue;
@@ -254,8 +256,9 @@ export function buildBrTerrain(zone, cfg, o) {
       }
     } else if (t === 'pillar') {
       if (tower && x >= tower.x0 && x <= tower.x1 && y >= tower.y0 && y <= tower.y1) continue; // torre própria abaixo
-      const h = reg?.id === 'elite' ? 4.4 : 3.6;
-      push(PILLAR_ARTE && PILLAR_ARTE[reg?.id] ? 'pillar_' + reg.id : 'pillar', x, y, [wx, gy - 0.2, wz], 0, [1, h, 1], 0xffffff);
+      const fonte = (m.fountains || []).some((f) => f.x === x && f.y === y);
+      const h = fonte ? 1.5 : vid(reg) === 'elite' ? 4.4 : vid(reg) === 'cidade2' ? 7.2 : 3.6; // CIDADE 2: torres douradas altas
+      push(PILLAR_ARTE && PILLAR_ARTE[vid(reg)] ? 'pillar_' + vid(reg) : 'pillar', x, y, [wx, gy - 0.2, wz], 0, [1, h, 1], 0xffffff);
       push('cap', x, y, [wx, gy + h - 0.1, wz], 0, [1, 1, 1], new THREE.Color(reg?.cor || '#ffc830').getHex());
     } else if (t === 'tree') {
       const s = 0.85 + hs * 0.55; const jx = (h32(x, y, 1) - 0.5) * 0.6, jz = (h32(x, y, 2) - 0.5) * 0.6;
@@ -267,10 +270,11 @@ export function buildBrTerrain(zone, cfg, o) {
     } else if (t === 'rock') {
       const cave = caveBox ? (x >= caveBox.x0 && x <= caveBox.x1 && y >= caveBox.y0 && y <= caveBox.y1) : (x >= 18 && x <= 31 && y >= 2 && y <= 9);
       const s = 0.95 + hs * 0.35;
-      tmpC.setHex(reg?.id === 'dragao' ? 0x3a4a40 : 0x5a5650).multiplyScalar(0.8 + hs * 0.3);
-      if (ROCK_ARTE && ROCK_ARTE[reg?.id]) tmpC.setScalar(0.8 + hs * 0.35);
-      push(ROCK_ARTE && ROCK_ARTE[reg?.id] ? 'rock_' + reg.id : 'rock', x, y, [wx, gy + (cave ? 0.6 : 0.2), wz], hs * 7, [s * 1.15, cave ? 2.4 + hs : 0.8 + hs * 0.6, s * 1.15], tmpC.getHex());
+      tmpC.setHex(vid(reg) === 'dragao' ? 0x3a4a40 : 0x5a5650).multiplyScalar(0.8 + hs * 0.3);
+      if (ROCK_ARTE && ROCK_ARTE[vid(reg)]) tmpC.setScalar(0.8 + hs * 0.35);
+      push(ROCK_ARTE && ROCK_ARTE[vid(reg)] ? 'rock_' + vid(reg) : 'rock', x, y, [wx, gy + (cave ? 0.6 : 0.2), wz], hs * 7, [s * 1.15, cave ? 2.4 + hs : 0.8 + hs * 0.6, s * 1.15], tmpC.getHex());
     } else if (t === 'crate') {
+      if (vid(reg) === 'guerra') { const cq = h32(x, y, 190); push('container', x, y, [wx, gy, wz], (hs - 0.5) * 1.2, [0.95, 0.9 + cq * 0.4, 0.55], cq < 0.4 ? 0x6a3a2a : cq < 0.75 ? 0x4a4440 : 0x7a5a30); if (hs > 0.6) push('rubble', x, y, [wx, gy + 1.15, wz], hs * 4, [2, 1, 1.4], 0xffffff); continue; } // ZONA DE GUERRA: barricada de sucata
       const two = hs > 0.55; push('crate', x, y, [wx, gy, wz], (hs - 0.5) * 0.5, [1, 1, 1], 0xffffff);
       if (two) push('crate', x, y, [wx + 0.1, gy + 1.25, wz - 0.05], hs * 2, [0.85, 0.85, 0.85], 0xffffff);
     } else if (t === 'bush') {
@@ -286,7 +290,7 @@ export function buildBrTerrain(zone, cfg, o) {
     // —— M10 fase 8: IDENTIDADE DA REGIÃO (decoração instanciada, rente ao chão ou encostada na parede; não bloqueia) ——
     if (o.props !== false && reg && (t === 'floor' || t === 'street' || t === 'grass' || t === 'tech' || t === 'rubble') && !isLootTile.has(x + y * W)) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
-      if (reg.id === 'periferia') {
+      if (vid(reg) === 'periferia') {
         if (t === 'street' && x % 7 === 0 && y % 5 === 0 && !wn) { pushP('upole', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff); pushP('wire', x, y, [wx, gy + 4.9, wz], 0, [T * 7, 1, 1], 0x000000); } // poste com fios (CONCEITO)
         if (!wn && q > 0.925 && q < 0.965) { const nq = h32(x, y, 160); tmpC.setHex(nq < 0.4 ? 0xff3ac8 : nq < 0.8 ? 0x3ad8ff : 0xffa040); pushP('puddle', x, y, [wx + (h32(x, y, 161) - 0.5), gy + 0.02, wz + (h32(x, y, 162) - 0.5)], nq * 6, [1.3 + nq, 1, 0.9 + nq * 0.7], tmpC.getHex()); } // poça refletindo néon
         if (wn && q > 0.9 && q < 0.93) { pushP('pot', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], 0, [1, 1, 1], 0xffffff); tmpC.setHSL(0.3 + q * 0.1, 0.55, 0.22); pushP('leaf', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], q * 9, [1, 1.2, 1], tmpC.getHex()); } // plantas
@@ -295,26 +299,35 @@ export function buildBrTerrain(zone, cfg, o) {
         else if (wn && q < 0.1) pushP('crate', x, y, [wx + wn.dx * 0.4, gy, wz + wn.dy * 0.4], q * 20, [0.62, 0.62, 0.62], 0xffffff);
         else if (o.extraProps && wn && q < 0.12) pushP('banner', x, y, [wx + wn.dx * 0.47, gy + 1.7 + h32(x, y, 80) * 0.6, wz + wn.dy * 0.47], wn.ry + Math.PI / 2, [1, 0.3 + h32(x, y, 81) * 0.25, 0.7], h32(x, y, 82) < 0.5 ? 0xff4a9a : 0x39e8ff);
         else if (o.extraProps && q > 0.982) { tmpC.setHSL(0.6, 0.15, 0.08 + h32(x, y, 83) * 0.06); pushP('rock', x, y, [wx + (h32(x, y, 84) - 0.5), gy + 0.18, wz + (h32(x, y, 85) - 0.5)], q * 30, [0.34, 0.24, 0.38], tmpC.getHex()); }
-      } else if (reg.id === 'ruinas') {
+      } else if (vid(reg) === 'ruinas') {
         if (WALL_ARTE && wn && q > 0.93 && q < 0.955) { const cq = h32(x, y, 170); pushP('container', x, y, [wx + wn.dx * 0.42, gy, wz + wn.dy * 0.42], wn.ry + Math.PI / 2, [0.62, 0.62, 0.62], cq < 0.34 ? 0xd04a30 : cq < 0.67 ? 0x3a6ad0 : 0xe0b030); } // r2 FÁBRICA: contêineres coloridos da folha
         if (wn && q < 0.05) { tmpC.setHex(0xa8906c).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.5 + h32(x, y, 34) * 1.1, 1], tmpC.getHex()); }
         else if (q > 0.975) pushP('rubble', x, y, [wx, gy + 0.08, wz], q * 9, [1.4, 1, 1.2], 0xffffff);
         else if (o.extraProps && q > 0.962) { const a = h32(x, y, 86) * Math.PI; pushP('rubble', x, y, [wx, gy + 0.3, wz], a, [5.2, 1, 0.65], 0xffffff); }
-      } else if (reg.id === 'floresta') {
+      } else if (vid(reg) === 'floresta') {
         if (WALL_ARTE && wn && q > 0.92 && q < 0.95) for (let k = 0; k < 3; k++) { const a = h32(x, y, 171 + k); pushP('crystal', x, y, [wx + wn.dx * 0.45 + (a - 0.5) * 0.5, gy - 0.1, wz + wn.dy * 0.45 + (h32(x, y, 175 + k) - 0.5) * 0.5], a * 6, [0.7 + a * 0.6, 0.6 + a * 0.9, 0.7 + a * 0.6], a < 0.5 ? 0x7a5aff : 0x4ab8ff); } // r2 CAVERNA: cristais azuis/roxos
         if (q < 0.07) { tmpC.setHSL(0.33 + h32(x, y, 35) * 0.08, 0.55, 0.2); pushP('fern', x, y, [wx + (h32(x, y, 36) - 0.5) * 1.2, gy, wz + (h32(x, y, 37) - 0.5) * 1.2], q * 60, [1, 0.8 + q * 6, 1], tmpC.getHex()); }
         else if (o.extraProps && q < 0.2) { tmpC.setHSL(0.3 + h32(x, y, 87) * 0.1, 0.6, 0.22 + h32(x, y, 88) * 0.1); pushP('fern', x, y, [wx + (h32(x, y, 89) - 0.5) * 1.6, gy - 0.02, wz + (h32(x, y, 91) - 0.5) * 1.6], h32(x, y, 93) * 6, [0.45, 0.45 + h32(x, y, 95) * 0.6, 0.45], tmpC.getHex()); }
         else if (q > 0.988) { pushP('shroom', x, y, [wx + (h32(x, y, 38) - 0.5), gy + 0.1, wz + (h32(x, y, 39) - 0.5)], 0, [1, 0.7, 1], h32(x, y, 40) < 0.5 ? 0x5dfff0 : 0xb36bff); }
-      } else if (reg.id === 'complexo') {
+      } else if (vid(reg) === 'complexo') {
         if (WALL_ARTE && wn && q > 0.94 && q < 0.958) { const lx = wx + wn.dx * 0.4, lz = wz + wn.dy * 0.4; pushP('labTube', x, y, [lx, gy + 0.1, lz], 0, [1, 1, 1], h32(x, y, 178) < 0.7 ? 0x5dff6a : 0x4ad8ff); pushP('labCap', x, y, [lx, gy + 0.1, lz], 0, [1, 1, 1], 0xffffff); pushP('labCap', x, y, [lx, gy + 2.05, lz], 0, [1, 1, 1], 0xffffff); } // r2 LABORATÓRIO: cubas verdes
         if (wn && q < 0.08) pushP('strip', x, y, [wx + wn.dx * 0.42, gy + 0.03, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], h32(x, y, 41) < 0.7 ? 0x39e8ff : 0xff4a8a);
         else if (q > 0.985) pushP('vent', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff);
         else if (o.extraProps && wn && q < 0.2) { pushP('pipe', x, y, [wx + wn.dx * 0.42, gy + 1.05, wz + wn.dy * 0.42], wn.ry, [1, 1, 1], 0xffffff); if (q < 0.15) pushP('pipe', x, y, [wx + wn.dx * 0.4, gy + 1.32, wz + wn.dy * 0.4], wn.ry, [1, 0.7, 0.7], 0xffffff); }
-      } else if (reg.id === 'elite') {
+      } else if (vid(reg) === 'elite') {
         if (WALL_ARTE && wn && q > 0.93 && q < 0.95) pushP('elamp', x, y, [wx + wn.dx * 0.42, gy, wz + wn.dy * 0.42], 0, [1, 1, 1], h32(x, y, 179) < 0.5 ? 0xb36bff : 0xffc860); // r2 ELITE: postes de luz roxo/dourado
         if (wn && q < 0.05) pushP('banner', x, y, [wx + wn.dx * 0.46, gy + 0.6, wz + wn.dy * 0.46], wn.ry + Math.PI / 2, [1, 1, 1], 0xffc830);
         else if (o.extraProps && q > 0.986) { tmpC.setHex(0x6a5a3a); pushP('stub', x, y, [wx, gy, wz], 0, [0.55, 0.9, 0.55], tmpC.getHex()); pushP('ember', x, y, [wx, gy + 1.0, wz], q * 9, [2.4, 2.8, 2.4], 0xffa030); }
-      } else if (reg.id === 'dragao') {
+      } else if (vid(reg) === 'guerra') { // 20261029mapa · ZONA DE GUERRA FINAL: chão rachado, brasas, entulho, colunas quebradas
+        if (q < 0.035) pushP('scorch', x, y, [wx + (h32(x, y, 44) - 0.5), gy + 0.03, wz + (h32(x, y, 45) - 0.5)], q * 90, [0.7 + q * 14, 1, 0.5 + q * 10], 0x000000);
+        else if (q > 0.975) { for (let k = 0; k < 2; k++) pushP('ember', x, y, [wx + (h32(x, y, 46 + k) - 0.5) * 1.2, gy + 0.1 + k * 0.5, wz + (h32(x, y, 48 + k) - 0.5) * 1.2], k * 1.7, [1, 1, 1], k ? 0xffa030 : 0xff4a1a); }
+        else if (wn && q < 0.075) { tmpC.setHex(0x6a4a3a).multiplyScalar(0.8 + h32(x, y, 33) * 0.3); pushP('stub', x, y, [wx + wn.dx * 0.45, gy - 0.05, wz + wn.dy * 0.45], q * 50, [1, 0.4 + h32(x, y, 34) * 1.4, 1], tmpC.getHex()); }
+        else if (q > 0.955) pushP('rubble', x, y, [wx, gy + 0.08, wz], q * 9, [1.6, 1, 1.3], 0xffffff);
+      } else if (vid(reg) === 'cidade2') { // 20261029mapa · CIDADE 2 · ELITE: postes dourados, estandartes, vasos de flores
+        if (WALL_ARTE && wn && q > 0.93 && q < 0.955) pushP('elamp', x, y, [wx + wn.dx * 0.42, gy, wz + wn.dy * 0.42], 0, [1, 1, 1], 0xffd890);
+        if (wn && q < 0.045) pushP('banner', x, y, [wx + wn.dx * 0.46, gy + 0.8, wz + wn.dy * 0.46], wn.ry + Math.PI / 2, [1, 1, 1], 0xffc830);
+        else if (wn && q > 0.9 && q < 0.93) { pushP('pot', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], 0, [1.3, 1.3, 1.3], 0xffffff); tmpC.setHSL(0.32 + q * 0.08, 0.6, 0.28); pushP('leaf', x, y, [wx + wn.dx * 0.5, gy, wz + wn.dy * 0.5], q * 9, [1.2, 1.3, 1.2], tmpC.getHex()); }
+      } else if (vid(reg) === 'dragao') {
         if (q < 0.025) pushP('bone', x, y, [wx + (h32(x, y, 42) - 0.5), gy + 0.05, wz + (h32(x, y, 43) - 0.5)], q * 80, [0.6 + q * 20, 1, 1], 0xffffff);
         else if (q > 0.99) pushP('ember', x, y, [wx, gy + 0.12, wz], q * 7, [1, 1, 1], 0xff7a2a);
         else if (o.extraProps && q > 0.972) { for (let k = 0; k < 3; k++) pushP('ember', x, y, [wx + (h32(x, y, 97 + k) - 0.5) * 0.9, gy + 0.3, wz + (h32(x, y, 100 + k) - 0.5) * 0.9], k * 2.1, [2.6, 5 + h32(x, y, 103 + k) * 4, 2.6], 0x3dff6a); }
@@ -331,6 +344,12 @@ export function buildBrTerrain(zone, cfg, o) {
     if (near > 0.3) pushP('skull', sg.x, sg.y, [wx - 0.6, gy + 0.16, wz + 0.5], a, [1, 0.85, 1.15], 0xffffff);
     if (near > 0.45) for (let k = 0; k < 2; k++) pushP('ember', sg.x, sg.y, [wx + (h32(sg.x, sg.y, 60 + k) - 0.5) * 1.4, gy + 0.12, wz + (h32(sg.x, sg.y, 70 + k) - 0.5) * 1.4], k, [1, 1, 1], 0xff7a2a);
     dragonSignsDrawn.n++;
+  }
+  // —— 20261029mapa: CRATERAS da Zona de Guerra (decalque queimado + brasas, instanciados) ——
+  for (const cr of m.craters || []) {
+    const gy = G(cr.x + 0.5, cr.y + 0.5); const wx = (cr.x + 0.5) * T, wz = (cr.y + 0.5) * T;
+    pushP('scorch', cr.x, cr.y, [wx, gy + 0.03, wz], h32(cr.x, cr.y, 51) * 6, [cr.r * T * 0.55, 1, cr.r * T * 0.5], 0x000000);
+    for (let k = 0; k < 3; k++) pushP('ember', cr.x, cr.y, [wx + (h32(cr.x, cr.y, 52 + k) - 0.5) * cr.r * T * 0.6, gy + 0.12, wz + (h32(cr.x, cr.y, 56 + k) - 0.5) * cr.r * T * 0.6], k, [1.3, 1.3, 1.3], 0xff5a1a);
   }
   const e = new THREE.Euler(); const qn = new THREE.Quaternion();
   const treeInst = new Map(); // tile → instâncias (tronco/copa) para esconder entre câmera e herói
@@ -361,6 +380,67 @@ export function buildBrTerrain(zone, cfg, o) {
     const bea = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff3a2a, toneMapped: false })); bea.position.set(cx, gy + tower.h + 5.2, cz); bea.name = 'br-tower-beacon'; tg.add(bea);
     group.add(tg); stats.meshes += 10;
   }
+
+  const extras = { guild: 0, fountains: 0, castle: 0 };
+  // —— GUILDA (Residência): telhado em duas águas, torre redonda com cone, estandartes vermelhos com dragão, pátio de treino ——
+  if (m.guild) {
+    const gd = m.guild; const gg = new THREE.Group(); gg.name = 'br-guilda';
+    const cx = ((gd.x0 + gd.x1 + 1) / 2) * T, cz = ((gd.y0 + gd.y1 + 1) / 2) * T; const gy = G((gd.x0 + gd.x1 + 1) / 2, (gd.y0 + gd.y1 + 1) / 2); const st = m.structures.find((q) => q.kind === 'guilda'); const wh = st?.h || 4.6;
+    const lx = (gd.x1 - gd.x0 + 1) * T, lz = (gd.y1 - gd.y0 + 1) * T;
+    const roofSh = new THREE.Shape(); roofSh.moveTo(-lz / 2 - 0.4, 0); roofSh.lineTo(lz / 2 + 0.4, 0); roofSh.lineTo(0, lz * 0.42); roofSh.lineTo(-lz / 2 - 0.4, 0);
+    const roofG = new THREE.ExtrudeGeometry(roofSh, { depth: lx + 0.8, bevelEnabled: false }).translate(0, 0, -(lx + 0.8) / 2).rotateY(Math.PI / 2);
+    const roof = new THREE.Mesh(roofG, addOccluderFade(new THREE.MeshStandardMaterial({ color: 0x8a3020, roughness: 0.75, metalness: 0.1, flatShading: true }))); roof.position.set(cx, gy + wh, cz); roof.castShadow = true; gg.add(roof);
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(lx + 0.4, 0.35, 0.35), mats.trunk); beam.position.set(cx, gy + wh * 0.62, cz + lz / 2 + 0.02); gg.add(beam);
+    const tx = (gd.tower.x + 0.5) * T, tz = (gd.tower.y + 0.5) * T;
+    const tw = new THREE.Mesh(new THREE.CylinderGeometry(T * 1.3, T * 1.45, wh + 4.2, 12).translate(0, (wh + 4.2) / 2, 0), mats.wall_periferia || mats.wall); tw.position.set(tx, gy - 0.2, tz); tw.castShadow = true; gg.add(tw);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(T * 1.75, 3.2, 12).translate(0, 1.6, 0), roof.material); cone.position.set(tx, gy + wh + 4.0, tz); gg.add(cone);
+    const bc = document.createElement('canvas'); bc.width = 64; bc.height = 160; { const g2 = bc.getContext('2d'); g2.fillStyle = '#9a1a1a'; g2.fillRect(0, 0, 64, 160); g2.fillStyle = '#d8b040'; g2.fillRect(0, 0, 64, 8); g2.beginPath(); g2.moveTo(0, 140); g2.lineTo(32, 160); g2.lineTo(64, 140); g2.lineTo(64, 160); g2.lineTo(0, 160); g2.fill(); g2.fillStyle = '#ff5a3a'; g2.beginPath(); g2.ellipse(32, 66, 14, 26, 0.4, 0, Math.PI * 2); g2.fill(); g2.fillStyle = '#9a1a1a'; g2.beginPath(); g2.ellipse(36, 62, 7, 16, 0.4, 0, Math.PI * 2); g2.fill(); g2.fillStyle = '#ffd34a'; g2.font = 'bold 18px sans-serif'; g2.textAlign = 'center'; g2.fillText('GUILDA', 32, 128); }
+    const bt = new THREE.CanvasTexture(bc); bt.colorSpace = THREE.SRGBColorSpace; const bm = new THREE.MeshBasicMaterial({ map: bt, side: THREE.DoubleSide });
+    for (const dx of [-0.32, 0.32]) { const b = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 2.5), bm); b.position.set(cx + dx * lx, gy + wh * 0.55, cz + lz / 2 + 0.06); b.name = 'br-guilda-estandarte'; gg.add(b); }
+    const yd = gd.yard; const dumG = mergeGeometries([new THREE.CylinderGeometry(0.08, 0.1, 1.7, 6).translate(0, 0.85, 0), new THREE.CylinderGeometry(0.28, 0.24, 0.8, 8).translate(0, 1.25, 0), new THREE.BoxGeometry(1.0, 0.1, 0.1).translate(0, 1.35, 0), new THREE.SphereGeometry(0.2, 8, 6).translate(0, 1.85, 0)]);
+    const dummies = new THREE.InstancedMesh(dumG, new THREE.MeshStandardMaterial({ color: 0xb08a50, roughness: 0.9 }), 3);
+    const tgtC = document.createElement('canvas'); tgtC.width = tgtC.height = 64; { const g2 = tgtC.getContext('2d'); for (const [r2, c2] of [[30, '#f2e6c8'], [22, '#c82a2a'], [14, '#f2e6c8'], [6, '#c82a2a']]) { g2.fillStyle = c2; g2.beginPath(); g2.arc(32, 32, r2, 0, Math.PI * 2); g2.fill(); } }
+    const tgt = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.55, 0.55, 0.12, 16).rotateX(Math.PI / 2).translate(0, 1.2, 0), [new THREE.MeshStandardMaterial({ color: 0x8a6a40 }), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(tgtC) }), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(tgtC) })], 2);
+    for (let i = 0; i < 3; i++) { const fx = yd.x0 + 2 + i * 2.5, fy = yd.y0 + 2.5; dummy.position.set(fx * T, G(fx, fy), fy * T); dummy.rotation.set(0, 0.3 * i, 0); dummy.scale.setScalar(1); dummy.updateMatrix(); dummies.setMatrixAt(i, dummy.matrix); }
+    for (let i = 0; i < 2; i++) { const fx = yd.x1 - 1.5, fy = yd.y0 + 2.5 + i * 3; dummy.position.set(fx * T, G(fx, fy), fy * T); dummy.rotation.set(0, Math.PI / 2, 0); dummy.scale.setScalar(1); dummy.updateMatrix(); tgt.setMatrixAt(i, dummy.matrix); }
+    dummies.castShadow = true; gg.add(dummies, tgt);
+    const fire = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), new THREE.MeshBasicMaterial({ color: 0xff8a2a, toneMapped: false })); fire.position.set(((yd.x0 + yd.x1) / 2) * T, G((yd.x0 + yd.x1) / 2, yd.y1 - 2) + 0.35, (yd.y1 - 2) * T); fire.scale.set(1, 1.6, 1); gg.add(fire);
+    group.add(gg); extras.guild = gg.children.length; stats.meshes += gg.children.length;
+  }
+  // —— CIDADE 2: fonte da praça (bacia + taça + água brilhando) ——
+  for (const f of m.fountains || []) {
+    const fx = f.x + 0.5, fz = f.y + 0.5; const gy = G(fx, fz);
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(T * 2.2, T * 2.4, 0.6, 20, 1, true).translate(0, 0.3, 0), mats.pillar_cidade2 || mats.metal); basin.position.set(fx * T, gy, fz * T); basin.material.side = THREE.DoubleSide;
+    const water = new THREE.Mesh(new THREE.CircleGeometry(T * 2.15, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x7ad8ff, transparent: true, opacity: 0.55, toneMapped: false })); water.position.set(fx * T, gy + 0.45, fz * T);
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(T * 0.9, T * 0.3, 0.35, 14).translate(0, 1.7, 0), new THREE.MeshStandardMaterial({ color: 0xffd060, roughness: 0.3, metalness: 0.8 })); cup.position.set(fx * T, gy, fz * T);
+    group.add(basin, water, cup); extras.fountains++; stats.meshes += 3;
+  }
+  // —— CASTELO DO ARCONTE (reservado): silhueta escura flutuando no céu + 6 correntes coloridas presas ao chão. Não entra (tiles 'X' bloqueados). ——
+  let castleSil = null;
+  if (m.castle) {
+    const c0 = m.castle; const ccx = c0.cx * T, ccz = c0.cy * T; const baseY = 34;
+    const parts = [];
+    parts.push(new THREE.ConeGeometry(T * 11, 18, 9).rotateX(Math.PI).translate(0, baseY - 9, 0)); // rocha flutuante invertida
+    parts.push(new THREE.CylinderGeometry(T * 11, T * 11, 2.2, 9).translate(0, baseY + 1.1, 0));
+    parts.push(new THREE.BoxGeometry(T * 12, 8, T * 9).translate(0, baseY + 6, 0));
+    for (const [ax, az, hh, rr] of [[-1, -1, 14, 1.5], [1, -1, 12, 1.4], [-1, 1, 12, 1.4], [1, 1, 14, 1.5], [0, 0, 22, 2.2], [0.5, -0.2, 17, 1.2], [-0.55, 0.25, 16, 1.1]]) {
+      const px = ax * T * 6.5, pz = az * T * 5; parts.push(new THREE.CylinderGeometry(T * rr * 0.8, T * rr, hh, 8).translate(px, baseY + 2 + hh / 2, pz)); parts.push(new THREE.ConeGeometry(T * rr * 1.1, hh * 0.45, 8).translate(px, baseY + 2 + hh + hh * 0.22, pz));
+    }
+    const silMat = new THREE.MeshBasicMaterial({ color: 0x0e0814, fog: false });
+    const sil = new THREE.Mesh(mergeGeometries(parts.map((g) => g.index ? g.toNonIndexed() : g)), silMat); sil.position.set(ccx, 0, ccz); sil.name = 'br-castelo-silhueta'; group.add(sil);
+    const win = new THREE.Mesh(new THREE.BoxGeometry(T * 12.1, 0.5, T * 9.1).translate(0, baseY + 7, 0), new THREE.MeshBasicMaterial({ color: 0xb36bff, fog: false, toneMapped: false, transparent: true, opacity: 0.7 })); win.position.copy(sil.position); group.add(win);
+    const CH_COL = [0xff3b3b, 0xffa030, 0xffe040, 0x3dff6a, 0x39c8ff, 0xb36bff]; const chainParts = []; const ccol = [];
+    const W2 = (c0.x1 - c0.x0 + 1) * T, H2 = (c0.y1 - c0.y0 + 1) * T;
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + 0.3; const ex = ccx + Math.cos(a) * W2 * 0.46, ez = ccz + Math.sin(a) * H2 * 0.46; const sx = ccx + Math.cos(a) * T * 8, sz = ccz + Math.sin(a) * T * 6;
+      const from = new THREE.Vector3(sx, baseY - 2, sz), to = new THREE.Vector3(ex, G(ex / T, ez / T) + 0.2, ez); const len = from.distanceTo(to);
+      const g = new THREE.CylinderGeometry(0.22, 0.22, len, 5, 1, true); g.translate(0, len / 2, 0); const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), from.clone().sub(to).normalize()); g.applyQuaternion(q); g.translate(to.x, to.y, to.z);
+      const cnt = g.attributes.position.count; const col = new Float32Array(cnt * 3); tmpC.setHex(CH_COL[i]).multiplyScalar(1.6); for (let k = 0; k < cnt; k++) { col[k * 3] = tmpC.r; col[k * 3 + 1] = tmpC.g; col[k * 3 + 2] = tmpC.b; } g.setAttribute('color', new THREE.BufferAttribute(col, 3)); chainParts.push(g.index ? g.toNonIndexed() : g);
+    }
+    const chains = new THREE.Mesh(mergeGeometries(chainParts), new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, toneMapped: false })); chains.name = 'br-castelo-correntes'; group.add(chains);
+    castleSil = { sil, chains, win }; extras.castle = 3; stats.meshes += 3;
+  }
+  stats.mapa5x3 = extras;
 
   // —— MARCADORES DE OBJETIVO (colunas de luz visíveis de longe, não revelam loot) ——
   const markers = [];
@@ -410,7 +490,7 @@ export function buildBrTerrain(zone, cfg, o) {
   const chestLots = [];
   for (const idx of lotOf.values()) {
     const L = { base: new THREE.InstancedMesh(chestGeoB, mats.metal, idx.length), lid: new THREE.InstancedMesh(chestGeoL, mats.rust, idx.length), glow: new THREE.InstancedMesh(chestGeoG, chestGlowMat, idx.length) };
-    idx.forEach((i, j) => { slot[i] = { L, j }; }); chestLots.push(L);
+    idx.forEach((i, j) => { slot[i] = { L, j }; }); let sx = 0, sz = 0; for (const i of idx) { sx += (lootSpots[i].x + 0.5) * T; sz += (lootSpots[i].y + 0.5) * T; } L.cx = sx / idx.length; L.cz = sz / idx.length; chestLots.push(L);
   }
   const lootState = lootSpots.map((s) => ({ id: s.id, opened: false }));
   const setLoot = (i, opened) => {
@@ -528,6 +608,8 @@ export function buildBrTerrain(zone, cfg, o) {
         for (const t of want) if (!treeHidden.has(t)) { for (const q of treeInst.get(t)) { q.im.setMatrixAt(q.i, ZERO_M); q.im.instanceMatrix.needsUpdate = true; } treeHidden.add(t); }
         treesFaded = treeHidden.size;
       }
+      // 20261029mapa (perf): lotes de baús longe do herói (além da névoa) não desenham — mesmo corte por distância dos blocos de cenário
+      for (const L of chestLots) { const on = Math.hypot(L.cx - heroWX, L.cz - heroWZ) < vd + LB * T * 0.71; L.base.visible = on; L.lid.visible = on; L.glow.visible = on; }
       visibleFloor = 0; for (const f of floorChunks) { const on = Math.hypot(f.userData.cx - heroWX, f.userData.cz - heroWZ) < viewDist * 1.6 + f.userData.rad; f.visible = on; if (on) visibleFloor++; }
       beamStats.faded = 0; beamStats.hidden = 0;
       for (const mk of markers) { const f = beamFade(mk.x, mk.y); if (f < 1) beamStats.faded++; mk.beam.visible = f > 0.01; if (!mk.beam.visible) beamStats.hidden++; mk.beam.material.opacity = (mk.beam.userData.base ??= mk.beam.material.opacity) * (0.85 + 0.15 * Math.sin(now * 0.002 + mk.x)) * f; }

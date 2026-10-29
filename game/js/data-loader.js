@@ -1,4 +1,5 @@
-import { scaleBrConfig } from './br-map.js?v=20261025arconte2';
+import { scaleBrConfig } from './br-map.js?v=20261029mapa';
+import { applyMapa5x3 } from './br-mapa5x3.js?v=20261029mapa';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 
@@ -27,7 +28,7 @@ export async function loadAllData() {
     })
   );
   // MASTER 10: Arena Principal no tamanho da escala configurada (zona.escala; ?brScale=1 = mapa original)
-  if (data.arena_br) { data.arena_br_design = JSON.parse(JSON.stringify(data.arena_br)); data.arena_br = scaleBrConfig(data.arena_br); data.arena_br_full = data.arena_br; } // NEXARA FAST parte do PROJETO (br-fast.js)
+  if (data.arena_br) { data.arena_br_design = JSON.parse(JSON.stringify(data.arena_br)); data.arena_br = scaleBrConfig(applyMapa5x3(data.arena_br)); /* 20261029mapa: grade 5×3 (só a ARENA; ?mapa=6 = antigo) */ data.arena_br_full = data.arena_br; } // NEXARA FAST parte do PROJETO (br-fast.js)
   const meta = data.items_meta?.meta || {};
   for (const it of data.items?.items || []) if (meta[it.id]) Object.assign(it, meta[it.id]);
   return data;
