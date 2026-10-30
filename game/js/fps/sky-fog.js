@@ -32,13 +32,14 @@ export function createSkyDome(o = {}) {
     uTop: { value: new THREE.Color(o.top || '#03081a') }, uMid: { value: new THREE.Color(o.mid || '#0c1f48') }, uHor: { value: new THREE.Color(o.horizon || '#1a3866') },
     uTime: { value: 0 }, uMoon: { value: new THREE.Vector3(-0.55, 0.42, -0.72).normalize() }, uMoonCol: { value: new THREE.Color(o.moon || 0xcfe6ff) },
     uAur: { value: new THREE.Color(o.aurora || 0x2cffc8) }, uAur2: { value: new THREE.Color(o.aurora2 || 0x8a5aff) }, uStars: { value: o.stars ?? 1 }, uAurK: { value: o.auroraK ?? 1 },
-    uTexA: { value: null }, uTexB: { value: null }, uTexK: { value: 0 }, uNight: { value: 0 } // 20261023: céu da arte do Caio (anoitecer → noite)
+    uTexA: { value: null }, uTexB: { value: null }, uTexK: { value: 0 }, uNight: { value: 0 },
+    uTint: { value: new THREE.Color(1, 1, 1) }, uEcl: { value: 0 }, uEclDir: { value: new THREE.Vector3(0.0, 0.2, -1).normalize() } // 20261029paisagem: humor por distrito + ECLIPSE sobre a Guerra/Castelo // 20261023: céu da arte do Caio (anoitecer → noite)
   };
   const mat = new THREE.ShaderMaterial({
     uniforms: u, side: THREE.BackSide, depthWrite: false, depthTest: true, depthFunc: THREE.LessEqualDepth, fog: false, toneMapped: false,
     vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }',
     fragmentShader: /* glsl */`
-uniform vec3 uTop, uMid, uHor, uMoonCol, uAur, uAur2, uMoon; uniform float uTime, uStars, uAurK, uTexK, uNight; uniform sampler2D uTexA, uTexB; varying vec3 vDir;
+uniform vec3 uTop, uMid, uHor, uMoonCol, uAur, uAur2, uMoon, uTint, uEclDir; uniform float uEcl; uniform float uTime, uStars, uAurK, uTexK, uNight; uniform sampler2D uTexA, uTexB; varying vec3 vDir;
 float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float n21(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h21(i), h21(i+vec2(1,0)), f.x), mix(h21(i+vec2(0,1)), h21(i+vec2(1,1)), f.x), f.y); }
 void main(){
@@ -76,6 +77,13 @@ void main(){
     vec3 bcol = vec3(0.025, 0.02, 0.06) + vec3(1.0, 0.62, 0.3) * wl * 0.55 + vec3(0.7, 0.2, 1.0) * step(0.001, spire) * step(top - 0.006, e) * 3.0;
     col = mix(col, bcol, inB * (0.6 + 0.4 * uNight));
     col += vec3(0.55, 0.2, 0.9) * exp(-max(e, 0.0) * 40.0) * 0.12 * step(-0.02, e);
+  }
+  col *= uTint;
+  if (uEcl > 0.001) { // ECLIPSE: disco negro + coroa vermelho-roxa + céu avermelhado em volta (ref. 02-zona-de-guerra-final)
+    float ed = dot(d, uEclDir); float disc = smoothstep(0.9955, 0.9963, ed); float cor = pow(max(ed, 0.0), 420.0) * 1.6 + pow(max(ed, 0.0), 40.0) * 0.45;
+    vec3 corC = mix(vec3(1.0, 0.25, 0.1), vec3(0.75, 0.2, 1.0), 0.5 + 0.5 * sin(uTime * 0.2));
+    col += corC * cor * (1.0 - disc) * uEcl + vec3(0.35, 0.04, 0.12) * pow(max(ed, 0.0), 6.0) * 0.5 * uEcl;
+    col = mix(col, vec3(0.01, 0.0, 0.02), disc * uEcl);
   }
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>

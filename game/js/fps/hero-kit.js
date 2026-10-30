@@ -26,7 +26,7 @@ const mixHex = (a, b, k) => {
 };
 const num = (v) => (v == null ? null : typeof v === 'number' ? v : parseInt(String(v).replace('#', ''), 16));
 
-import { SKINS } from '../personagens.js?v=20261029leve';
+import { SKINS } from '../personagens.js?v=20261029paisagem';
 /** SKIN ELEMENTAL: brilho do elemento + armadura tingida (mantém a forma do personagem) */
 export function applySkin(k, skinId) {
   const S = SKINS[skinId]; if (!S) return k;

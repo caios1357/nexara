@@ -1,15 +1,15 @@
-import { label, CATEGORIES } from './arquivo.js?v=20261029leve';
-import { drawMinimap } from './map.js?v=20261029leve';
+import { label, CATEGORIES } from './arquivo.js?v=20261029paisagem';
+import { drawMinimap } from './map.js?v=20261029paisagem';
 import {
   useItem, equipItem, unequipItem, discardItem, buyItem, tryEnterZone
-} from './actions.js?v=20261029leve';
-import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261029leve';
-import { getEquippedStats } from './state.js?v=20261029leve';
-import { countItem } from '../../rules/loot.js?v=20261029leve';
-import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261029leve';
-import { isArenaState } from './arena.js?v=20261029leve';
-import { spriteCount } from './assets.js?v=20261029leve';
-import { attrLines } from './equipment.js?v=20261029leve';
+} from './actions.js?v=20261029paisagem';
+import { saveToLocal, downloadJson, importJsonFile } from './save.js?v=20261029paisagem';
+import { getEquippedStats } from './state.js?v=20261029paisagem';
+import { countItem } from '../../rules/loot.js?v=20261029paisagem';
+import { drawItemIcon, drawSkillIcon, itemRarity, RARITY_COLOR, drawPlayer } from './sprites.js?v=20261029paisagem';
+import { isArenaState } from './arena.js?v=20261029paisagem';
+import { spriteCount } from './assets.js?v=20261029paisagem';
+import { attrLines } from './equipment.js?v=20261029paisagem';
 
 let rendererRef = null;
 

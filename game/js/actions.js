@@ -1,14 +1,14 @@
-import { trainSkill } from '../../rules/skills.js?v=20261029leve';
-import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261029leve';
-import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261029leve';
-import { addReputation } from '../../rules/reputation.js?v=20261029leve';
-import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261029leve';
-import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261029leve';
-import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261029leve';
-import { reveal } from './arquivo.js?v=20261029leve';
-import { checkEventReady } from './events.js?v=20261029leve';
-import { getConfig } from './gameplay-config.js?v=20261029leve';
-import { getStat, STATS } from './modifiers.js?v=20261029leve';
+import { trainSkill } from '../../rules/skills.js?v=20261029paisagem';
+import { calcDamage, inRange, isAiMeleeRange } from '../../rules/combat.js?v=20261029paisagem';
+import { rollLoot, addToInventory, removeFromInventory, countItem } from '../../rules/loot.js?v=20261029paisagem';
+import { addReputation } from '../../rules/reputation.js?v=20261029paisagem';
+import { isWalkable, isWalkableHero, getTileType, monstersInZone } from './map.js?v=20261029paisagem';
+import { pushLog, addXp, getEquippedStats, isE4Unlocked } from './state.js?v=20261029paisagem';
+import { currentWeaponClass, currentWeaponFamily, magicMult } from './equipment.js?v=20261029paisagem';
+import { reveal } from './arquivo.js?v=20261029paisagem';
+import { checkEventReady } from './events.js?v=20261029paisagem';
+import { getConfig } from './gameplay-config.js?v=20261029paisagem';
+import { getStat, STATS } from './modifiers.js?v=20261029paisagem';
 
 /** Player attack cooldown (ms) — realtime, not turn-based. */
 export const PLAYER_ATTACK_COOLDOWN_MS = 400;

@@ -13,11 +13,11 @@
  * - Sem loop próprio e sem tryMove aqui: player-motion.js é o único dono do
  *   movimento (chamado pelo rAF único do renderer).
  */
-import { interactAdjacent, talkNpc } from './actions.js?v=20261029leve';
-import { pushLog } from './state.js?v=20261029leve';
-import { isArenaState } from './arena.js?v=20261029leve';
-import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261029leve';
-import { ICONS } from './icons.js?v=20261029leve';
+import { interactAdjacent, talkNpc } from './actions.js?v=20261029paisagem';
+import { pushLog } from './state.js?v=20261029paisagem';
+import { isArenaState } from './arena.js?v=20261029paisagem';
+import { getConfig, onConfigChange, detectTouchMode } from './gameplay-config.js?v=20261029paisagem';
+import { ICONS } from './icons.js?v=20261029paisagem';
 
 /**
  * Bloco 6: 5 botões de combate na tela — ATAQUE (anel) + ESQUIVA + GOLPE PODEROSO + ÁREA + SUPREMA.
@@ -159,6 +159,10 @@ export function createMobileControls(hooks) {
           <span class="mc-lbl">Falar</span>
         </button>
       </div>
+      <button type="button" class="mc-btn mc-jump" data-power="jump" title="Pular (G)" aria-label="Pular">
+        <span class="mc-ico">⤒</span>
+        <span class="mc-lbl">PULAR</span>
+      </button>
       <button type="button" class="mc-btn mc-mount mc-mount-off" data-power="mount" title="Montar no Gigante (M)" aria-label="Montar no dragão">
         <span class="mc-ico">🐉</span>
         <span class="mc-lbl">MONTAR</span>
@@ -179,6 +183,7 @@ export function createMobileControls(hooks) {
     const wrap = document.getElementById('canvas-wrap') || document.getElementById('game-screen');
     (wrap || document.body).appendChild(root);
 
+    { let mmSeen = null; setInterval(() => { const el = document.getElementById('br-minimap'); const r = el && el.offsetParent ? el.getBoundingClientRect() : null; const k = r ? `${Math.round(r.left)}|${Math.round(r.bottom)}` : ''; if (k !== mmSeen) { mmSeen = k; if (visible) layoutCluster(); } }, 700); } // 20261029paisagem: PULAR desvia do minimapa quando ele aparece/muda
     joyZone = root.querySelector('#mc-joy-zone');
     joy = root.querySelector('#mc-joy');
     knob = root.querySelector('#mc-joy-knob');
@@ -612,6 +617,19 @@ export function createMobileControls(hooks) {
       const pt = at(deg, dd);
       placeItem(b.id, el, pt[0], pt[1], b.id === 'suprema' ? sup : dev);
     }
+    { // 20261029paisagem: PULAR logo ACIMA do botão de poder mais alto do arco (mesma coluna), dentro da tela
+      const js = Math.round(dev * 0.92); let top = null; for (const id of ['suprema', 'ataque_area', 'golpe_poderoso', 'dodge']) { const r = itemRects[id]; if (r && (!top || r.cy - r.size / 2 < top.cy - top.size / 2)) top = r; }
+      if (top) { // candidatos ACIMA de cada botão de poder (do mais alto ao mais baixo; reto e deslocado p/ a esquerda) → o 1º que não cobre nada
+        const mmEl = document.getElementById('br-minimap'); const rr0 = root.getBoundingClientRect(); const busy = Object.entries(itemRects).filter(([k]) => k !== 'jump' && k !== 'joystick').map(([, r]) => ({ x0: r.cx - r.size / 2, y0: r.cy - r.size / 2, x1: r.cx + r.size / 2, y1: r.cy + r.size / 2 }));
+        if (mmEl && mmEl.offsetParent) { const q = mmEl.getBoundingClientRect(); busy.push({ x0: q.left - rr0.left - 4, y0: q.top - rr0.top - 4, x1: q.right - rr0.left + 4, y1: q.bottom - rr0.top + 24 }); }
+        busy.push({ x0: 0, y0: 0, x1: W, y1: 58 }); // barra do topo (HP/Nexa/menu)
+        { const te = root.querySelector('.mc-interact'); if (te && getComputedStyle(te).visibility !== 'hidden') { const tq = at(slots.talk[0], slots.talk[1]); busy.push({ x0: tq[0] - talk / 2, y0: tq[1] - talk / 2, x1: tq[0] + talk / 2, y1: tq[1] + talk / 2 }); } }
+        const free = (x, y) => x - js / 2 >= 4 && x + js / 2 <= W - safeR - 4 && y - js / 2 >= 4 && y + js / 2 <= H - safeB - 4 && !busy.some((b2) => x + js / 2 > b2.x0 + 1 && x - js / 2 < b2.x1 - 1 && y + js / 2 > b2.y0 + 1 && y - js / 2 < b2.y1 - 1);
+        const pw = ['suprema', 'ataque_area', 'golpe_poderoso', 'dodge'].map((id) => itemRects[id]).filter(Boolean).sort((a2, b2) => (a2.cy - a2.size / 2) - (b2.cy - b2.size / 2));
+        let best = null; for (const r of pw) { for (const dx of [0, -0.45, -0.9, 0.45]) { const x = r.cx + dx * r.size, y = r.cy - r.size / 2 - gap - js / 2 - 2; if (free(x, y)) { best = [x, y]; break; } } if (best) break; }
+        if (!best) best = [top.cx, Math.max(js / 2 + 60, top.cy - top.size / 2 - gap - js / 2)];
+        placeItem('jump', root.querySelector('.mc-jump'), best[0], best[1], js); }
+    }
     layoutInfo.slots = { suprema: +supDeg.toFixed(1), ataque_area: +areaDeg.toFixed(1), golpe_poderoso: +golpeDeg.toFixed(1), dodge: +dodgeDeg.toFixed(1) };
     const tk = at(slots.talk[0], slots.talk[1]);
     place(root.querySelector('.mc-interact'), tk[0], tk[1], talk);
@@ -770,6 +788,7 @@ export function createMobileControls(hooks) {
       return;
     }
 
+    if (id === 'jump') { hooks.onJump?.(); return; }
     if (id === 'mount') { hooks.onMount?.(); return; }
     if (id === 'dspecial') { hooks.onDragonSpecial?.(); return; }
     if (id === 'dalvo') { hooks.onDragonLockCycle?.(); return; }

@@ -10,45 +10,45 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261029leve';
-import { buildArenaDressing } from './arena-dressing.js?v=20261029leve';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261029leve';
-import { createHeroModel } from './hero-model.js?v=20261029leve';
-import { artPalette } from './dragon-art.js?v=20261029leve';
-import { setTrailSkin } from './ground-trail.js?v=20261029leve';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261029leve';
-import { createArconteModel, ARCONTE_ESCALA, ARCONTE_ESCALA_JOGADOR } from './arconte-model.js?v=20261029leve'; // 20261025arconte
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261029leve';
-import { attachHeroGlb } from './hero-glb.js?v=20261029leve';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261029leve';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261029leve';
-import { createActionVfx } from './action-vfx.js?v=20261029leve';
-import { createPassiveVfx } from './passive-vfx.js?v=20261029leve';
-import { createFpsControls } from './fps-controls.js?v=20261029leve';
-import { createViewmodel } from './viewmodel.js?v=20261029leve';
-import { createDragonView } from './dragon-view.js?v=20261029leve';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261029leve';
-import { getSprite } from '../assets.js?v=20261029leve';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261029leve';
-import { createBossDragon } from './boss-dragon-view.js?v=20261029leve';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261029leve';
-import { mergeStaticParts } from './merge-util.js?v=20261029leve';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261029leve';
-import { attachDragonGlb } from './dragon-glb.js?v=20261029leve';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261029leve';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261029leve';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261029leve';
-import { createPostFx } from './post-fx.js?v=20261029leve';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261029leve';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261029leve';
-import { createContactShadows } from './contact-shadows.js?v=20261029leve';
-import { createPowerVfx } from './power-vfx.js?v=20261029leve';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261029leve';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261029leve';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261029leve';
-import { groundAt, setGroundFn } from './ground.js?v=20261029leve';
-import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261029leve';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261029leve';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261029paisagem';
+import { buildArenaDressing } from './arena-dressing.js?v=20261029paisagem';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261029paisagem';
+import { createHeroModel } from './hero-model.js?v=20261029paisagem';
+import { artPalette } from './dragon-art.js?v=20261029paisagem';
+import { setTrailSkin } from './ground-trail.js?v=20261029paisagem';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261029paisagem';
+import { createArconteModel, ARCONTE_ESCALA, ARCONTE_ESCALA_JOGADOR } from './arconte-model.js?v=20261029paisagem'; // 20261025arconte
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261029paisagem';
+import { attachHeroGlb } from './hero-glb.js?v=20261029paisagem';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261029paisagem';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261029paisagem';
+import { createActionVfx } from './action-vfx.js?v=20261029paisagem';
+import { createPassiveVfx } from './passive-vfx.js?v=20261029paisagem';
+import { createFpsControls } from './fps-controls.js?v=20261029paisagem';
+import { createViewmodel } from './viewmodel.js?v=20261029paisagem';
+import { createDragonView } from './dragon-view.js?v=20261029paisagem';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261029paisagem';
+import { getSprite } from '../assets.js?v=20261029paisagem';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261029paisagem';
+import { createBossDragon } from './boss-dragon-view.js?v=20261029paisagem';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261029paisagem';
+import { mergeStaticParts } from './merge-util.js?v=20261029paisagem';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261029paisagem';
+import { attachDragonGlb } from './dragon-glb.js?v=20261029paisagem';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261029paisagem';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261029paisagem';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261029paisagem';
+import { createPostFx } from './post-fx.js?v=20261029paisagem';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261029paisagem';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261029paisagem';
+import { createContactShadows } from './contact-shadows.js?v=20261029paisagem';
+import { createPowerVfx } from './power-vfx.js?v=20261029paisagem';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261029paisagem';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261029paisagem';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261029paisagem';
+import { groundAt, setGroundFn } from './ground.js?v=20261029paisagem';
+import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261029paisagem';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261029paisagem';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -167,7 +167,23 @@ export function createFpsRenderer() {
   let brWorld = null; // ARENA PRINCIPAL: terreno instanciado + marcadores
   let brDir = null; let brLights = []; let brLightAt = 0;
   let brSky = null; let brRim = null; // GRÁFICOS 3: cúpula de céu + contra-luz
+  let heroJumpY = 0; // 20261029paisagem: altura do salto (main.js → PULAR)
   const brFogTint = { id: null, at: 0, last: 0, target: new THREE.Color() };
+  /** 20261029paisagem: paleta de cada distrito (refs visual/reference/mapas): tinta do céu, eclipse (Guerra/Castelo), hemisfério céu/chão, sol */
+  const BR_MOOD = {
+    _: { tint: [1, 1, 1], hemi: 0x9a90e0, ground: 0x8a5a36, sun: 0xffe2c0 },
+    guerra: { tint: [1.3, 0.62, 0.9], ecl: 1, hemi: 0xc06080, ground: 0x7a3018, sun: 0xff7a40, fog: '#3a1426' },
+    castelo: { tint: [1.1, 0.55, 0.95], ecl: 1, hemi: 0xa060d0, ground: 0x4a1a40, sun: 0xd080ff, fog: '#2a1036' },
+    favela: { tint: [1.18, 0.86, 0.78], hemi: 0xd09a90, ground: 0x9a6036, sun: 0xffb070, fog: '#3a2232' },
+    periferia: { tint: [1, 0.95, 1.05], hemi: 0x9a90e0, ground: 0x8a5a36, sun: 0xffd0a0 },
+    cidade2: { tint: [1.15, 1.02, 0.8], hemi: 0xf0d8a0, ground: 0xa08050, sun: 0xffe8b0, fog: '#3a3226' },
+    elite: { tint: [1.1, 0.98, 0.82], hemi: 0xe0c890, ground: 0x8a6a40, sun: 0xffe0a0 },
+    floresta: { tint: [0.8, 1.08, 0.9], hemi: 0x90d8a8, ground: 0x3a5a2a, sun: 0xd8ffd0 },
+    dragao: { tint: [0.82, 1.12, 0.82], hemi: 0x88e090, ground: 0x2a4a20, sun: 0xc8ffb0 },
+    complexo: { tint: [0.78, 0.9, 1.25], hemi: 0x7aa0f0, ground: 0x2a3a5a, sun: 0xb0d0ff },
+    ruinas: { tint: [1.12, 0.86, 0.7], hemi: 0xd0a080, ground: 0x7a4a2a, sun: 0xffb880 }
+  };
+  const brMood = { styleOf: {}, tint: new THREE.Color(1, 1, 1), ecl: 0, id: null }; const tmpMoodC = new THREE.Color();
   const dragonFx = { pts: null, vel: null, on: false, k: 0, el: null, n: 0, last: 0 };
   const brLod = { hidden: 0, shown: 0 };
   let puddleTex = null;
@@ -896,6 +912,7 @@ export function createFpsRenderer() {
     const sfxOn = !/[?&]sfx=0\b/.test(location.search);
     brWorld = buildBrTerrain(zone, cfg, { TILE, ground: groundAt, loadTex: loadHdTex, tierName, props: brProps, detail: !!tier?.surfaceDetail && sfxOn, extraProps: !!tier?.extraProps && brProps && sfxOn, skyColor: new THREE.Color(horizon).lerp(new THREE.Color(0x9fd8ff), 0.35).getHex() });
     worldRoot.add(brWorld.group);
+    brMood.styleOf = Object.fromEntries((cfg.regioes || []).map((r) => [r.id, r.estilo || r.id])); brMood.tint.setRGB(1, 1, 1); brMood.ecl = 0;
     { /* 20261029leve: cenário do BR é ESTÁTICO (milhares de Object3D) — matrizes calculadas 1× e o three.js pula a subárvore a cada quadro (updateMatrixWorld era o maior custo de CPU na renderização) */
       brWorld.group.updateMatrixWorld(true); for (const c of brWorld.group.children) { c.traverse((q) => { q.matrixAutoUpdate = false; }); c.matrixWorldAutoUpdate = false; } }
     dressing = null; city = null; haze = null;
@@ -952,9 +969,17 @@ export function createFpsRenderer() {
     // M10 fase 8: tonalidade da névoa por região (lerp contínuo; troca de alvo a cada 400 ms)
     if (scene.fog && brWorld.regionAt) {
       const BL = getConfig().graphics?.brLight || {};
-      if (!brFogTint.at || now - brFogTint.at > 400) { brFogTint.at = now; const rid = brWorld.regionAt(hx / TILE, hz / TILE); if (rid && rid !== brFogTint.id) { brFogTint.id = rid; brFogTint.target.set(BL.regionFog?.[rid] || BL.horizon || '#1a3866').multiplyScalar(BL.fogColorK ?? 0.95); } }
+      if (!brFogTint.at || now - brFogTint.at > 400) { brFogTint.at = now; const rid = brWorld.regionAt(hx / TILE, hz / TILE); if (rid && rid !== brFogTint.id) { brFogTint.id = rid; brFogTint.target.set(BL.regionFog?.[rid] || BR_MOOD[brMood.styleOf[rid]]?.fog || BL.horizon || '#1a3866').multiplyScalar(BL.fogColorK ?? 0.95); } }
       const dt = Math.min(0.2, Math.max(0, (now - (brFogTint.last || now)) / 1000)); brFogTint.last = now;
       if (brFogTint.id) scene.fog.color.lerp(brFogTint.target, Math.min(1, dt * 1000 / (BL.regionFogMs || 1600) * 3));
+      { // 20261029paisagem: HUMOR por distrito (tinta do céu, eclipse, luz hemisférica/direcional) — só lerp de uniforms/cores, custo ~0
+        const st = brMood.styleOf[brFogTint.id] || brFogTint.id; const M = BR_MOOD[st] || BR_MOOD._; const k = Math.min(1, dt * 1.6);
+        brMood.tint.lerp(tmpMoodC.setRGB(M.tint[0], M.tint[1], M.tint[2]), k); brMood.ecl += ((M.ecl || 0) - brMood.ecl) * k;
+        if (brSky) { brSky.uniforms.uTint.value.copy(brMood.tint); brSky.uniforms.uEcl.value = brMood.ecl; }
+        if (sceneLights.hemi) { sceneLights.hemi.color.lerp(tmpMoodC.setHex(M.hemi), k); sceneLights.hemi.groundColor.lerp(tmpMoodC.setHex(M.ground), k); }
+        if (brDir) brDir.color.lerp(tmpMoodC.setHex(M.sun), k);
+        brMood.id = st;
+      }
     }
     brWorld.update(hx, hz, now, fpsCam.camera.position.x, fpsCam.camera.position.z);
     if (brDir) { brDir.position.set(hx + 10, 18, hz + 8); brDir.target.position.set(hx, 0, hz); }
@@ -2854,7 +2879,7 @@ export function createFpsRenderer() {
       runSpeed: mv.walkSpeed * mv.runMultiplier,
       attack: cview,
       action: act,
-      groundY: groundAt(fpsCam.state.visX / TILE, fpsCam.state.visZ / TILE) + mountVis.heroLift,
+      groundY: groundAt(fpsCam.state.visX / TILE, fpsCam.state.visZ / TILE) + mountVis.heroLift + heroJumpY,
       mounted: mountVis.seatOn, seatY: mountVis.seatOn ? mountVis.seatPos.y : undefined,
       leapHeight: getConfig().specials.suprema.leapHeight,
       nexa: (() => { const P = getState()?.player; return P && P.nexaMax ? P.nexa / P.nexaMax : 0.5; })()
@@ -2968,6 +2993,11 @@ export function createFpsRenderer() {
     hasPostFx: () => !!postFx,
     getHeroPortrait: () => (portrait.version ? { canvas: portrait.canvas, version: portrait.version } : null),
     heroArconteFx: (k, v) => { const h = hero; if (!h?.arconte) return false; if (k === 'ciclone') h.ciclone(v); else if (k === 'eclipse') h.eclipse(v); else if (k === 'nucleos') h.setNucleos(v); return true; }, // 20261025arconte2
+    /** 20261029paisagem (e2e escala): altura visual do herói (mundo) e da geometria de porta/janela do cenário */
+    setHeroJump: (y) => { heroJumpY = Math.max(0, +y || 0); },
+    heroY: () => (hero?.root ? +hero.root.position.y.toFixed(2) : null),
+    heroHeight: () => (hero?.root ? +(new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y).toFixed(2) : null),
+    sceneScale: () => brWorld?.scale || null,
     heroArconteInfo: () => (hero?.arconte ? { ...hero.arconte.info(), visible: !!hero.root?.visible, h: +(new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y).toFixed(2) } : null),
     setHeroStyle: (id, extra) => { heroStyleId = id || 'cavaleiro'; heroExtra = extra || {}; setTrailSkin(heroExtra.custom?.skin || null); if (hero && (!!hero.glb !== heroWantsGlb() || (!heroWantsGlb() && kitSig(heroKitNow()) !== heroKitSig))) { const old = hero.root; const vis = old.visible; const par = old.parent; hero = buildHero(); hero.root.position.copy(old.position); hero.root.rotation.copy(old.rotation); hero.root.visible = vis; par?.remove(old); par?.add(hero.root); heroRebuilds++; } hero?.glb?.setStyle(heroStyleId, heroExtra); hero?.setWeaponClass?.(heroExtra.weaponClass || 'espada', heroExtra.equip?.weapon?.glow); },
     getRivalMounts: () => ({ ...rivalMountStats }),
@@ -3173,7 +3203,7 @@ export function createFpsRenderer() {
       dragon: dragonView?.info?.() || null,
       botPool: Object.fromEntries(Object.entries(botPool).map(([k, v]) => [k, v.length])),
       scenery: dressing ? { ...dressing.stats } : null,
-      br: brWorld ? { ...brWorld.stats, chunks: brWorld.chunkCount, visibleChunks: brWorld.visibleChunks, floorChunks: brWorld.floorChunks, visibleFloor: brWorld.visibleFloor, regionProps: brWorld.regionProps?.n || 0, propsByKind: brWorld.regionProps?.byKind, dragonSigns: brWorld.dragonSigns?.n || 0, fogRegion: brFogTint.id, fogColor: scene.fog ? '#' + scene.fog.color.getHexString() : null, treesFaded: brWorld.treesFaded, treeTiles: brWorld.treeTiles, mapW: brWorld.mapW, mapH: brWorld.mapH, lodHidden: brLod.hidden, lodShown: brLod.shown, pointLights: brLights.length, pickFlashes: brWorld.pickFlashes, teleOnTop } : null,
+      br: brWorld ? { ...brWorld.stats, chunks: brWorld.chunkCount, visibleChunks: brWorld.visibleChunks, floorChunks: brWorld.floorChunks, visibleFloor: brWorld.visibleFloor, regionProps: brWorld.regionProps?.n || 0, propsByKind: brWorld.regionProps?.byKind, dragonSigns: brWorld.dragonSigns?.n || 0, fogRegion: brFogTint.id, mood: { id: brMood.id, ecl: +brMood.ecl.toFixed(2), tint: brMood.tint.toArray().map((v) => +v.toFixed(2)) }, fogColor: scene.fog ? '#' + scene.fog.color.getHexString() : null, treesFaded: brWorld.treesFaded, treeTiles: brWorld.treeTiles, mapW: brWorld.mapW, mapH: brWorld.mapH, lodHidden: brLod.hidden, lodShown: brLod.shown, pointLights: brLights.length, pickFlashes: brWorld.pickFlashes, teleOnTop } : null,
       archTeleSeen: { ...teleSeen },
       merge: { hero: hero?.mergeInfo || null, dragon: dragonView?.mergeInfo || null }
     }),

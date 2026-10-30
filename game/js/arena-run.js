@@ -13,11 +13,11 @@
  *    rollLoot, addToInventory) no personagem PERMANENTE + stats.arenaBossWins++ → saveToLocal;
  *    depois reset e nova tentativa.
  */
-import { getConfig } from './gameplay-config.js?v=20261029leve';
-import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261029leve';
-import { addXp, pushLog } from './state.js?v=20261029leve';
-import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261029leve';
-import { reveal } from './arquivo.js?v=20261029leve';
+import { getConfig } from './gameplay-config.js?v=20261029paisagem';
+import { addModifier, getStat, listModifiers, STATS } from './modifiers.js?v=20261029paisagem';
+import { addXp, pushLog } from './state.js?v=20261029paisagem';
+import { rollLoot, addToInventory } from '../../rules/loot.js?v=20261029paisagem';
+import { reveal } from './arquivo.js?v=20261029paisagem';
 
 /** Estatísticas medidas para a checagem "sem bônus sobrando" (valores exatos). */
 const SNAP_STATS = [

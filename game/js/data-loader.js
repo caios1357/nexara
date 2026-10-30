@@ -1,5 +1,5 @@
-import { scaleBrConfig } from './br-map.js?v=20261029leve';
-import { applyMapa5x3 } from './br-mapa5x3.js?v=20261029leve';
+import { scaleBrConfig } from './br-map.js?v=20261029paisagem';
+import { applyMapa5x3 } from './br-mapa5x3.js?v=20261029paisagem';
 /** Load all data/*.json — single source of truth */
 const DATA_BASE = new URL('../../data/', import.meta.url).href;
 

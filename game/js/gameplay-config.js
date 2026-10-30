@@ -952,7 +952,7 @@ export const DEFAULTS = Object.freeze({
 });
 
 /** Bloco 5 — itens editáveis do layout (ids estáveis, salvos em layout.<orientação>). */
-export const LAYOUT_ITEMS = Object.freeze(['joystick', 'camera', 'attack', 'dodge', 'defend', 'golpe_poderoso', 'ataque_area', 'suprema']);
+export const LAYOUT_ITEMS = Object.freeze(['joystick', 'camera', 'attack', 'dodge', 'defend', 'golpe_poderoso', 'ataque_area', 'suprema', 'jump']); // jump = PULAR (20261029paisagem; layouts antigos sem ele → posição padrão)
 /** Bloco 6 — itens de layout que saíram da tela (layouts antigos: descartados na leitura). */
 export const REMOVED_LAYOUT_ITEMS = Object.freeze(['dash', 'lock']);
 /** Limites de cada campo de um item de layout. */

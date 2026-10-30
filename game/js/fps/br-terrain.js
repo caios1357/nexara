@@ -8,7 +8,7 @@
  *  - baús/caixas de loot instanciados (abrir = some o brilho, tampa abre)
  */
 import * as THREE from 'three';
-import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261029leve';
+import { addFloorDetail, addWallDetail } from './surface-fx.js?v=20261029paisagem';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const REGION_FLOOR = { periferia: 0x5a6878, ruinas: 0x6e5c4c, floresta: 0x355a40, complexo: 0x50627a, elite: 0x76684a, dragao: 0x2c4232, guerra: 0x8a3424, cidade2: 0xd6ccb4, castelo: 0x2a1420 };
@@ -16,8 +16,20 @@ const VIS = { favela: 'periferia' }; // 20261029mapa: FAVELA usa o visual da Per
 const vid = (r) => (r ? (VIS[r.estilo] || r.estilo || r.id) : undefined);
 const REGION_WALL = { periferia: 0xc08a68, ruinas: 0xb28660, floresta: 0x78907c, complexo: 0x8a9cb4, elite: 0xb8a068, dragao: 0x6a806c, guerra: 0x9a4a38, cidade2: 0xf4eedc, castelo: 0x3a2030 };
 const TILE_FLOOR = { street: 0x3a4250, grass: 0x34583e, tech: 0x50627a, rubble: 0x6e5a44, bush: 0x34583e };
+/** 20261029paisagem · ESCALA (herói chibi ≈ 2,0 u de altura medido no jogo; 1 tile = 2 u):
+ *  porta 2,8 u (1,4× herói) · janela 0,95×1,05 u acima da porta · parede baixa 3,4 u (1,7×) · casa favela 3,4–4,9 u (1–2 andares) · Cidade 2 até ~6,5 u
+ *  tufo de grama 0,3–0,6 u (joelho) · pinheiro 5–8 u (2,5–4×) · poste 5,2 u. */
+export const BR_SCALE = { heroRef: 2.0, door: 2.8, doorW: 1.3, win: 1.05, wallLow: 3.4, favelaMax: 4.9, cidade2Max: 6.5, tuft: 0.5, lamp: 5.2 };
+const FAVELA_PAL = [0xe0703a, 0xd84a6a, 0x3aa0a8, 0xe8c040, 0xb8583a, 0x6a8ad8, 0x8ac04a, 0xf0e0c8]; // casas coloridas (ref. 00-mapa / favela)
 const RARITY_GLOW = { basico: 0xc8d4d0, medio: 0x4aa0ff, avancado: 0xffc24a, alto: 0xb36bff, lendario: 0xffd34a };
 
+/** 20261029paisagem: ruído de baixa frequência (manchas de ~8 tiles) p/ variação do chão por COR DE VÉRTICE (sem camada extra de shader) */
+function vnoise(x, y, s, F = 8) { const gx = x / F, gy = y / F, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy; const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+  const a = h32(ix, iy, s), b = h32(ix + 1, iy, s), c = h32(ix, iy + 1, s), d = h32(ix + 1, iy + 1, s); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+const GROUND_MIX = { // estilo → [cor A (manchas baixas), cor B (manchas altas)]
+  guerra: [0x9a5a30, 0x2a1810], favela: [0x9a6a44, 0x5a4a52], periferia: [0x6a5a50, 0x48586a], cidade2: [0xf0e4c4, 0xb8a888], elite: [0x8a7650, 0x5a5040],
+  floresta: [0x4a7a3a, 0x24402e], dragao: [0x3a6a32, 0x1c2c20], complexo: [0x3a5a8a, 0x2a3448], ruinas: [0x8a6a44, 0x4a3a30], castelo: [0x3a1a30, 0x1a0a14] };
+const tmpG = new THREE.Color();
 function h32(x, y, s = 0) { let h = (x * 374761393 + y * 668265263 + s * 974711) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 
 /**
@@ -92,6 +104,9 @@ export function buildBrTerrain(zone, cfg, o) {
           const x = i + dx, y = j + dy; if (x < 0 || y < 0 || x >= W || y >= H) continue;
           const t = tileAt(x, y); const reg = regAt(x, y);
           tmpC.setHex(TILE_FLOOR[t] ?? (reg ? REGION_FLOOR[vid(reg)] : 0x2a3038));
+          { const gm = reg && GROUND_MIX[reg.estilo] || (reg && GROUND_MIX[vid(reg)]); if (gm && t !== 'street') { const nz = vnoise(x, y, 77) * 0.75 + vnoise(x, y, 78, 3) * 0.25; tmpG.setHex(nz < 0.5 ? gm[0] : gm[1]); tmpC.lerp(tmpG, Math.min(0.7, Math.abs(nz - 0.5) * 1.8)); }
+            if (reg && vid(reg) === 'cidade2' && ((x >> 1) + (y >> 1)) % 2) tmpC.multiplyScalar(0.9); // lajotas
+            if (reg && reg.estilo === 'guerra' && h32(x, y, 79) < 0.05) tmpC.setHex(0xff6a1a); } // fenda em brasa (cor emissiva fraca via vértice)
           const v = (0.86 + h32(x, y, 3) * 0.28) * 1.4; r += tmpC.r * v; g += tmpC.g * v; b += tmpC.b * v; n++;
         }
         n = n || 1; col[k * 3] = r / n; col[k * 3 + 1] = g / n; col[k * 3 + 2] = b / n;
@@ -168,10 +183,11 @@ export function buildBrTerrain(zone, cfg, o) {
     scorch: new THREE.CircleGeometry(1, 12).rotateX(-Math.PI / 2),
     ember: new THREE.OctahedronGeometry(0.09, 0),
     pipe: new THREE.CylinderGeometry(0.085, 0.085, T, 6).rotateZ(Math.PI / 2),
-    win: new THREE.PlaneGeometry(0.7, 0.8),
+    win: new THREE.PlaneGeometry(0.95, BR_SCALE.win),
+    tuft: (() => { const a = new THREE.ConeGeometry(0.09, 0.5, 3).translate(0.1, 0.25, 0), b = new THREE.ConeGeometry(0.08, 0.42, 3).translate(-0.1, 0.21, 0.06), c = new THREE.ConeGeometry(0.07, 0.36, 3).translate(0, 0.18, -0.1); return mergeGeometries([a, b, c]); })(),
     tank: new THREE.CylinderGeometry(0.55, 0.55, 0.9, 10).translate(0, 0.45, 0),
     roof: (() => { const sh = new THREE.Shape(); sh.moveTo(-T * 0.6, 0); sh.lineTo(T * 0.6, 0); sh.lineTo(0, T * 0.55); sh.lineTo(-T * 0.6, 0); return new THREE.ExtrudeGeometry(sh, { depth: T * 1.1, bevelEnabled: false }).translate(0, 0, -T * 0.55); })(),
-    door: new THREE.PlaneGeometry(0.9, 1.7).translate(0, 0.85, 0),
+    door: new THREE.PlaneGeometry(BR_SCALE.doorW, BR_SCALE.door).translate(0, BR_SCALE.door / 2, 0),
     balc: (() => { const b = [new THREE.BoxGeometry(1.3, 0.08, 0.55).translate(0, 0, 0.27), new THREE.BoxGeometry(1.3, 0.05, 0.04).translate(0, 0.42, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(-0.63, 0.21, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(0.63, 0.21, 0.53), new THREE.BoxGeometry(0.04, 0.42, 0.04).translate(0, 0.21, 0.53)]; return mergeGeometries(b); })(),
     puddle: new THREE.CircleGeometry(0.75, 14).rotateX(-Math.PI / 2),
     sign: new THREE.BoxGeometry(0.42, 1.1, 0.06).translate(0, 0, 0.03),
@@ -211,7 +227,8 @@ export function buildBrTerrain(zone, cfg, o) {
   KIND.labCap = [new THREE.CylinderGeometry(0.5, 0.5, 0.22, 10), mats.metal, false];
   KIND.container = [new THREE.BoxGeometry(1.15, 1.15, 2.3).translate(0, 0.575, 0), new THREE.MeshStandardMaterial({ color: 0xffffff, map: o.loadTex('../distritos/fabrica-2.webp', 1, 1), roughness: 0.7, metalness: 0.4 }), true];
   KIND.elamp = [new THREE.CylinderGeometry(0.06, 0.09, 3.2, 6).translate(0, 1.6, 0), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), false];
-  const COLORED = new Set(['crystal', 'labTube', 'container', 'elamp', 'puddle', 'leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
+  KIND.tuft = [geos.tuft, mats.canopy, false];
+  const COLORED = new Set(['tuft', 'crystal', 'labTube', 'container', 'elamp', 'puddle', 'leaf', 'roof', 'win', 'tank', 'wall', 'canopy', 'rock', 'neon', 'cap', 'bush', 'barrel', 'stub', 'fern', 'shroom', 'strip', 'banner', 'ember']);
   const regionProps = { n: 0, byKind: {} }; const pushP = (kind, ...a) => { regionProps.n++; regionProps.byKind[kind] = (regionProps.byKind[kind] || 0) + 1; push(kind, ...a); };
   const wallNear = (x, y) => { for (const [dx, dy, ry] of [[1, 0, Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, 0], [0, -1, 0]]) if (tileAt(x + dx, y + dy) === 'wall') return { dx, dy, ry }; return null; };
   const isLootTile = new Set([...(m.chests || []), ...(m.crates || [])].map((c) => c.x + c.y * W));
@@ -225,10 +242,13 @@ export function buildBrTerrain(zone, cfg, o) {
       const st = structAt(x, y); const border = x === 0 || y === 0 || x === W - 1 || y === H - 1;
       let h = border ? 4.6 : st ? st.h : 3.4; if (vid(reg) === 'castelo') h = 5.6; // 20261029mapa: muralha do quadrado reservado
       if (st?.kind === 'ruina') h *= 0.45 + 0.55 * h32(x, y, 9);
+      else if (st && !border) { const sv = reg?.estilo === 'favela' ? 1 + 0.45 * h32(st.x0, st.y0, 7) : vid(reg) === 'cidade2' ? 1.1 + 0.5 * h32(st.x0, st.y0, 7) : vid(reg) === 'elite' ? 1 + 0.3 * h32(st.x0, st.y0, 7) : 1; h = Math.min(vid(reg) === 'cidade2' ? BR_SCALE.cidade2Max : BR_SCALE.favelaMax + 1.6, h * sv); } // 20261029paisagem: silhuetas variadas (1–2 andares)
       const wc = REGION_WALL[vid(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1)))] ?? 0x6a7080;
       tmpC.setHex(wc).multiplyScalar(0.85 + hs * 0.3);
       const wrid = vid(reg || regAt(Math.min(W - 2, x + 1), Math.min(H - 2, y + 1))); const wk = WALL_ARTE && WALL_ARTE[wrid] && !border ? 'wall_' + wrid : 'wall';
       if (wk !== 'wall') tmpC.setScalar(0.85 + hs * 0.3);
+      if (reg?.estilo === 'favela' && st && !border) tmpC.setHex(FAVELA_PAL[Math.floor(h32(st.x0, st.y0, 11) * FAVELA_PAL.length)]).multiplyScalar(1.05 + hs * 0.2); // 20261029paisagem: FAVELA colorida (cada casa uma cor)
+      else if (vid(reg) === 'guerra' && !border) tmpC.multiplyScalar(0.55 + 0.25 * h32(x, y, 12)); // guerra: paredes chamuscadas
       push(wk, x, y, [wx, gy - 0.3, wz], 0, [1, h + 0.3, 1], tmpC.getHex());
       // CONCEITO (Periferia à noite): casas de tijolo com janelas acesas, caixas d'água azuis e telhado de zinco
       if (vid(reg) === 'periferia' && !border && o.props !== false) {
@@ -236,14 +256,19 @@ export function buildBrTerrain(zone, cfg, o) {
         if (wq < 0.55 && h > 2.2) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) {
           if (tileAt(x + dx, y + dy) === 'wall') continue;
           const warm = h32(x, y, 121) < 0.9; tmpC.setHex(warm ? 0xffb860 : 0xff6ad8).multiplyScalar(0.7 + h32(x, y, 122) * 0.45);
-          pushP('win', x, y, [wx + dx * T * 0.505, gy + h * 0.62, wz + dy * T * 0.505], ry, [1, 1, 1], tmpC.getHex()); break;
+          pushP('win', x, y, [wx + dx * T * 0.505, gy + Math.max(h * 0.62, Math.min(h - 0.7, BR_SCALE.door + 0.75)), wz + dy * T * 0.505], ry, [1, 1, 1], tmpC.getHex()); break;
         }
         if (wq > 0.88) { tmpC.setHex(0x1e4fb8).multiplyScalar(0.8 + h32(x, y, 123) * 0.4); pushP('tank', x, y, [wx, gy + h, wz], wq * 9, [1, 1, 1], tmpC.getHex()); }
         else if (wq > 0.45) { tmpC.setHex(h32(x, y, 124) < 0.5 ? 0x7a3a28 : 0x5a6470).multiplyScalar(0.8 + h32(x, y, 125) * 0.4); pushP('roof', x, y, [wx, gy + h - 0.02, wz], (h32(x, y, 126) < 0.5 ? 0 : Math.PI / 2), [1, 0.55, 1], tmpC.getHex()); }
         { const fq = h32(x, y, 150); if (h > 2.2 && fq < 0.35) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; const px = wx + dx * T * 0.5, pz = wz + dy * T * 0.5;
           if (fq < 0.08) pushP('sign', x, y, [px, gy + h * 0.5, pz], ry, [1, 1, 1], fq < 0.04 ? 0xff3ac8 : 0x39e8ff); else if (fq < 0.2) pushP('acu', x, y, [px, gy + h * 0.82, pz], ry, [1, 1, 1], 0xffffff); else pushP('awn', x, y, [px, gy + 2.0, pz], ry, [1, 1, 1], 0xffffff); break; } } // fachada: letreiro néon, ar-condicionado, toldo
         if (h > 2.2 && wq >= 0.55 && wq < 0.68) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; pushP('balc', x, y, [wx + dx * T * 0.5, gy + h * 0.55, wz + dy * T * 0.5], ry, [1, 1, 1], 0xffffff); break; } // varanda
-        if (h32(x, y, 140) < 0.16) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; pushP('door', x, y, [wx + dx * T * 0.506, gy, wz + dy * T * 0.506], ry, [1, 1, 1], 0xffffff); break; }
+        if (h >= BR_SCALE.door + 0.4 && h32(x, y, 140) < 0.16) for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; pushP('door', x, y, [wx + dx * T * 0.506, gy, wz + dy * T * 0.506], ry, [1, 1, 1], 0xffffff); break; }
+      }
+      if ((vid(reg) === 'cidade2' || vid(reg) === 'elite' || vid(reg) === 'guerra') && !border && o.props !== false && h >= 3.2 && h32(x, y, 127) < (vid(reg) === 'guerra' ? 0.18 : 0.5)) { // 20261029paisagem: janelas acesas (Cidade 2 douradas, Guerra brasa)
+        for (const [dx, dy, ry] of [[0, 1, 0], [0, -1, Math.PI], [1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2]]) { if (tileAt(x + dx, y + dy) === 'wall') continue; tmpC.setHex(vid(reg) === 'guerra' ? 0xff5a20 : h32(x, y, 128) < 0.8 ? 0xffe0a0 : 0xa0d8ff).multiplyScalar(0.75 + h32(x, y, 129) * 0.4);
+          pushP('win', x, y, [wx + dx * T * 0.505, gy + h * 0.66, wz + dy * T * 0.505], ry, [1, 1, 1], tmpC.getHex()); if (h > 5) pushP('win', x, y, [wx + dx * T * 0.505, gy + h * 0.66 - 1.8, wz + dy * T * 0.505], ry, [1, 1, 1], tmpC.getHex()); break; }
+        if (vid(reg) === 'cidade2' && h32(x, y, 130) > 0.82) pushP('roof', x, y, [wx, gy + h - 0.02, wz], h32(x, y, 131) < 0.5 ? 0 : Math.PI / 2, [1, 0.8, 1], 0xd8b050);
       }
       if ((Math.floor(hs * 1000) % 4) === 0 && h > 2.2) {
         // néon na face voltada para um tile andável
@@ -290,6 +315,8 @@ export function buildBrTerrain(zone, cfg, o) {
     // —— M10 fase 8: IDENTIDADE DA REGIÃO (decoração instanciada, rente ao chão ou encostada na parede; não bloqueia) ——
     if (o.props !== false && reg && (t === 'floor' || t === 'street' || t === 'grass' || t === 'tech' || t === 'rubble') && !isLootTile.has(x + y * W)) {
       const q = h32(x, y, 31); const wn = wallNear(x, y);
+      // 20261029paisagem: TUFOS de grama/mato (instanciados, material compartilhado; só MEDIUM/HIGH = extraProps)
+      if (o.extraProps && !wn && t !== 'street' && q > 0.3 && q < (reg.estilo === 'favela' ? 0.36 : vid(reg) === 'guerra' || vid(reg) === 'complexo' || vid(reg) === 'castelo' ? 0.3 : 0.42)) { const a = h32(x, y, 200); tmpC.setHSL(vid(reg) === 'cidade2' ? 0.28 : 0.24 + a * 0.12, 0.5, 0.2 + a * 0.1); pushP('tuft', x, y, [wx + (a - 0.5) * 1.5, gy, wz + (h32(x, y, 201) - 0.5) * 1.5], a * 6, [0.8 + a * 0.6, 0.7 + a * 0.6, 0.8 + a * 0.6], tmpC.getHex()); }
       if (vid(reg) === 'periferia') {
         if (t === 'street' && x % 7 === 0 && y % 5 === 0 && !wn) { pushP('upole', x, y, [wx, gy, wz], 0, [1, 1, 1], 0xffffff); pushP('wire', x, y, [wx, gy + 4.9, wz], 0, [T * 7, 1, 1], 0x000000); } // poste com fios (CONCEITO)
         if (!wn && q > 0.925 && q < 0.965) { const nq = h32(x, y, 160); tmpC.setHex(nq < 0.4 ? 0xff3ac8 : nq < 0.8 ? 0x3ad8ff : 0xffa040); pushP('puddle', x, y, [wx + (h32(x, y, 161) - 0.5), gy + 0.02, wz + (h32(x, y, 162) - 0.5)], nq * 6, [1.3 + nq, 1, 0.9 + nq * 0.7], tmpC.getHex()); } // poça refletindo néon
@@ -581,7 +608,7 @@ export function buildBrTerrain(zone, cfg, o) {
   const viewDist = o.tierName === 'low' ? 34 : o.tierName === 'medium' ? 44 : 62; // névoa esconde o corte
   let visibleChunks = 0; let visibleFloor = 0; const treeHidden = new Set(); const ZERO_M = new THREE.Matrix4().makeScale(0.0001, 0.0001, 0.0001); let treesFaded = 0;
   return {
-    group, stats, markers, extraction, lampPos, lootSpots, lootState,
+    group, stats, markers, extraction, lampPos, lootSpots, lootState, scale: { ...BR_SCALE },
     regionProps, dragonSigns: dragonSignsDrawn,
     /** M10: região sob um ponto (tiles) — usado para a tonalidade da névoa por região */
     regionAt(fx, fy) { const x = Math.floor(fx), y = Math.floor(fy); return x >= 0 && y >= 0 && x < W && y < H ? (regAt(x, y)?.id || null) : null; },

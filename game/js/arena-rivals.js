@@ -11,16 +11,16 @@
  * No último estágio da zona (ou com 1 rival restante após a zona começar) o mais forte vira
  * CAMPEÃO RIVAL (cartão de entrada + barra de HP). Derrotar todos os rivais → VITÓRIA.
  */
-import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261029leve';
-import { xpForLevel, getEquippedStats } from './state.js?v=20261029leve';
-import { getConfig } from './gameplay-config.js?v=20261029leve';
-import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261029leve';
-import { planRoster } from './br-roster.js?v=20261029leve';
-import { listPassives } from './passives.js?v=20261029leve';
-import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261029leve';
-import { kitFor } from './hero-kits.js?v=20261029leve';
-import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra, nucleoUp } from './rival-kits.js?v=20261029leve';
-import { ARCONTE_KIT, isArconte } from './arconte-kit.js?v=20261029leve'; // 20261025arconte: rival chefe do X1
+import { getAiView, AI_STATES, placeMonster, resetMonsterRuntime, onMonsterHit, rivalDodge, getMonsterPos, setAttackerBonus } from './enemy-ai.js?v=20261029paisagem';
+import { xpForLevel, getEquippedStats } from './state.js?v=20261029paisagem';
+import { getConfig } from './gameplay-config.js?v=20261029paisagem';
+import { sorteiaPersonagem, PERSONALIDADES } from './personagens.js?v=20261029paisagem';
+import { planRoster } from './br-roster.js?v=20261029paisagem';
+import { listPassives } from './passives.js?v=20261029paisagem';
+import { bbForRivalIndex, newBBState, stepBB, bbAbility } from './dragon-bb.js?v=20261029paisagem';
+import { kitFor } from './hero-kits.js?v=20261029paisagem';
+import { newFighter, outMult, mitigate, onHitFx, tick as kitTick, botPower, applyExtra, nucleoUp } from './rival-kits.js?v=20261029paisagem';
+import { ARCONTE_KIT, isArconte } from './arconte-kit.js?v=20261029paisagem'; // 20261025arconte: rival chefe do X1
 
 const ENGAGED = new Set([AI_STATES.DETECT, AI_STATES.CHASE, AI_STATES.ATTACK_PREPARE, AI_STATES.ATTACK, AI_STATES.RECOVERY]);
 

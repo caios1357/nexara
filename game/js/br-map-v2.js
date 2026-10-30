@@ -241,6 +241,23 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const nB = Math.round(((r.x1 - r.x0) * (r.y1 - r.y0)) / 150);
     for (let i = 0; i < nB; i++) { const x = ri(r.x0 + 3, r.x1 - 7), y = ri(r.y0 + 3, r.y1 - 3); const hz = R() < 0.5; const len = ri(3, 5); for (let k = 0; k < len; k++) { if (k === 2 && len > 3) continue; const xx = hz ? x + k : x, yy = hz ? y : y + k; if (get(xx, yy) === '.') set(xx, yy, 'C'); } }
   }
+  // 20261029paisagem · ESTRADA DA GUERRA FINAL: caminho principal LIVRE (sem barricada/ruína/cratera/entulho) ligando as passagens ao centro e o centro ao muro do Castelo
+  const warRoad = new Uint8Array(W * H); const warRoads = [];
+  const castleR = regions.find((q) => q.bloqueado);
+  const RW = 2; // meia-largura → estrada de 5 tiles
+  const roadSeg = (ax, ay, bx, by, r) => { const x0 = Math.min(ax, bx) - RW, x1 = Math.max(ax, bx) + RW, y0 = Math.min(ay, by) - RW, y1 = Math.max(ay, by) + RW; warRoads.push({ x0, y0, x1, y1, region: r.id }); for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (inb(x, y) && regionOf(x, y) === r) warRoad[x + y * W] = 1; };
+  const paveWar = () => { for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (warRoad[x + y * W]) g[y][x] = '.'; };
+  for (const r of regions.filter((q) => q.estilo === 'guerra')) {
+    const cx = Math.round((r.x0 + r.x1) / 2), cy = Math.round((r.y0 + r.y1) / 2);
+    for (const q of gaps.filter((q) => q.ra === r.id)) { const ix = Math.max(r.x0 + RW, Math.min(r.x1 - RW, q.x)), iy = Math.max(r.y0 + RW, Math.min(r.y1 - RW, q.y)); roadSeg(q.x, q.y, ix, iy, r); if (Math.abs(q.x - r.x0) <= 2 || Math.abs(q.x - r.x1) <= 2) { roadSeg(ix, iy, cx, iy, r); roadSeg(cx, iy, cx, cy, r); } else { roadSeg(ix, iy, ix, cy, r); roadSeg(ix, cy, cx, cy, r); } }
+    if (castleR) { // até o muro do castelo (vizinho W/E/N)
+      if (castleR.x0 > r.x1) roadSeg(cx, cy, r.x1, cy, r); else if (castleR.x1 < r.x0) roadSeg(r.x0, cy, cx, cy, r); else if (castleR.y1 < r.y0) roadSeg(cx, r.y0, cx, cy, r); else roadSeg(cx, cy, cx, r.y1, r);
+    }
+    // ruínas cortadas pela estrada: tira a estrutura (as paredes somem com o asfalto)
+    for (let i = structures.length - 1; i >= 0; i--) { const st = structures[i]; if (!st.guerra) continue; let hit = false; for (let y = st.y0; y <= st.y1 && !hit; y++) for (let x = st.x0; x <= st.x1; x++) if (warRoad[x + y * W]) { hit = true; break; } if (hit) { for (let y = st.y0; y <= st.y1; y++) for (let x = st.x0; x <= st.x1; x++) if (regionOf(x, y) === r) set(x, y, '.'); structures.splice(i, 1); } }
+  }
+  for (let i = craters.length - 1; i >= 0; i--) { const q = craters[i]; let hit = false; for (let y = q.y - q.r - 2; y <= q.y + q.r + 2 && !hit; y++) for (let x = q.x - q.r - 2; x <= q.x + q.r + 2; x++) if (inb(x, y) && warRoad[x + y * W]) { hit = true; break; } if (hit) { for (let y = q.y - q.r; y <= q.y + q.r; y++) for (let x = q.x - q.r; x <= q.x + q.r; x++) if (get(x, y) === '~') set(x, y, '.'); craters.splice(i, 1); const ai = areas.findIndex((a) => a.kind === 'cratera' && a.cx === q.x && a.cy === q.y); if (ai >= 0) areas.splice(ai, 1); } }
+  paveWar();
   // CIDADE 2 · ELITE: pedra branca + torres douradas, jardins, praça com fonte, muralha interna com portões
   for (const r of regions.filter((q) => q.estilo === 'cidade2')) {
     const cx = Math.round((r.x0 + r.x1) / 2), cy = Math.round((r.y0 + r.y1) / 2);
@@ -278,7 +295,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   } }
 
   // —— MASTER 10 · FASE 3: identidade extra por região, ESCONDERIJOS, ATALHOS secretos ——
-  const freeBox = (x0, y0, x1, y1, r) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (regionOf(x, y) !== r) return false; const c = get(x, y); if (c !== floorOf(r) && c !== '.' && c !== 'g' && c !== 'T' && c !== 'b' && c !== 'R' && c !== '~') return false; } return true; };
+  const freeBox = (x0, y0, x1, y1, r) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (regionOf(x, y) !== r || warRoad[x + y * W]) return false; const c = get(x, y); if (c !== floorOf(r) && c !== '.' && c !== 'g' && c !== 'T' && c !== 'b' && c !== 'R' && c !== '~') return false; } return true; };
   const inArea = (x, y, pad = 0) => areas.some((a) => x >= a.x0 - pad && x <= a.x1 + pad && y >= a.y0 - pad && y <= a.y1 + pad);
   const nearGap = (x, y, d) => gaps.some((q) => Math.hypot(q.x - x, q.y - y) < d);
   // ELITE: platôs de risco (mini-arenas de pilares com 2 aberturas) + barricadas de caixas = gargalos
@@ -371,6 +388,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   // passagens sempre livres
   for (const q of gaps) keepClear(q.x, q.y, 2);
   const sp = cfg.spawnHeroi; keepClear(sp.x, sp.y, 2);
+  paveWar(); // estrada da guerra sempre livre (atalhos/esconderijos não entram nela)
   if (castle) { rect(castle.x0, castle.y0, castle.x1, castle.y1, 'X'); box(castle.x0, castle.y0, castle.x1, castle.y1, 'W'); }
 
   // —— alcance (BFS) + garantia: toda região ligada ——
@@ -403,7 +421,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const out = [];
     for (let tries = 0; tries < n * 80 && out.length < n; tries++) {
       const x = ri(r.x0 + 1, r.x1 - 1); const y = ri(r.y0 + 1, r.y1 - 1);
-      if (!openAround(x, y, need)) continue;
+      if (!openAround(x, y, need) || warRoad[x + y * W]) continue;
       if (Math.hypot(x - sp.x, y - sp.y) < (cfg.diretor?.zonaLivreSpawn || 8)) continue;
       if (!farFrom(x, y, minD)) continue;
       const p = { x, y, region: r.id }; out.push(p); taken.push(p);
@@ -428,7 +446,7 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
     const nA = Math.max(1, Math.round((cfg.abandonados?.porRegiao ?? 1) * S)); let made = 0;
     for (let t = 0; t < 400 && made < nA; t++) {
       const x = ri(r.x0 + 2, r.x1 - 2), y = ri(r.y0 + 2, r.y1 - 2);
-      if (!walkable(x, y) || !(solidA(x + 1, y) || solidA(x - 1, y) || solidA(x, y + 1) || solidA(x, y - 1))) continue;
+      if (!walkable(x, y) || warRoad[x + y * W] || !(solidA(x + 1, y) || solidA(x - 1, y) || solidA(x, y + 1) || solidA(x, y - 1))) continue;
       if (Math.hypot(x - sp.x, y - sp.y) < 16 || !farFrom(x, y, 4)) continue;
       const p = { x, y, region: r.id }; taken.push(p);
       crates.push({ ...p, id: `cx_aband_${r.id}_${made}`, loot: up(r.loot), kind: 'caixa', aband: true }); made++;
@@ -497,6 +515,6 @@ export function generateBrMapV2(cfg, { BR_LEGEND, BR_SOLID, vnoise }) {
   for (const r of regions) { delete r._towers; delete r._secret; delete r._cave; delete r._clear; delete r._lab; delete r._ec; }
   const tiles = g.map((row) => row.join(''));
   let walkN = 0; for (let i = 0; i < reach.length; i++) walkN += reach[i];
-  return { W, H, tiles, heights: hgt, regionGrid, structures, chests, crates, spawnPoints, pois, areas, gaps, reachable: reach, gerador: 2, escala: S, shortcuts, dragonSigns, craters, guild, castle, fountains,
+  return { W, H, tiles, heights: hgt, regionGrid, structures, chests, crates, spawnPoints, pois, areas, gaps, reachable: reach, gerador: 2, escala: S, shortcuts, dragonSigns, craters, warRoad, warRoads, guild, castle, fountains,
     stats: { walkable: walkN, total: W * H, chests: chests.length, crates: crates.length, spawnPoints: spawnPoints.length, structures: structures.length, areas: areas.length, gaps: gaps.length / 2 } };
 }

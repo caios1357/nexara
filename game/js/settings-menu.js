@@ -9,11 +9,11 @@
  */
 import {
   getConfig, setOverrides, setLayout, clearOverridePaths, SETTINGS_UI, LAYOUT_ITEMS
-} from './gameplay-config.js?v=20261029leve';
+} from './gameplay-config.js?v=20261029paisagem';
 
 const ITEM_LABEL = {
   joystick: 'JOYSTICK', camera: 'CÂMERA + ATAQUE', attack: 'ATAQUE', dodge: 'ESQUIVA', defend: 'DEFESA',
-  golpe_poderoso: 'GOLPE', ataque_area: 'ÁREA', suprema: 'SUPREMA'
+  golpe_poderoso: 'GOLPE', ataque_area: 'ÁREA', suprema: 'SUPREMA', jump: 'PULAR'
 };
 
 function getPath(obj, path) {
