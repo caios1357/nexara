@@ -7,13 +7,13 @@
  *  - comparação antes→depois (Dano/Defesa/Vida/Crítico…) ao passar o mouse/selecionar um item
  *  - até 3 LOADOUTS salvos em player.loadouts (vai no save com o player)
  */
-import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261029mapa';
-import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261029mapa';
-import { sumEquipAttrs, weaponClassOf, ALL_SLOTS } from './equipment.js?v=20261029mapa';
-import { getEquippedStats } from './state.js?v=20261029mapa';
-import { isOwned, arsenalConfig } from './mcb.js?v=20261029mapa';
-import { paintItemIcons } from './ui.js?v=20261029mapa';
-import { setSlot2 } from './dual-weapons.js?v=20261029mapa';
+import { mountHeroStyleEditor } from './hero-style-ui.js?v=20261029leve';
+import { heroStyleOf, equipmentVisual } from './hero-styles.js?v=20261029leve';
+import { sumEquipAttrs, weaponClassOf, ALL_SLOTS } from './equipment.js?v=20261029leve';
+import { getEquippedStats } from './state.js?v=20261029leve';
+import { isOwned, arsenalConfig } from './mcb.js?v=20261029leve';
+import { paintItemIcons } from './ui.js?v=20261029leve';
+import { setSlot2 } from './dual-weapons.js?v=20261029leve';
 
 export const VEST_SLOTS = [['helmet', 'CAPACETE', '⛑'], ['armor', 'ARMADURA', '🛡'], ['pants', 'CALÇA', '👖'], ['weapon', 'ARMA', '⚔'], ['body', 'ROUPA', '👕'], ['accessory', 'ACESSÓRIO', '💍']];
 export const MAX_LOADOUTS = 3;
@@ -235,7 +235,7 @@ export function createVestiario(deps) {
     open = true;
     document.querySelectorAll('#vst [data-vst-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.vstTab; msg = ''; render(); }; });
     styleEd = mountHeroStyleEditor(document.getElementById('vst-style-box'), { styleId: s.player.heroStyle, custom: s.player.heroCustom || {}, preview: false, onChange: (v) => { if (styleEd) applyStyle(v); }, arma2: s.player.armas?.s2 || 'arco', onArma2: (c) => applyArma2(c) });
-    import('./fps/hero-preview.js?v=20261029mapa').then((m) => {
+    import('./fps/hero-preview.js?v=20261029leve').then((m) => {
       const cv = document.getElementById('vst-canvas'); if (!cv || !open) return;
       try { preview = m.createHeroPreview(cv, { interactive: true }); refreshModel(); } catch (e) { console.warn('[vestiário] prévia 3D indisponível', e); }
       document.getElementById('vst-front').onclick = () => preview?.front();

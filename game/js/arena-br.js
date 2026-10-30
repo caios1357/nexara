@@ -10,13 +10,13 @@
  * drops no chão (ímã + coleta), zona segura com aviso antes de qualquer dano, eventos (CAÇADA / DROP ESPECIAL),
  * extração, território do dragão (aviso; enfrentar é escolha) e o resumo final.
  */
-import { createArenaState } from './arena.js?v=20261029mapa';
-import { getConfig } from './gameplay-config.js?v=20261029mapa';
-import { pushLog } from './state.js?v=20261029mapa';
-import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261029mapa';
-import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261029mapa';
-import { rollLootFor, lootTierUp } from './br-items.js?v=20261029mapa';
-import { createRivals } from './arena-rivals.js?v=20261029mapa';
+import { createArenaState } from './arena.js?v=20261029leve';
+import { getConfig } from './gameplay-config.js?v=20261029leve';
+import { pushLog } from './state.js?v=20261029leve';
+import { buildBrZone, BR_ZONE_ID, brRegionAt, brCoverAt, brCoverList } from './br-map.js?v=20261029leve';
+import { resetMonsterRuntime, getAiView, AI_STATES, getBossView, placeMonster } from './enemy-ai.js?v=20261029leve';
+import { rollLootFor, lootTierUp } from './br-items.js?v=20261029leve';
+import { createRivals } from './arena-rivals.js?v=20261029leve';
 
 export { BR_ZONE_ID };
 const UID_BASE = 15000;
@@ -407,10 +407,11 @@ export function createArenaBr(deps) {
     const m = map();
     // baú abre ao ficar ao lado (0,45 s) — feedback de "abrindo" no HUD
     let near = null; let nd = 9;
-    for (const s of [...m.chests, ...m.crates]) {
-      if (br.lootOpened.includes(s.id)) continue;
-      const d = Math.hypot(s.x + 0.5 - p.x, s.y + 0.5 - p.y);
-      if (d < 1.25 && d < nd) { near = s; nd = d; }
+    // 20261029leve: sem cópia [...baús, ...caixas] por quadro (mapa 5×3 ≈ 900 pontos) e distância ANTES do includes
+    for (const arr of [m.chests, m.crates]) for (let i = 0; i < arr.length; i++) {
+      const s = arr[i]; const ax = s.x + 0.5 - p.x, ay = s.y + 0.5 - p.y; if (ax > 1.25 || ax < -1.25 || ay > 1.25 || ay < -1.25) continue;
+      const d = Math.hypot(ax, ay);
+      if (d < 1.25 && d < nd && !br.lootOpened.includes(s.id)) { near = s; nd = d; }
     }
     if (near) {
       if (br.opening?.id !== near.id) br.opening = { id: near.id, ms: 0 };

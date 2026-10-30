@@ -250,7 +250,7 @@ export function buildCity(zone, key, TILE, tileType, opts = {}) {
     disposables.push(geo, mat);
     // PERF 20261025perf: canos em LOTES de 12 tiles (antes 1 InstancedMesh com o mapa inteiro → ~45k triângulos por quadro mesmo longe).
     //   Mesmas instâncias/posições; o recorte por frustum de cada lote tira os que estão fora da tela.
-    const PB = 12; const lots = new Map();
+    const PB = 24; const lots = new Map(); // 20261029leve: lotes de 24 (mapa 5×3 tem perímetro maior → muitas chamadas de canos)
     for (const st of seg) { const key = `${Math.floor(st[0] / PB)}|${Math.floor(st[1] / PB)}`; let l = lots.get(key); if (!l) { l = []; lots.set(key, l); } l.push(st); }
     for (const lot of lots.values()) {
       const im = new THREE.InstancedMesh(geo, mat, lot.length * 2);

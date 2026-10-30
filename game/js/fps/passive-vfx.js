@@ -10,9 +10,9 @@
  * Tudo em metros (1 tile = TILE m). O estado vem de main (passive-procs.getView()).
  */
 import * as THREE from 'three';
-import { getGroundTrail } from './ground-trail.js?v=20261029mapa';
-import { TILE } from './fps-camera.js?v=20261029mapa';
-import { createPassiveSignatures } from './passive-signatures.js?v=20261029mapa';
+import { getGroundTrail } from './ground-trail.js?v=20261029leve';
+import { TILE } from './fps-camera.js?v=20261029leve';
+import { createPassiveSignatures } from './passive-signatures.js?v=20261029leve';
 
 const COL = { furia: 0xff3b3b, impulso: 0x39a8ff, shield: 0x5ff0ff, foco: 0xffd23f, condutor: 0x4f8dff, mark: 0xff8a1f, divine: 0xffd76a };
 

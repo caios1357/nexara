@@ -10,7 +10,7 @@
  * Puramente visual. Custo: ~1 modelo de herói + 6 cristais + 2 nuvens nas mãos (poucas chamadas de desenho a mais).
  */
 import * as THREE from 'three';
-import { createHeroModel } from './hero-model.js?v=20261029mapa';
+import { createHeroModel } from './hero-model.js?v=20261029leve';
 
 export const NUCLEO_CORES = [0x2a6cff, 0xff2a2a, 0xffd02a, 0x2aff5a, 0xd0782a, 0xf4f4ff]; // azul · vermelho · amarelo · verde · laranja/marrom · branco
 export const ARCONTE_ESCALA = 1.26;

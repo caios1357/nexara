@@ -4,8 +4,8 @@
  * só a paleta (paintMini) e as habilidades mudam. (20261010ajustes)
  */
 import * as THREE from 'three';
-import { addMembrane, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261029mapa';
-import { getConfig } from '../gameplay-config.js?v=20261029mapa';
+import { addMembrane, fanWingGeometry, dragonDetailOn } from './surface-fx.js?v=20261029leve';
+import { getConfig } from '../gameplay-config.js?v=20261029leve';
 
 const BLUE = 0x49c6ff;
 

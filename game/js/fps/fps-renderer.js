@@ -10,45 +10,45 @@
  *      faíscas (pool), vinheta de dano, aviso de borda e pose da lâmina.
  */
 import * as THREE from 'three';
-import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261029mapa';
-import { buildArenaDressing } from './arena-dressing.js?v=20261029mapa';
-import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261029mapa';
-import { createHeroModel } from './hero-model.js?v=20261029mapa';
-import { artPalette } from './dragon-art.js?v=20261029mapa';
-import { setTrailSkin } from './ground-trail.js?v=20261029mapa';
-import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261029mapa';
-import { createArconteModel, ARCONTE_ESCALA, ARCONTE_ESCALA_JOGADOR } from './arconte-model.js?v=20261029mapa'; // 20261025arconte
-import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261029mapa';
-import { attachHeroGlb } from './hero-glb.js?v=20261029mapa';
-import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261029mapa';
-import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261029mapa';
-import { createActionVfx } from './action-vfx.js?v=20261029mapa';
-import { createPassiveVfx } from './passive-vfx.js?v=20261029mapa';
-import { createFpsControls } from './fps-controls.js?v=20261029mapa';
-import { createViewmodel } from './viewmodel.js?v=20261029mapa';
-import { createDragonView } from './dragon-view.js?v=20261029mapa';
-import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261029mapa';
-import { getSprite } from '../assets.js?v=20261029mapa';
-import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261029mapa';
-import { createBossDragon } from './boss-dragon-view.js?v=20261029mapa';
-import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261029mapa';
-import { mergeStaticParts } from './merge-util.js?v=20261029mapa';
-import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261029mapa';
-import { attachDragonGlb } from './dragon-glb.js?v=20261029mapa';
-import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261029mapa';
-import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261029mapa';
-import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261029mapa';
-import { createPostFx } from './post-fx.js?v=20261029mapa';
-import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261029mapa';
-import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261029mapa';
-import { createContactShadows } from './contact-shadows.js?v=20261029mapa';
-import { createPowerVfx } from './power-vfx.js?v=20261029mapa';
-import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261029mapa';
-import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261029mapa';
-import { buildCity, ZONE_ACCENTS } from './city.js?v=20261029mapa';
-import { groundAt, setGroundFn } from './ground.js?v=20261029mapa';
-import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261029mapa';
-import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261029mapa';
+import { creatureMaps, lathe, limb, floorTex, skyTex, addRim, setKitDetail } from './creature-kit.js?v=20261029leve';
+import { buildArenaDressing } from './arena-dressing.js?v=20261029leve';
+import { createFpsCamera, TILE, EYE_HEIGHT, VIEW_MODE, setBossFraming, setMountFraming, setFirstPersonLive, isFirstPersonLive } from './fps-camera.js?v=20261029leve';
+import { createHeroModel } from './hero-model.js?v=20261029leve';
+import { artPalette } from './dragon-art.js?v=20261029leve';
+import { setTrailSkin } from './ground-trail.js?v=20261029leve';
+import { kitFor, rivalKit, kitSig } from './hero-kit.js?v=20261029leve';
+import { createArconteModel, ARCONTE_ESCALA, ARCONTE_ESCALA_JOGADOR } from './arconte-model.js?v=20261029leve'; // 20261025arconte
+import { attachEnemyGlb, getEnemyGlbStats } from './enemy-glb.js?v=20261029leve';
+import { attachHeroGlb } from './hero-glb.js?v=20261029leve';
+import { getModelStats, setPresetModels, modelsEnabled } from './model-lib.js?v=20261029leve';
+import { getDragonGlbStats, setPresetDragons } from './dragon-glb.js?v=20261029leve';
+import { createActionVfx } from './action-vfx.js?v=20261029leve';
+import { createPassiveVfx } from './passive-vfx.js?v=20261029leve';
+import { createFpsControls } from './fps-controls.js?v=20261029leve';
+import { createViewmodel } from './viewmodel.js?v=20261029leve';
+import { createDragonView } from './dragon-view.js?v=20261029leve';
+import { getTileType, monstersInZone, isWalkable } from '../map.js?v=20261029leve';
+import { getSprite } from '../assets.js?v=20261029leve';
+import { getAiView, getAiClock, AI_STATES, getBossView, getPosture } from '../enemy-ai.js?v=20261029leve';
+import { createBossDragon } from './boss-dragon-view.js?v=20261029leve';
+import { bossCfgFor, uniformDragonScale } from '../boss-variants.js?v=20261029leve';
+import { mergeStaticParts } from './merge-util.js?v=20261029leve';
+import { buildMiniModel, animateMini, paintMini, glowTexture } from './mini-model.js?v=20261029leve';
+import { attachDragonGlb } from './dragon-glb.js?v=20261029leve';
+import { projectiles as enemyProjectiles, hazards as enemyHazardList } from '../enemy-behaviors.js?v=20261029leve';
+import { heroProjectiles, heroBursts, heroFxNow } from '../weapon-projectiles.js?v=20261029leve';
+import { getConfig, DEG, detectQualityTier, detectTouchMode, isSoftwareGL } from '../gameplay-config.js?v=20261029leve';
+import { createPostFx } from './post-fx.js?v=20261029leve';
+import { portraitKey, getPortraitSnapshot } from './hero-preview.js?v=20261029leve';
+import { createNeonEnvironment, createPuddleRoughness, createRain, createHaze, createMotes } from './atmosphere.js?v=20261029leve';
+import { createContactShadows } from './contact-shadows.js?v=20261029leve';
+import { createPowerVfx } from './power-vfx.js?v=20261029leve';
+import { surfaceFxStats, tickSurfaceFx, setDragonDetail } from './surface-fx.js?v=20261029leve';
+import { createSkyDome, installHeightFog, heightFogInfo } from './sky-fog.js?v=20261029leve';
+import { buildCity, ZONE_ACCENTS } from './city.js?v=20261029leve';
+import { groundAt, setGroundFn } from './ground.js?v=20261029leve';
+import { OCCL, buildBrTerrain } from './br-terrain.js?v=20261029leve';
+import { brHeightAt, BR_SOLID } from '../br-map.js?v=20261029leve';
 /** ARENA PRINCIPAL: escala do relevo (unidades do mundo por unidade de altura do mapa). */
 const BR_RELIEF = 1.2;
 
@@ -896,6 +896,8 @@ export function createFpsRenderer() {
     const sfxOn = !/[?&]sfx=0\b/.test(location.search);
     brWorld = buildBrTerrain(zone, cfg, { TILE, ground: groundAt, loadTex: loadHdTex, tierName, props: brProps, detail: !!tier?.surfaceDetail && sfxOn, extraProps: !!tier?.extraProps && brProps && sfxOn, skyColor: new THREE.Color(horizon).lerp(new THREE.Color(0x9fd8ff), 0.35).getHex() });
     worldRoot.add(brWorld.group);
+    { /* 20261029leve: cenário do BR é ESTÁTICO (milhares de Object3D) — matrizes calculadas 1× e o three.js pula a subárvore a cada quadro (updateMatrixWorld era o maior custo de CPU na renderização) */
+      brWorld.group.updateMatrixWorld(true); for (const c of brWorld.group.children) { c.traverse((q) => { q.matrixAutoUpdate = false; }); c.matrixWorldAutoUpdate = false; } }
     dressing = null; city = null; haze = null;
     // skyline neon da cidade em volta do mapa (mesmo módulo do Campo/mundo; densidade reduzida no mapa grande)
     if (VIEW_MODE === 'third' && getConfig().graphics?.brCity !== false) {
@@ -1841,7 +1843,7 @@ export function createFpsRenderer() {
     const bbm = R0.bb ? makeBBMesh(R0.bb.cor) : null; if (bbm) { root.add(bbm.g); own.push(...bbm.mats, ...bbm.geos); }
     return { bb: bbm, mesh: root, body, kind: 'mon', uid: m.uid, rival: true, glb, tag, tagLvl: R0.level || 1, ring, ringMat: rgMat, fb, own, lastNow: 0, animAcc: 0, champ: false, fx: null, fy: null };
   }
-  const rivalRank = []; const rivalFull = new Set(); const rivalBBOn = new Set(); const bbLod = { on: 0, off: 0 };
+  const rivalRank = []; const rivalFull = new Set(); const monRank = []; const monFull = new Set(); const rivalBBOn = new Set(); const bbLod = { on: 0, off: 0 };
   /** rival fora do grupo próximo: só posição + etiqueta/anel (sem animação/corpo) */
   /* 20261016abrigos: rival montado/voando — dragão sob o rival (até 3 modelos; mesma pose de voo da montaria do herói) */
   const rivalMountStats = { views: 0, shown: 0 };
@@ -1928,6 +1930,10 @@ export function createFpsRenderer() {
     rivalFull.clear(); { const extra = tierName === 'low' ? 1 : tierName === 'medium' ? 2 : 4; /* 20261024apex: 49 rivais — perto (≤10 tiles) também tem TETO de corpos completos (multidão = só etiqueta+anel) */ for (let i = 0; i < rivalRank.length; i++) if (i < rivalCap || (rivalRank[i].d <= 10 && i < rivalCap + extra)) rivalFull.add(rivalRank[i].uid); }
     // META-69: o filhote (BB) do rival custa ~29 chamadas de desenho — só nos N rivais mais próximos e a ≤ rivalBBDist tiles (MEDIUM 2, HIGH 4, LOW 1)
     rivalBBOn.clear(); { const nBB = tier?.rivalBB ?? 2, dBB = getConfig().graphics?.rivalBBDist ?? 14; for (let i = 0; i < rivalRank.length && rivalBBOn.size < nBB; i++) if (rivalRank[i].d <= dBB && rivalFull.has(rivalRank[i].uid)) rivalBBOn.add(rivalRank[i].uid); }
+    // 20261029leve: TETO de corpos de monstros comuns desenhados (os N mais próximos); mapa 5×3 junta muitos na Favela/Guerra → dezenas de chamadas de desenho a mais
+    monFull.clear(); if (zone.br) { const cap = tierName === 'low' ? 8 : tierName === 'medium' ? 12 : 20; const cx = fpsCam.state.visX / TILE, cy = fpsCam.state.visZ / TILE; monRank.length = 0;
+      for (let i = 0; i < mons.length; i++) { const q = mons[i]; if (q.alive && !q.rival && !q.boss && q.zone === zone.id) monRank.push({ uid: q.uid, d: Math.hypot(q.x + 0.5 - cx, q.y + 0.5 - cy) }); }
+      if (monRank.length > cap) { monRank.sort((a, b) => a.d - b.d); for (let i = 0; i < cap; i++) monFull.add(monRank[i].uid); } else for (const q of monRank) monFull.add(q.uid); }
     for (let i = 0; i < mons.length; i++) {
       const m = mons[i];
       if (!m.alive || m.zone !== zone.id) continue;
@@ -1937,7 +1943,7 @@ export function createFpsRenderer() {
       // ARENA PRINCIPAL — LOD visual: longe do herói o bot não é desenhado nem animado (malha fica no lugar, sem recriar)
       if (zone.br && !m.boss) {
         const far = Math.hypot(m.x + 0.5 - fpsCam.state.visX / TILE, m.y + 0.5 - fpsCam.state.visZ / TILE) > (tierName === 'low' ? 20 : tierName === 'medium' ? 23 : 32) * (m.rival ? 1 : brLodK); // fase 9: degrau 'enemyLod' encurta
-        if (far) { if (entry) entry.mesh.visible = false; brLod.hidden++; continue; }
+        if (far || (!m.rival && !monFull.has(m.uid) && !m.hunted && !m.elite)) { if (entry) entry.mesh.visible = false; brLod.hidden++; continue; }
         brLod.shown++;
         if (entry && !entry.mesh.visible) entry.mesh.visible = true;
       }
@@ -3126,6 +3132,8 @@ export function createFpsRenderer() {
       const top = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => [k, v, tb[k] || 0]);
       return { meshes, instanced: inst, lights, shadowLights, materials: mats.size, programs: renderer?.info?.programs?.length || 0, geometries: renderer?.info?.memory?.geometries || 0, textures: renderer?.info?.memory?.textures || 0, calls: frameStats.calls, tris: frameStats.tris, top };
     },
+    /** 20261029leve: leitura BARATA do preset (o getGraphics completo varre a cena inteira — era chamado pela simulação a cada quadro) */
+    getTierInfo: () => ({ tier: tierName, caps: tier?.caps || null }),
     getGraphics: () => ({
       mount: { rest: !!(restVis.mesh && restVis.mesh.visible), restErr: restVis.err, k: +mountVis.k.toFixed(2), alt: +mountVis.alt.toFixed(2), hasMesh: !!mountVis.mesh, visible: !!mountVis.mesh?.visible, err: mountVis.err || null, heroLift: +mountVis.heroLift.toFixed(2), h: mountVis.view?.height ?? null, y: mountVis.mesh ? +mountVis.mesh.position.y.toFixed(2) : null, gy: +(mountVis.gy ?? 0).toFixed(2), vAlt: +(mountVis.vAlt ?? 0).toFixed(2), parked: !!mountVis.park, parks: mountVis.parks || 0 },
       tier: tierName,

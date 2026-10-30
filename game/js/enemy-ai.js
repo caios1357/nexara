@@ -19,12 +19,12 @@
  *   respawn, log). A IA não depende do herói atacar primeiro.
  * - Todos os números em gameplay-config.enemyAi.
  */
-import { bossCfgFor } from './boss-variants.js?v=20261029mapa';
-import { getConfig, DEG } from './gameplay-config.js?v=20261029mapa';
-import { isWalkable, getTileType } from './map.js?v=20261029mapa';
-import { monsterAttackPlayer } from './actions.js?v=20261029mapa';
-import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261029mapa';
-import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261029mapa';
+import { bossCfgFor } from './boss-variants.js?v=20261029leve';
+import { getConfig, DEG } from './gameplay-config.js?v=20261029leve';
+import { isWalkable, getTileType } from './map.js?v=20261029leve';
+import { monsterAttackPlayer } from './actions.js?v=20261029leve';
+import { moveAxisX, moveAxisY, hasLineOfSight, wrapAngle } from './collision.js?v=20261029leve';
+import { thinkArchetype, tickHazards, spawnHazard, clearEnemyHazards, archCfg, hazards as enemyHazards, recountRanged, rangedBusyCount } from './enemy-behaviors.js?v=20261029leve';
 
 export const AI_STATES = Object.freeze({
   IDLE: 'IDLE', PATROL: 'PATROL', DETECT: 'DETECT', ALERT: 'ALERT', CHASE: 'CHASE',
